@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project><Template>FPGA</Template><Version>5</Version>
+<Device name="GW5A-25A" pn="GW5A-LV25UG324C2/I1">gw5a25a-008</Device>
+<FileList>
+<File path="../../src/robot_right_reverse_test_top.v" type="file.verilog" enable="1" top="1"/>
+<File path="../../src/robot_closed_loop_test_top.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/dual_ab_quadrature_encoder.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/speed_measurement_and_velocity_filter.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/dual_speed_pi_pid_controller.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/pwm_and_startup_ramp.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/safety_protection_and_fault_arbitration.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/tb6612_driver_interface.v" type="file.verilog" enable="1"/>
+<File path="../../src/uart/uart_tx.v" type="file.verilog" enable="1"/>
+<File path="../../src/uart/closed_loop_uart_telemetry.v" type="file.verilog" enable="1"/>
+<File path="../../src/robot_closed_loop_test_top.cst" type="file.cst" enable="1"/>
+<File path="../../src/robot_closed_loop_test_top.sdc" type="file.sdc" enable="1"/>
+</FileList></Project>
+
+
+

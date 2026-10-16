@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project>
+    <Template>FPGA</Template>
+    <Version>5</Version>
+    <Device name="GW5A-25A" pn="GW5A-LV25UG324C2/I1">gw5a25a-008</Device>
+    <FileList>
+        <File path="../../src/robot_imu_test_top.v" type="file.verilog" enable="1" top="1"/>
+        <File path="../../src/imu/imu660ra_spi_master.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/imu660ra_config_rom.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/imu660ra_driver.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/imu_uart_telemetry.v" type="file.verilog" enable="1"/>
+        <File path="../../src/uart/uart_tx.v" type="file.verilog" enable="1"/>
+        <File path="../../src/robot_imu_test_top.cst" type="file.cst" enable="1"/>
+        <File path="../../src/robot_imu_test_top.sdc" type="file.sdc" enable="1"/>
+        <File path="../../src/imu/imu660ra_config.hex" type="file.data" enable="1"/>
+    </FileList>
+</Project>
