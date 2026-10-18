@@ -1,30 +1,23 @@
-<?xml version="1" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE gowin-fpga-project>
-<Project>
-    <Template>FPGA</Template>
-    <Version>5</Version>
-    <Device name="GW5A-25A" pn="GW5A-LV25UG324C2/I1">gw5a25a-008</Device>
-    <FileList>
-        <File path="src/uart/uart_tx.v" type="file.verilog" enable="1"/>
-        <File path="src/uart/encoder_uart_telemetry.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/chassis_calibration_telemetry_and_register_interface.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/chassis_differential_kinematics.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/dual_ab_quadrature_encoder.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/dual_speed_pi_pid_controller.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/motion_control_and_mode_fsm.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/power_and_hardware_safety.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/pwm_and_startup_ramp.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/safety_protection_and_fault_arbitration.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/speed_measurement_and_velocity_filter.v" type="file.verilog" enable="1"/>
-        <File path="src/motor/tb6612_driver_interface.v" type="file.verilog" enable="1"/>
-        <File path="src/robot_motor_test_top.v" type="file.verilog" enable="1"/>
-        <File path="src/robot_motor_test_top.cst" type="file.cst" enable="1"/>
-        <File path="src/robot_motor_test_top.sdc" type="file.sdc" enable="1"/>
-        <File path="src/robot_encoder_test_top.v" type="file.verilog" enable="1"/>
-        <File path="src/robot_encoder_test_top.cst" type="file.cst" enable="1"/>
-        <File path="src/robot_closed_loop_test_top.v" type="file.verilog" enable="1"/>
-        <File path="src/robot_closed_loop_test_top.cst" type="file.cst" enable="1"/>
-        <File path="src/robot_encoder_test_top.sdc" type="file.sdc" enable="1"/>
-        <File path="src/robot_closed_loop_test_top.sdc" type="file.sdc" enable="1"/>
-    </FileList>
-</Project>
+<Project><Template>FPGA</Template><Version>5</Version>
+<Device name="GW5A-25A" pn="GW5A-LV25UG324C2/I1">gw5a25a-008</Device>
+<FileList>
+<File path="src/robot_system_top.v" type="file.verilog" enable="1" top="1"/>
+<File path="src/robot_closed_loop_test_top.v" type="file.verilog" enable="1"/>
+<File path="src/motor/dual_ab_quadrature_encoder.v" type="file.verilog" enable="1"/>
+<File path="src/motor/speed_measurement_and_velocity_filter.v" type="file.verilog" enable="1"/>
+<File path="src/motor/dual_speed_pi_pid_controller.v" type="file.verilog" enable="1"/>
+<File path="src/motor/pwm_and_startup_ramp.v" type="file.verilog" enable="1"/>
+<File path="src/motor/safety_protection_and_fault_arbitration.v" type="file.verilog" enable="1"/>
+<File path="src/motor/tb6612_driver_interface.v" type="file.verilog" enable="1"/>
+<File path="src/imu/imu660ra_driver.v" type="file.verilog" enable="1"/>
+<File path="src/imu/imu660ra_spi_master.v" type="file.verilog" enable="1"/>
+<File path="src/imu/imu660ra_config_rom.v" type="file.verilog" enable="1"/>
+<File path="src/uart/uart_tx.v" type="file.verilog" enable="1"/>
+<File path="src/uart/uart_heartbeat_watchdog.v" type="file.verilog" enable="1"/>
+<File path="src/uart/system_event_logger.v" type="file.verilog" enable="1"/>
+<File path="src/imu/imu660ra_config.hex" type="file.data" enable="1"/>
+<File path="src/robot_system_top.cst" type="file.cst" enable="1"/>
+<File path="src/robot_system_top.sdc" type="file.sdc" enable="1"/>
+</FileList></Project>

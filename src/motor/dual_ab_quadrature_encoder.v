@@ -29,10 +29,11 @@ module dual_ab_encoder_channel #(
     parameter integer INVERT = 0
 )(
     input wire clk, rst_n, a, b, clear_fault,
-    output reg signed [31:0] position,
+    // Preserve readable counters even in event-only builds without telemetry.
+    (* syn_preserve=1 *) output reg signed [31:0] position,
     output reg signed [1:0] delta_count,
     output reg direction,
-    output reg [31:0] illegal_transition,
+    (* syn_preserve=1 *) output reg [31:0] illegal_transition,
     output reg encoder_fault
 );
     function integer bits_needed;

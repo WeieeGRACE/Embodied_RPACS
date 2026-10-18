@@ -1,0 +1,5 @@
+PASS 28 unique constrained pins/electrical settings, T11 input/NONE, one top/CST/SDC, no camera, 64 position + 64 illegal counter bits, 99 IMU sample/status bits, one UART TX, no DSP/PLL, zero setup/hold violations and TNS
+
+Hash : 14E06FAA647C05AA1B5F1B37878E4408E78D0D3E806C21E22249A940E1743D88
+Path : D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\pnr\Embodied_RPACS.fs
+

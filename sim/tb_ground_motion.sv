@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 module tb_ground_motion #(parameter integer LEFT_TARGET=-10,RIGHT_TARGET=10);
- reg clk=0,rst=0,key=0,estop=1; always #10 clk=~clk;
+ reg clk=0,rst=0,key=1,estop=1; always #10 clk=~clk;
  reg [1:0] abl=0,abr=0; wire a,a1,a2,b,b1,b2,st,tx;
  reg completed=0,model_on=0;
  robot_closed_loop_test_top #(.TARGET_L(LEFT_TARGET),.TARGET_R(RIGHT_TARGET),.TEST_BOTH(1),.WINDOW_CYCLES(10000),.DEBOUNCE_CYCLES(8),
@@ -55,30 +55,36 @@ module tb_ground_motion #(parameter integer LEFT_TARGET=-10,RIGHT_TARGET=10);
  integer count;
  initial begin
   repeat(5)tick;rst=1;repeat(30)tick;if(dut.run_request)$fatal(1,"held boot");
-  key=1;repeat(20)tick;key=0;repeat(2)tick;key=1;repeat(20)tick;if(dut.run_request)$fatal(1,"bounce");
-  start();model_on=1;repeat(450000)tick;model_on=0;
+  key=0;repeat(10)tick;if(!dut.run_request)$fatal(1,"single press did not trigger");
+  key=1;model_on=1;repeat(5000)tick;if(!dut.run_request || !st)$fatal(1,"release stopped action");
+  key=0;repeat(20)tick;if(!dut.run_request || dut.run_count<5000)$fatal(1,"re-press changed active action");key=1;
+  repeat(445000)tick;
   if((LEFT_TARGET>0 && dut.pos_l<=0) || (LEFT_TARGET<0 && dut.pos_l>=0) ||
      (RIGHT_TARGET>0 && dut.pos_r<=0) || (RIGHT_TARGET<0 && dut.pos_r>=0) ||
      $signed(dut.speed_l)<LEFT_TARGET-3 || $signed(dut.speed_l)>LEFT_TARGET+3 ||
      $signed(dut.speed_r)<RIGHT_TARGET-3 || $signed(dut.speed_r)>RIGHT_TARGET+3)
    $fatal(1,"ground feedback %d %d",dut.speed_l,dut.speed_r);
   if(dut.control_l==dut.control_r)$fatal(1,"independent plant control");
-  @(negedge clk);#2;key=1;model_on=0;#1;off("key release");tick();
+  if(!dut.run_request || !st)$fatal(1,"action stopped before timer");
+  count=0;while(dut.run_request)begin tick();count=count+1;end model_on=0;
+  if(count>50000 || count<40000)$fatal(1,"auto-stop remainder %0d",count);
+  #1;off("8-second auto stop");tick();
   if(dut.control_l!==0 || dut.control_r!==0 || dut.ramp_l!==0 || dut.ramp_r!==0)$fatal(1,"dual clear");
-  repeat(20)tick;start();#2;estop=0;off("estop");#2;estop=1;repeat(20)tick;
+  repeat(20)tick;if(dut.run_request)$fatal(1,"action rearmed while key held");
+  key=0;repeat(10)tick;if(!dut.run_request)$fatal(1,"second press did not rearm");key=1;#2;estop=0;off("estop");#2;estop=1;repeat(20)tick;
   if(!dut.local_fault || st)$fatal(1,"dual estop latch");
-  reset();start();model_on=0;@(negedge clk);abl=3;repeat(120)tick;
+  reset();key=0;repeat(10)tick;if(!dut.run_request)$fatal(1,"encoder test trigger");key=1;model_on=0;@(negedge clk);abl=3;repeat(120)tick;
   if(!dut.enc_fault_l)$fatal(1,"left encoder fault injection not detected: pin=%b sync=%b candidate=%b stable=%0d previous=%b",abl,dut.enc.left_channel.ab_sync,dut.enc.left_channel.candidate,dut.enc.left_channel.stable_count,dut.enc.left_channel.previous);
   #1;off("left encoder fault");repeat(120)tick;
   if(!dut.local_fault)$fatal(1,"left fault latch");
-  reset();start();model_on=0;@(negedge clk);abr=3;repeat(120)tick;
+  reset();key=0;repeat(10)tick;if(!dut.run_request)$fatal(1,"encoder test trigger");key=1;model_on=0;@(negedge clk);abr=3;repeat(120)tick;
   if(!dut.enc_fault_r)$fatal(1,"right encoder fault injection not detected: pin=%b sync=%b candidate=%b stable=%0d previous=%b",abr,dut.enc.right_channel.ab_sync,dut.enc.right_channel.candidate,dut.enc.right_channel.stable_count,dut.enc.right_channel.previous);
   #1;off("right encoder fault");repeat(120)tick;
   if(!dut.local_fault)$fatal(1,"right fault latch");
-  reset();start();count=0;while(dut.run_request)begin tick();count=count+1;end off("timeout");
-  if(count>500000 || count<499980)$fatal(1,"duration");
+  reset();key=0;repeat(10)tick;if(!dut.run_request)$fatal(1,"timer test trigger");key=1;count=0;while(dut.run_request)begin tick();count=count+1;end off("timed stop");
+  if(count>500000 || count<499980)$fatal(1,"duration %0d",count);
   repeat(30)tick;if(dut.run_request)$fatal(1,"held rearm");
-  key=1;repeat(20)tick;start();rst=0;off("reset");
+  key=0;repeat(10)tick;if(!dut.run_request)$fatal(1,"release and repress did not rearm");rst=0;off("reset");
   if(periods<100)$fatal(1,"PWM coverage");
   completed=1;$display("PASS dual target=%0d independent plants, signed feedback, physical PWM, direction, disable, both encoder faults, estop, timeout and rearm",LEFT_TARGET);$finish;
  end

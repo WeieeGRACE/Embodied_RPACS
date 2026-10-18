@@ -12,7 +12,7 @@ module tb_dual_closed_loop_test #(parameter integer TEST_TARGET=10);
  task tick; begin @(posedge clk);#1;end endtask
  task off; input [255:0] stage; begin #1;if({a,a1,a2,b,b1,b2,st}!==0) $fatal(1,"dual safety off stage=%0s outputs=%b control=%b safety=%b key=%b estop=%b fault=%b enc=%b/%b",stage,{a,a1,a2,b,b1,b2,st},dut.control_enable,dut.safety_active,key,estop,dut.fault_latched,dut.enc_fault_l,dut.enc_fault_r);end endtask
  task reset;begin @(negedge clk);rst=0;key=1;estop=1;abl=0;abr=0;repeat(5)tick;rst=1;repeat(80)tick;end endtask
- task start;begin @(negedge clk);key=0;wait(dut.run_request);wait(st);end endtask
+ task start;begin @(negedge clk);key=0;wait(dut.run_request);wait(st);@(negedge clk);key=1;end endtask
  integer mc=0,vl=0,vr=0,el=0,er=0;
  always @(negedge clk) if(model_on) begin
   if(mc==0) begin
@@ -61,7 +61,10 @@ module tb_dual_closed_loop_test #(parameter integer TEST_TARGET=10);
      (TEST_TARGET<0 && (dut.pos_l>=0 || dut.pos_r>=0 || dut.speed_l> -5 || dut.speed_l< -14 || dut.speed_r> -5 || dut.speed_r< -14)))
    $fatal(1,"dual plant feedback %d %d",dut.speed_l,dut.speed_r);
   if(dut.control_l==dut.control_r)$fatal(1,"independent plant control");
-  @(negedge clk);#2;key=1;model_on=0;#1;off("key release");tick();
+  if(!dut.run_request || !st)$fatal(1,"release stopped action");
+  count=0;while(dut.run_request)begin tick();count=count+1;end model_on=0;off("timed stop");
+  if(count>50000 || count<40000)$fatal(1,"timer remainder %0d",count);
+  tick();
   if(dut.control_l!==0 || dut.control_r!==0 || dut.ramp_l!==0 || dut.ramp_r!==0)$fatal(1,"dual clear");
   repeat(20)tick;start();#2;estop=0;off("estop");#2;estop=1;repeat(20)tick;
   if(!dut.local_fault || st)$fatal(1,"dual estop latch");
@@ -76,7 +79,7 @@ module tb_dual_closed_loop_test #(parameter integer TEST_TARGET=10);
   reset();start();count=0;while(dut.run_request)begin tick();count=count+1;end off("timeout");
   if(count>500000 || count<499980)$fatal(1,"duration");
   repeat(30)tick;if(dut.run_request)$fatal(1,"held rearm");
-  key=1;repeat(20)tick;start();rst=0;off("reset");
+  repeat(20)tick;start();rst=0;off("reset");
   if(periods<100)$fatal(1,"PWM coverage");
   completed=1;$display("PASS dual target=%0d independent plants, signed feedback, physical PWM, direction, disable, both encoder faults, estop, timeout and rearm",TEST_TARGET);$finish;
  end

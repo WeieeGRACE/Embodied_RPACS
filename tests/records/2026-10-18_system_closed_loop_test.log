@@ -1,0 +1,171 @@
+# do run_closed_loop_test.do
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 12:29:11 on Oct 18,2026
+# vlog -sv -work work_closed ../src/motor/dual_ab_quadrature_encoder.v ../src/motor/speed_measurement_and_velocity_filter.v ../src/motor/dual_speed_pi_pid_controller.v ../src/motor/pwm_and_startup_ramp.v ../src/motor/safety_protection_and_fault_arbitration.v ../src/motor/tb6612_driver_interface.v ../src/uart/uart_tx.v ../src/uart/closed_loop_uart_telemetry.v ../src/robot_closed_loop_test_top.v tb_closed_loop_test.sv 
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module safety_protection_and_fault_arbitration
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module uart_tx
+# -- Compiling module closed_loop_uart_telemetry
+# -- Compiling module robot_closed_loop_test_top
+# -- Compiling module tb_closed_loop_test
+# 
+# Top level modules:
+# 	tb_closed_loop_test
+# End time: 12:29:11 on Oct 18,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" work_closed.tb_closed_loop_test 
+# Start time: 12:29:11 on Oct 18,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2685) [TFMPC] - Too few port connections for 'dut'.  Expected 28, found 20.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_fault_code'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_enc_r'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_enc_l'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_watchdog'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_heartbeat'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'system_fault'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'system_ready'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'uart_rx'.
+# ** Note: (vopt-143) Recognized 1 FSM in module "tb_closed_loop_test(fast)".
+# ** Note: (vopt-143) Recognized 1 FSM in module "closed_loop_uart_telemetry(fast)".
+# ** Note: (vopt-143) Recognized 1 FSM in module "tb6612_driver_channel(fast__1)".
+# ** Note: (vopt-143) Recognized 1 FSM in module "tb6612_driver_channel(fast)".
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_closed_loop_test(fast)
+# Loading work.robot_closed_loop_test_top(fast)
+# Loading work.dual_ab_quadrature_encoder(fast)
+# Loading work.dual_ab_encoder_channel(fast)
+# Loading work.dual_ab_encoder_channel(fast__1)
+# Loading work.speed_measurement_and_velocity_filter(fast)
+# Loading work.dual_speed_pi_pid_controller(fast)
+# Loading work.speed_pi_pid_channel(fast)
+# Loading work.pwm_and_startup_ramp(fast)
+# Loading work.pwm_startup_ramp_channel(fast)
+# Loading work.safety_protection_and_fault_arbitration(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# Loading work.tb6612_driver_channel(fast__1)
+# Loading work.closed_loop_uart_telemetry(fast)
+# Loading work.uart_tx(fast)
+# PASS closed loop plant, 4-window filter, signed feedback, physical PWM width/limit, ramp, unused wheel, bounce, estop, fault, timeout and reset
+# ** Note: $finish    : tb_closed_loop_test.sv(115)
+#    Time: 20405301 ns  Iteration: 0  Instance: /tb_closed_loop_test
+# Break in Module tb_closed_loop_test at tb_closed_loop_test.sv line 115
+# Stopped at tb_closed_loop_test.sv line 115
+# End time: 12:29:13 on Oct 18,2026, Elapsed time: 0:00:02
+# Errors: 0, Warnings: 9
+# vsim -onfinish stop -voptargs="+acc" work_closed.tb_closed_loop_test -gTEST_TARGET=-10 
+# Start time: 12:29:13 on Oct 18,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2685) [TFMPC] - Too few port connections for 'dut'.  Expected 28, found 20.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_fault_code'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_enc_r'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_enc_l'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_watchdog'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_heartbeat'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'system_fault'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'system_ready'.
+# ** Warning: tb_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'uart_rx'.
+# ** Note: (vopt-143) Recognized 1 FSM in module "tb_closed_loop_test(fast)".
+# ** Note: (vopt-143) Recognized 1 FSM in module "closed_loop_uart_telemetry(fast)".
+# ** Note: (vopt-143) Recognized 1 FSM in module "tb6612_driver_channel(fast__1)".
+# ** Note: (vopt-143) Recognized 1 FSM in module "tb6612_driver_channel(fast)".
+# Loading sv_std.std
+# Loading work.tb_closed_loop_test(fast)
+# Loading work.robot_closed_loop_test_top(fast)
+# Loading work.dual_ab_quadrature_encoder(fast)
+# Loading work.dual_ab_encoder_channel(fast)
+# Loading work.dual_ab_encoder_channel(fast__1)
+# Loading work.speed_measurement_and_velocity_filter(fast)
+# Loading work.dual_speed_pi_pid_controller(fast)
+# Loading work.speed_pi_pid_channel(fast)
+# Loading work.pwm_and_startup_ramp(fast)
+# Loading work.pwm_startup_ramp_channel(fast)
+# Loading work.safety_protection_and_fault_arbitration(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# Loading work.tb6612_driver_channel(fast__1)
+# Loading work.closed_loop_uart_telemetry(fast)
+# Loading work.uart_tx(fast)
+# PASS closed loop plant, 4-window filter, signed feedback, physical PWM width/limit, ramp, unused wheel, bounce, estop, fault, timeout and reset
+# ** Note: $finish    : tb_closed_loop_test.sv(115)
+#    Time: 20405301 ns  Iteration: 0  Instance: /tb_closed_loop_test
+# Break in Module tb_closed_loop_test at tb_closed_loop_test.sv line 115
+# Stopped at tb_closed_loop_test.sv line 115
+# End time: 12:29:15 on Oct 18,2026, Elapsed time: 0:00:02
+# Errors: 0, Warnings: 9
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 12:29:15 on Oct 18,2026
+# vlog -sv -work work_closed tb_closed_loop_uart.sv tb_speed_filter_modes.sv tb_pi_bench.sv 
+# -- Compiling module tb_closed_loop_uart
+# -- Compiling module tb_speed_filter_modes
+# -- Compiling module tb_pi_bench
+# 
+# Top level modules:
+# 	tb_closed_loop_uart
+# 	tb_speed_filter_modes
+# 	tb_pi_bench
+# End time: 12:29:15 on Oct 18,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" work_closed.tb_closed_loop_uart 
+# Start time: 12:29:15 on Oct 18,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Note: (vopt-143) Recognized 1 FSM in module "closed_loop_uart_telemetry(fast)".
+# Loading sv_std.std
+# Loading work.tb_closed_loop_uart(fast)
+# Loading work.closed_loop_uart_telemetry(fast)
+# Loading work.uart_tx(fast)
+# PASS closed loop UART all fields, signed boundaries, CRLF and atomic snapshots
+# ** Note: $finish    : tb_closed_loop_uart.sv(36)
+#    Time: 49027531 ns  Iteration: 0  Instance: /tb_closed_loop_uart
+# Break in Module tb_closed_loop_uart at tb_closed_loop_uart.sv line 36
+# Stopped at tb_closed_loop_uart.sv line 36
+# End time: 12:29:17 on Oct 18,2026, Elapsed time: 0:00:02
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" work_closed.tb_speed_filter_modes 
+# Start time: 12:29:17 on Oct 18,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# Loading sv_std.std
+# Loading work.tb_speed_filter_modes(fast)
+# Loading work.speed_measurement_and_velocity_filter(fast)
+# Loading work.speed_measurement_and_velocity_filter(fast__1)
+# PASS signed filter warm-up, zero padding, truncation and history replacement
+# ** Note: $finish    : tb_speed_filter_modes.sv(26)
+#    Time: 880 ns  Iteration: 1  Instance: /tb_speed_filter_modes
+# Break in Module tb_speed_filter_modes at tb_speed_filter_modes.sv line 26
+# Stopped at tb_speed_filter_modes.sv line 26
+# End time: 12:29:18 on Oct 18,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" work_closed.tb_pi_bench 
+# Start time: 12:29:18 on Oct 18,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# Loading sv_std.std
+# Loading work.tb_pi_bench(fast)
+# Loading work.speed_pi_pid_channel(fast)
+# PASS PI accumulation, zero error hold, both clamps, antiwindup and disable clear
+# ** Note: $finish    : tb_pi_bench.sv(32)
+#    Time: 3620 ns  Iteration: 1  Instance: /tb_pi_bench
+# Break in Module tb_pi_bench at tb_pi_bench.sv line 32
+# Stopped at tb_pi_bench.sv line 32
+# End time: 12:29:19 on Oct 18,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0

@@ -14,7 +14,7 @@ module tb_closed_loop_test #(parameter integer TEST_TARGET=10);
  task reset;
  begin @(negedge clk);rst=0;key=1;estop=1;ab=0;repeat(5) tick;rst=1;repeat(20) tick;end endtask
  task start;
- begin @(negedge clk);key=0;wait(dut.run_request);wait(stby);end endtask
+ begin @(negedge clk);key=0;wait(dut.run_request);wait(stby);@(negedge clk);key=1;end endtask
  integer cycles=0,high_count=0,phase_count=0;
  integer previous_ramp=0,period_duty=0,pwm_periods=0;
  reg was_enabled=0,period_complete=0,period_drive=0;
@@ -89,8 +89,8 @@ module tb_closed_loop_test #(parameter integer TEST_TARGET=10);
      (TEST_TARGET<0 && (dut.pos_l>=0 || dut.speed_l> -5 || dut.speed_l<= -15)))
    $fatal(1,"plant did not reduce speed error: speed=%0d command=%0d",dut.speed_l,dut.control_l);
   model_on=0;
-  // Immediate release, before next clock; PI/ramp clear next edge.
-  @(negedge clk);#2;key=1;off();tick();
+  if(!dut.run_request || !stby) $fatal(1,"release stopped action");
+  while(dut.run_request) tick();off();tick();
   if(dut.control_l!==0 || dut.ramp_l!==0) $fatal(1,"disable clears state");
   repeat(20) tick;start();
   wait(dut.control_l!=0);@(negedge clk);#2;estop=0;off();#2;estop=1;
@@ -109,7 +109,7 @@ module tb_closed_loop_test #(parameter integer TEST_TARGET=10);
   while(dut.run_request) begin tick();cycles=cycles+1;end
   if(cycles>500000 || cycles<499980) $fatal(1,"run duration %0d",cycles);
   off();repeat(100) tick;if(dut.run_request) $fatal(1,"held retrigger");
-  key=1;repeat(20) tick;start();if(!stby) $fatal(1,"rearm");
+  repeat(20) tick;start();if(!stby) $fatal(1,"rearm");
   @(negedge clk);rst=0;off();
   if(pwm_periods<10) $fatal(1,"insufficient PWM coverage");
   completed=1;$display("PASS closed loop plant, 4-window filter, signed feedback, physical PWM width/limit, ramp, unused wheel, bounce, estop, fault, timeout and reset");$finish;

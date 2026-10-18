@@ -15,20 +15,20 @@ module tb_ground_watchdog;
  task off;begin if({a,a1,a2,b,b1,b2,st}!==0)$fatal(1,"unsafe outputs");end endtask
  integer n;
  initial begin
- cycles(5);rst=1;cycles(90);key=0;cycles(50);off;
+ cycles(5);rst=1;cycles(90);key=0;cycles(10);key=1;cycles(40);off;
  byte_send(8'h00,1);if(dut.heartbeat_seen)$fatal(1,"wrong byte accepted");
  byte_send(8'hA5,0);if(dut.heartbeat_seen)$fatal(1,"bad stop accepted");
  byte_send(8'hA5,1);cycles(30);off;if(dut.run_request)$fatal(1,"held key started");
- key=1;cycles(20);key=0;cycles(30);if(!st)$fatal(1,"no start");
+ key=0;cycles(10);key=1;cycles(30);if(!st)$fatal(1,"no start");
  repeat(3)begin cycles(1000);byte_send(8'hA5,1);if(!st || dut.watchdog_expired)$fatal(1,"healthy heartbeat");end
  wait(dut.wd.watchdog.age==100);byte_send(8'h00,1);
  n=0;while(!dut.watchdog_expired)begin cycles(1);n=n+1;if(n>5000)$fatal(1,"timeout absent");end
  if(dut.wd.watchdog.age!=4999)$fatal(1,"timeout boundary");cycles(5);off;
  if(dut.fault_code!=5)$fatal(1,"watchdog fault code");
- byte_send(8'hA5,1);key=1;cycles(20);key=0;cycles(30);off;
+ byte_send(8'hA5,1);key=0;cycles(10);key=1;cycles(30);off;
  rst=0;cycles(5);rst=1;cycles(80);byte_send(8'hA5,1);cycles(30);off;
- key=1;cycles(20);key=0;cycles(30);if(!st)$fatal(1,"reset rearm failed");
- key=1;#1;off;cycles(20);key=0;cycles(30);estop=0;#1;off;cycles(5);estop=1;cycles(20);off;
+ key=0;cycles(10);key=1;cycles(30);if(!st)$fatal(1,"reset rearm failed");
+ key=0;#1;if(!st)$fatal(1,"release stopped watchdog action");cycles(20);key=1;cycles(30);estop=0;#1;off;cycles(5);estop=1;cycles(20);off;
  completed=1;$display("PASS UART heartbeat framing, no-heartbeat inhibit, timeout boundary, both outputs, fault=5, latch, reset/rearm, disable and estop");$finish;
  end
  initial begin #2000000;$fatal(1,"test timeout");end

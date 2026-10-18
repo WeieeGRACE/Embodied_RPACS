@@ -9,6 +9,7 @@ module imu660ra_driver #(
     parameter integer ID_RETRY_CYCLES = CLK_HZ / 1000,
     parameter integer RETRY_CYCLES = CLK_HZ,
     parameter integer SAMPLE_CYCLES = CLK_HZ / 200,
+    parameter integer HEALTH_CHECK_CYCLES = 0,
     parameter integer ID_RETRIES = 10
 )(
     input wire clk,
@@ -78,7 +79,8 @@ module imu660ra_driver #(
         ST_DIAG_CTRL        = 37,
         ST_DIAG_ERROR       = 38,
         ST_INIT_RESULT      = 39,
-        ST_SOFT_RESET_WAIT  = 40;
+        ST_SOFT_RESET_WAIT  = 40,
+        ST_HEALTH_ID = 41, ST_HEALTH_ERROR = 42;
 
     // Bosch SensorAPI bmi2_set_regs waits 2 us after normal-mode writes.
     // The existing 1 ms PWR_CONF wait also covers the APS transition.
@@ -102,6 +104,8 @@ module imu660ra_driver #(
     reg [31:0] delay_count;
     reg [31:0] sample_timer;
     reg sample_pending;
+    reg [31:0] health_timer;
+    reg health_pending;
     reg [12:0] config_index;
     wire [7:0] config_rom_byte;
     reg [12:0] config_rom_address;
@@ -181,6 +185,7 @@ module imu660ra_driver #(
             delay_count <= 0;
             sample_timer <= 0;
             sample_pending <= 0;
+            health_timer <= 0; health_pending <= 0;
             config_index <= 0;
             config_rom_address <= 0;
             spi_start <= 0;
@@ -224,6 +229,13 @@ module imu660ra_driver #(
                 sample_timer <= 0;
             end
 
+            if (HEALTH_CHECK_CYCLES != 0 && ready) begin
+                if (!health_pending) begin
+                    if (health_timer >= HEALTH_CHECK_CYCLES-1) begin
+                        health_pending <= 1; health_timer <= 0;
+                    end else health_timer <= health_timer+1'b1;
+                end
+            end else begin health_timer <= 0; health_pending <= 0; end
             case (state)
                 ST_POWER_WAIT: begin
                     spi_cs_n <= 1;
@@ -466,13 +478,30 @@ module imu660ra_driver #(
                 end
 
                 ST_RUN: begin
-                    if (sample_pending) begin
+                    if (HEALTH_CHECK_CYCLES != 0 && health_pending) begin
+                        health_pending <= 0;
+                        schedule_read(8'h00, 4'd2, ST_HEALTH_ID);
+                    end else if (sample_pending) begin
                         sample_pending <= 0;
                         operation_reg <= 8'h0C;
                         operation_length <= 4'd7;
                         after_operation <= ST_ACC_DECODE;
                         state <= ST_READ_BEGIN;
                     end
+                end
+                ST_HEALTH_ID: begin
+                    chip_id <= read_buffer[0];
+                    if (read_buffer[0] != 8'h24) begin
+                        ready <= 0; error_code <= 8'd6;
+                        delay_count <= 0; state <= ST_RETRY_WAIT;
+                    end else schedule_read(8'h02, 4'd2, ST_HEALTH_ERROR);
+                end
+                ST_HEALTH_ERROR: begin
+                    sensor_error <= read_buffer[0];
+                    if (read_buffer[0] != 0) begin
+                        ready <= 0; error_code <= 8'd7;
+                        delay_count <= 0; state <= ST_RETRY_WAIT;
+                    end else state <= ST_RUN;
                 end
                 ST_ACC_DECODE: begin
                     acc_x_work <= read_buffer[0];
