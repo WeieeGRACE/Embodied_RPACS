@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Fixed eight-byte lines: S/E, source I/M/N/W/L/R/X, hex code, CRLF.
 // Each source/code has its own pending bit; no FIFO, decimal conversion or telemetry timer.
-module system_event_logger #(parameter integer CLK_HZ=50000000,BAUD=115200)(
+module system_event_logger #(parameter integer CLK_HZ=50000000,BAUD=115200,WATCHDOG_PRESENT=1)(
  input wire clk,rst_n,imu_started,imu_failed,
  input wire [7:0] imu_error,input wire [11:0] errors,output wire tx);
  reg [15:0] pending,reported;
@@ -28,7 +28,7 @@ module system_event_logger #(parameter integer CLK_HZ=50000000,BAUD=115200)(
  .clk(clk),.rst_n(rst_n),.data(data),.valid(busy),.ready(ready),.tx(tx),.done(done));
  always @(posedge clk or negedge rst_n) begin
  if(!rst_n) begin
-  pending<=16'h0007;reported<=0;imu_boot_seen<=0;imu_boot_code<=0;
+  pending<=WATCHDOG_PRESENT ? 16'h0007:16'h0003;reported<=0;imu_boot_seen<=0;imu_boot_code<=0;
   busy<=0;selected<=0;index<=0;kind<=0;source<=0;code<=0;
  end else begin
   pending<=pending|(arrivals & ~reported);

@@ -1,0 +1,45 @@
+{
+  "generationStartedAt": 1792747979972,
+  "modelActive": false,
+  "events": [],
+  "logs": [
+    {
+      "kind": "showToast",
+      "text": "登录成功",
+      "time": 1792747899347
+    },
+    {
+      "kind": "showToast",
+      "text": "模型合成成功！",
+      "time": 1792747933161
+    },
+    {
+      "kind": "showToast",
+      "text": "TTS合成成功！",
+      "time": 1792747944276
+    },
+    {
+      "kind": "showToast",
+      "text": "模型文件导入成功",
+      "time": 1792748066063
+    }
+  ],
+  "build": [
+    {
+      "kind": "build",
+      "ok": true,
+      "message": "程序编译完成"
+    },
+    {
+      "kind": "aec-setting",
+      "mode": "break",
+      "message": "切换打断写入完成"
+    },
+    {
+      "kind": "build",
+      "ok": true,
+      "message": "程序编译完成"
+    }
+  ],
+  "dialog": "ueue, &item, 0) == pdTRUE) return true;\n  ++yy_dropped_audio;\n  return false;\n}\nstatic void yy_send_command(uint8_t code) {\n  if (!yy_ready) return;\n  const uint8_t frame[6] = {0xAA,0x55,0x01,code,(uint8_t)(0x01+code),0x0D};\n  for (uint8_t i=0; i<6; ++i) Serial1.write(frame[i]);\n 串口配置\n端口号\n未连接\n波特率\n1200\n2400\n4800\n9600\n19200\n38400\n57600\n115200\n230400\n460800\n921600\n打开串口\n数据位\n5\n6\n7\n8\n停止位\n1\n1.5\n2\n校验\n无\n奇\n偶\nDTR\nRTS\n 接收区\n数据\n波形\nHEX\n时间戳\n显示发送的数据\n清空\n 发送区\n单条\n多条\n发送\n清除\nHEX\n换行\n定时发送\nms\n未选择\n打开\n文件\n未连接\nRX 0\nTX 0\n添加扩展"
+}

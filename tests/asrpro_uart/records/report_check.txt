@@ -1,0 +1,43 @@
+clk_50m                T9   in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+reset_n                B16  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+asr_uart_rx            D17  in  DRIVE=OFF PULL=UP   LVCMOS33 3.3V
+asr_uart_tx            D18  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+uart_tx                V8   out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+uart_rx                U8   in  DRIVE=OFF PULL=UP   LVCMOS33 3.3V
+key_step_n             A15  in  DRIVE=OFF PULL=UP   LVCMOS33 3.3V
+key_fault_n            C15  in  DRIVE=OFF PULL=UP   LVCMOS33 3.3V
+led_ready              D14  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+led_busy               C14  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+led_error              B9   out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+led_rx                 A9   out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+PWMA                   U17  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+AIN1                   M16  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+AIN2                   M14  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+PWMB                   T17  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+BIN1                   N15  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+BIN2                   H12  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+STBY                   G13  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+imu_gnd_reserved       T11  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+imu_spi_sck            V15  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+imu_spi_mosi           V16  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+imu_spi_miso           U18  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+imu_cs_n               T18  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+imu_int1               N14  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+imu_int2               N16  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+tof_front_scl          G16  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_front_sda          G18  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_front_gpio1        F17  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+tof_front_xshut_n      F18  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_left_scl           H13  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_left_sda           H14  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_left_gpio1         K15  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+tof_left_xshut_n       K16  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_right_scl          J13  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_right_sda          K14  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_right_gpio1        K12  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+tof_right_xshut_n      K13  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+PASS 38 unique ports; all source ports constrained; saved GUI configs match Tcl
+PASS fixed P6 mapping in both projects; checked 11 other CST files; only ToF partner and ASR motion UART reuse allowed
+PASS 50 MHz clock; Fmax=70.042 MHz; setup/hold TNS=0
+PASS protocol, control_fifo, top simulation logs
+FS bytes=5958596; SHA256=2c47ecf476ea47514507ab075f6bd139e319f8f76b221fb460358186edb135c2

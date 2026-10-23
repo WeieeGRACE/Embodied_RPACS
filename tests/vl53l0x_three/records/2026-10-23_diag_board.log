@@ -1,0 +1,9 @@
+FRONT seq=00000002 mm=01591 id=EE rev=10 pre=07 final=05 status=0B ambient=00020 signal=00024 gpio=1 valid=1 err=00 dbg=0000 pad=7
+LEFT  seq=00000002 mm=08190 id=EE rev=10 pre=07 final=05 status=09 ambient=00010 signal=00017 gpio=1 valid=1 err=00 dbg=0000 pad=7
+RIGHT seq=00000002 mm=00000 id=00 rev=00 pre=00 final=00 status=00 ambient=00000 signal=00000 gpio=1 valid=0 err=03 dbg=1020 pad=1
+FRONT seq=00000003 mm=00020 id=EE rev=10 pre=07 final=05 status=08 ambient=00001 signal=00039 gpio=1 valid=1 err=00 dbg=0000 pad=7
+LEFT  seq=00000003 mm=00020 id=EE rev=10 pre=07 final=05 status=08 ambient=00000 signal=00026 gpio=1 valid=1 err=00 dbg=0000 pad=7
+RIGHT seq=00000003 mm=00000 id=00 rev=00 pre=00 final=00 status=00 ambient=00000 signal=00000 gpio=1 valid=0 err=03 dbg=1020 pad=1
+FRONT seq=00000004 mm=08190 id=EE rev=10 pre=07 final=05 status=09 ambient=00022 signal=00022 gpio=1 valid=1 err=00 dbg=0000 pad=7
+LEFT  seq=00000004 mm=00020 id=EE rev=10 pre=07 final=05 status=08 ambient=00009 signal=00024 gpio=1 valid=1 err=00 dbg=0000 pad=7
+RIGHT seq=00000004 mm=00000 id=00 rev=00 pre=00 final=00 status=00 ambient=00000 signal=00000 gpio=1 valid=0 err=03 dbg=1020 pad=1

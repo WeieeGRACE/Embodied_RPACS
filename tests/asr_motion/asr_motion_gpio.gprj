@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project>
+<Template>FPGA</Template>
+<Version>5</Version>
+<Device name="GW5A-25A" pn="GW5A-LV25UG324C2/I1">gw5a25a-008</Device>
+<FileList>
+<File path="src/asr_uart_rx.v" type="file.verilog" enable="1"/>
+<File path="src/asr_packet_tx.v" type="file.verilog" enable="1"/>
+<File path="src/asr_feedback.v" type="file.verilog" enable="1"/>
+<File path="src/asr_motion_test_top.v" type="file.verilog" enable="1" top="1"/>
+<File path="../../src/imu/imu660ra_spi_master.v" type="file.verilog" enable="1"/>
+<File path="../../src/imu/imu660ra_config_rom.v" type="file.verilog" enable="1"/>
+<File path="../../src/imu/imu660ra_driver.v" type="file.verilog" enable="1"/>
+<File path="../../src/imu/imu_attitude_fixed.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/dual_ab_quadrature_encoder.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/speed_measurement_and_velocity_filter.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/motion_control_and_mode_fsm.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/dual_speed_pi_pid_controller.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/pwm_and_startup_ramp.v" type="file.verilog" enable="1"/>
+<File path="../../src/motor/tb6612_driver_interface.v" type="file.verilog" enable="1"/>
+<File path="../../src/uart/uart_tx.v" type="file.verilog" enable="1"/>
+<File path="src/asr_diagnostic_tx.v" type="file.verilog" enable="1"/>
+<File path="src/asr_motion_gpio.cst" type="file.cst" enable="1"/>
+<File path="src/asr_motion_test_top.sdc" type="file.sdc" enable="1"/>
+<File path="../../src/imu/imu660ra_config.hex" type="file.data" enable="1"/>
+</FileList>
+</Project>

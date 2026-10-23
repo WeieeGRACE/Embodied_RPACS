@@ -1,0 +1,29 @@
+clk_50m              T9   in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+reset_n              B16  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+imu_gnd_reserved     T11  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+uart_tx              V8   out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+oled_scl             R3   out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+oled_sda             T3   io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+PWMA                 U17  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+AIN1                 M16  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+AIN2                 M14  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+PWMB                 T17  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+BIN1                 N15  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+BIN2                 H12  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+STBY                 G13  out DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_front_scl        G16  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_front_sda        G18  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_front_gpio1      F17  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+tof_front_xshut_n    F18  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_left_scl         H13  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_left_sda         H14  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_left_gpio1       K15  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+tof_left_xshut_n     K16  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_right_scl        J13  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_right_sda        K14  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+tof_right_gpio1      K12  in  DRIVE=OFF PULL=NONE LVCMOS33 3.3V
+tof_right_xshut_n    K13  io  DRIVE=8   PULL=NONE LVCMOS33 3.3V
+PASS 25 pins; CPU/SSPI GPIO in both saved configs
+PASS fixed P6 mapping in both projects; checked 11 other CST files (only ASR protection may share ToF pins)
+PASS 50 MHz constraint; Fmax=86.996 MHz; setup/hold TNS=0
+FS bytes=5958596; SHA256=042e5057f6eb299634a7fbb465b3664f910d7d3d7c4bf49accac435f9b770eca

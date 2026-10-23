@@ -17,10 +17,14 @@ $expectedPins = @{
  PWMA='U17';AIN1='M16';AIN2='M14';PWMB='T17';BIN1='N15';BIN2='H12';STBY='G13'
  imu_spi_sck='V15';imu_spi_mosi='V16';imu_spi_miso='U18';imu_cs_n='T18';imu_int1='N14';imu_int2='N16'
  imu_gnd_reserved='T11';led_ready='D14';led_run='C14';led_fault='B9';led_heartbeat='A9'
+ oled_scl='R3';oled_sda='T3';asr_rx='D17';asr_tx='D18'
+ tof_front_scl='G16';tof_front_sda='G18';tof_front_gpio1='F17';tof_front_xshut_n='F18'
+ tof_left_scl='H13';tof_left_sda='H14';tof_left_gpio1='K15';tof_left_xshut_n='K16'
+ tof_right_scl='J13';tof_right_sda='K14';tof_right_gpio1='K12';tof_right_xshut_n='K13'
 }
-$inputs=@('clk_50m','reset_n','key_enable_n','key_estop_n','uart_rx','encoder_a_l','encoder_b_l','encoder_a_r','encoder_b_r','imu_spi_miso','imu_int1','imu_int2','imu_gnd_reserved')
+$inputs=@('clk_50m','reset_n','key_enable_n','key_estop_n','uart_rx','encoder_a_l','encoder_b_l','encoder_a_r','encoder_b_r','imu_spi_miso','imu_int1','imu_int2','imu_gnd_reserved','asr_rx','tof_front_gpio1','tof_left_gpio1','tof_right_gpio1')
 $down=@('encoder_a_l','encoder_b_l','encoder_a_r','encoder_b_r','imu_int1','imu_int2')
-$up=@('key_enable_n','key_estop_n','uart_rx')
+$up=@('key_enable_n','key_estop_n','uart_rx','asr_rx')
 $cst=Read-Project 'src/robot_system_top.cst'
 $locations=[regex]::Matches($cst,'IO_LOC\s+"([^"]+)"\s+(\w+)')
 Require ($locations.Count -eq $expectedPins.Count) 'Unexpected constraint port count'
@@ -38,7 +42,7 @@ foreach($row in (Html-Rows (Read-Project 'impl/pnr/Embodied_RPACS.pin.html'))) {
 foreach($name in $expectedPins.Keys) {
  Require ($pinRows.ContainsKey($name)) "Missing generated pin: $name"
  $row=$pinRows[$name]
- $direction=if($inputs -contains $name){'in'}else{'out'}
+ $direction=if($name -eq 'oled_sda' -or $name -match '^tof_.*_(scl|sda|xshut_n)$'){'io'}elseif($inputs -contains $name){'in'}else{'out'}
  $pull=if($down -contains $name){'DOWN'}elseif($up -contains $name){'UP'}else{'NONE'}
  $drive=if($direction -eq 'in'){'OFF'}else{'8'}
  Require ($row[2].Split('/')[0] -eq $expectedPins[$name] -and $row[3] -eq 'Y') "Unconstrained/wrong generated pin: $name"
@@ -50,13 +54,32 @@ Require (@($files | Where-Object { $_.top -eq '1' -and $_.path -eq 'src/robot_sy
 Require (@($files | Where-Object { $_.type -eq 'file.cst' }).Count -eq 1) 'More than one CST'
 Require (@($files | Where-Object { $_.type -eq 'file.sdc' }).Count -eq 1) 'More than one SDC'
 Require (@($files | Where-Object { $_.path -match 'camera|ov5647|ddr|hdmi' }).Count -eq 0) 'Camera/display source included'
-$netlist=Read-Project 'impl/gwsynthesis/Embodied_RPACS.vg'
-foreach($entry in @(@('position',64),@('illegal_transition',64),@('imu_sample',99))) {
- $count=[regex]::Matches($netlist, ('\bDFF\w+\s+'+$entry[0]+'_\d+_s\d+\s*\(')).Count
- Require ($count -eq $entry[1]) "Preserved $($entry[0]) bits: $count, expected $($entry[1])"
+foreach($module in @('imu_attitude_fixed','attitude_angle_to_digits','oled_i2c_write_byte')) {
+ Require (@($files | Where-Object { $_.path -eq "src/imu/$module.v" -and $_.enable -eq '1' }).Count -eq 1) "Missing OLED/attitude source: $module"
 }
-Require ([regex]::Matches($netlist,'\buart_tx\s+serial\s*\(').Count -eq 1) 'Expected exactly one UART transmitter'
-Require ($netlist -notmatch '(?im)^\s*(?:PLL\w*|rPLL|MULT\w*|DSP\w*)\s+\S+\s*\(') 'Unexpected PLL/DSP instance'
+$deviceConfig=Read-Project 'impl/pnr/device.cfg'
+Require ($deviceConfig -match 'set CPU regular_io = true' -and $deviceConfig -match 'set SSPI regular_io = true') 'OLED dual-purpose pins not released'
+Require ((Read-Project 'impl/pnr/cmd.do') -match '-global_freq 50\.000') 'Wrong PnR frequency'
+foreach($config in @('impl/Embodied_RPACS_process_config.json','impl/project_process_config.json')) {
+ $options=(Read-Project $config) | ConvertFrom-Json -AsHashtable
+ Require ($options.CPU -and $options.SSPI -and [double]$options.Global_Freq -eq 50 -and $options.TopModule -eq 'robot_system_top') "Wrong saved IDE options: $config"
+}
+$netlist=Read-Project 'impl/gwsynthesis/Embodied_RPACS.vg'
+Require ($netlist -match '(?s)TBUF oled_sda_s0\s*\(\s*\.O\(oled_sda\),\s*\.I\(GND\),\s*\.OEN\(') 'OLED SDA must only drive low or release'
+foreach($module in @('imu660ra_driver','imu_attitude_fixed','motion_control_and_mode_fsm','dual_ab_quadrature_encoder','dual_speed_pi_pid_controller','tb6612_driver_interface')) {
+ Require ([regex]::Matches($netlist, ('(?m)^\s*'+$module+'\s+\w+\s*\(')).Count -eq 1) "Expected one owner of $module"
+}
+foreach($name in @('tof_front_scl','tof_front_sda','tof_front_xshut_n','tof_left_scl','tof_left_sda','tof_left_xshut_n','tof_right_scl','tof_right_sda','tof_right_xshut_n')) {
+ $pattern=if($name -match '_xshut_n$') {
+  '(?s)TBUF '+$name+'_s0\s*\(\s*\.O\('+$name+'\),\s*\.I\(GND\),\s*\.OEN\('
+ } else {
+  '(?s)IOBUF '+$name+'_iobuf\s*\(\s*\.O\([^)]*\),\s*\.IO\('+$name+'\),\s*\.I\(GND\),\s*\.OEN\('
+ }
+ Require ($netlist -match $pattern) "ToF output must be open drain: $name"
+}
+Require ($netlist -notmatch '(?im)^\s*(?:PLL\w*|rPLL)\s+\S+\s*\(') 'Unexpected PLL instance'
+Require (@($files | Where-Object { $_.path -match '(?i)(^|/)tests/|test_top|heartbeat_watchdog' }).Count -eq 0) 'Main project depends on test/heartbeat sources'
+foreach($file in $files) { Require ($file.path -notmatch '^[/\\]|^[A-Za-z]:|\.\.') "Nonportable source: $($file.path)" }
 $timing=Read-Project 'impl/pnr/Embodied_RPACS_tr_content.html'
 foreach($row in (Html-Rows $timing)) {
  if($row[0] -match '^Numbers of (Setup|Hold) Violated Endpoints$') { Require ($row[1] -eq '0') "Timing violation: $($row -join ' ')" }
@@ -66,5 +89,5 @@ $bitstream=Join-Path $projectRoot 'impl/pnr/Embodied_RPACS.fs'
 Require (Test-Path -LiteralPath $bitstream) 'Missing bitstream'
 $reportDate=(Get-Item -LiteralPath $bitstream).LastWriteTimeUtc
 foreach($file in $files) { Require ((Get-Item -LiteralPath (Join-Path $projectRoot $file.path)).LastWriteTimeUtc -le $reportDate) "Stale bitstream: $($file.path)" }
-Write-Output 'PASS 28 unique constrained pins/electrical settings, T11 input/NONE, one top/CST/SDC, no camera, 64 position + 64 illegal counter bits, 99 IMU sample/status bits, one UART TX, no DSP/PLL, zero setup/hold violations and TNS'
+Write-Output 'PASS 44 unique constrained pins, electrical settings, ten open-drain outputs, CPU/SSPI GPIO, saved 50MHz options, one IMU/encoder/motion/PI/driver owner, no test/heartbeat dependency, zero setup/hold violations and fresh bitstream'
 Get-FileHash -LiteralPath $bitstream -Algorithm SHA256 | Select-Object Hash,Path

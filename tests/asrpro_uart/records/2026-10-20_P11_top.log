@@ -1,0 +1,93 @@
+Reading D:/app/modesilm/tcl/vsim/pref.tcl
+
+# 10.7
+
+# do sim/run_top.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap asr_lib sim/work 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 22:38:18 on Oct 20,2026
+# vlog -sv -work asr_lib src/asr_debug_input.v src/asr_diagnostics.v src/asr_feedback.v src/asr_frame_rx.v src/asr_key.v src/asr_test_control.v src/asr_uart_rx.v src/asrpro_uart_top.v ../../src/uart/uart_tx.v sim/tb_top.sv 
+# -- Compiling module asr_debug_input
+# -- Compiling module asr_diagnostics
+# -- Compiling module asr_feedback
+# -- Compiling module asr_frame_rx
+# -- Compiling module asr_key
+# -- Compiling module asr_test_control
+# -- Compiling module asr_uart_rx
+# -- Compiling module asrpro_uart_top
+# -- Compiling module uart_tx
+# -- Compiling module tb_top
+# 
+# Top level modules:
+# 	tb_top
+# End time: 22:38:18 on Oct 20,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" asr_lib.tb_top 
+# Start time: 22:38:18 on Oct 20,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_top(fast)
+# Loading work.asrpro_uart_top(fast)
+# Loading work.asr_uart_rx(fast)
+# Loading work.asr_frame_rx(fast)
+# Loading work.asr_debug_input(fast)
+# Loading work.asr_key(fast)
+# Loading work.asr_test_control(fast)
+# Loading work.asr_feedback(fast)
+# Loading work.uart_tx(fast)
+# Loading work.asr_diagnostics(fast)
+# TEST command 03 expected ack=00 state=00 offset=0
+# TEST command 01 expected ack=00 state=01 offset=12
+# TEST command 01 expected ack=01 state=01 offset=24
+# TEST command 10 expected ack=01 state=01 offset=36
+# TEST command 14 expected ack=00 state=03 offset=60
+# TEST command 14 expected ack=00 state=03 offset=72
+# TEST command 15 expected ack=00 state=03 offset=84
+# TEST command 15 expected ack=00 state=03 offset=96
+# TEST command 15 expected ack=00 state=03 offset=108
+# TEST command 10 expected ack=00 state=10 offset=120
+# TEST command 03 expected ack=00 state=10 offset=132
+# TEST command 02 expected ack=00 state=04 offset=144
+# TEST command 11 expected ack=00 state=10 offset=156
+# TEST command 02 expected ack=00 state=04 offset=168
+# TEST command 12 expected ack=00 state=10 offset=180
+# TEST command 02 expected ack=00 state=04 offset=192
+# TEST command 13 expected ack=00 state=10 offset=204
+# TEST command 02 expected ack=00 state=04 offset=216
+# TEST injected state 00 offset=228
+# TEST injected state 01 offset=234
+# TEST injected state 02 offset=240
+# TEST injected state 03 offset=246
+# TEST injected state 04 offset=252
+# TEST injected state 05 offset=258
+# TEST injected state 10 offset=264
+# TEST injected state 11 offset=270
+# TEST injected state 11 offset=276
+# TEST injected state ff offset=276
+# TEST command 03 expected ack=00 state=11 offset=276
+# TEST injected state 06 offset=288
+# TEST injected state 00 offset=294
+# TEST command 01 expected ack=02 state=06 offset=294
+# TEST command 02 expected ack=00 state=06 offset=306
+# PASS top: real clock/baud, every command/state, debug ASCII, concurrent RX, keys, silence, safety
+# ** Note: $finish    : sim/tb_top.sv(147)
+#    Time: 375154760 ns  Iteration: 1  Instance: /tb_top
+# Break in Module tb_top at sim/tb_top.sv line 147
+# Stopped at sim/tb_top.sv line 147
+# End time: 22:38:31 on Oct 20,2026, Elapsed time: 0:00:13
+# Errors: 0, Warnings: 0

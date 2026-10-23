@@ -1,0 +1,5 @@
+FRONT: observed=10 communication_ok=10 errors=
+LEFT: observed=10 communication_ok=10 errors=
+RIGHT: observed=10 communication_ok=10 errors=
+PASS raw-byte parsing and unread-value integrity for captured lines; optical accuracy unverified
+PASS all three channels communicate throughout this capture

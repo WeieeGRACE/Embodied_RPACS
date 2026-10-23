@@ -1,0 +1,83 @@
+*** GOWIN Tcl Command Line Console  *** 
+alog error: failed to open log file: 'C:/Users/Administartor/AppData/Local/GowinSemi/IDE/cache/sh.log'
+current device: GW5A-25A  GW5A-LV25UG324C2/I1
+add new file: "src/vl53l0x_three_top.v"
+add new file: "src/tof_i2c.v"
+add new file: "src/tof_driver.v"
+add new file: "src/tof_uart.v"
+add new file: "src/tof_page.v"
+add new file: "src/tof_oled_text.v"
+add new file: "../../src/uart/uart_tx.v"
+add new file: "../../src/imu/oled_i2c_write_byte.v"
+add new file: "src/vl53l0x_three_top.cst"
+add new file: "src/vl53l0x_three_top.sdc"
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\vl53l0x_three_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_i2c.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_driver.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_uart.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_page.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_oled_text.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\oled_i2c_write_byte.v'
+Compiling module 'vl53l0x_three_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\vl53l0x_three_top.v":2)
+Compiling module 'tof_three(RESET_CYCLES=50000,BOOT_CYCLES=1000000,POLL_CYCLES=500000,TIMEOUT_CYCLES=500000,ROUND_CYCLES=50000000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_driver.v":102)
+Compiling module 'tof_driver(RESET_CYCLES=50000,BOOT_CYCLES=1000000,POLL_CYCLES=500000,TIMEOUT_CYCLES=500000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_driver.v":4)
+Compiling module 'tof_i2c_reg'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_i2c.v":86)
+Compiling module 'tof_i2c_bits'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_i2c.v":4)
+Compiling module 'tof_uart'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_uart.v":4)
+Compiling module 'uart_tx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v":3)
+Compiling module 'tof_page'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_page.v":3)
+Compiling module 'tof_oled_text(POWERUP_CYCLES=5000000,FRAME_WAIT_CYCLES=7000000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_oled_text.v":5)
+Compiling module 'oled_i2c_write_byte'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\oled_i2c_write_byte.v":4)
+NOTE  (EX0101) : Current top module is "vl53l0x_three_top"
+[5%] Running netlist conversion ...
+WARN  (CV0016) : Input imu_gnd_reserved is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\vl53l0x_three_top.v":9)
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+[95%] Generate netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\gwsynthesis\vl53l0x_three.vg" completed
+[100%] Generate report file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\gwsynthesis\vl53l0x_three_syn.rpt.html" completed
+GowinSynthesis finish
+Reading netlist file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\gwsynthesis\vl53l0x_three.vg"
+Parsing netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\gwsynthesis\vl53l0x_three.vg" completed
+Processing netlist completed
+Reading constraint file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\vl53l0x_three_top.cst"
+Physical Constraint parsed completed
+Running placement......
+[10%] Placement Phase 0 completed
+[20%] Placement Phase 1 completed
+[30%] Placement Phase 2 completed
+[50%] Placement Phase 3 completed
+Running routing......
+[60%] Routing Phase 0 completed
+[70%] Routing Phase 1 completed
+[80%] Routing Phase 2 completed
+[90%] Routing Phase 3 completed
+Running timing analysis......
+[95%] Timing analysis completed
+Placement and routing completed
+Bitstream generation in progress......
+Bitstream generation completed
+Running power analysis......
+[100%] Power analysis completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\vl53l0x_three.power.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\vl53l0x_three.pin.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\vl53l0x_three.rpt.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\vl53l0x_three.rpt.txt" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\vl53l0x_three.tr.html" completed
+Fri Oct 23 13:28:00 2026
+

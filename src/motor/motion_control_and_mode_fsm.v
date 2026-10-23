@@ -4,7 +4,8 @@
 module motion_control_and_mode_fsm #(
  parameter integer CLK_HZ=50000000, TICK_HZ=1000,
  parameter integer FEEDBACK_TIMEOUT_MS=100, STOP_TIMEOUT_MS=1000,
- parameter integer STILL_SAMPLES=3, STILL_THRESHOLD=1
+ parameter integer STILL_SAMPLES=3, STILL_THRESHOLD=1,
+ parameter integer ALLOW_SINGLE_TIMED=0
 )(
  input wire clk,rst_n,enable,stop_request,external_fault,clear_fault,
  input wire cmd_valid,
@@ -57,11 +58,14 @@ module motion_control_and_mode_fsm #(
               (end_kind==2 && reach_l && reach_r) ||
               (end_kind==3 && !dy[31] && dy>=goal);
  wire valid_mode=(cmd_mode>=FORWARD && cmd_mode<=DISTANCE_MOVE);
- wire valid_command=valid_mode && cmd_speed_l!=0 && cmd_speed_r!=0 &&
+ wire single_timed=ALLOW_SINGLE_TIMED!=0 && cmd_end==1 &&
+ (cmd_mode==FORWARD || cmd_mode==BACKWARD) &&
+ ((cmd_speed_l==0) != (cmd_speed_r==0));
+ wire valid_command=valid_mode && ((cmd_speed_l!=0 && cmd_speed_r!=0) || single_timed) &&
  !cmd_speed_limit[31] && cmd_speed_limit!=0 &&
  cmd_speed_l<=cmd_speed_limit && cmd_speed_r<=cmd_speed_limit &&
  cmd_accel_step!=0 && cmd_decel_step!=0 &&
- ((cmd_mode==FORWARD || cmd_mode==BACKWARD || cmd_mode==ROTATE || cmd_mode==DISTANCE_MOVE) ? cmd_speed_l==cmd_speed_r:1'b1) &&
+ ((cmd_mode==FORWARD || cmd_mode==BACKWARD || cmd_mode==ROTATE || cmd_mode==DISTANCE_MOVE) ? (cmd_speed_l==cmd_speed_r || single_timed):1'b1) &&
  (cmd_mode!=TURN_LEFT || cmd_speed_r>cmd_speed_l) &&
  (cmd_mode!=TURN_RIGHT || cmd_speed_l>cmd_speed_r) &&
  (cmd_mode!=DISTANCE_MOVE || cmd_end==2) &&

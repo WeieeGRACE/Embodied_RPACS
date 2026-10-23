@@ -1,0 +1,39 @@
+# do sim/compile.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap asr_lib sim/work 
+# Copying D:/app/modesilm/win64/../modelsim.ini to modelsim.ini
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 22:30:23 on Oct 20,2026
+# vlog -sv -work asr_lib src/asr_uart_rx.v src/asr_packet_tx.v src/asr_feedback.v src/asr_motion_test_top.v ../../src/imu/imu660ra_spi_master.v ../../src/imu/imu660ra_config_rom.v ../../src/imu/imu660ra_driver.v ../../src/imu/imu_attitude_fixed.v ../../src/motor/dual_ab_quadrature_encoder.v ../../src/motor/speed_measurement_and_velocity_filter.v ../../src/motor/motion_control_and_mode_fsm.v ../../src/motor/dual_speed_pi_pid_controller.v ../../src/motor/pwm_and_startup_ramp.v ../../src/motor/tb6612_driver_interface.v ../../src/uart/uart_tx.v ../../src/uart/closed_loop_uart_telemetry.v 
+# -- Compiling module asr_uart_rx
+# -- Compiling module asr_packet_tx
+# -- Compiling module asr_distance
+# -- Compiling module asr_yaw_unwrap
+# -- Compiling module asr_motion_test_top
+# -- Compiling module imu660ra_spi_master
+# -- Compiling module imu660ra_config_rom
+# -- Compiling module imu660ra_driver
+# -- Compiling module imu_attitude_fixed
+# -- Compiling module imu_attitude_bias_divider
+# -- Compiling module imu_attitude_atan2
+# -- Compiling module imu_attitude_sqrt
+# -- Compiling module imu_attitude_divider
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module motion_control_and_mode_fsm
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module uart_tx
+# -- Compiling module closed_loop_uart_telemetry
+# 
+# Top level modules:
+# 	asr_motion_test_top
+# End time: 22:30:23 on Oct 20,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+#  quit -code 0 -force

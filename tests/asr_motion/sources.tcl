@@ -1,0 +1,17 @@
+add_file src/asr_uart_rx.v
+add_file src/asr_packet_tx.v
+add_file src/asr_feedback.v
+add_file src/asr_motion_test_top.v
+add_file ../../src/imu/imu660ra_spi_master.v
+add_file ../../src/imu/imu660ra_config_rom.v
+add_file ../../src/imu/imu660ra_driver.v
+add_file ../../src/imu/imu_attitude_fixed.v
+add_file ../../src/motor/dual_ab_quadrature_encoder.v
+add_file ../../src/motor/speed_measurement_and_velocity_filter.v
+add_file ../../src/motor/motion_control_and_mode_fsm.v
+add_file ../../src/motor/dual_speed_pi_pid_controller.v
+add_file ../../src/motor/pwm_and_startup_ramp.v
+add_file ../../src/motor/tb6612_driver_interface.v
+add_file ../../src/uart/uart_tx.v
+add_file src/asr_diagnostic_tx.v
+add_file ../../src/imu/imu660ra_config.hex

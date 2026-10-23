@@ -1,0 +1,9 @@
+FRONT: observed=6 communication_ok=6 errors=
+LEFT: observed=6 communication_ok=6 errors=
+RIGHT: observed=6 communication_ok=0 errors=03:6
+PASS raw-byte parsing and unread-value integrity for captured lines; optical accuracy unverified
+Traceback (most recent call last):
+  File "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\check_board.py", line 47, in <module>
+    assert all(counts[side] > 0 and success[side] == counts[side] for side in ('FRONT', 'LEFT', 'RIGHT')), 'Three-channel communication is not fully working'
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Three-channel communication is not fully working

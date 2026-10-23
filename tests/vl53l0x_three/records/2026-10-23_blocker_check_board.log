@@ -1,0 +1,3 @@
+FRONT seq=00000070 mm=01179 id=EE rev=10 pre=07 final=05 status=0B ambient=00101 signal=00007 gpio=1 valid=1 err=00 dbg=0000 pad=7 rd=1F raw=5F06C800FFFF00650007049B
+LEFT  seq=00000070 mm=00020 id=EE rev=10 pre=07 final=05 status=08 ambient=03262 signal=00001 gpio=1 valid=1 err=00 dbg=0000 pad=7 rd=1F raw=41060500FFFF0CBE00010014
+RIGHT seq=00000070 mm=----- id=-- rev=-- pre=-- final=-- status=-- ambient=----- signal=----- gpio=1 valid=0 err=03 dbg=1020 pad=1 rd=00 raw=------------------------

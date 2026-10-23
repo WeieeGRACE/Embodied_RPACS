@@ -56,6 +56,16 @@ module speed_measurement_and_velocity_filter #(
     reg signed [31:0] samples [0:FILTER_LENGTH-1];
     reg [ACW-1:0] sample_count;
     reg [ACW-1:0] sample_index;
+    wire signed [31:0] oldest_sample;
+    generate if (WINDOW_CYCLES > 1) begin: prefetch_history
+        reg signed [31:0] oldest;
+        always @(posedge clk or negedge rst_n)
+            if (!rst_n) oldest <= 0;
+            else oldest <= samples[sample_index];
+        assign oldest_sample = oldest;
+    end else begin: immediate_history
+        assign oldest_sample = samples[sample_index];
+    end endgenerate
     integer i;
     reg signed [SUM_WIDTH-1:0] next_sum;
     reg signed [63:0] avg_value;
@@ -96,7 +106,7 @@ module speed_measurement_and_velocity_filter #(
                 // Replace the oldest sample and calculate the new average.
                 next_sum = history_sum;
                 if (sample_count == FILTER_LENGTH) begin
-                    next_sum = next_sum - samples[sample_index] + window_sum + delta_count;
+                    next_sum = next_sum - oldest_sample + window_sum + delta_count;
                 end else begin
                     next_sum = next_sum + window_sum + delta_count;
                 end

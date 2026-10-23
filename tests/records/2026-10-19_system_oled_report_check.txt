@@ -1,0 +1,6 @@
+PASS 30 unique constrained pins/electrical settings, OLED R3/T3, CPU/SSPI regular IO and saved 50 MHz options, T11 input/NONE, one top/CST/SDC, no camera, 64 position + 64 illegal counter bits, 99 IMU sample/status bits, one UART TX, four attitude DSPs, no PLL, zero setup/hold violations and TNS
+
+Hash                                                             Path
+----                                                             ----
+81CD06CC97BCB4A1700C7187218FEE91FF1D856C95E72F83556F8C6C22B57F36 D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS…
+

@@ -1,0 +1,19 @@
+{
+  "events": [
+    {
+      "kind": "build",
+      "ok": true,
+      "message": "程序编译完成"
+    },
+    {
+      "kind": "aec-setting",
+      "mode": "break",
+      "message": "切换打断写入完成"
+    },
+    {
+      "kind": "build",
+      "ok": true,
+      "message": "程序编译完成"
+    }
+  ]
+}

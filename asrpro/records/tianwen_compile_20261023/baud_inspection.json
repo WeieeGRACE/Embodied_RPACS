@@ -1,0 +1,28 @@
+{
+  "id": 1,
+  "result": {
+    "result": {
+      "type": "object",
+      "value": {
+        "block": {
+          "type": "serial_begin",
+          "inputs": [
+            {
+              "name": "CONTENT",
+              "connected": null
+            },
+            {
+              "name": "",
+              "connected": null
+            }
+          ],
+          "xml": "<block xmlns=\"http://www.w3.org/1999/xhtml\" type=\"serial_begin\" id=\"yaoyao_40\"><field name=\"serial_select\">Serial1</field><field name=\"TX\">PA_2</field><field name=\"RX\">PA_3</field><next><block type=\"block_with_textarea\" id=\"yaoyao_42\"><field name=\"input\">vol_set(7);\nyy_init();\n            </field></block></next></block>"
+        },
+        "serialGenerator": "function () {\r\n    var serial_select = this.getFieldValue('serial_select');\r\n    var code = '';\r\n    Blockly.Arduino.definitions_['include_HardwareSerial'] = '#include \"HardwareSerial.h\"';\r\n    var dropdown_tx = this.getFieldValue('TX');\r\n    var dropdown_rx = this.getFieldValue('RX');\r\n    pin_digital.forEach(element => {\r\n        if (dropdown_tx == element[0]) {\r\n            dropdown_tx = element[1]\r\n        }\r\n        if (dropdown_rx == element[0]) {\r\n            dropdown_rx = element[1]\r\n        }\r\n    });\r\n    if (serial_select == 'Serial') {\r\n        // Blockly.Arduino.setups_['setPinFun_13'] = 'setPinFun(13,SECOND_FUNCTION);';\r\n        // Blockly.Arduino.setups_['setPinFun_14'] = 'setPinFun(14,SECOND_FUNCTION);';\r\n        code += 'setPinFun(13,SECOND_FUNCTION);\\n' +\r\n            'setPinFun(14,SECOND_FUNCTION);\\n';\r\n    } else if (serial_select == 'Serial1') {\r\n        if (dropdown_tx == '7') {\r\n            // Blockly.Arduino.setups_['setPinFun_7'] = 'setPinFun(15,THIRD_FUNCTION);';\r\n            code += 'setPinFun(7,THIRD_FUNCTION);\\n';\r\n        } else if (dropdown_tx == '15') {\r\n            // Blockly.Arduino.setups_['setPinFun_15'] = 'setPinFun(15,SECOND_FUNCTION);';\r\n            code += 'setPinFun(15,SECOND_FUNCTION);\\n';\r\n        } else {\r\n            // Blockly.Arduino.setups_['setPinFun_' + dropdown_tx] = 'setPinFun(' + dropdown_tx + ',FORTH_FUNCTION);';\r\n            code += 'setPinFun(' + dropdown_tx + ',FORTH_FUNCTION);\\n';\r\n        }\r\n        if (dropdown_rx == '8') {\r\n            // Blockly.Arduino.setups_['setPinFun_8'] = 'setPinFun(8,THIRD_FUNCTION);';\r\n            code += 'setPinFun(8,THIRD_FUNCTION);\\n';\r\n        } else if (dropdown_rx == '16') {\r\n            // Blockly.Arduino.setups_['setPinFun_16'] = 'setPinFun(16,SECOND_FUNCTION);';\r\n            code += 'setPinFun(16,SECOND_FUNCTION);\\n';\r\n        } else {\r\n            // Blockly.Arduino.setups_['setPinFun_' + dropdown_rx] = 'setPinFun(' + dropdown_rx + ',FORTH_FUNCTION);';\r\n            code += 'setPinFun(' + dropdown_rx + ',FORTH_FUNCTION);\\n';\r\n        }\r\n    } else if (serial_select == 'Serial2') {\r\n        if (dropdown_tx == '9') {\r\n            // Blockly.Arduino.setups_['setPinFun_9'] = 'setPinFun(9,THIRD_FUNCTION);';\r\n            code += 'setPinFun(9,THIRD_FUNCTION);\\n';\r\n        } else if (dropdown_tx == '14') {\r\n            // Blockly.Arduino.setups_['setPinFun_14'] = 'setPinFun(14,FIFTH_FUNCTION);';\r\n            code += 'setPinFun(14,FIFTH_FUNCTION);\\n';\r\n        } else {\r\n            // Blockly.Arduino.setups_['setPinFun_' + dropdown_tx] = 'setPinFun(' + dropdown_tx + ',FORTH_FUNCTION);';\r\n            code += 'setPinFun(' + dropdown_tx + ',FORTH_FUNCTION);\\n';\r\n        }\r\n        if (dropdown_rx == '10') {\r\n            // Blockly.Arduino.setups_['setPinFun_10'] = 'setPinFun(10,THIRD_FUNCTION);';\r\n            code += 'setPinFun(10,THIRD_FUNCTION);\\n';\r\n        } else {\r\n            // Blockly.Arduino.setups_['setPinFun_' + dropdown_rx] = 'setPinFun(' + dropdown_rx + ',FORTH_FUNCTION);';\r\n            code += 'setPinFun(' + dropdown_rx + ',FORTH_FUNCTION);\\n';\r\n        }\r\n    }\r\n    var content = Blockly.Arduino.valueToCode(this, 'CONTENT', Blockly.Arduino.ORDER_ATOMIC);\r\n    // Blockly.Arduino.setups_['setup_serial_' + serial_select] = serial_select + '.begin(' + content + ');';\r\n    code += serial_select + '.begin(' + content + ');\\n';\r\n    return code;\r\n}",
+        "baudGenerator": "function () {\r\n    var code = this.getFieldValue('baud');\r\n    return [code, Blockly.Arduino.ORDER_ATOMIC];\r\n}",
+        "baudPresent": false,
+        "sourceUnchanged": true
+      }
+    }
+  }
+}

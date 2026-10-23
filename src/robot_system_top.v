@@ -1,93 +1,107 @@
 `timescale 1ns/1ps
-// Production integration: one clock, one reset release, one event-only UART.
+// Main project: one motion owner; UI navigation never resets sensor consumers.
 module robot_system_top #(
- parameter integer CLK_HZ=50000000, UART_BAUD=115200, UART_BIT_CYCLES=434,
- WATCHDOG_CYCLES=25000000, WINDOW_CYCLES=500000, DEBOUNCE_CYCLES=500000,
- RUN_CYCLES=400000000, STARTUP_CYCLES=250000,
- IMU_POWERUP_CYCLES=1000000, IMU_CONFIG_WAIT_CYCLES=1000000,
- IMU_RETRY_CYCLES=50000000, IMU_ID_RETRY_CYCLES=50000,
- IMU_SAMPLE_CYCLES=250000, IMU_SPI_HALF_PERIOD=25,
- IMU_HEALTH_CYCLES=50000000, IMU_TIMEOUT_CYCLES=5000000,
- parameter signed [15:0] TARGET_L=10,TARGET_R=10
+ parameter integer CLK_HZ=50000000,UART_BAUD=115200,PWM_HZ=20000,
+ WINDOW_CYCLES=CLK_HZ/100,DEBOUNCE_CYCLES=CLK_HZ/100,
+ POR_CYCLES=1024,ENC_FILTER=50,DIR_DEADTIME=2500,
+ IMU_POWERUP_CYCLES=CLK_HZ/50,IMU_CONFIG_WAIT_CYCLES=CLK_HZ/50,
+ IMU_RETRY_CYCLES=CLK_HZ,IMU_SAMPLE_CYCLES=CLK_HZ/200,
+ IMU_SPI_HALF_PERIOD=25,IMU_HEALTH_CYCLES=CLK_HZ,
+ IMU_TIMEOUT_CYCLES=CLK_HZ/10,IMU_CALIBRATION_SAMPLES=200,
+ OLED_I2C_HZ=250000,OLED_POWERUP_CYCLES=CLK_HZ/10,
+ OLED_FRAME_WAIT_CYCLES=CLK_HZ*7/50,
+ TOF_I2C_HZ=100000,TOF_RESET_CYCLES=CLK_HZ/1000,
+ TOF_BOOT_CYCLES=CLK_HZ/50,TOF_POLL_CYCLES=CLK_HZ/100,
+ TOF_MAX_POLLS=100,TOF_TIMEOUT_CYCLES=CLK_HZ/100,TOF_ROUND_CYCLES=CLK_HZ,
+ parameter CONFIG_HEX_FILE="src/imu/imu660ra_config.hex"
 )(
- input wire clk_50m,reset_n,key_enable_n,key_estop_n,uart_rx,
+ input wire clk_50m,reset_n,key_enable_n,key_estop_n,uart_rx,asr_rx,
  input wire encoder_a_l,encoder_b_l,encoder_a_r,encoder_b_r,
  input wire imu_spi_miso,imu_int1,imu_int2,imu_gnd_reserved,
+ input wire tof_front_gpio1,tof_left_gpio1,tof_right_gpio1,
+ inout wire tof_front_scl,tof_front_sda,tof_front_xshut_n,
+ inout wire tof_left_scl,tof_left_sda,tof_left_xshut_n,
+ inout wire tof_right_scl,tof_right_sda,tof_right_xshut_n,
  output wire imu_spi_sck,imu_spi_mosi,imu_cs_n,
- output wire PWMA,AIN1,AIN2,PWMB,BIN1,BIN2,STBY,uart_tx,
+ output wire oled_scl,inout wire oled_sda,
+ output wire PWMA,AIN1,AIN2,PWMB,BIN1,BIN2,STBY,uart_tx,asr_tx,
  output wire led_ready,led_run,led_fault,led_heartbeat
 );
- (* ASYNC_REG="TRUE" *) reg [1:0] reset_pipe;
- always @(posedge clk_50m or negedge reset_n)
- if(!reset_n) reset_pipe<=0; else reset_pipe<={reset_pipe[0],1'b1};
- wire rst_n=reset_pipe[1];
- (* syn_keep=1 *) wire signed [15:0] ax,ay,az,gx,gy,gz;
- (* syn_keep=1 *) wire sample_valid;
- (* syn_keep=1 *) wire imu_int1_sync,imu_int2_sync;
- wire imu_ready; wire [7:0] imu_error,sensor_error;
- imu660ra_driver #(.CLK_HZ(CLK_HZ),.SPI_HALF_PERIOD(IMU_SPI_HALF_PERIOD),
- .POWERUP_CYCLES(IMU_POWERUP_CYCLES),.CONFIG_WAIT_CYCLES(IMU_CONFIG_WAIT_CYCLES),
- .ID_RETRY_CYCLES(IMU_ID_RETRY_CYCLES),.RETRY_CYCLES(IMU_RETRY_CYCLES),
- .SAMPLE_CYCLES(IMU_SAMPLE_CYCLES),.HEALTH_CHECK_CYCLES(IMU_HEALTH_CYCLES)) imu(
- .clk(clk_50m),.rst_n(rst_n),.spi_miso(imu_spi_miso),.imu_int1(imu_int1),.imu_int2(imu_int2),
- .spi_sclk(imu_spi_sck),.spi_mosi(imu_spi_mosi),.spi_cs_n(imu_cs_n),
- .accel_x(ax),.accel_y(ay),.accel_z(az),.gyro_x(gx),.gyro_y(gy),.gyro_z(gz),
- .sample_valid(sample_valid),.sample_sequence(),.chip_id(),.init_status(),
- .power_conf_readback(),.init_ctrl_readback(),.sensor_error(sensor_error),
- .ready(imu_ready),.error_code(imu_error),.int1_sync(imu_int1_sync),.int2_sync(imu_int2_sync));
- // Retained internal sample bank for later control consumers; no periodic serial output.
- (* syn_preserve=1, syn_keep=1 *) reg [98:0] imu_sample;
- always @(posedge clk_50m or negedge rst_n)
- if(!rst_n) imu_sample<=0;
- else if(sample_valid) imu_sample<={imu_gnd_reserved,imu_int2_sync,imu_int1_sync,gz,gy,gx,az,ay,ax};
- reg first_sample,ready_seen;
- reg [31:0] sample_age;
- reg [7:0] imu_faults;
- wire sample_timeout=imu_ready && !sample_valid && sample_age>=IMU_TIMEOUT_CYCLES-1;
- wire ready_lost=ready_seen && !imu_ready;
- wire imu_bad=(imu_error!=0)||(sensor_error!=0)||ready_lost||sample_timeout;
- always @(posedge clk_50m or negedge rst_n) begin
- if(!rst_n) begin first_sample<=0;ready_seen<=0;sample_age<=0;imu_faults<=0;end
- else begin
-  if(imu_ready) ready_seen<=1;
-  if(sample_valid) begin first_sample<=1;sample_age<=0;end
-  else if(imu_ready && sample_age<IMU_TIMEOUT_CYCLES) sample_age<=sample_age+1'b1;
-  else if(!imu_ready) sample_age<=0;
-  if(imu_error==4) imu_faults[0]<=1;
-  if(imu_error==5) imu_faults[1]<=1;
-  if(imu_error==6) imu_faults[2]<=1;
-  if(imu_error==7) imu_faults[3]<=1;
-  if(sensor_error!=0) imu_faults[4]<=1;
-  if(ready_lost) imu_faults[5]<=1;
-  if(sample_timeout) imu_faults[6]<=1;
-  if(imu_error!=0 && imu_error!=4 && imu_error!=5 && imu_error!=6 && imu_error!=7) imu_faults[7]<=1;
- end
- end
- wire imu_stop=(|imu_faults)||imu_bad;
- wire modules_ready=imu_ready && first_sample && !imu_stop;
- wire hb,wd,enc_l,enc_r,motion_fault,motion_run;
- reg estop_seen;
- wire estop_event=!key_estop_n;
- always @(posedge clk_50m or posedge estop_event)
- if(estop_event) estop_seen<=1;else if(!rst_n) estop_seen<=0;
- robot_closed_loop_test_top #(.SYSTEM_INTEGRATION(1),.TELEMETRY_ENABLE(0),
- .TEST_BOTH(1),.WATCHDOG_ENABLE(1),.WATCHDOG_CYCLES(WATCHDOG_CYCLES),
- .UART_BIT_CYCLES(UART_BIT_CYCLES),.TARGET_L(TARGET_L),.TARGET_R(TARGET_R),
- .WINDOW_CYCLES(WINDOW_CYCLES),.DEBOUNCE_CYCLES(DEBOUNCE_CYCLES),
- .RUN_CYCLES(RUN_CYCLES),.STARTUP_CYCLES(STARTUP_CYCLES)) motion(
- .clk_50m(clk_50m),.reset_n(rst_n),.key_enable_n(key_enable_n),.key_estop_n(key_estop_n),
- .uart_rx(uart_rx),.system_ready(modules_ready),.system_fault(imu_stop),
- .status_heartbeat(hb),.status_watchdog(wd),.status_enc_l(enc_l),.status_enc_r(enc_r),
- .status_fault_code(),
+ // Gowin synthesizes register initialization into configuration INIT values.
+ // KEY0 is an ordinary key, so startup reset must not depend on its level.
+ reg [31:0] por_count=0;
+ wire por_n=por_count>=POR_CYCLES;
+ always @(posedge clk_50m)if(!por_n)por_count<=por_count+1'b1;
+ wire [2:0] pressed,released_n;
+ system_keys #(.DEBOUNCE_CYCLES(DEBOUNCE_CYCLES)) keys(
+ .clk(clk_50m),.por_n(por_n),.keys_n({key_estop_n,key_enable_n,reset_n}),
+ .pressed(pressed),.released_n(released_n));
+ wire [2:0] group_id;wire [3:0] item;wire page;
+ reg [5:0] reset_count=0;
+ always @(posedge clk_50m)
+ if(!por_n)reset_count<=32;
+ else if(pressed[0] && group_id==0 && !page)reset_count<=32;
+ else if(reset_count!=0)reset_count<=reset_count-1'b1;
+ wire rst_n=por_n && reset_count==0;
+ wire voice_enable,voice_candidate,menu_valid,gear_commit,menu_stop;
+ wire [7:0] menu_command;wire [1:0] gear,gear_candidate,gear_value;
+ system_menu menu(.clk(clk_50m),.rst_n(rst_n),.pressed(pressed),.gear(gear),
+ .group_id(group_id),.item(item),.page(page),.voice_enable(voice_enable),
+ .voice_candidate(voice_candidate),.gear_candidate(gear_candidate),
+ .command_valid(menu_valid),.command(menu_command),.gear_commit(gear_commit),
+ .gear_value(gear_value),.stop_request(menu_stop));
+ wire imu_ready,calibrating,attitude_valid;
+ wire signed [31:0] roll_mdeg,pitch_mdeg,yaw_wrapped,pos_l,pos_r,speed_l,speed_r;
+ wire [7:0] status,imu_error,sensor_error,motion_fault,command,response;
+ wire command_valid;wire [11:0] event_errors;
+ system_motion #(.CLK_HZ(CLK_HZ),.BAUD(UART_BAUD),.PWM_HZ(PWM_HZ),
+ .WINDOW_CYCLES(WINDOW_CYCLES),.ENC_FILTER(ENC_FILTER),.DIR_DEADTIME(DIR_DEADTIME),
+ .IMU_POWERUP(IMU_POWERUP_CYCLES),.IMU_WAIT(IMU_CONFIG_WAIT_CYCLES),
+ .IMU_RETRY(IMU_RETRY_CYCLES),.IMU_SAMPLE(IMU_SAMPLE_CYCLES),
+ .IMU_SPI_HALF(IMU_SPI_HALF_PERIOD),.IMU_HEALTH(IMU_HEALTH_CYCLES),
+ .IMU_TIMEOUT(IMU_TIMEOUT_CYCLES),.CALIBRATION_SAMPLES(IMU_CALIBRATION_SAMPLES),
+ .CONFIG_HEX_FILE(CONFIG_HEX_FILE)) control(
+ .clk_50m(clk_50m),.reset_n(rst_n),.stop_gate(!reset_n),.stop_request(menu_stop),
+ .uart_rx(asr_rx),.voice_enable(voice_enable),.menu_valid(menu_valid),.menu_command(menu_command),
+ .gear_commit(gear_commit),.gear_value(gear_value),
  .encoder_a_l(encoder_a_l),.encoder_b_l(encoder_b_l),.encoder_a_r(encoder_a_r),.encoder_b_r(encoder_b_r),
- .PWMA(PWMA),.AIN1(AIN1),.AIN2(AIN2),.PWMB(PWMB),.BIN1(BIN1),.BIN2(BIN2),.STBY(STBY),
- .uart_tx(),.led_enable(motion_run),.led_estop(),.led_fault(motion_fault),.led_saturated());
- assign led_ready=modules_ready && !motion_fault && !wd;
- assign led_run=motion_run; assign led_fault=imu_stop||motion_fault||wd;
- assign led_heartbeat=hb;
- // Bit per distinct source/code, retained until KEY0. Simultaneous faults cannot overwrite.
- wire [11:0] errors={estop_seen,enc_r,enc_l,wd,imu_faults};
- system_event_logger #(.CLK_HZ(CLK_HZ),.BAUD(UART_BAUD)) logger(
- .clk(clk_50m),.rst_n(rst_n),.imu_started(imu_ready && first_sample),
- .imu_failed(imu_stop),.imu_error(imu_error),.errors(errors),.tx(uart_tx));
+ .imu_spi_miso(imu_spi_miso),.imu_int1(imu_int1),.imu_int2(imu_int2),.imu_gnd_reserved(imu_gnd_reserved),
+ .imu_spi_sck(imu_spi_sck),.imu_spi_mosi(imu_spi_mosi),.imu_cs_n(imu_cs_n),
+ .PWMA(PWMA),.AIN1(AIN1),.AIN2(AIN2),.PWMB(PWMB),.BIN1(BIN1),.BIN2(BIN2),.STBY(STBY),.uart_tx(asr_tx),
+ .led_ready(led_ready),.led_run(led_run),.led_fault(led_fault),
+ .imu_ready(imu_ready),.calibrating(calibrating),.attitude_valid(attitude_valid),
+ .roll_mdeg(roll_mdeg),.pitch_mdeg(pitch_mdeg),.yaw_wrapped(yaw_wrapped),
+ .pos_l(pos_l),.pos_r(pos_r),.speed_l(speed_l),.speed_r(speed_r),
+ .imu_error(imu_error),.sensor_error(sensor_error),.gear(gear),.status(status),
+ .motion_fault(motion_fault),.command_valid(command_valid),.command(command),.response(response),.event_errors(event_errors));
+ assign led_heartbeat=voice_enable;
+ system_event_logger #(.CLK_HZ(CLK_HZ),.BAUD(UART_BAUD),.WATCHDOG_PRESENT(0)) logger(
+ .clk(clk_50m),.rst_n(rst_n),.imu_started(imu_ready),.imu_failed(led_fault),
+ .imu_error(imu_error),.errors(event_errors),.tx(uart_tx));
+ wire [2:0] tof_seen,tof_valid;wire [47:0] distances;
+ wire [23:0] tof_errors;wire [11:0] tof_statuses;
+ tof_three #(.CLK_HZ(CLK_HZ),.I2C_HZ(TOF_I2C_HZ),.RESET_CYCLES(TOF_RESET_CYCLES),
+ .BOOT_CYCLES(TOF_BOOT_CYCLES),.POLL_CYCLES(TOF_POLL_CYCLES),.MAX_POLLS(TOF_MAX_POLLS),
+ .TIMEOUT_CYCLES(TOF_TIMEOUT_CYCLES),.ROUND_CYCLES(TOF_ROUND_CYCLES)) sensors(
+ .clk(clk_50m),.rst_n(rst_n),.gpio1({tof_right_gpio1,tof_left_gpio1,tof_front_gpio1}),
+ .scl({tof_right_scl,tof_left_scl,tof_front_scl}),.sda({tof_right_sda,tof_left_sda,tof_front_sda}),
+ .xshut_n({tof_right_xshut_n,tof_left_xshut_n,tof_front_xshut_n}),
+ .gpio_sync(),.seen(tof_seen),.valid(tof_valid),.distances(distances),
+ .ambients(),.signals(),.errors(tof_errors),.models(),.revisions(),.pre_periods(),.final_periods(),
+ .statuses(tof_statuses),.sequences(),.event_valid(),.event_channel(),.diagnostics(),.read_masks(),.raw_results());
+ wire [671:0] tof_text,text;
+ reg [671:0] tof_snapshot;
+ always @(posedge clk_50m or negedge rst_n)
+ if(!rst_n)tof_snapshot<={84{8'h20}};else tof_snapshot<=tof_text;
+ tof_page tof_display(.seen(tof_seen),.valid(tof_valid),.distances(distances),
+ .errors(tof_errors),.statuses(tof_statuses),.text(tof_text));
+ system_pages pages(.clk(clk_50m),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page),
+ .voice_enable(voice_enable),.voice_candidate(voice_candidate),.gear(gear),.gear_candidate(gear_candidate),
+ .ready(led_ready),.busy(led_run),.fault(led_fault),.imu_ready(imu_ready),.calibrating(calibrating),.attitude_valid(attitude_valid),
+ .status(status),.imu_error(imu_error),.sensor_error(sensor_error),.motion_fault(motion_fault),.command(command),.response(response),
+ .roll_mdeg(roll_mdeg),.pitch_mdeg(pitch_mdeg),.yaw_mdeg(-yaw_wrapped),
+ .pos_l(pos_l),.pos_r(pos_r),.speed_l(speed_l),.speed_r(speed_r),.tof_text(tof_snapshot),.text(text));
+ system_oled_text #(.CLK_HZ(CLK_HZ),.I2C_HZ(OLED_I2C_HZ),.POWERUP_CYCLES(OLED_POWERUP_CYCLES),
+ .FRAME_WAIT_CYCLES(OLED_FRAME_WAIT_CYCLES)) display(
+ .clk(clk_50m),.rst_n(rst_n),.text(text),.frame_done(),.scl(oled_scl),.sda(oled_sda));
 endmodule

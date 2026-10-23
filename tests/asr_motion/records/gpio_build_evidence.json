@@ -1,0 +1,40 @@
+{
+  "result": "PASS",
+  "fmax_mhz": 56.62,
+  "setup_violations": 0,
+  "hold_violations": 0,
+  "pins": 28,
+  "cpu_gpio": true,
+  "sspi_gpio": true,
+  "resources": {
+    "Logic": "7823/23040",
+    "Register": "3379/23685",
+    "BSRAM": "4/56",
+    "DSP": "6.5/28",
+    "I/O Port": "28/222"
+  },
+  "bitstream": "impl\\pnr\\asr_motion_gpio.fs",
+  "bytes": 6120356,
+  "sha256": "2d3ddeee654ddd59d484735e079c8142b586afc20833eb6ef8cec53cfde4c492",
+  "source_sha256": {
+    "src\\asr_uart_rx.v": "6a24d21429d7950b1b25e5b65fae4a6b1db90248be2e99219dca9778c0f67093",
+    "src\\asr_packet_tx.v": "1787974062dd2712eda1c858154cbd6637a5149bb87f841bed012f2b9368044e",
+    "src\\asr_feedback.v": "2d6e83b554447ce7a2c0e6ddcb44a892bb1efa948d91523e574d87a8e569b01f",
+    "src\\asr_motion_test_top.v": "36fa9aa31d126a060e96eb7b152e8eb0ff1983aff854d997c436e42b23f2921e",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\imu\\imu660ra_spi_master.v": "f97aff7b1130c657254cc32b35e73671a9c8316792665914de61b1c6e25eafa8",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\imu\\imu660ra_config_rom.v": "00900e79a3df136c5f3afa25ebb4cc93652150cac163e8da1b8156368c2f3021",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\imu\\imu660ra_driver.v": "b7fb2e3d078d2795e0e11d05729d40f85eaaae416096021ec9517cccf8a3a117",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\imu\\imu_attitude_fixed.v": "eef7da05e2841af8507c6f1c2bc995b5a09499f8c3380885fd5c9d3706afaf4a",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\motor\\dual_ab_quadrature_encoder.v": "f823f7ac1b7edebf0c424867e94a021d9f1d97268409fc5a0c46ecddf18db06d",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\motor\\speed_measurement_and_velocity_filter.v": "e918b33bb40887db2b8e7c9d229c5df66f00eebbd86f484177d7131ffbe07e74",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\motor\\motion_control_and_mode_fsm.v": "8c7716a51f38d9f49242653fd00546608049492d162b885d0cf3a245568c308d",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\motor\\dual_speed_pi_pid_controller.v": "6bc2831ff5326f7dde6db32e5cf36ab23a9812ce714d73a50fafe3b48f8a3459",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\motor\\pwm_and_startup_ramp.v": "05bf27548597be4d8c158a9deea101642a0bead58ea4e283ddfdfdae6463be04",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\motor\\tb6612_driver_interface.v": "395f3457e243701293c2d1018a149e08754dc5236f073ac72540e8ca46e77ce3",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\uart\\uart_tx.v": "a15e7cd0592e3ce0f4c3ad806fef45a9896fe4070f350f2e87c50a6a7b488055",
+    "src\\asr_diagnostic_tx.v": "9ae4d2a68d774791899b6ac3392766459c68e22cca6bf55a7fb0437eb47c0cff",
+    "src\\asr_motion_gpio.cst": "cac06aeda9aae6b7eb7441266975ce5fd5286238305a9a14d53f16d083ad26c7",
+    "src\\asr_motion_test_top.sdc": "1ab55acfff1fae96b49a4cfeea8f0a5efe41ef93e82096ac4b73b2573a0f0d9c",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\src\\imu\\imu660ra_config.hex": "107649de633ebf83ec2c503ae26d7856e577b5075aa42a7aca5b564caa8f1ccb"
+  }
+}

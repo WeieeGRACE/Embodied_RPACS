@@ -1,0 +1,21 @@
+{
+  "logs": [
+    {
+      "kind": "showToast",
+      "text": "模型合成成功！",
+      "time": 1792747933161
+    },
+    {
+      "kind": "showToast",
+      "text": "TTS合成成功！",
+      "time": 1792747944276
+    },
+    {
+      "kind": "showToast",
+      "text": "模型文件导入成功",
+      "time": 1792748066063
+    }
+  ],
+  "downloadEvents": [],
+  "downloadRecovery": "Downloaded same generated resource URL directly, verified word/audio IDs, imported through Tianwen."
+}

@@ -1,0 +1,1 @@
+(async () => {document.getElementById('command-create-modal').click();await new Promise(r=>setTimeout(r,1000));return {blocks:Blockly.getMainWorkspace().getAllBlocks().length,dialogs:Array.from(document.querySelectorAll('.modal')).filter(x=>getComputedStyle(x).display!=='none').map(x=>({id:x.id,text:x.innerText.slice(0,400)})),text:document.body.innerText.slice(-1000)};})()

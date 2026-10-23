@@ -1,0 +1,44 @@
+OLED 编译证据摘要；构建日期：2026-10-19；路径相对仓库根目录。
+以下为最终 Tcl 构建产物的摘录；后续重编译可能覆盖 impl 中的报告。
+
+--- device.cfg ---
+set SSPI regular_io = true
+set CPU regular_io = true
+--- cmd.do ---
+-global_freq 50.000
+--- PNR 日志尾部 ---
+Running placement......
+[10%] Placement Phase 0 completed
+[20%] Placement Phase 1 completed
+[30%] Placement Phase 2 completed
+[50%] Placement Phase 3 completed
+Running routing......
+[60%] Routing Phase 0 completed
+[70%] Routing Phase 1 completed
+[80%] Routing Phase 2 completed
+[90%] Routing Phase 3 completed
+Running timing analysis......
+[95%] Timing analysis completed
+Placement and routing completed
+Bitstream generation in progress......
+Bitstream generation completed
+Running power analysis......
+[100%] Power analysis completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\imu_attitude_oled\impl\pnr\imu_attitude_oled_test.power.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\imu_attitude_oled\impl\pnr\imu_attitude_oled_test.pin.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\imu_attitude_oled\impl\pnr\imu_attitude_oled_test.rpt.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\imu_attitude_oled\impl\pnr\imu_attitude_oled_test.rpt.txt" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\imu_attitude_oled\impl\pnr\imu_attitude_oled_test.tr.html" completed
+Mon Oct 19 22:52:11 2026
+
+--- 时序报告摘录 ---
+Numbers of Setup Violated Endpoints: 0
+Numbers of Hold Violated Endpoints: 0
+Fmax row: 1 clk_50m 50.000(MHz) 50.002(MHz) 30 TOP
+--- OLED 管脚报告摘录 ---
+oled_scl: - R3/5 Y out IOB8[A] D05/SO/SSI1 LVCMOS33 8 NONE OFF OFF OFF OFF OFF OFF 3.3 MEDIUM NONE
+oled_sda: - T3/5 Y io IOB8[B] D06 LVCMOS33 8 NONE OFF OFF OFF OFF OFF OFF 3.3 MEDIUM NONE
+--- 位流 ---
+Length: 6174044
+LastWriteTime: 2026-10-19 22:52:11
+SHA256: A3171FF5BFD2AEFED8E5D1726B6FF4C84767CAF37FA8393B8CA870E80BCAE5D2

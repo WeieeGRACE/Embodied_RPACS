@@ -1,0 +1,23 @@
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp: In function 'void hardware_init()':
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp:211:15: warning: invalid conversion from 'void (*)()' to 'TaskFunction_t' {aka 'void (*)(void*)'} [-fpermissive]
+  211 |   xTaskCreate(yaoyao_uart_rx,"yaoyao_uart_rx",512,NULL,5,NULL);
+      |               ^~~~~~~~~~~~~~
+      |               |
+      |               void (*)()
+In file included from D:/app/twenblock/asrpro/asr_pro_sdk/projects/offline_asr_sample/src/wiring.h:32,
+                 from D:/app/twenblock/asrpro/asr_pro_sdk/projects/offline_asr_sample/src/asr.h:26,
+                 from D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp:1:
+D:/app/twenblock/asrpro/asr_pro_sdk/components/freertos/include/task.h:325:41: note:   initializing argument 1 of 'BaseType_t xTaskCreate(TaskFunction_t, const char*, uint16_t, void*, UBaseType_t, TaskControlBlock_t**)'
+  325 |  BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
+      |                          ~~~~~~~~~~~~~~~^~~~~~~~~~
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp:212:15: warning: invalid conversion from 'void (*)()' to 'TaskFunction_t' {aka 'void (*)(void*)'} [-fpermissive]
+  212 |   xTaskCreate(yaoyao_audio,"yaoyao_audio",512,NULL,4,NULL);
+      |               ^~~~~~~~~~~~
+      |               |
+      |               void (*)()
+In file included from D:/app/twenblock/asrpro/asr_pro_sdk/projects/offline_asr_sample/src/wiring.h:32,
+                 from D:/app/twenblock/asrpro/asr_pro_sdk/projects/offline_asr_sample/src/asr.h:26,
+                 from D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp:1:
+D:/app/twenblock/asrpro/asr_pro_sdk/components/freertos/include/task.h:325:41: note:   initializing argument 1 of 'BaseType_t xTaskCreate(TaskFunction_t, const char*, uint16_t, void*, UBaseType_t, TaskControlBlock_t**)'
+  325 |  BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
+      |                          ~~~~~~~~~~~~~~~^~~~~~~~~~

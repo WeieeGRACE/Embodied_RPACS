@@ -1,0 +1,67 @@
+*** GOWIN Tcl Command Line Console  *** 
+alog error: failed to open log file: 'C:/Users/Administartor/AppData/Local/GowinSemi/IDE/cache/sh.log'
+current device: GW5A-25A  GW5A-LV25UG324C2/I1
+add new file: "src/tof_bus_probe_top.v"
+add new file: "../../src/uart/uart_tx.v"
+add new file: "src/vl53l0x_three_top.cst"
+add new file: "src/vl53l0x_three_top.sdc"
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_bus_probe_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v'
+Compiling module 'tof_bus_probe_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_bus_probe_top.v":3)
+Compiling module 'uart_tx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v":3)
+WARN  (EX3791) : Expression size 5 truncated to fit in target size 4("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_bus_probe_top.v":94)
+NOTE  (EX0101) : Current top module is "tof_bus_probe_top"
+[5%] Running netlist conversion ...
+WARN  (CV0016) : Input imu_gnd_reserved is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_bus_probe_top.v":3)
+WARN  (CV0016) : Input tof_front_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_bus_probe_top.v":4)
+WARN  (CV0016) : Input tof_left_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_bus_probe_top.v":4)
+WARN  (CV0016) : Input tof_right_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\tof_bus_probe_top.v":4)
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+[95%] Generate netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\gwsynthesis\tof_bus_probe.vg" completed
+[100%] Generate report file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\gwsynthesis\tof_bus_probe_syn.rpt.html" completed
+GowinSynthesis finish
+Reading netlist file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\gwsynthesis\tof_bus_probe.vg"
+Parsing netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\gwsynthesis\tof_bus_probe.vg" completed
+Processing netlist completed
+Reading constraint file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\src\vl53l0x_three_top.cst"
+Physical Constraint parsed completed
+Running placement......
+[10%] Placement Phase 0 completed
+[20%] Placement Phase 1 completed
+[30%] Placement Phase 2 completed
+[50%] Placement Phase 3 completed
+Running routing......
+[60%] Routing Phase 0 completed
+[70%] Routing Phase 1 completed
+[80%] Routing Phase 2 completed
+[90%] Routing Phase 3 completed
+Running timing analysis......
+[95%] Timing analysis completed
+Placement and routing completed
+Bitstream generation in progress......
+Bitstream generation completed
+Running power analysis......
+[100%] Power analysis completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\tof_bus_probe.power.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\tof_bus_probe.pin.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\tof_bus_probe.rpt.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\tof_bus_probe.rpt.txt" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\vl53l0x_three\impl\pnr\tof_bus_probe.tr.html" completed
+Fri Oct 23 14:13:34 2026
+

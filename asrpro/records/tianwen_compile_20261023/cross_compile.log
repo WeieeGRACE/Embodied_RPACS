@@ -1,0 +1,31 @@
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\tianwen_compile_20261023\generated.cpp: In function 'void hardware_init()':
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\tianwen_compile_20261023\generated.cpp:205:17: error: no matching function for call to 'HardwareSerial::begin()'
+  205 |   Serial1.begin();
+      |                 ^
+In file included from D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\tianwen_compile_20261023\generated.cpp:4:
+D:\天问Block\asrpro\asr_pro_sdk\projects\offline_asr_sample\src\CString/HardwareSerial.h:54:10: note: candidate: 'void HardwareSerial::begin(uint32_t)'
+   54 |     void begin(uint32_t);
+      |          ^~~~~
+D:\天问Block\asrpro\asr_pro_sdk\projects\offline_asr_sample\src\CString/HardwareSerial.h:54:10: note:   candidate expects 1 argument, 0 provided
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\tianwen_compile_20261023\generated.cpp:208:15: warning: invalid conversion from 'void (*)()' to 'TaskFunction_t' {aka 'void (*)(void*)'} [-fpermissive]
+  208 |   xTaskCreate(yaoyao_uart_rx,"yaoyao_uart_rx",512,NULL,5,NULL);
+      |               ^~~~~~~~~~~~~~
+      |               |
+      |               void (*)()
+In file included from D:\天问Block\asrpro\asr_pro_sdk\projects\offline_asr_sample\src/wiring.h:32,
+                 from D:\天问Block\asrpro\asr_pro_sdk\projects\offline_asr_sample\src/asr.h:26,
+                 from D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\tianwen_compile_20261023\generated.cpp:1:
+D:\天问Block\asrpro\asr_pro_sdk\components\freertos\include/task.h:325:41: note:   initializing argument 1 of 'BaseType_t xTaskCreate(TaskFunction_t, const char*, uint16_t, void*, UBaseType_t, TaskControlBlock_t**)'
+  325 |  BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
+      |                          ~~~~~~~~~~~~~~~^~~~~~~~~~
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\tianwen_compile_20261023\generated.cpp:209:15: warning: invalid conversion from 'void (*)()' to 'TaskFunction_t' {aka 'void (*)(void*)'} [-fpermissive]
+  209 |   xTaskCreate(yaoyao_audio,"yaoyao_audio",512,NULL,4,NULL);
+      |               ^~~~~~~~~~~~
+      |               |
+      |               void (*)()
+In file included from D:\天问Block\asrpro\asr_pro_sdk\projects\offline_asr_sample\src/wiring.h:32,
+                 from D:\天问Block\asrpro\asr_pro_sdk\projects\offline_asr_sample\src/asr.h:26,
+                 from D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\tianwen_compile_20261023\generated.cpp:1:
+D:\天问Block\asrpro\asr_pro_sdk\components\freertos\include/task.h:325:41: note:   initializing argument 1 of 'BaseType_t xTaskCreate(TaskFunction_t, const char*, uint16_t, void*, UBaseType_t, TaskControlBlock_t**)'
+  325 |  BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
+      |                          ~~~~~~~~~~~~~~~^~~~~~~~~~

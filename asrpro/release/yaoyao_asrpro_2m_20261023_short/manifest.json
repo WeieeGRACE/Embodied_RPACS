@@ -1,0 +1,253 @@
+{
+  "date": "2026-10-23",
+  "software": "Tianwen Block AI 2026 autumn 0.2.8",
+  "romBytes": 2097152,
+  "nvOffset": 2031616,
+  "firmwareBytes": 1604581,
+  "firmwareSHA256": "6fd0596f97c0a332133b5e19b8b8b45f7351686d043d0e304f7b41cdc90cab25",
+  "aecEnabled": true,
+  "wakeTimeoutMs": 8589934,
+  "receiptAfterTransmit": true,
+  "recognition": [
+    {
+      "phrase": "幺幺耍起",
+      "type": "唤醒词",
+      "id": "0",
+      "reply": "幺幺在，请说指令。"
+    },
+    {
+      "phrase": "寻找红色水瓶",
+      "type": "命令词",
+      "id": "1",
+      "reply": ""
+    },
+    {
+      "phrase": "停止任务",
+      "type": "唤醒词",
+      "id": "2",
+      "reply": ""
+    },
+    {
+      "phrase": "停车",
+      "type": "唤醒词",
+      "id": "3",
+      "reply": ""
+    },
+    {
+      "phrase": "停止",
+      "type": "唤醒词",
+      "id": "4",
+      "reply": ""
+    },
+    {
+      "phrase": "查询状态",
+      "type": "命令词",
+      "id": "5",
+      "reply": ""
+    },
+    {
+      "phrase": "现在什么状态",
+      "type": "命令词",
+      "id": "6",
+      "reply": ""
+    },
+    {
+      "phrase": "前进",
+      "type": "命令词",
+      "id": "10",
+      "reply": ""
+    },
+    {
+      "phrase": "向前走",
+      "type": "命令词",
+      "id": "11",
+      "reply": ""
+    },
+    {
+      "phrase": "后退",
+      "type": "命令词",
+      "id": "12",
+      "reply": ""
+    },
+    {
+      "phrase": "向后走",
+      "type": "命令词",
+      "id": "13",
+      "reply": ""
+    },
+    {
+      "phrase": "左转",
+      "type": "命令词",
+      "id": "14",
+      "reply": ""
+    },
+    {
+      "phrase": "向左转",
+      "type": "命令词",
+      "id": "15",
+      "reply": ""
+    },
+    {
+      "phrase": "向左原地旋转",
+      "type": "命令词",
+      "id": "16",
+      "reply": ""
+    },
+    {
+      "phrase": "右转",
+      "type": "命令词",
+      "id": "17",
+      "reply": ""
+    },
+    {
+      "phrase": "向右转",
+      "type": "命令词",
+      "id": "18",
+      "reply": ""
+    },
+    {
+      "phrase": "向右原地旋转",
+      "type": "命令词",
+      "id": "19",
+      "reply": ""
+    },
+    {
+      "phrase": "加速",
+      "type": "命令词",
+      "id": "20",
+      "reply": ""
+    },
+    {
+      "phrase": "快一点",
+      "type": "命令词",
+      "id": "21",
+      "reply": ""
+    },
+    {
+      "phrase": "减速",
+      "type": "命令词",
+      "id": "22",
+      "reply": ""
+    },
+    {
+      "phrase": "慢一点",
+      "type": "命令词",
+      "id": "23",
+      "reply": ""
+    }
+  ],
+  "audio": [
+    {
+      "id": "9000",
+      "text": "已接受"
+    },
+    {
+      "id": "9001",
+      "text": "忙碌中"
+    },
+    {
+      "id": "9002",
+      "text": "无法执行"
+    },
+    {
+      "id": "9100",
+      "text": "空闲"
+    },
+    {
+      "id": "9101",
+      "text": "执行中"
+    },
+    {
+      "id": "9103",
+      "text": "已到达"
+    },
+    {
+      "id": "9104",
+      "text": "已停止"
+    },
+    {
+      "id": "9105",
+      "text": "失败"
+    },
+    {
+      "id": "9106",
+      "text": "故障"
+    },
+    {
+      "id": "9108",
+      "text": "已完成"
+    },
+    {
+      "id": "9201",
+      "text": "收到"
+    }
+  ],
+  "originalWelcomeWakeSleepPreserved": true,
+  "executionStatusSpeechDeduplicated": true,
+  "packagedVoiceIDs": [
+    0,
+    23,
+    9000,
+    9001,
+    9002,
+    9100,
+    9101,
+    9103,
+    9104,
+    9105,
+    9106,
+    9108,
+    9201,
+    10001,
+    10002
+  ],
+  "partitions": {
+    "code": {
+      "offset": 16384,
+      "size": 145992,
+      "crc16": 4038,
+      "sha256": "22a09efda6dacce2873b2a257c7525bce9b2a5d7e541f347fd886c19e4ea9f79"
+    },
+    "asr": {
+      "offset": 163840,
+      "size": 30361,
+      "crc16": 59683,
+      "sha256": "deabf3ee33c1c0910ed50618b02bae1e72d5f555ef8cc6d1e0de12cd6e395ef2"
+    },
+    "dnn": {
+      "offset": 196608,
+      "size": 1366288,
+      "crc16": 23136,
+      "sha256": "efbb8fd60836c7d28b0f0a900fe171c082f96621213f0a6f3fbef7c772dffe8a"
+    },
+    "voice": {
+      "offset": 1564672,
+      "size": 36830,
+      "crc16": 47080,
+      "sha256": "4621c5d964e1359a933b483496febfc44d9a5791887c11d9ecce204c438e7136"
+    },
+    "user_file": {
+      "offset": 1601536,
+      "size": 3045,
+      "crc16": 2478,
+      "sha256": "c0cc73c37c6089f426e6d4bfd4de80b3754c1598dc1e481f57fc1081f93eac4c"
+    }
+  },
+  "checks": [
+    "host behavioral checks including shared receipts, execution-state dedup, and timeout overflow",
+    "save/reopen baud 115200",
+    "full SDK build with AEC",
+    "empty command replies use vendor silent MP3",
+    "partition-table checksum",
+    "five partition CRC16s and exact bytes",
+    "bootloader exact bytes",
+    "current code file exact bytes",
+    "two current model payloads exact bytes plus SDK DNN pruning metadata",
+    "command info exact bytes",
+    "21 word/ID/wake-class matches",
+    "11 feedback audio IDs and silence/wake audio references",
+    "all packaged MP3 frames match current generated resources"
+  ],
+  "hardwareTested": false,
+  "deviceFlashed": false
+}

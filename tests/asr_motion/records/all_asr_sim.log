@@ -1,0 +1,299 @@
+Reading D:/app/modesilm/tcl/vsim/pref.tcl
+
+# 10.7
+
+# do sim/run_units.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap asr_lib sim/work 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 15:42:59 on Oct 23,2026
+# vlog -sv -work asr_lib src/asr_uart_rx.v src/asr_packet_tx.v src/asr_feedback.v src/asr_motion_test_top.v ../../src/imu/imu660ra_spi_master.v ../../src/imu/imu660ra_config_rom.v ../../src/imu/imu660ra_driver.v ../../src/imu/imu_attitude_fixed.v ../../src/motor/dual_ab_quadrature_encoder.v ../../src/motor/speed_measurement_and_velocity_filter.v ../../src/motor/motion_control_and_mode_fsm.v ../../src/motor/dual_speed_pi_pid_controller.v ../../src/motor/pwm_and_startup_ramp.v ../../src/motor/tb6612_driver_interface.v ../../src/uart/uart_tx.v src/asr_diagnostic_tx.v 
+# -- Compiling module asr_uart_rx
+# -- Compiling module asr_packet_tx
+# -- Compiling module asr_distance
+# -- Compiling module asr_yaw_unwrap
+# -- Compiling module asr_motion_test_top
+# -- Compiling module imu660ra_spi_master
+# -- Compiling module imu660ra_config_rom
+# -- Compiling module imu660ra_driver
+# -- Compiling module imu_attitude_fixed
+# -- Compiling module imu_attitude_bias_divider
+# -- Compiling module imu_attitude_atan2
+# -- Compiling module imu_attitude_sqrt
+# -- Compiling module imu_attitude_divider
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module motion_control_and_mode_fsm
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module uart_tx
+# -- Compiling module asr_diagnostic_tx
+# 
+# Top level modules:
+# 	asr_motion_test_top
+# End time: 15:43:00 on Oct 23,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 15:43:00 on Oct 23,2026
+# vlog -sv -work asr_lib sim/tb_asr_units.sv 
+# -- Compiling module tb_asr_units
+# 
+# Top level modules:
+# 	tb_asr_units
+# End time: 15:43:00 on Oct 23,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" asr_lib.tb_asr_units 
+# Start time: 15:43:00 on Oct 23,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_asr_units(fast)
+# Loading work.asr_uart_rx(fast)
+# Loading work.asr_distance(fast)
+# Loading work.asr_yaw_unwrap(fast)
+# Loading work.asr_yaw_unwrap(fast__1)
+# Loading work.asr_packet_tx(fast)
+# Loading work.uart_tx(fast)
+# PASS protocol framing/recovery/timeout, Q16 distance, both yaw wraps, TX framing/concurrency/overflow
+# ** Note: $finish    : sim/tb_asr_units.sv(80)
+#    Time: 847656 ns  Iteration: 0  Instance: /tb_asr_units
+# Break in Module tb_asr_units at sim/tb_asr_units.sv line 80
+# Stopped at sim/tb_asr_units.sv line 80
+# End time: 15:43:01 on Oct 23,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+Reading D:/app/modesilm/tcl/vsim/pref.tcl
+
+# 10.7
+
+# do sim/run_integration.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap asr_lib sim/work 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 15:43:02 on Oct 23,2026
+# vlog -sv -work asr_lib src/asr_uart_rx.v src/asr_packet_tx.v src/asr_feedback.v src/asr_motion_test_top.v ../../src/imu/imu660ra_spi_master.v ../../src/imu/imu660ra_config_rom.v ../../src/imu/imu660ra_driver.v ../../src/imu/imu_attitude_fixed.v ../../src/motor/dual_ab_quadrature_encoder.v ../../src/motor/speed_measurement_and_velocity_filter.v ../../src/motor/motion_control_and_mode_fsm.v ../../src/motor/dual_speed_pi_pid_controller.v ../../src/motor/pwm_and_startup_ramp.v ../../src/motor/tb6612_driver_interface.v ../../src/uart/uart_tx.v src/asr_diagnostic_tx.v 
+# -- Compiling module asr_uart_rx
+# -- Compiling module asr_packet_tx
+# -- Compiling module asr_distance
+# -- Compiling module asr_yaw_unwrap
+# -- Compiling module asr_motion_test_top
+# -- Compiling module imu660ra_spi_master
+# -- Compiling module imu660ra_config_rom
+# -- Compiling module imu660ra_driver
+# -- Compiling module imu_attitude_fixed
+# -- Compiling module imu_attitude_bias_divider
+# -- Compiling module imu_attitude_atan2
+# -- Compiling module imu_attitude_sqrt
+# -- Compiling module imu_attitude_divider
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module motion_control_and_mode_fsm
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module uart_tx
+# -- Compiling module asr_diagnostic_tx
+# 
+# Top level modules:
+# 	asr_motion_test_top
+# End time: 15:43:02 on Oct 23,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 15:43:02 on Oct 23,2026
+# vlog -sv -work asr_lib sim/tb_asr_motion.sv 
+# -- Compiling module tb_asr_motion
+# 
+# Top level modules:
+# 	tb_asr_motion
+# End time: 15:43:02 on Oct 23,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" asr_lib.tb_asr_motion 
+# Start time: 15:43:02 on Oct 23,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_asr_motion(fast)
+# Loading work.asr_motion_test_top(fast)
+# Loading work.imu660ra_driver(fast)
+# Loading work.imu660ra_spi_master(fast)
+# Loading work.imu660ra_config_rom(fast)
+# Loading work.imu_attitude_fixed(fast)
+# Loading work.imu_attitude_bias_divider(fast)
+# Loading work.imu_attitude_atan2(fast)
+# Loading work.imu_attitude_sqrt(fast)
+# Loading work.imu_attitude_divider(fast)
+# Loading work.asr_yaw_unwrap(fast)
+# Loading work.dual_ab_quadrature_encoder(fast)
+# Loading work.dual_ab_encoder_channel(fast)
+# Loading work.dual_ab_encoder_channel(fast__1)
+# Loading work.asr_distance(fast)
+# Loading work.speed_measurement_and_velocity_filter(fast)
+# Loading work.asr_uart_rx(fast)
+# Loading work.motion_control_and_mode_fsm(fast)
+# Loading work.dual_speed_pi_pid_controller(fast)
+# Loading work.speed_pi_pid_channel(fast)
+# Loading work.pwm_and_startup_ramp(fast)
+# Loading work.pwm_startup_ramp_channel(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# Loading work.asr_packet_tx(fast)
+# Loading work.uart_tx(fast)
+# Loading work.asr_diagnostic_tx(fast)
+# PASS action 10 L=202787 um R=200651 um yaw=-494 mdeg physical=-0.508028 deg
+# PASS action 11 L=-203072 um R=-200794 um yaw=550 mdeg physical=0.568242 deg
+# PASS action 12 L=-188975 um R=189402 um yaw=90134 mdeg physical=90.333954 deg
+# PASS action 13 L=188975 um R=-189117 um yaw=-90207 mdeg physical=-90.338136 deg
+# PASS action 12 L=-188263 um R=189544 um yaw=90140 mdeg physical=90.304136 deg
+# PASS action 12 L=-189544 um R=188547 um yaw=90073 mdeg physical=90.255380 deg
+# PASS action 12 L=-189117 um R=189117 um yaw=90104 mdeg physical=90.293494 deg
+# PASS busy refusal/query/next-action gear and ordinary stop
+# PASS async estop and sensor error latch/no auto restart
+# PASS sample and attitude feedback age protection
+# PASS encoder fault and running reset
+# PASS 10 second action timeout with fresh frozen encoder feedback
+# PASS independent speed stale, stop timeout and ready loss
+# PASS serial overload latches stop; parser still consumes STOP
+# PASS passive diagnostic mode inhibits commands, hexadecimal count/yaw snapshot decoded
+# ** Note: $finish    : sim/tb_asr_motion.sv(290)
+#    Time: 718356192 ns  Iteration: 0  Instance: /tb_asr_motion
+# Break in Module tb_asr_motion at sim/tb_asr_motion.sv line 290
+# Stopped at sim/tb_asr_motion.sv line 290
+# End time: 15:43:49 on Oct 23,2026, Elapsed time: 0:00:47
+# Errors: 0, Warnings: 0
+Reading D:/app/modesilm/tcl/vsim/pref.tcl
+
+# 10.7
+
+# do sim/run_50mhz.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap asr_lib sim/work 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 15:43:50 on Oct 23,2026
+# vlog -sv -work asr_lib src/asr_uart_rx.v src/asr_packet_tx.v src/asr_feedback.v src/asr_motion_test_top.v ../../src/imu/imu660ra_spi_master.v ../../src/imu/imu660ra_config_rom.v ../../src/imu/imu660ra_driver.v ../../src/imu/imu_attitude_fixed.v ../../src/motor/dual_ab_quadrature_encoder.v ../../src/motor/speed_measurement_and_velocity_filter.v ../../src/motor/motion_control_and_mode_fsm.v ../../src/motor/dual_speed_pi_pid_controller.v ../../src/motor/pwm_and_startup_ramp.v ../../src/motor/tb6612_driver_interface.v ../../src/uart/uart_tx.v src/asr_diagnostic_tx.v 
+# -- Compiling module asr_uart_rx
+# -- Compiling module asr_packet_tx
+# -- Compiling module asr_distance
+# -- Compiling module asr_yaw_unwrap
+# -- Compiling module asr_motion_test_top
+# -- Compiling module imu660ra_spi_master
+# -- Compiling module imu660ra_config_rom
+# -- Compiling module imu660ra_driver
+# -- Compiling module imu_attitude_fixed
+# -- Compiling module imu_attitude_bias_divider
+# -- Compiling module imu_attitude_atan2
+# -- Compiling module imu_attitude_sqrt
+# -- Compiling module imu_attitude_divider
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module motion_control_and_mode_fsm
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module uart_tx
+# -- Compiling module asr_diagnostic_tx
+# 
+# Top level modules:
+# 	asr_motion_test_top
+# End time: 15:43:50 on Oct 23,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 15:43:50 on Oct 23,2026
+# vlog -sv -work asr_lib sim/tb_asr_50mhz.sv 
+# -- Compiling module tb_asr_50mhz
+# 
+# Top level modules:
+# 	tb_asr_50mhz
+# End time: 15:43:50 on Oct 23,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" asr_lib.tb_asr_50mhz 
+# Start time: 15:43:50 on Oct 23,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_asr_50mhz(fast)
+# Loading work.asr_motion_test_top(fast)
+# Loading work.imu660ra_driver(fast)
+# Loading work.imu660ra_spi_master(fast)
+# Loading work.imu660ra_config_rom(fast)
+# Loading work.imu_attitude_fixed(fast)
+# Loading work.imu_attitude_bias_divider(fast)
+# Loading work.imu_attitude_atan2(fast)
+# Loading work.imu_attitude_sqrt(fast)
+# Loading work.imu_attitude_divider(fast)
+# Loading work.asr_yaw_unwrap(fast)
+# Loading work.dual_ab_quadrature_encoder(fast)
+# Loading work.dual_ab_encoder_channel(fast)
+# Loading work.dual_ab_encoder_channel(fast__1)
+# Loading work.asr_distance(fast)
+# Loading work.speed_measurement_and_velocity_filter(fast)
+# Loading work.asr_uart_rx(fast)
+# Loading work.motion_control_and_mode_fsm(fast)
+# Loading work.dual_speed_pi_pid_controller(fast)
+# Loading work.speed_pi_pid_channel(fast)
+# Loading work.pwm_and_startup_ramp(fast)
+# Loading work.pwm_startup_ramp_channel(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# Loading work.asr_packet_tx(fast)
+# Loading work.uart_tx(fast)
+# Loading work.asr_diagnostic_tx(fast)
+# PASS 50MHz, 115200 baud, 1MHz SPI, production 10ms speed window/20kHz PWM, calibrated enable and STOP
+# ** Note: $finish    : sim/tb_asr_50mhz.sv(133)
+#    Time: 201200171 ns  Iteration: 0  Instance: /tb_asr_50mhz
+# Break in Module tb_asr_50mhz at sim/tb_asr_50mhz.sv line 133
+# Stopped at sim/tb_asr_50mhz.sv line 133
+# End time: 15:43:58 on Oct 23,2026, Elapsed time: 0:00:08
+# Errors: 0, Warnings: 0
+PASS command frames, feedback resynchronization, signed diagnostic decode; no serial port opened
+PASS all ASR motion simulation suites and offline serial tool checks

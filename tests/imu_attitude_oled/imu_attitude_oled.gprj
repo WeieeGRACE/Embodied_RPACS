@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project>
+    <Template>FPGA</Template>
+    <Version>5</Version>
+    <Device name="GW5A-25A" pn="GW5A-LV25UG324C2/I1">gw5a25a-008</Device>
+    <FileList>
+        <File path="src/imu_attitude_oled_test_top.v" type="file.verilog" enable="1" top="1"/>
+        <File path="../../src/imu/imu660ra_spi_master.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/imu660ra_config_rom.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/imu660ra_driver.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/imu_attitude_fixed.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/attitude_angle_to_digits.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/oled_i2c_write_byte.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/imu_attitude_oled.v" type="file.verilog" enable="1"/>
+        <File path="../../src/imu/imu660ra_config.hex" type="file.data" enable="1"/>
+        <File path="src/imu_attitude_oled_test_top.cst" type="file.cst" enable="1"/>
+        <File path="src/imu_attitude_oled_test_top.sdc" type="file.sdc" enable="1"/>
+    </FileList>
+</Project>

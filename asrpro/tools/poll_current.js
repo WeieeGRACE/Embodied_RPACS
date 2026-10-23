@@ -1,0 +1,1 @@
+(function(){return {generationStartedAt:window.yyGenerationStartedAt||0,modelActive:on_creat_model,events:window.yyModelEvents||[],logs:window.yyUiLog||[],build:window.yyBuildEvents||[],dialog:document.body.innerText.slice(-500)};})()

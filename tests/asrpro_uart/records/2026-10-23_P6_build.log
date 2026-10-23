@@ -1,0 +1,95 @@
+*** GOWIN Tcl Command Line Console  *** 
+alog error: failed to open log file: 'C:/Users/Administartor/AppData/Local/GowinSemi/IDE/cache/sh.log'
+current device: GW5A-25A  GW5A-LV25UG324C2/I1
+add new file: "src/asr_debug_input.v"
+add new file: "src/asr_diagnostics.v"
+add new file: "src/asr_feedback.v"
+add new file: "src/asr_frame_rx.v"
+add new file: "src/asr_key.v"
+add new file: "src/asr_test_control.v"
+add new file: "src/asr_uart_rx.v"
+add new file: "src/asrpro_uart_top.v"
+add new file: "../../src/uart/uart_tx.v"
+add new file: "src/asrpro_uart_top.cst"
+add new file: "src/asrpro_uart_top.sdc"
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_debug_input.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_diagnostics.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_feedback.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_frame_rx.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_key.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_test_control.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_uart_rx.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v'
+Compiling module 'asrpro_uart_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":2)
+Compiling module 'asr_uart_rx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_uart_rx.v":3)
+Compiling module 'asr_frame_rx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_frame_rx.v":4)
+Compiling module 'asr_debug_input'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_debug_input.v":3)
+Compiling module 'asr_key'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_key.v":2)
+Compiling module 'asr_test_control'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_test_control.v":3)
+Compiling module 'asr_feedback'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_feedback.v":4)
+Extracting RAM for identifier 'fifo'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_feedback.v":9)
+Compiling module 'uart_tx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v":3)
+Compiling module 'asr_diagnostics'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_diagnostics.v":3)
+Extracting RAM for identifier 'fifo'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asr_diagnostics.v":8)
+NOTE  (EX0101) : Current top module is "asrpro_uart_top"
+[5%] Running netlist conversion ...
+WARN  (CV0016) : Input imu_gnd_reserved is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":7)
+WARN  (CV0016) : Input imu_spi_sck is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":7)
+WARN  (CV0016) : Input imu_spi_mosi is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":7)
+WARN  (CV0016) : Input imu_spi_miso is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":7)
+WARN  (CV0016) : Input imu_cs_n is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":7)
+WARN  (CV0016) : Input imu_int1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":7)
+WARN  (CV0016) : Input imu_int2 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":7)
+WARN  (CV0016) : Input tof_front_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":8)
+WARN  (CV0016) : Input tof_left_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":8)
+WARN  (CV0016) : Input tof_right_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.v":8)
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+[95%] Generate netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\gwsynthesis\asrpro_uart.vg" completed
+[100%] Generate report file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\gwsynthesis\asrpro_uart_syn.rpt.html" completed
+GowinSynthesis finish
+Reading netlist file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\gwsynthesis\asrpro_uart.vg"
+Parsing netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\gwsynthesis\asrpro_uart.vg" completed
+Processing netlist completed
+Reading constraint file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\src\asrpro_uart_top.cst"
+Physical Constraint parsed completed
+Running placement......
+[10%] Placement Phase 0 completed
+[20%] Placement Phase 1 completed
+[30%] Placement Phase 2 completed
+[50%] Placement Phase 3 completed
+Running routing......
+[60%] Routing Phase 0 completed
+[70%] Routing Phase 1 completed
+[80%] Routing Phase 2 completed
+[90%] Routing Phase 3 completed
+Running timing analysis......
+[95%] Timing analysis completed
+Placement and routing completed
+Bitstream generation in progress......
+Bitstream generation completed
+Running power analysis......
+[100%] Power analysis completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\pnr\asrpro_uart.power.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\pnr\asrpro_uart.pin.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\pnr\asrpro_uart.rpt.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\pnr\asrpro_uart.rpt.txt" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\asrpro_uart\impl\pnr\asrpro_uart.tr.html" completed
+Fri Oct 23 13:30:52 2026
+

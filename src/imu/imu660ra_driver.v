@@ -10,7 +10,8 @@ module imu660ra_driver #(
     parameter integer RETRY_CYCLES = CLK_HZ,
     parameter integer SAMPLE_CYCLES = CLK_HZ / 200,
     parameter integer HEALTH_CHECK_CYCLES = 0,
-    parameter integer ID_RETRIES = 10
+    parameter integer ID_RETRIES = 10,
+    parameter CONFIG_HEX_FILE = "src/imu/imu660ra_config.hex"
 )(
     input wire clk,
     input wire rst_n,
@@ -132,7 +133,7 @@ module imu660ra_driver #(
         .spi_sclk(spi_sclk), .spi_mosi(spi_mosi)
     );
 
-    imu660ra_config_rom config_rom (
+    imu660ra_config_rom #(.INIT_FILE(CONFIG_HEX_FILE)) config_rom (
         .clk(clk), .address(config_rom_address), .data(config_rom_byte)
     );
 
