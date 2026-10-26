@@ -13,10 +13,14 @@ module tb_speed_measurement_and_velocity_filter;
   task cycle; input signed [15:0] d; begin @(negedge clk); delta_count=d; @(posedge clk); #1; end endtask
   initial begin
     delta_count=0; repeat(2) @(posedge clk); rst_n=1;
-    repeat(4) cycle(2); check(speed_valid && speed_raw==8 && speed_filtered==8 && position==8 && !direction,"positive window");
-    repeat(4) cycle(-1); check(speed_valid && speed_raw==-4 && speed_filtered==2 && position==4 && direction,"negative window and average");
-    repeat(4) cycle(0); check(speed_valid && speed_raw==0 && speed_filtered==1 && position==4 && zero_speed,"zero window");
-    repeat(4) cycle(-2); check(speed_valid && speed_raw==-8 && speed_filtered==-1 && position==-4,"reverse window");
+    repeat(4) cycle(2);
+    cycle(-1); check(speed_valid && speed_raw==8 && speed_filtered==8 && position==7 && !direction,"positive window");
+    repeat(3) cycle(-1);
+    cycle(0); check(speed_valid && speed_raw==-4 && speed_filtered==2 && position==4 && direction,"negative window and average");
+    repeat(3) cycle(0);
+    cycle(-2); check(speed_valid && speed_raw==0 && speed_filtered==1 && position==2 && zero_speed,"zero window");
+    repeat(3) cycle(-2);
+    cycle(0); check(speed_valid && speed_raw==-8 && speed_filtered==-1 && position==-4,"reverse window");
     @(posedge clk); #1; check(!speed_valid,"valid pulse width");
     $display("PASS: %0d checks",checks); $finish;
   end

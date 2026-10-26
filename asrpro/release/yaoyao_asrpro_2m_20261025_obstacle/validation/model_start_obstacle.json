@@ -1,0 +1,26 @@
+{
+  "loggedIn": true,
+  "logs": [
+    {
+      "kind": "showToast",
+      "text": "登录成功",
+      "time": 1792940849786
+    },
+    {
+      "kind": "showToast",
+      "text": "后台正在生成模型中，请稍后重试！",
+      "time": 1792940878368
+    }
+  ],
+  "dialogs": "speed:10,platform:haohaodada}\n//{playid:10001,voice:幺幺准备好了，请说幺幺耍起唤醒我。}\n//{playid:10002,voice:幺幺休息了，请说幺幺耍起唤醒我。}\n// Embedded in asrpro.hd; regenerate through tools/build_project.py.\n#include \"HardwareSerial.h\"\n#include \"queue.h\"\n#include \"semphr.h\"\nextern \"C\" uint32_t yy_prompt_play(uint16_t, void (*)(uint32_t,int32_t), uint32_t);\nstruct YaoyaoAudio { uint16_t id; uint8_t urgent; uint32_t epoch,cookie; };\nstruct YaoyaoDone { uint32_t cookie; int32_t reason; };\nstatic QueueHandle_t yy_audio_queue=NULL,yy_done_queue=NULL;\nstatic SemaphoreHandle_t yy_serial_mutex=NULL;\nstatic volatile bool yy_ready=false;\nstatic volatile uint32_t yy_epoch=0,yy_active_cookie=0;\nstatic uint32_t yy_cookie_counter=0,yy_active_since=0;\nstatic uint8_t yy_token=0;\nstatic bool yy_avoid=false,yy_suppress_accept=false;\nstatic uint8_t yy_frame[6],yy_used=0,yy_last_status=0xFF;\nstatic uint32_t yy_started=0,yy_dropped_audio=0;\nstatic uint16_t yy_last_status_audio=0;\nstatic void yy_cancel_start(){yy_active_cookie=0;}\nstatic void yy_write_frame(uint8_t type,uint8_t code){\n if(!yy_serial_mutex || xSemaphoreTake(yy_serial_mutex,portMAX_DELAY)!=pdTRUE)return;\n const uint8_t f[6]={0xAA,0x55,type,code,(uint8_t)(type+code),0x0D};\n for(uint8_t i=0;i<6;++i)Serial1.write(f[i]);\n xSemaphoreGive(yy_serial_mutex);\n}\nstatic bool yy_queue_audio(uint16_t id,bool urgent,uint32_t cookie=0){\n if(!yy_audio_queue)return false;\n if(urgent){++yy_epoch;xQueueReset(yy_audio_queue);}\n YaoyaoAudio item={id,(uint8_t)urgent,yy_epoch,cookie};\n if(xQueueSend(yy_audio_queue,&item,0)==pdTRUE)return true;\n 串口配置\n端口号\n未连接\n波特率\n1200\n2400\n4800\n9600\n19200\n38400\n57600\n115200\n230400\n460800\n921600\n打开串口\n数据位\n5\n6\n7\n8\n停止位\n1\n1.5\n2\n校验\n无\n奇\n偶\nDTR\nRTS\n 接收区\n数据\n波形\nHEX\n时间戳\n显示发送的数据\n清空\n 发送区\n单条\n多条\n发送\n清除\nHEX\n换行\n定时发送\nms\n未选择\n打开\n文件\n未连接\nRX 0\nTX 0\n添加扩展\n后台正在生成模型中，请稍后重试！",
+  "envMethods": [
+    "on_creat_model",
+    "asrpro_optimize",
+    "openmodelPro",
+    "modelCopyAction",
+    "file_dialogs",
+    "folder_ops",
+    "asrpro_run_flash",
+    "asrpro_model_load_manager"
+  ]
+}

@@ -46,6 +46,7 @@
 !/tests/records/*.ps1
 /tools/*
 !/tools/*.ps1
+!/tools/*.py
 
 # Keep only the board-ready camera bitstream; other Gowin build products stay local.
 !/tests/ov5647_camera/impl/
@@ -171,3 +172,10 @@
 
 # Local IDE session state is not part of the deliverable.
 *.gprj.user
+
+!/OBSTACLE_BOARD_TEST.md
+!/records/obstacle_20261025/
+/records/obstacle_20261025/*
+!/records/obstacle_20261025/*.md
+!/records/obstacle_20261025/*.json
+!/records/obstacle_20261025/*.log

@@ -33,5 +33,9 @@
     <File path="src/imu/imu660ra_config.hex" type="file.data" enable="1" />
     <File path="src/robot_system_top.cst" type="file.cst" enable="1" />
     <File path="src/robot_system_top.sdc" type="file.sdc" enable="1" />
+    <File path="src/obstacle/obstacle_route.v" type="file.verilog" enable="1" />
+    <File path="src/obstacle/obstacle_sensors.v" type="file.verilog" enable="1" />
+    <File path="src/obstacle/obstacle_command.v" type="file.verilog" enable="1" />
+    <File path="src/obstacle/system_dispatch.v" type="file.verilog" enable="1" />
   </FileList>
 </Project>

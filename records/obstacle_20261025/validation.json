@@ -1,0 +1,131 @@
+{
+  "version": "2026-10-26 OA09 integrated",
+  "validatedAt": "2026-10-26T01:47:19.254380+08:00",
+  "fpga": {
+    "device": "GW5A-LV25UG324C2/I1",
+    "clockMHz": 50,
+    "actualFmax": "50.379(MHz)",
+    "setupViolations": 0,
+    "holdViolations": 0,
+    "bytes": 6173924,
+    "sha256": "c2e453b94a76d9a70cc9242de378d87986aa630f558f8315c3046742c3efa9db"
+  },
+  "asrpro": {
+    "bytes": 1622062,
+    "sha256": "a612e72d21f58c14246ed8f74669d38066447993427a492f98a9ecdcc1546380",
+    "hdSHA256": "ec3bd7f40e75dd712c24fe38ac6243835536ea5d9cee68fb372e168dc2fc044d",
+    "hostChecks": 190,
+    "words": 23,
+    "feedbackClips": 15
+  },
+  "simulations": {
+    "system.log": {
+      "sha256": "e46a169a35b54993e62ed16de0fa0ad7e900383c172ab1283116f7badcd99d2c",
+      "passLines": [
+        "PASS startup defaults, bounce, one-shot keys, K0 context and disabled voice",
+        "PASS menu quantitative action 0 distance=204069/200651 yaw=-801",
+        "PASS menu quantitative action 1 distance=-204639/-200794 yaw=908",
+        "PASS menu quantitative action 2 distance=-188975/189259 yaw=90149",
+        "PASS menu quantitative action 3 distance=188690/-189401 yaw=-90189",
+        "PASS full 8s debug action 0 L=7856 R=0",
+        "PASS full 8s debug action 1 L=-7842 R=0",
+        "PASS full 8s debug action 2 L=0 R=7840",
+        "PASS full 8s debug action 3 L=0 R=-7838",
+        "PASS full 8s debug action 4 L=7850 R=7835",
+        "PASS full 8s debug action 5 L=-7850 R=-7837",
+        "PASS full 8s debug action 6 L=4061 R=7833",
+        "PASS full 8s debug action 7 L=7862 R=4008",
+        "PASS all motions without USB heartbeat",
+        "PASS running K0 immediate cut, no restart, no false completion",
+        "PASS STOP/menu/voice arbitration and voice STOP",
+        "PASS disable voice stops action, disabled query/stop remain available",
+        "PASS menu quantitative action 0 distance=204212/200652 yaw=-826",
+        "PASS integrated ToF normal/NACK/timeout/recovery, hidden stale values, display-only faults",
+        "PASS IMU/speed/timeout/still/overflow faults and root reset defaults",
+        "PASS logger 16 exact lines, one-cycle simultaneous events during TX, startup failure snapshot, hex/CRLF, persistent and reasserted deduplication"
+      ]
+    },
+    "system_oled.log": {
+      "sha256": "9c7c40ce1009465cccc17b9eb246e7fd083bd54cf8c215ff1b27e0bae9eb6898",
+      "passLines": [
+        "PASS main OLED root menu complete bitmap and key legend",
+        "PASS main OLED action page and tear-free page switching",
+        "PASS settings, attitude signs/units, encoder count/speed, ToF bitmap and stale data masking",
+        "PASS obstacle OLED entry, voice-off prompt, waiting, cruise, paused, ranges and keys"
+      ]
+    },
+    "system_50mhz.log": {
+      "sha256": "6ed2fa77032bb9c1f11c548bebebdc8ffba9dafb564c8402d242531ebc0c4a40",
+      "passLines": [
+        "PASS main project menu + 50MHz, 115200 baud, 1MHz SPI, production 10ms speed window/20kHz PWM, calibrated enable and STOP"
+      ]
+    },
+    "dispatch.log": {
+      "sha256": "264ce936f387582b4c02fe1a054080ed84ffe2df36291f41384fe8d95656c5e0",
+      "passLines": [
+        "PASS dispatch 177 checks"
+      ]
+    },
+    "live_speed.log": {
+      "sha256": "359d2fa2f66e61857135cd52d32ab80233cb729a3f2d54f4663131a429dd2043",
+      "passLines": [
+        "PASS live_speed 9 checks, ramp, cap, distance continuity, no idle start"
+      ]
+    },
+    "obstacle.log": {
+      "sha256": "d4d753084340ede8e5853031a3c11f05ec6cecefd1082017e4bbba08b506fca8",
+      "passLines": [
+        "PASS main obstacle full  left route, two300mm, return652581, speech and live speed",
+        "PASS main obstacle full right route, two300mm, return652295, speech and live speed",
+        "PASS main obstacle audio gate, menu navigation, takeover, busy, ToF bypass, live manual speed, exit"
+      ]
+    },
+    "attitude_pipeline.log": {
+      "sha256": "cfb58e03619c92645fe5a4692034022fa6b69f579774afdffdc1d7d048247ad6",
+      "passLines": [
+        "PASS pipeline angle 12345 -> 0 012.3",
+        "PASS pipeline angle -12345 -> 1 012.3",
+        "PASS pipeline angle 12450 -> 0 012.5",
+        "PASS pipeline angle 180000 -> 0 180.0",
+        "PASS attitude display pipeline rounding, sign and limits"
+      ]
+    }
+  },
+  "projectSources": {
+    "src/robot_system_top.v": "ee363fc9c39331c789a58b7f632db44376e43994636604795cfd4bc208331fdb",
+    "src/asr/system_motion.v": "cb32d243424160e6c5204ecd418163dcaede6178bebf78d37c885a9050d5bc97",
+    "src/asr/asr_uart_rx.v": "795b0e3758bb4682bb59af89e45aa2bf7c317783bdddcf7ba7417bfd8deaedaf",
+    "src/asr/asr_packet_tx.v": "ab37915e35955b9d3b93a7cbef7a720f17a276578048a45a828b65811d7202d4",
+    "src/asr/asr_feedback.v": "2d6e83b554447ce7a2c0e6ddcb44a892bb1efa948d91523e574d87a8e569b01f",
+    "src/ui/system_keys.v": "d01b6ba9a14861b6c3d71692bc25c33be2fc3da620cb2915a08759c6f0d47525",
+    "src/ui/system_menu.v": "4a6d38e003003cd01a966ccafa08df9f73f71ee540c703dff4f2b9e9be7be304",
+    "src/ui/system_pages.v": "6a51b4fd7d206352ffed57514c8030991b34e4144482d1751444ca7d86bf0ccc",
+    "src/ui/system_oled_text.v": "d10bbdde5eb764d742a37f767390a41a4ada3e92763d91da3e019248b15adcc6",
+    "src/tof/tof_driver.v": "dcecd46350c6c2cef5e55accb2cd6d568022739d16c96851c367b282b0a146a3",
+    "src/tof/tof_i2c.v": "ffda90ce9e2bbfcaa3f2681e7cd9195d4e171d04659686dd0c9503566c0d2fc2",
+    "src/tof/tof_page.v": "cce15d57beb778018e9fb06f870cb3abb76e3b0313ce20fc8cabe83337253464",
+    "src/motor/motion_control_and_mode_fsm.v": "a15163c6fb99d412861d6f336f46f588ada660acaf2c8aa10524b31fa7f5e898",
+    "src/motor/dual_ab_quadrature_encoder.v": "f823f7ac1b7edebf0c424867e94a021d9f1d97268409fc5a0c46ecddf18db06d",
+    "src/motor/speed_measurement_and_velocity_filter.v": "10850c05714053ca9ec4cc692b4804a53fcfd4454a87aa332d68f014c7cf2f41",
+    "src/motor/dual_speed_pi_pid_controller.v": "6bc2831ff5326f7dde6db32e5cf36ab23a9812ce714d73a50fafe3b48f8a3459",
+    "src/motor/pwm_and_startup_ramp.v": "05bf27548597be4d8c158a9deea101642a0bead58ea4e283ddfdfdae6463be04",
+    "src/motor/tb6612_driver_interface.v": "395f3457e243701293c2d1018a149e08754dc5236f073ac72540e8ca46e77ce3",
+    "src/imu/imu_attitude_fixed.v": "eef7da05e2841af8507c6f1c2bc995b5a09499f8c3380885fd5c9d3706afaf4a",
+    "src/imu/attitude_angle_to_digits.v": "f57b7df18874e762edd95bbf663cdc90d5d1bce6845ec57ae79aeeb6423de750",
+    "src/imu/oled_i2c_write_byte.v": "48fa3224e0bed2db88973458a41f78a242ccfdcc0d6df1c4e07c492c47a7afae",
+    "src/imu/imu660ra_driver.v": "b7fb2e3d078d2795e0e11d05729d40f85eaaae416096021ec9517cccf8a3a117",
+    "src/imu/imu660ra_spi_master.v": "f97aff7b1130c657254cc32b35e73671a9c8316792665914de61b1c6e25eafa8",
+    "src/imu/imu660ra_config_rom.v": "00900e79a3df136c5f3afa25ebb4cc93652150cac163e8da1b8156368c2f3021",
+    "src/uart/uart_tx.v": "a15e7cd0592e3ce0f4c3ad806fef45a9896fe4070f350f2e87c50a6a7b488055",
+    "src/uart/system_event_logger.v": "881677805b2d2dc81f243fd1b017bce397d1a3b35b40d0cb970727dc1f8ec7a7",
+    "src/imu/imu660ra_config.hex": "107649de633ebf83ec2c503ae26d7856e577b5075aa42a7aca5b564caa8f1ccb",
+    "src/robot_system_top.cst": "61942906a6e160c0632fe81e1b61c4e82570a06876d9c62fdfc7e8e2cfe02cdf",
+    "src/robot_system_top.sdc": "1ab55acfff1fae96b49a4cfeea8f0a5efe41ef93e82096ac4b73b2573a0f0d9c",
+    "src/obstacle/obstacle_route.v": "a907d3c1193102284a3e034cbc4827e5d3e7f2e11290221ff1f3dbae5cca0655",
+    "src/obstacle/obstacle_sensors.v": "d5273dedbe1068dd5e6feb6f37bdcf347a458659c75dc01366df3fd30e434084",
+    "src/obstacle/obstacle_command.v": "1d5d2912c41b1aa9cfbd48378616c16e88ae2a827613bd49de84a92f8c3b70a5",
+    "src/obstacle/system_dispatch.v": "98fde4c0fd46fec2369ef5d3923b672c69bc3726f8f93badb41d0105da6f87f9"
+  },
+  "hardwareTested": false,
+  "deviceFlashed": false
+}

@@ -1,2 +1,2 @@
-test_runtime.cpp
-PASS 163 checks: generated command callbacks, framing, statuses, dedup, timeout, wrap, resync, urgent audio, bounded queues, allocation failure
+test_runtime.cpp
+PASS 190 checks: generated command callbacks, framing, statuses, dedup, timeout, wrap, resync, urgent audio, bounded queues, allocation failure

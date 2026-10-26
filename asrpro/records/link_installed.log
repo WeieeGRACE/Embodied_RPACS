@@ -1,0 +1,5 @@
+../../../startup/asrpro_init.c:90:12: warning: type of 'efuse_check_idle' does not match original declaration [-Wlto-type-mismatch]
+../../../driver/ci130x_chip_driver/src/ci130x_efuse.c:73:6: note: return value type mismatch
+../../../driver/ci130x_chip_driver/src/ci130x_efuse.c:73:6: note: type '_Bool' should match type 'int'
+../../../driver/ci130x_chip_driver/src/ci130x_efuse.c:73:6: note: 'efuse_check_idle' was previously declared here
+../../../driver/ci130x_chip_driver/src/ci130x_efuse.c:73:6: note: code may be misoptimized unless '-fno-strict-aliasing' is used

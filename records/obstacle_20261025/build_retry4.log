@@ -1,0 +1,171 @@
+*** GOWIN Tcl Command Line Console  *** 
+alog error: failed to open log file: 'C:/Users/Administartor/AppData/Local/GowinSemi/IDE/cache/sh.log'
+current device: GW5A-25A  GW5A-LV25UG324C2/I1
+add new file: "src/robot_system_top.v"
+add new file: "src/asr/system_motion.v"
+add new file: "src/asr/asr_uart_rx.v"
+add new file: "src/asr/asr_packet_tx.v"
+add new file: "src/asr/asr_feedback.v"
+add new file: "src/ui/system_keys.v"
+add new file: "src/ui/system_menu.v"
+add new file: "src/ui/system_pages.v"
+add new file: "src/ui/system_oled_text.v"
+add new file: "src/tof/tof_driver.v"
+add new file: "src/tof/tof_i2c.v"
+add new file: "src/tof/tof_page.v"
+add new file: "src/motor/motion_control_and_mode_fsm.v"
+add new file: "src/motor/dual_ab_quadrature_encoder.v"
+add new file: "src/motor/speed_measurement_and_velocity_filter.v"
+add new file: "src/motor/dual_speed_pi_pid_controller.v"
+add new file: "src/motor/pwm_and_startup_ramp.v"
+add new file: "src/motor/tb6612_driver_interface.v"
+add new file: "src/imu/imu_attitude_fixed.v"
+add new file: "src/imu/attitude_angle_to_digits.v"
+add new file: "src/imu/oled_i2c_write_byte.v"
+add new file: "src/imu/imu660ra_driver.v"
+add new file: "src/imu/imu660ra_spi_master.v"
+add new file: "src/imu/imu660ra_config_rom.v"
+add new file: "src/uart/uart_tx.v"
+add new file: "src/uart/system_event_logger.v"
+add new file: "src/imu/imu660ra_config.hex"
+add new file: "src/robot_system_top.cst"
+add new file: "src/robot_system_top.sdc"
+add new file: "src/obstacle/obstacle_route.v"
+add new file: "src/obstacle/obstacle_sensors.v"
+add new file: "src/obstacle/obstacle_command.v"
+add new file: "src/obstacle/system_dispatch.v"
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\system_motion.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\asr_uart_rx.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\asr_packet_tx.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\asr_feedback.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_keys.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_menu.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_pages.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_oled_text.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\tof\tof_driver.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\tof\tof_i2c.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\tof\tof_page.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\motion_control_and_mode_fsm.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\dual_ab_quadrature_encoder.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\speed_measurement_and_velocity_filter.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\dual_speed_pi_pid_controller.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\pwm_and_startup_ramp.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\tb6612_driver_interface.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu_attitude_fixed.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\attitude_angle_to_digits.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\oled_i2c_write_byte.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_driver.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_spi_master.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_config_rom.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\system_event_logger.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\obstacle\obstacle_route.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\obstacle\obstacle_sensors.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\obstacle\obstacle_command.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\obstacle\system_dispatch.v'
+Compiling module 'robot_system_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v":3)
+Compiling module 'system_keys'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_keys.v":4)
+Compiling module 'system_menu'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_menu.v":2)
+WARN  (EX3791) : Expression size 5 truncated to fit in target size 4("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_menu.v":29)
+WARN  (EX3791) : Expression size 3 truncated to fit in target size 2("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_menu.v":31)
+Compiling module 'system_motion(WINDOW_CYCLES=500000,IMU_POWERUP=1000000,IMU_WAIT=1000000,IMU_RETRY=50000000,IMU_SAMPLE=250000,IMU_HEALTH=50000000,IMU_TIMEOUT=5000000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\system_motion.v":2)
+Compiling module 'imu660ra_driver(POWERUP_CYCLES=1000000,CONFIG_WAIT_CYCLES=1000000,ID_RETRY_CYCLES=50000,RETRY_CYCLES=50000000,SAMPLE_CYCLES=250000,HEALTH_CHECK_CYCLES=50000000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_driver.v":4)
+Compiling module 'imu660ra_spi_master'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_spi_master.v":3)
+Compiling module 'imu660ra_config_rom'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_config_rom.v":4)
+Extracting RAM for identifier 'rom'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_config_rom.v":11)
+Compiling module 'imu_attitude_fixed'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu_attitude_fixed.v":5)
+Compiling module 'imu_attitude_bias_divider'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu_attitude_fixed.v":287)
+Compiling module 'imu_attitude_atan2'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu_attitude_fixed.v":334)
+Compiling module 'imu_attitude_sqrt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu_attitude_fixed.v":387)
+Compiling module 'imu_attitude_divider'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu_attitude_fixed.v":422)
+Compiling module 'asr_yaw_unwrap(YAW_SIGN=-1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\asr_feedback.v":15)
+Compiling module 'dual_ab_quadrature_encoder(FILTER_CYCLES=50,INVERT_L=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\dual_ab_quadrature_encoder.v":3)
+Compiling module 'dual_ab_encoder_channel(FILTER_CYCLES=50,INVERT=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\dual_ab_quadrature_encoder.v":27)
+Compiling module 'dual_ab_encoder_channel(FILTER_CYCLES=50)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\dual_ab_quadrature_encoder.v":27)
+Compiling module 'asr_distance'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\asr_feedback.v":3)
+Compiling module 'speed_measurement_and_velocity_filter(ZERO_PAD_WARMUP=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\speed_measurement_and_velocity_filter.v":3)
+Compiling module 'asr_uart_rx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\asr_uart_rx.v":3)
+Compiling module 'system_dispatch'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\obstacle\system_dispatch.v":3)
+Compiling module 'obstacle_route(WINDOW_CYCLES=500000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\obstacle\obstacle_route.v":4)
+Compiling module 'obstacle_command_buffer'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\obstacle\obstacle_command.v":4)
+Compiling module 'motion_control_and_mode_fsm(STILL_THRESHOLD=0,ALLOW_SINGLE_TIMED=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\motion_control_and_mode_fsm.v":4)
+WARN  (EX3045) : Case inequality operator always evaluates to true due to comparison with 'x' or 'z'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\motion_control_and_mode_fsm.v":62)
+Compiling module 'dual_speed_pi_pid_controller'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\dual_speed_pi_pid_controller.v":3)
+Compiling module 'speed_pi_pid_channel'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\dual_speed_pi_pid_controller.v":27)
+Compiling module 'pwm_and_startup_ramp'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\pwm_and_startup_ramp.v":3)
+Compiling module 'pwm_startup_ramp_channel'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\pwm_and_startup_ramp.v":42)
+Compiling module 'tb6612_driver_interface'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\tb6612_driver_interface.v":4)
+Compiling module 'tb6612_driver_channel'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\tb6612_driver_interface.v":58)
+Compiling module 'asr_packet_tx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\asr_packet_tx.v":4)
+Extracting RAM for identifier 'fifo'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\asr\asr_packet_tx.v":9)
+Compiling module 'uart_tx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v":3)
+Compiling module 'system_event_logger(WATCHDOG_PRESENT=0)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\system_event_logger.v":4)
+Compiling module 'obstacle_sensors(RESET_CYCLES=50000,BOOT_CYCLES=1000000,POLL_CYCLES=500000,MAX_POLLS=100,TIMEOUT_CYCLES=500000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\obstacle\obstacle_sensors.v":3)
+Compiling module 'tof_driver(RESET_CYCLES=50000,BOOT_CYCLES=1000000,POLL_CYCLES=500000,TIMEOUT_CYCLES=500000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\tof\tof_driver.v":4)
+Compiling module 'tof_i2c_reg'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\tof\tof_i2c.v":99)
+Compiling module 'tof_i2c_bits'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\tof\tof_i2c.v":4)
+Compiling module 'tof_page'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\tof\tof_page.v":3)
+Compiling module 'system_pages'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_pages.v":2)
+Compiling module 'attitude_angle_to_digits'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\attitude_angle_to_digits.v":3)
+WARN  (EX3791) : Expression size 5 truncated to fit in target size 4("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_pages.v":95)
+Compiling module 'system_oled_text(POWERUP_CYCLES=5000000,FRAME_WAIT_CYCLES=7000000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\ui\system_oled_text.v":5)
+Compiling module 'oled_i2c_write_byte'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\oled_i2c_write_byte.v":4)
+NOTE  (EX0101) : Current top module is "robot_system_top"
+[5%] Running netlist conversion ...
+WARN  (CV0016) : Input uart_rx is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v":18)
+WARN  (CV0016) : Input imu_int1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v":20)
+WARN  (CV0016) : Input imu_int2 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v":20)
+WARN  (CV0016) : Input imu_gnd_reserved is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v":20)
+WARN  (CV0016) : Input tof_front_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v":21)
+WARN  (CV0016) : Input tof_left_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v":21)
+WARN  (CV0016) : Input tof_right_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.v":21)
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+[95%] Generate netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\gwsynthesis\Embodied_RPACS.vg" completed
+[100%] Generate report file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\gwsynthesis\Embodied_RPACS_syn.rpt.html" completed
+GowinSynthesis finish
+Reading netlist file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\gwsynthesis\Embodied_RPACS.vg"
+Parsing netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\gwsynthesis\Embodied_RPACS.vg" completed
+Processing netlist completed
+Reading constraint file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\robot_system_top.cst"
+Physical Constraint parsed completed
+Running placement......
+[10%] Placement Phase 0 completed
+[20%] Placement Phase 1 completed
+[30%] Placement Phase 2 completed
+[50%] Placement Phase 3 completed
+Running routing......
+[60%] Routing Phase 0 completed
+[70%] Routing Phase 1 completed
+[80%] Routing Phase 2 completed
+[90%] Routing Phase 3 completed
+Running timing analysis......
+[95%] Timing analysis completed
+Placement and routing completed
+Bitstream generation in progress......
+Bitstream generation completed
+Running power analysis......
+[100%] Power analysis completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\pnr\Embodied_RPACS.power.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\pnr\Embodied_RPACS.pin.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\pnr\Embodied_RPACS.rpt.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\pnr\Embodied_RPACS.rpt.txt" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\impl\pnr\Embodied_RPACS.tr.html" completed
+Mon Oct 26 00:22:46 2026
+

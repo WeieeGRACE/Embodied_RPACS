@@ -1,4 +1,4 @@
-param([string]$Destination = 'release/Embodied_RPACS_main_20261023')
+param([string]$Destination = 'release/Embodied_RPACS_main_20261026')
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $exportRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot $Destination))
@@ -18,15 +18,16 @@ foreach ($file in $project.Project.FileList.File) {
     Copy-MainFile $file.path
 }
 foreach ($file in @(
-    'Embodied_RPACS.gprj','build.tcl','verify_project.tcl','README.md','PIN_ASSIGNMENT.md',
+    'OBSTACLE_BOARD_TEST.md','Embodied_RPACS.gprj','build.tcl','verify_project.tcl','README.md','PIN_ASSIGNMENT.md',
     'impl/Embodied_RPACS_process_config.json','impl/project_process_config.json',
     'sim/compile_system.do','sim/run_system.do','sim/run_system_oled.do','sim/run_system_50mhz.do',
-    'sim/tb_robot_system.sv','sim/tb_system_event_logger.sv','sim/tb_system_oled.sv','sim/tb_system_50mhz.sv',
+    'sim/run_system_dispatch.do','sim/run_live_speed.do','sim/run_system_obstacle.do','sim/run_attitude_pipeline.do',
+    'sim/tb_system_dispatch.sv','sim/tb_live_speed.sv','sim/tb_system_obstacle.sv','sim/tb_attitude_pipeline.sv','sim/tb_robot_system.sv','sim/tb_system_event_logger.sv','sim/tb_system_oled.sv','sim/tb_system_50mhz.sv',
     'sim/models/vl53l0x_model.sv','tools/run_system_sim.ps1','tools/check_system_reports.ps1','tools/export_main.ps1'
 )) { Copy-MainFile $file }
-foreach ($file in @('THIRD_PARTY_NOTICES.md','records/main_20261023/VALIDATION.md')) {
+foreach ($file in @('THIRD_PARTY_NOTICES.md','records/obstacle_20261025/VALIDATION.md')) {
     if (Test-Path -LiteralPath (Join-Path $projectRoot $file)) { Copy-MainFile $file }
 }
-New-Item -ItemType Directory -Force -Path (Join-Path $exportRoot 'records/main_20261023') | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $exportRoot 'records/obstacle_20261025') | Out-Null
 if (Test-Path -LiteralPath (Join-Path $exportRoot 'tests')) { throw 'Unexpected test directory in main export' }
 Write-Output "PASS self-contained main source export: $exportRoot"

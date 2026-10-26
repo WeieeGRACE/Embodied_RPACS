@@ -3,11 +3,12 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $projectRoot
 try {
-    New-Item -ItemType Directory -Force records/main_20261023 | Out-Null
-    foreach ($suite in @('system','system_oled','system_50mhz')) {
-        & $Vsim -c -l "records/main_20261023/$suite.log" -do "sim/run_$suite.do"
+    New-Item -ItemType Directory -Force records/obstacle_20261025 | Out-Null
+    foreach ($suite in @('system','system_oled','system_50mhz','system_dispatch','live_speed','system_obstacle','attitude_pipeline')) {
+        & $Vsim -c -l "records/obstacle_20261025/$suite.log" -do "sim/run_$suite.do"
         if ($LASTEXITCODE -ne 0) { throw "Main simulation failed: $suite" }
-        if (-not (Select-String -LiteralPath "records/main_20261023/$suite.log" -Pattern 'Errors: 0, Warnings: 0' -Quiet)) { throw "Missing success footer: $suite" }
+        $log = Get-Content -LiteralPath "records/obstacle_20261025/$suite.log" -Raw
+        if (!$log.TrimEnd().EndsWith('Errors: 0, Warnings: 0') -or $log -match '\*\* (Fatal|Error)') { throw "Missing success footer: $suite" }
     }
-    Write-Output 'PASS independent main integration, OLED bitmap and 50MHz suites'
+    Write-Output 'PASS all seven integration, OLED, 50MHz, dispatcher, live speed, obstacle and attitude-pipeline suites'
 } finally { Pop-Location }

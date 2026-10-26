@@ -10,29 +10,35 @@ module speed_prefetch_case #(parameter W=2, L=3, PAD=0)(output reg completed=0);
  .speed_raw(raw_speed),.speed_filtered(filtered),.position(position),
  .speed_valid(valid),.direction(),.zero_speed());
  integer history[0:L-1];
- integer window_ticks=0,window_total=0,filled=0,pos=0;
+	integer window_ticks=0,window_total=0,filled=0,pos=0,pending_total=0;
+	reg pending_valid=0,expected_valid=0;
  integer expected_raw=0,expected_filtered=0,total,divisor,j,k,epoch;
  always @(posedge clk) begin
   if(!rst) begin
-   window_ticks=0;window_total=0;filled=0;pos=0;
+   window_ticks=0;window_total=0;filled=0;pos=0;pending_total=0;
+   pending_valid=0;expected_valid=0;
    expected_raw=0;expected_filtered=0;
    for(j=0;j<L;j=j+1)history[j]=0;
    #1;if(valid || filtered || raw_speed || position)$fatal(1,"reset W=%0d L=%0d",W,L);
   end else begin
-   pos=pos+$signed(delta);window_total=window_total+$signed(delta);
-   window_ticks=window_ticks+1;
-   if(window_ticks==W) begin
+   expected_valid=pending_valid;
+   if(pending_valid) begin
     for(j=L-1;j>0;j=j-1)history[j]=history[j-1];
-    history[0]=window_total;
+    history[0]=pending_total;
     if(filled<L)filled=filled+1;
     total=0;for(j=0;j<L;j=j+1)total=total+history[j];
     divisor=PAD ? L : filled;
-    expected_raw=window_total;expected_filtered=total/divisor;
-    window_total=0;window_ticks=0;
-    #1;if(!valid)$fatal(1,"missing valid");
-   end else begin
-    #1;if(valid)$fatal(1,"unexpected valid");
+    expected_raw=pending_total;expected_filtered=total/divisor;
    end
+   pos=pos+$signed(delta);window_total=window_total+$signed(delta);
+   window_ticks=window_ticks+1;
+   if(window_ticks==W) begin
+	    pending_total=window_total;pending_valid=1;
+    window_total=0;window_ticks=0;
+   end else begin
+	    pending_valid=0;
+   end
+	   #1;if(valid!==expected_valid)$fatal(1,"valid W=%0d expected=%b actual=%b",W,expected_valid,valid);
    if(raw_speed!==expected_raw || filtered!==expected_filtered || position!==pos)
     $fatal(1,"filter W=%0d L=%0d PAD=%0d raw=%0d/%0d mean=%0d/%0d position=%0d/%0d",
      W,L,PAD,raw_speed,expected_raw,filtered,expected_filtered,position,pos);

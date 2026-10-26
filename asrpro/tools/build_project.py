@@ -30,11 +30,14 @@ commands = [
     (17, '右转', 0x13), (18, '向右转', 0x13), (19, '向右原地旋转', 0x13),
     (20, '加速', 0x14), (21, '快一点', 0x14),
     (22, '减速', 0x15), (23, '慢一点', 0x15),
+    (24, '避障模式', 0x16), (25, '退出避障模式', 0x17),
 ]
 audio = [(9000,'已接受'), (9001,'忙碌中'), (9002,'无法执行'),
          (9100,'空闲'), (9101,'执行中'), (9103,'已到达'),
          (9104,'已停止'), (9105,'失败'), (9106,'故障'),
-         (9108,'已完成'), (9201,'收到')]
+         (9108,'已完成'), (9201,'收到'),
+         (9300,'开启避障模式'), (9301,'遇到障碍开始绕障'),
+         (9302,'已绕过障碍物'), (9303,'已退出避障模式')]
 
 def build():
     root = E.Element('xml', xmlns='http://www.w3.org/1999/xhtml')
@@ -46,7 +49,7 @@ def build():
             block('asr_sleep', {'NAME':'幺幺休息了，请说幺幺耍起唤醒我。'}),
             block('asr_id', {'ASR':'幺幺耍起','leibie':'唤醒词','huifu':'幺幺在，请说指令。','id':0})]
     for ident, phrase, code in commands:
-        init.append(block('asr_id', {'ASR':phrase, 'leibie':'唤醒词' if code==2 else '命令词',
+        init.append(block('asr_id', {'ASR':phrase, 'leibie':'唤醒词' if code in (2,0x17) else '命令词',
                                      'huifu':'', 'id':ident}))
     init += [block('asr_add_id', {'NAME':phrase,'id':ident}) for ident, phrase in audio]
     statement(setup,'DO',init)

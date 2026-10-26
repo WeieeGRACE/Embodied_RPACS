@@ -3,44 +3,44 @@
     "D:\\app\\twenblock\\asrpro\\asr_pro_sdk\\tools\\ci-tool-kit.exe",
     "ID3-editor",
     "--input-dir",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\voice\\mp3"
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\voice\\mp3"
   ],
   [
     "D:\\app\\twenblock\\asrpro\\asr_pro_sdk\\tools\\ci-tool-kit.exe",
     "merge",
     "user-file",
     "-i",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\voice\\mp3"
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\voice\\mp3"
   ],
   [
     "D:\\app\\twenblock\\asrpro\\asr_pro_sdk\\tools\\ci-tool-kit.exe",
     "merge",
     "user-file",
     "-i",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\user_code"
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\user_code"
   ],
   [
     "D:\\app\\twenblock\\asrpro\\asr_pro_sdk\\tools\\ci-tool-kit.exe",
     "merge",
     "user-file",
     "-i",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\user_file"
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\user_file"
   ],
   [
     "D:\\app\\twenblock\\asrpro\\asr_pro_sdk\\tools\\ci-tool-kit.exe",
     "merge",
     "asr-file",
     "-i",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\asr"
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\asr"
   ],
   [
     "D:\\app\\twenblock\\asrpro\\asr_pro_sdk\\tools\\ci-tool-kit.exe",
     "merge",
     "nn-file",
     "-i",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\dnn",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\dnn",
     "-a",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\asr"
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\asr"
   ],
   [
     "D:\\app\\twenblock\\asrpro\\asr_pro_sdk\\tools\\ci-tool-kit.exe",
@@ -60,17 +60,17 @@
     "--firmware-version",
     "2.0.0",
     "--user-code",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\user_code\\user_code.bin",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\user_code\\user_code.bin",
     "--asr-file",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\asr\\asr.bin",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\asr\\asr.bin",
     "--nn-file",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\dnn\\dnn.bin",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\dnn\\dnn.bin",
     "--voice-file",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\voice\\voice.bin",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\voice\\voice.bin",
     "--user-file",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\user_file\\user_file.bin",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\user_file\\user_file.bin",
     "--boot-file",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\data\\boot.bin",
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\data\\boot.bin",
     "--rom-size",
     "0x200000",
     "--nvdata-size",
@@ -78,6 +78,6 @@
     "--chip-name",
     "CI130*",
     "--output-path",
-    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_short_20261023\\packed"
+    "D:\\Gowin\\Project\\Contest\\Embodied_RPACS\\Embodied_RPACS\\Embodied_RPACS\\asrpro\\records\\build\\firmware_obstacle_20261025\\packed"
   ]
 ]

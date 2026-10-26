@@ -4,7 +4,7 @@ import json, os, re, shutil, sys, zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 INSTALL=Path(os.environ.get('TIANWEN_HOME','D:/app/twenblock'))
-WORK=ROOT/'records/build/firmware_short_20261023'
+WORK=ROOT/'records/build/firmware_obstacle_20261025'
 WORK.mkdir(parents=True,exist_ok=True)
 sdk=WORK/'asr_pro_sdk'
 if not sdk.exists():
@@ -19,6 +19,8 @@ s=config.read_text(encoding='utf-8')
 s,n=re.subn(r'(#define\s+USE_AEC_MODULE\s+)0\b',r'\g<1>1',s)
 assert n==1 or re.search(r'#define\s+USE_AEC_MODULE\s+1',s)
 config.write_text(s,encoding='utf-8')
+from patch_sdk import patch_sdk
+patch_sdk(sdk)
 shutil.copyfile(ROOT/'records/generated.cpp',WORK/'asr.cpp')
 shutil.copyfile(ROOT/'records/generated.cpp',WORK/'_asr.cpp')
 if '--code-only' in sys.argv:
@@ -46,7 +48,7 @@ for name in ['dnn']:
 shutil.copyfile(INSTALL/'asrpro/data/boot.bin',resource/'data/boot.bin')
 # Tianwen normally resets empty replies after download. Reproduce that step
 # when recovering its download manually; the server's "无" placeholder is voiced.
-empty_reply=list((resource/'voice/mp3').glob('[[]23]*'))
+empty_reply=list((resource/'voice/mp3').glob('[[]25]*'))
 assert len(empty_reply)==1
 shutil.copyfile(INSTALL/'asrpro/demo_audio/空回复.mp3',empty_reply[0])
 (WORK/'user_code').mkdir(exist_ok=True)

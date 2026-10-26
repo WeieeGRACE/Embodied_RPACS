@@ -43,9 +43,12 @@ module robot_system_top #(
  else if(pressed[0] && group_id==0 && !page)reset_count<=32;
  else if(reset_count!=0)reset_count<=reset_count-1'b1;
  wire rst_n=por_n && reset_count==0;
+ wire avoid_mode,auto_run,waiting,show_avoid,show_root,sensor_refresh,sensor_monitor,sensor_fault;
+ wire [4:0] route_state;
+ wire [2:0] post_turn,sample_mask,tof_seen,tof_valid,reused;wire [47:0] distances;
  wire voice_enable,voice_candidate,menu_valid,gear_commit,menu_stop;
  wire [7:0] menu_command;wire [1:0] gear,gear_candidate,gear_value;
- system_menu menu(.clk(clk_50m),.rst_n(rst_n),.pressed(pressed),.gear(gear),
+ system_menu menu(.clk(clk_50m),.rst_n(rst_n),.pressed(pressed),.gear(gear),.show_avoid(show_avoid),.show_root(show_root),.avoid_mode(avoid_mode),
  .group_id(group_id),.item(item),.page(page),.voice_enable(voice_enable),
  .voice_candidate(voice_candidate),.gear_candidate(gear_candidate),
  .command_valid(menu_valid),.command(menu_command),.gear_commit(gear_commit),
@@ -64,6 +67,9 @@ module robot_system_top #(
  .clk_50m(clk_50m),.reset_n(rst_n),.stop_gate(!reset_n),.stop_request(menu_stop),
  .uart_rx(asr_rx),.voice_enable(voice_enable),.menu_valid(menu_valid),.menu_command(menu_command),
  .gear_commit(gear_commit),.gear_value(gear_value),
+ .distances(distances),.tof_seen(tof_seen),.tof_valid(tof_valid),.post_turn(post_turn),.sample_mask(sample_mask),
+ .sensor_fault(sensor_fault),.sensor_refresh(sensor_refresh),.sensor_monitor(sensor_monitor),
+ .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.show_avoid(show_avoid),.show_root(show_root),.route_state(route_state),
  .encoder_a_l(encoder_a_l),.encoder_b_l(encoder_b_l),.encoder_a_r(encoder_a_r),.encoder_b_r(encoder_b_r),
  .imu_spi_miso(imu_spi_miso),.imu_int1(imu_int1),.imu_int2(imu_int2),.imu_gnd_reserved(imu_gnd_reserved),
  .imu_spi_sck(imu_spi_sck),.imu_spi_mosi(imu_spi_mosi),.imu_cs_n(imu_cs_n),
@@ -78,17 +84,16 @@ module robot_system_top #(
  system_event_logger #(.CLK_HZ(CLK_HZ),.BAUD(UART_BAUD),.WATCHDOG_PRESENT(0)) logger(
  .clk(clk_50m),.rst_n(rst_n),.imu_started(imu_ready),.imu_failed(led_fault),
  .imu_error(imu_error),.errors(event_errors),.tx(uart_tx));
- wire [2:0] tof_seen,tof_valid;wire [47:0] distances;
  wire [23:0] tof_errors;wire [11:0] tof_statuses;
- tof_three #(.CLK_HZ(CLK_HZ),.I2C_HZ(TOF_I2C_HZ),.RESET_CYCLES(TOF_RESET_CYCLES),
+ obstacle_sensors #(.CLK_HZ(CLK_HZ),.I2C_HZ(TOF_I2C_HZ),.RESET_CYCLES(TOF_RESET_CYCLES),
  .BOOT_CYCLES(TOF_BOOT_CYCLES),.POLL_CYCLES(TOF_POLL_CYCLES),.MAX_POLLS(TOF_MAX_POLLS),
- .TIMEOUT_CYCLES(TOF_TIMEOUT_CYCLES),.ROUND_CYCLES(TOF_ROUND_CYCLES)) sensors(
- .clk(clk_50m),.rst_n(rst_n),.gpio1({tof_right_gpio1,tof_left_gpio1,tof_front_gpio1}),
+ .TIMEOUT_CYCLES(TOF_TIMEOUT_CYCLES)) sensors(
+ .clk(clk_50m),.rst_n(rst_n),.refresh(sensor_refresh),.monitor_enable(sensor_monitor),.front_near_mm(16'd85),
+ .gpio1({tof_right_gpio1,tof_left_gpio1,tof_front_gpio1}),
  .scl({tof_right_scl,tof_left_scl,tof_front_scl}),.sda({tof_right_sda,tof_left_sda,tof_front_sda}),
  .xshut_n({tof_right_xshut_n,tof_left_xshut_n,tof_front_xshut_n}),
- .gpio_sync(),.seen(tof_seen),.valid(tof_valid),.distances(distances),
- .ambients(),.signals(),.errors(tof_errors),.models(),.revisions(),.pre_periods(),.final_periods(),
- .statuses(tof_statuses),.sequences(),.event_valid(),.event_channel(),.diagnostics(),.read_masks(),.raw_results());
+ .seen(tof_seen),.valid(tof_valid),.distances(distances),.post_turn(post_turn),.event_mask(sample_mask),
+ .errors(tof_errors),.statuses(tof_statuses),.reused(reused),.fault(sensor_fault),.ages(),.raw_distances(),.comm_ages(),.confirm_ages(),.pending(),.raw_event_mask(),.fault_bits());
  wire [671:0] tof_text,text;
  reg [671:0] tof_snapshot;
  always @(posedge clk_50m or negedge rst_n)
@@ -96,6 +101,7 @@ module robot_system_top #(
  tof_page tof_display(.seen(tof_seen),.valid(tof_valid),.distances(distances),
  .errors(tof_errors),.statuses(tof_statuses),.text(tof_text));
  system_pages pages(.clk(clk_50m),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page),
+ .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.route_state(route_state),.distances(distances),.tof_valid(tof_valid),
  .voice_enable(voice_enable),.voice_candidate(voice_candidate),.gear(gear),.gear_candidate(gear_candidate),
  .ready(led_ready),.busy(led_run),.fault(led_fault),.imu_ready(imu_ready),.calibrating(calibrating),.attitude_valid(attitude_valid),
  .status(status),.imu_error(imu_error),.sensor_error(sensor_error),.motion_fault(motion_fault),.command(command),.response(response),

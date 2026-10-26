@@ -63,6 +63,27 @@ int main(){
   reset_rx();const uint8_t states2[]={0,1,2,3,0,0x10,0x11};
   for(unsigned i=0;i<1000;++i)frame(3,states2[i%7],i+1);
   CHECK(yy_used==0);CHECK(Serial1.tx.empty());
+  // New vocabulary uses the real generated callbacks, not a second mapping.
+  reset_rx();Serial1.tx.clear();snid=24;ASR_CODE();
+  CHECK(Serial1.tx==std::vector<uint8_t>({0xAA,0x55,1,0x16,0x17,0x0D}));
+  CHECK(yy_audio_queue->items.empty());frame(2,0);CHECK(yy_audio_queue->items.empty());
+  frame(4,42);CHECK(yy_active_cookie!=0);yy_audio_poll();CHECK(spoken.back()==9300);
+  Serial1.tx.clear();host_done(host_cookie,0);yy_rx_poll();
+  CHECK(Serial1.tx==std::vector<uint8_t>({0xAA,0x55,5,42,47,0x0D}));
+  CHECK(yy_active_cookie==0);host_done(host_cookie,0);yy_rx_poll();CHECK(Serial1.tx.size()==6);
+  for(int reason:{-99,-1,1,2,3,4}){reset_rx();frame(4,43);yy_audio_poll();Serial1.tx.clear();host_done(host_cookie,reason);yy_rx_poll();CHECK(Serial1.tx.empty());}
+  reset_rx();frame(4,44);yy_audio_poll();uint32_t old_cookie=host_cookie;
+  yy_send_command(2);Serial1.tx.clear();host_done(old_cookie,0);yy_rx_poll();CHECK(Serial1.tx.empty());
+  reset_rx();frame(4,45);yy_audio_poll();old_cookie=host_cookie;
+  frame(4,46);yy_audio_poll();Serial1.tx.clear();host_done(old_cookie,0);yy_rx_poll();CHECK(Serial1.tx.empty());
+  host_done(host_cookie,0);yy_rx_poll();CHECK(Serial1.tx[3]==46);
+  reset_rx();frame(4,47);yy_audio_poll();host_time+=10001;Serial1.tx.clear();host_done(host_cookie,0);yy_rx_poll();CHECK(Serial1.tx.empty());
+  reset_rx();frame(6,1);CHECK(yy_avoid);CHECK(wake_ms==8589934);
+  frame(7,1);frame(7,1);frame(7,2);CHECK(yy_audio_queue->items.size()==3);
+  yy_audio_poll();yy_audio_poll();yy_audio_poll();CHECK(spoken==std::vector<uint16_t>({9301,9301,9302}));
+  frame(3,0x20);frame(3,0x21);frame(3,0x22);frame(3,0x23);CHECK(yy_audio_queue->items.empty());
+  frame(7,3);yy_audio_poll();CHECK(spoken.back()==9303);CHECK(!yy_avoid);
+  reset_rx();Serial1.tx.clear();snid=25;ASR_CODE();CHECK(Serial1.tx[3]==0x17);CHECK(yy_audio_queue->items.empty());
   fail_allocate=true;yy_init();Serial1.tx.clear();snid=2;ASR_CODE();CHECK(Serial1.tx.size()==6);
   yy_audio_poll();CHECK(!yy_audio_queue);
   std::cout<<"PASS "<<checks<<" checks: generated command callbacks, framing, statuses, dedup, timeout, wrap, resync, urgent audio, bounded queues, allocation failure\n";

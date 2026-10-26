@@ -1,6 +1,6 @@
 D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp: In function 'void hardware_init()':
-D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp:216:15: warning: invalid conversion from 'void (*)()' to 'TaskFunction_t' {aka 'void (*)(void*)'} [-fpermissive]
-  216 |   xTaskCreate(yaoyao_uart_rx,"yaoyao_uart_rx",512,NULL,5,NULL);
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp:230:15: warning: invalid conversion from 'void (*)()' to 'TaskFunction_t' {aka 'void (*)(void*)'} [-fpermissive]
+  230 |   xTaskCreate(yaoyao_uart_rx,"yaoyao_uart_rx",512,NULL,5,NULL);
       |               ^~~~~~~~~~~~~~
       |               |
       |               void (*)()
@@ -10,8 +10,8 @@ In file included from D:/app/twenblock/asrpro/asr_pro_sdk/projects/offline_asr_s
 D:/app/twenblock/asrpro/asr_pro_sdk/components/freertos/include/task.h:325:41: note:   initializing argument 1 of 'BaseType_t xTaskCreate(TaskFunction_t, const char*, uint16_t, void*, UBaseType_t, TaskControlBlock_t**)'
   325 |  BaseType_t xTaskCreate( TaskFunction_t pxTaskCode,
       |                          ~~~~~~~~~~~~~~~^~~~~~~~~~
-D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp:217:15: warning: invalid conversion from 'void (*)()' to 'TaskFunction_t' {aka 'void (*)(void*)'} [-fpermissive]
-  217 |   xTaskCreate(yaoyao_audio,"yaoyao_audio",512,NULL,4,NULL);
+D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\asrpro\records\generated.cpp:231:15: warning: invalid conversion from 'void (*)()' to 'TaskFunction_t' {aka 'void (*)(void*)'} [-fpermissive]
+  231 |   xTaskCreate(yaoyao_audio,"yaoyao_audio",512,NULL,4,NULL);
       |               ^~~~~~~~~~~~
       |               |
       |               void (*)()

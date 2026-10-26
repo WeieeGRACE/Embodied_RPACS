@@ -1,0 +1,40 @@
+{
+  "generationStartedAt": 1792940878368,
+  "modelActive": false,
+  "events": [
+    {
+      "kind": "error_occurred",
+      "text": "下载失败：HTTPSConnectionPool(host='www.haohaodada.com', port=443): Max retries exceeded with url: /uploadfile/voiceAI/1192217/twen-asr/twen-asr.zip (Caused by ProxyError('Unable to connect to proxy', FileNotFoundError(2, 'No such file or directory')))",
+      "time": 1792940910325
+    }
+  ],
+  "logs": [
+    {
+      "kind": "showToast",
+      "text": "登录成功",
+      "time": 1792940849786
+    },
+    {
+      "kind": "showToast",
+      "text": "后台正在生成模型中，请稍后重试！",
+      "time": 1792940878368
+    },
+    {
+      "kind": "showToast",
+      "text": "后台正在生成模型中，请稍后重试！",
+      "time": 1792940879975
+    },
+    {
+      "kind": "showToast",
+      "text": "模型合成成功！",
+      "time": 1792940883143
+    },
+    {
+      "kind": "showToast",
+      "text": "TTS合成成功！",
+      "time": 1792940895083
+    }
+  ],
+  "build": [],
+  "dialog": "x);\n}\nstatic bool yy_queue_audio(uint16_t id,bool urgent,uint32_t cookie=0){\n if(!yy_audio_queue)return false;\n if(urgent){++yy_epoch;xQueueReset(yy_audio_queue);}\n YaoyaoAudio item={id,(uint8_t)urgent,yy_epoch,cookie};\n if(xQueueSend(yy_audio_queue,&item,0)==pdTRUE)return true;\n 串口配置\n端口号\n未连接\n波特率\n1200\n2400\n4800\n9600\n19200\n38400\n57600\n115200\n230400\n460800\n921600\n打开串口\n数据位\n5\n6\n7\n8\n停止位\n1\n1.5\n2\n校验\n无\n奇\n偶\nDTR\nRTS\n 接收区\n数据\n波形\nHEX\n时间戳\n显示发送的数据\n清空\n 发送区\n单条\n多条\n发送\n清除\nHEX\n换行\n定时发送\nms\n未选择\n打开\n文件\n未连接\nRX 0\nTX 0\n添加扩展"
+}

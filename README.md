@@ -1,112 +1,65 @@
-# Embodied_RPACS main FPGA project
+# Embodied_RPACS 主工程
 
-Target: ACG525 / GW5A-LV25UG324C2/I1, 50 MHz. Tools: Gowin 1.9.12 and ModelSim.
+ACG525 / GW5A-LV25UG324C2/I1，50 MHz，Gowin 1.9.12。主工程、构建与仿真不依赖 `tests/`。
 
-This is a self-contained robot project. `Embodied_RPACS.gprj`, `src/`, the two
-saved option files in `impl/`, root Tcl scripts, and the main `sim/`/`tools/`
-files contain everything required to build and simulate it. No main source,
-project manifest, build script or main simulation depends on `tests/`.
-The repository also retains historical independent test projects; those are
-optional regression inputs and are not included in the standalone export.
+## 本次交付
 
-## Build and verify
+2026-10-26 完成持续避障模式、语音接管、播报完成后启动、实时三档调速及姿态显示时序优化。
+主工程位流：`impl/pnr/Embodied_RPACS.fs`。
+配套语音固件：`asrpro/release/yaoyao_asrpro_2m_20261025_obstacle/fw.bin`。
+必须配套更新 FPGA 和 ASRPRO。上板步骤见 `OBSTACLE_BOARD_TEST.md`，数字验证记录见 `records/obstacle_20261025/VALIDATION.md`。
 
-Run from this project directory:
+## 菜单与按键
+
+K1下一项，K2选择。主菜单保留 DISPLAY、MANUAL、MOTOR TEST、SETTINGS，并新增 OBSTACLE AVOID。
+手动页仍执行前后20cm、左右90°；电机测试仍为原有固定轮速8秒动作。
+
+语音默认关闭；到 SETTINGS → VOICE ENABLE，用K1选择ON、K2确认。
+进入避障面板不运动；K2先播报“开启避障模式”，正常播完才前进。运行中K2暂停，暂停后K2恢复。
+语音关闭时显示 ENABLE VOICE FIRST 并禁止避障启动。
+面板显示状态、档位、三路距离。面板距离为四位十六进制mm（07D0=2000mm），不可用显示----。
+
+K0始终立即关断驱动。避障期间K0退出模式并返回主菜单，松开不恢复。
+其他页面K0沿用返回/停车；主菜单K0复位、清故障并重新校准IMU。
+
+## 避障与语音
+
+唤醒词“幺幺耍起”保持不变；“避障模式”成功后OLED自动跳转面板。
+自主绕行完成后继续巡航，可处理后续障碍。无路可绕时暂停等待重新启动。
+“停车/停止/停止任务”暂停并保留模式；“前进”在此模式内始终表示恢复持续避障。
+“左转/右转/后退”取消旧路线，停稳后执行90°/20cm动作，完成后原地等待。
+语音定量动作执行期间拒绝其他运动口令，不排队；停止与退出仍然有效。
+“退出避障模式”停车、退出并回到主菜单；故障清除前禁止启动。
+
+自主前方障碍触发一次“遇到障碍开始绕障”；完整回线、恢复航向和最终测距检查通过后触发一次“已绕过障碍物”。
+取消或失败不报完成。模式存续期间每秒续期ASRPRO唤醒窗口。
+
+自主避障继承独立09版：600mm减速、130mm准备绕行、三路非20距离≤85mm保护、转向侧>300mm、两次额外300mm及按实际横移里程返回。
+保留正常通信持续20时复用旧距离的策略；20不能建立首次正常值或转向后新鲜样本。
+
+按用户确认，语音接管动作不受ToF近距和转向侧距离限制；IMU、编码器、动作/停车超时和已锁存故障保护保留。
+自主运行期间ToF故障会锁存；暂停或语音接管时不新增ToF锁存，已经锁存的故障仍须复位。
+
+## 实时加减速
+
+“加速/快一点”“减速/慢一点”切换0.05、0.10、0.15m/s，默认中档，上下端饱和。
+自主巡航与语音前后直行动作实时沿斜坡调速；不会重置目标距离、累计里程或当前动作。
+近障及绕障阶段优先保持0.05m/s；原地旋转固定0.05m/s，档位供后续动作使用。
+前距≥650mm连续三个正常新样本后解除近障限速，恢复最新档位。
+暂停时调速不启动，电机测试保持固定速度。
+
+## 接口与构建
+
+ASRPRO D17/RX、D18/TX，115200/8N1；USB U8/RX、V8/TX。管脚保持既有接线，见 PIN_ASSIGNMENT.md。
+协议与ASRPRO资源生成说明见 `asrpro/README.md`。USB仅输出事件诊断，不需要控制心跳。
 
 ```powershell
 & 'D:/Gowin/Gowin_V1.9.12_x64/IDE/bin/gw_sh.exe' build.tcl
 & 'D:/Gowin/Gowin_V1.9.12_x64/IDE/bin/gw_sh.exe' verify_project.tcl
 ./tools/check_system_reports.ps1
 ./tools/run_system_sim.ps1
+./tools/export_main.ps1
 ```
 
-`verify_project.tcl` opens the saved `.gprj` and builds without overriding its
-settings. CPU and SSPI must remain regular GPIO, with a 50 MHz clock. Keep
-`src/imu/imu660ra_config.hex` and both `impl/*process_config.json` files.
-The Tcl scripts locate their own project directory. When using the IDE, launch
-it from this directory so the IMU ROM data resolves relative to the project.
-
-Download artifact: **`impl/pnr/Embodied_RPACS.fs`**. Download is left to the user.
-Close and reopen an already cached IDE project after updating the file list.
-
-## Controls
-
-The OLED starts at an English root menu. K1 advances and wraps, K2 selects.
-
-| Group | Functions |
-| --- | --- |
-| DISPLAY | System, IMU attitude, three ToF distances, encoder/speed, voice/motion |
-| MANUAL | Forward/backward 20 cm, left/right rotation 90 degrees, stop |
-| MOTOR TEST | Each wheel forward/reverse, both forward/reverse, left/right arc |
-| SETTINGS | Voice enable and LOW/MID/HIGH speed |
-
-K2 first opens an action page. A second press runs one action; it never repeats
-while held. Motor tests run for 8 seconds, followed by deceleration/stillness
-confirmation. Their fixed legacy targets are 10 counts/10 ms per driven wheel;
-arcs use 5/10 or 10/5. Manual translations use 0.05/0.10/0.15 m/s nominal gears;
-rotations stay at the validated 0.05 m/s limit. Default gear is MID.
-
-K0 immediately inhibits motor outputs. On a content page it returns to that
-page's group; in a group directory it returns to root. At root it performs a
-full reset, clears faults and restarts IMU calibration. A held press produces
-only one navigation/reset event. K0 release never resumes a stopped action.
-K1 changes setting candidates and K2 commits. Leaving a setting discards an
-uncommitted edit. Voice defaults OFF and stays enabled across page changes
-until explicitly disabled or reset. Disabling voice stops the active action.
-The former KEY2 emergency-stop binding is replaced by K0 stop/back/reset.
-
-## Motion, voice and measurement
-
-ASRPRO is 115200/8N1 on **D17 RX / D18 TX**, separate from USB serial U8/V8.
-Protocol remains `AA 55 01 CODE CHECK 0D`, `CHECK=(1+CODE)&255`.
-Codes: STOP=02, QUERY=03, FORWARD=10, BACKWARD=11, LEFT=12, RIGHT=13,
-FASTER=14, SLOWER=15; SEARCH=01 is unavailable. Replies use TYPE=02
-(00 accepted, 01 busy, 02 unavailable) and TYPE=03 state (00 idle, 04 stopped,
-06 fault, 10 moving, 11 done), with the same six-byte framing/checksum.
-Disabled voice rejects movement and gear commands; STOP and QUERY still work.
-
-Menu and voice share one feedback/PI/PWM chain. Busy actions cannot be replaced
-or queued. STOP wins conflicts; menu movement wins simultaneous voice movement.
-Menu actions also publish motion state on ASRPRO TX. Three consecutive zero-count
-10 ms windows are required before completion/restart. No USB heartbeat is needed.
-IMU/encoder faults, stale feedback, 10-second action timeout, one-second failure
-to stop, and ASR feedback FIFO overflow latch a fault until root reset.
-
-Three ToF buses run continuously regardless of the displayed page. They only
-supply distance/error display, never obstacle avoidance or motion interlocks.
-Their example-derived driver reports communication/readiness validity, not
-verified optical accuracy. A failed channel hides its old distance and retries
-through XSHUT without blocking the other channels. See `PIN_ASSIGNMENT.md`.
-
-LED D14=ready, C14=motion/settling, B9=latched fault, A9=voice enabled.
-Encoder display uses signed 32-bit hexadecimal counts and signed decimal
-counts/10 ms. Yaw is left-positive, matching the tested `YAW_SIGN=-1` motion
-feedback; roll and pitch retain their sensor convention.
-USB TX V8 carries event-only diagnostics: startup `S M 00`, `S N 00`, IMU start
-or failure `S I xx`; IMU errors `E I xx`, encoder faults `E L 01`/`E R 01`,
-and aggregate main fault `E X 01`. No heartbeat watchdog/startup event is emitted.
-USB RX U8 is reserved and has no motion-control function.
-
-## Board acceptance
-
-1. Load the main `.fs`, keep the robot still through 200 IMU samples, and check
-   the root menu, ready LED, voice OFF and stationary motors.
-2. Check K1 wrap, K2 selection, content/group K0 return and root K0 calibration.
-3. Check three ToF readings and move targets independently. Missing/failed
-   sensors must show errors with hidden old distances; movement has no ToF guard.
-4. First lift the wheels: enter each motor-test page, confirm no movement on
-   entry, press K2 again, check direction, K0 immediate stop and no auto-resume.
-5. On clear ground, check all four quantitative actions and record actual
-   distance/angle. Wheel circumference/counts remain nominal and need calibration.
-6. Enable voice in SETTINGS, return to other pages, test all commands, busy
-   refusal, STOP and speed changes. Disable voice and verify movement is rejected.
-7. Check root reset restores MID/voice OFF and requires calibration again.
-
-Simulation/build evidence and limitations are in `records/main_20261023/VALIDATION.md`.
-Simulation is not a measurement of physical distance, angle, braking or ToF accuracy.
-
-## Standalone export
-
-`./tools/export_main.ps1` creates `release/Embodied_RPACS_main_20261023/` with
-only the main project, its own sensor model, scripts, docs and saved IDE options.
-Build and simulate that directory directly; it has no `tests/` directory.
+导出目录默认 `release/Embodied_RPACS_main_20261026/`，不含历史独立测试目录。
+数字仿真验证控制逻辑；实际转角、距离、制动余量、光学可靠性和语音识别效果由上板测试确认。本次不执行下载烧录。

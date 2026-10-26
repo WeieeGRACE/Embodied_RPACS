@@ -3,7 +3,7 @@ from pathlib import Path
 import os, subprocess, sys
 ROOT=Path(__file__).resolve().parents[1]
 INSTALL=Path(os.environ.get('TIANWEN_HOME','D:/app/twenblock'))
-WORK=ROOT/'records/build/firmware_short_20261023'
+WORK=ROOT/'records/build/firmware_obstacle_20261025'
 project=WORK/'asr_pro_sdk/projects/offline_asr_sample/project_file'
 env=os.environ.copy()
 env['PATH']=os.pathsep.join([str(INSTALL/'asrpro/gcc/bin'),str(INSTALL/'toolchains/build-tools/bin'),str(INSTALL/'asrpro/asr_pro_sdk/tools/build-tools/bin'),str(Path(os.environ.get('SystemRoot','C:/Windows'))/'System32'),env.get('PATH','')])

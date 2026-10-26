@@ -34,4 +34,8 @@ add_file src/robot_system_top.cst
 add_file src/robot_system_top.sdc
 set_option -top_module robot_system_top
 set_option -output_base_name Embodied_RPACS
+add_file src/obstacle/obstacle_route.v
+add_file src/obstacle/obstacle_sensors.v
+add_file src/obstacle/obstacle_command.v
+add_file src/obstacle/system_dispatch.v
 run all

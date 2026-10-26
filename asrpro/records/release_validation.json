@@ -1,10 +1,10 @@
 {
-  "date": "2026-10-23",
+  "date": "2026-10-25",
   "software": "Tianwen Block AI 2026 autumn 0.2.8",
   "romBytes": 2097152,
   "nvOffset": 2031616,
-  "firmwareBytes": 1604581,
-  "firmwareSHA256": "6fd0596f97c0a332133b5e19b8b8b45f7351686d043d0e304f7b41cdc90cab25",
+  "firmwareBytes": 1622062,
+  "firmwareSHA256": "a612e72d21f58c14246ed8f74669d38066447993427a492f98a9ecdcc1546380",
   "aecEnabled": true,
   "wakeTimeoutMs": 8589934,
   "receiptAfterTransmit": true,
@@ -134,6 +134,18 @@
       "type": "命令词",
       "id": "23",
       "reply": ""
+    },
+    {
+      "phrase": "避障模式",
+      "type": "命令词",
+      "id": "24",
+      "reply": ""
+    },
+    {
+      "phrase": "退出避障模式",
+      "type": "唤醒词",
+      "id": "25",
+      "reply": ""
     }
   ],
   "audio": [
@@ -180,13 +192,29 @@
     {
       "id": "9201",
       "text": "收到"
+    },
+    {
+      "id": "9300",
+      "text": "开启避障模式"
+    },
+    {
+      "id": "9301",
+      "text": "遇到障碍开始绕障"
+    },
+    {
+      "id": "9302",
+      "text": "已绕过障碍物"
+    },
+    {
+      "id": "9303",
+      "text": "已退出避障模式"
     }
   ],
   "originalWelcomeWakeSleepPreserved": true,
   "executionStatusSpeechDeduplicated": true,
   "packagedVoiceIDs": [
     0,
-    23,
+    25,
     9000,
     9001,
     9002,
@@ -198,21 +226,25 @@
     9106,
     9108,
     9201,
+    9300,
+    9301,
+    9302,
+    9303,
     10001,
     10002
   ],
   "partitions": {
     "code": {
       "offset": 16384,
-      "size": 145992,
-      "crc16": 4038,
-      "sha256": "22a09efda6dacce2873b2a257c7525bce9b2a5d7e541f347fd886c19e4ea9f79"
+      "size": 146840,
+      "crc16": 53474,
+      "sha256": "ad535e6f8e1a4faf055b856310fec009eea4a40afef7033ec71bdf15114c7b49"
     },
     "asr": {
       "offset": 163840,
-      "size": 30361,
-      "crc16": 59683,
-      "sha256": "deabf3ee33c1c0910ed50618b02bae1e72d5f555ef8cc6d1e0de12cd6e395ef2"
+      "size": 32696,
+      "crc16": 59178,
+      "sha256": "81ac7de776096014a69a9a5718b10d7dfa564d00eb1395b6aa4de70008d3f4f7"
     },
     "dnn": {
       "offset": 196608,
@@ -222,15 +254,15 @@
     },
     "voice": {
       "offset": 1564672,
-      "size": 36830,
-      "crc16": 47080,
-      "sha256": "4621c5d964e1359a933b483496febfc44d9a5791887c11d9ecce204c438e7136"
+      "size": 49742,
+      "crc16": 7594,
+      "sha256": "67b1b79833d7549694d8a141170e75852058b91ae32e66532220d4325e311be4"
     },
     "user_file": {
-      "offset": 1601536,
-      "size": 3045,
-      "crc16": 2478,
-      "sha256": "c0cc73c37c6089f426e6d4bfd4de80b3754c1598dc1e481f57fc1081f93eac4c"
+      "offset": 1617920,
+      "size": 4142,
+      "crc16": 17176,
+      "sha256": "79981dc07f4b3f14c0698bc4c7293d90a2d8747bddbe6b6a48dab5dba7b230fb"
     }
   },
   "checks": [
@@ -244,8 +276,8 @@
     "current code file exact bytes",
     "two current model payloads exact bytes plus SDK DNN pruning metadata",
     "command info exact bytes",
-    "21 word/ID/wake-class matches",
-    "11 feedback audio IDs and silence/wake audio references",
+    "23 word/ID/wake-class matches",
+    "15 feedback audio IDs and silence/wake audio references",
     "all packaged MP3 frames match current generated resources"
   ],
   "hardwareTested": false,

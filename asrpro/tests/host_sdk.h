@@ -49,3 +49,15 @@ struct HostSerial {
   int read(){if(rx.empty())return -1;int b=rx.front();rx.pop_front();return b;}
 };
 static HostSerial Serial1;
+
+using SemaphoreHandle_t=int*;
+#define portMAX_DELAY 0xFFFFFFFFu
+static int host_mutex=0;
+static SemaphoreHandle_t xSemaphoreCreateMutex(){return &host_mutex;}
+static int xSemaphoreTake(SemaphoreHandle_t,unsigned){return pdTRUE;}
+static void xSemaphoreGive(SemaphoreHandle_t){}
+static void (*host_done)(uint32_t,int32_t)=nullptr;
+static uint32_t host_cookie=0;
+extern "C" uint32_t yy_prompt_play(uint16_t id,void (*cb)(uint32_t,int32_t),uint32_t cookie){
+ spoken.push_back(id);host_done=cb;host_cookie=cookie;return 0;
+}

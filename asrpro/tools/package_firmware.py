@@ -3,7 +3,7 @@ from pathlib import Path
 import binascii, json, os, shutil, struct, subprocess, sys
 ROOT=Path(__file__).resolve().parents[1]
 INSTALL=Path(os.environ.get('TIANWEN_HOME','D:/app/twenblock'))
-WORK=ROOT/'records/build/firmware_short_20261023'
+WORK=ROOT/'records/build/firmware_obstacle_20261025'
 TOOL=INSTALL/'asrpro/asr_pro_sdk/tools/ci-tool-kit.exe'
 commands=[]
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
@@ -20,7 +20,7 @@ for name in ['asr','voice','user_file','dnn','data']:
     if not (WORK/name).exists():shutil.copytree(WORK/'resources'/name,WORK/name)
 shutil.copyfile(INSTALL/'asrpro/asr_pro_sdk/libs/libfbin.a',WORK/'user_code/[1]code.bin')
 for parent in [WORK/'resources/voice/mp3',WORK/'voice/mp3']:
-    empty_reply=list(parent.glob('[[]23]*'))
+    empty_reply=list(parent.glob('[[]25]*'))
     assert len(empty_reply)==1
     shutil.copyfile(INSTALL/'asrpro/demo_audio/空回复.mp3',empty_reply[0])
 run('ID3-editor','--input-dir',WORK/'voice/mp3')

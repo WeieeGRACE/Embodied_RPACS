@@ -2,6 +2,7 @@
 module system_pages(
  input wire clk,rst_n,
  input wire [2:0] group_id,input wire [3:0] item,input wire page,
+ input wire avoid_mode,auto_run,waiting,input wire [4:0] route_state,input wire [47:0] distances,input wire [2:0] tof_valid,
  input wire voice_enable,voice_candidate,input wire [1:0] gear,gear_candidate,
  input wire ready,busy,fault,imu_ready,calibrating,attitude_valid,
  input wire [7:0] status,imu_error,sensor_error,motion_fault,command,response,
@@ -18,6 +19,7 @@ module system_pages(
  0:label="DISPLAY              ";
  1:label="MANUAL               ";
  2:label="MOTOR TEST           ";
+ 4:label="OBSTACLE AVOID       ";
  3:label="SETTINGS             ";
  default:label="                     ";endcase
  1:case(index)
@@ -48,6 +50,7 @@ module system_pages(
  0:label="VOICE ENABLE         ";
  1:label="SPEED GEAR           ";
  default:label="                     ";endcase
+ 5:label="OBSTACLE AVOID       ";
  default:label="                     ";endcase end
  endfunction
  function [7:0] hexchar;
@@ -67,11 +70,17 @@ module system_pages(
  signed_speed[47:40]=value<0 ? "-":"+";
  for(k=0;k<5;k=k+1)signed_speed[(4-k)*8+:8]=8'd48+bcd[(4-k)*4+:4];
  end endfunction
+ // Sample attitude once before the decimal formatter. The formatter contains
+ // a small binary-to-BCD network and must not sit on the sensor-to-OLED path.
+ reg signed [31:0] roll_q,pitch_q,yaw_q;
+ always @(posedge clk or negedge rst_n)
+ if(!rst_n)begin roll_q<=0;pitch_q<=0;yaw_q<=0;end
+ else begin roll_q<=roll_mdeg;pitch_q<=pitch_mdeg;yaw_q<=yaw_mdeg;end
  wire [3:0] rh,rt,ro,rf,ph,pt,po,pf,yh,yt,yo,yf;
  wire rn,pn,yn;
- attitude_angle_to_digits rd(roll_mdeg,rn,rh,rt,ro,rf);
- attitude_angle_to_digits pd(pitch_mdeg,pn,ph,pt,po,pf);
- attitude_angle_to_digits yd(yaw_mdeg,yn,yh,yt,yo,yf);
+ attitude_angle_to_digits_pipeline rd(clk,rst_n,roll_q,rn,rh,rt,ro,rf);
+ attitude_angle_to_digits_pipeline pd(clk,rst_n,pitch_q,pn,ph,pt,po,pf);
+ attitude_angle_to_digits_pipeline yd(clk,rst_n,yaw_q,yn,yh,yt,yo,yf);
  function [47:0] angle;
  input n;input [3:0] h,t,o,f;
  begin angle={n ? 8'h2d:8'h2b,8'd48+h,8'd48+t,8'd48+o,8'h2e,8'd48+f};end
@@ -88,7 +97,7 @@ module system_pages(
  reg [3:0] next_item,last_item;
  always @* begin
  r0="                     ";r1=r0;r2=r0;r3=r0;current_label=label(group_id,item);
- case(group_id)0:last_item=3;1:last_item=4;2:last_item=4;3:last_item=7;default:last_item=1;endcase
+ case(group_id)0:last_item=4;1:last_item=4;2:last_item=4;3:last_item=7;5:last_item=0;default:last_item=1;endcase
  next_item=item==last_item ? 0:item+4'd1;
  if(!page)begin
  r0=group_id==0 ? "RPACS MENU           ":label(3'd0,{1'b0,group_id}-4'd1);
@@ -125,6 +134,14 @@ module system_pages(
  end
  default:begin end
  endcase
+ 5:begin
+ r1=!voice_enable ? "ENABLE VOICE FIRST   ":fault ? "FAULT RESET REQUIRED ":waiting ? "SPEAKING PLEASE WAIT ":auto_run ? (route_state==1 || route_state==2 ? "CRUISE               ":"AVOIDING             "):avoid_mode ? "PAUSED               ":"READY TO START       ";
+ if(voice_enable && !fault)r1[39:0]=gear==0 ? " LOW ":gear==1 ? " MID ":" HIGH";
+ r2={"F:",(tof_valid[0] ? {hexchar(distances[15:12]),hexchar(distances[11:8]),hexchar(distances[7:4]),hexchar(distances[3:0])}:32'h2d2d2d2d),
+ " L:",(tof_valid[1] ? {hexchar(distances[31:28]),hexchar(distances[27:24]),hexchar(distances[23:20]),hexchar(distances[19:16])}:32'h2d2d2d2d),
+ " R:",(tof_valid[2] ? {hexchar(distances[47:44]),hexchar(distances[43:40]),hexchar(distances[39:36]),hexchar(distances[35:32])}:32'h2d2d2d2d)," "};
+ r3=auto_run ? "K0 EXIT K2 PAUSE     ":"K0 EXIT K2 START     ";
+ end
  2:begin r1="K2 EXECUTE ONCE      ";r2=item==4 ? "STOP ANY ACTION      ":item<2 ? "GOAL 20CM            ":"GOAL 90 DEG          ";end
  3:begin r1="K2 START 8 SECOND    ";r2="FIXED BENCH SPEED    ";end
  4:begin

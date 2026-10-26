@@ -1,114 +1,122 @@
 <xml xmlns="http://www.w3.org/1999/xhtml">
   <block type="block_with_textarea" id="yaoyao_1" x="0" y="0">
-    <field name="input">// Embedded in asrpro.hd: edit here, then run tools/build_project.py.
-// No motor control, automatic command retries, or heartbeat generation here.
+    <field name="input">// Embedded in asrpro.hd; regenerate through tools/build_project.py.
 #include "HardwareSerial.h"
 #include "queue.h"
-
-struct YaoyaoAudio { uint16_t id; uint8_t urgent; uint32_t epoch; };
-static QueueHandle_t yy_audio_queue = NULL;
-static volatile bool yy_ready = false;
-static volatile uint32_t yy_epoch = 0;
-static uint8_t yy_frame[6];
-static uint8_t yy_used = 0;
-static uint32_t yy_started = 0;
-static uint8_t yy_last_status = 0xFF;
-static uint16_t yy_last_status_audio = 0;
-static uint32_t yy_dropped_audio = 0;
-
-static bool yy_queue_audio(uint16_t id, bool urgent) {
-  if (!yy_audio_queue) return false;
-  if (urgent) { ++yy_epoch; xQueueReset(yy_audio_queue); }
-  YaoyaoAudio item = {id, (uint8_t)urgent, yy_epoch};
-  if (xQueueSend(yy_audio_queue, &amp;item, 0) == pdTRUE) return true;
-  ++yy_dropped_audio;
-  return false;
+#include "semphr.h"
+extern "C" uint32_t yy_prompt_play(uint16_t, void (*)(uint32_t,int32_t), uint32_t);
+struct YaoyaoAudio { uint16_t id; uint8_t urgent; uint32_t epoch,cookie; };
+struct YaoyaoDone { uint32_t cookie; int32_t reason; };
+static QueueHandle_t yy_audio_queue=NULL,yy_done_queue=NULL;
+static SemaphoreHandle_t yy_serial_mutex=NULL;
+static volatile bool yy_ready=false;
+static volatile uint32_t yy_epoch=0,yy_active_cookie=0;
+static uint32_t yy_cookie_counter=0,yy_active_since=0;
+static uint8_t yy_token=0;
+static bool yy_avoid=false,yy_suppress_accept=false;
+static uint8_t yy_frame[6],yy_used=0,yy_last_status=0xFF;
+static uint32_t yy_started=0,yy_dropped_audio=0;
+static uint16_t yy_last_status_audio=0;
+static void yy_cancel_start(){yy_active_cookie=0;}
+static void yy_write_frame(uint8_t type,uint8_t code){
+ if(!yy_serial_mutex || xSemaphoreTake(yy_serial_mutex,portMAX_DELAY)!=pdTRUE)return;
+ const uint8_t f[6]={0xAA,0x55,type,code,(uint8_t)(type+code),0x0D};
+ for(uint8_t i=0;i&lt;6;++i)Serial1.write(f[i]);
+ xSemaphoreGive(yy_serial_mutex);
 }
-
-static void yy_send_command(uint8_t code) {
-  if (!yy_ready) return;
-  const uint8_t frame[6] = {0xAA,0x55,0x01,code,(uint8_t)(0x01+code),0x0D};
-  for (uint8_t i=0; i&lt;6; ++i) Serial1.write(frame[i]);
-  // Receipt confirms recognition only. Always transmit before queuing speech.
-  // Stop cancels stale queued speech and preempts current playback.
-  yy_queue_audio(9201, code == 0x02);
+static bool yy_queue_audio(uint16_t id,bool urgent,uint32_t cookie=0){
+ if(!yy_audio_queue)return false;
+ if(urgent){++yy_epoch;xQueueReset(yy_audio_queue);}
+ YaoyaoAudio item={id,(uint8_t)urgent,yy_epoch,cookie};
+ if(xQueueSend(yy_audio_queue,&amp;item,0)==pdTRUE)return true;
+ ++yy_dropped_audio;return false;
 }
-
-static void yy_dispatch(uint8_t type, uint8_t code) {
-  if (type == 0x02 &amp;&amp; code &lt;= 0x02) {
-    yy_queue_audio((uint16_t)(9000+code), false);
-  } else if (type == 0x03 &amp;&amp; (code &lt;= 0x06 || code == 0x10 || code == 0x11)) {
-    if (code == yy_last_status) return;
-    const uint16_t id = (code == 1 || code == 2 || code == 0x10) ? 9101
-      : code &lt;= 6 ? (uint16_t)(9100+code) : 9108;
-    // Searching, approaching, and manual movement share one spoken status.
-    if (id == yy_last_status_audio) { yy_last_status = code; return; }
-    if (yy_queue_audio(id, code == 4 || code == 5 || code == 6)) {
-      yy_last_status = code;
-      yy_last_status_audio = id;
-    }
+static void yy_send_command(uint8_t code){
+ if(!yy_ready)return;
+ if(code==2 || code==0x17 || (code&gt;=0x11 &amp;&amp; code&lt;=0x13))yy_cancel_start();
+ yy_suppress_accept=code==0x16;
+ yy_write_frame(1,code);
+ if(code!=0x16 &amp;&amp; code!=0x17)yy_queue_audio(9201,code==2);
+}
+static void yy_dispatch(uint8_t type,uint8_t code){
+ if(type==2 &amp;&amp; code&lt;=2){
+  bool suppress=yy_suppress_accept &amp;&amp; code==0;yy_suppress_accept=false;
+  if(!suppress)yy_queue_audio(9000+code,false);
+ }else if(type==4){
+  yy_cancel_start();yy_token=code;yy_active_cookie=++yy_cookie_counter;
+  if(!yy_active_cookie)yy_active_cookie=++yy_cookie_counter;
+  yy_active_since=millis();
+  if(!yy_queue_audio(9300,true,yy_active_cookie))yy_cancel_start();
+ }else if(type==6 &amp;&amp; code&lt;=1){
+  yy_avoid=code!=0;
+  if(yy_avoid)set_state_enter_wakeup(8589934);else yy_cancel_start();
+ }else if(type==7 &amp;&amp; code&gt;=1 &amp;&amp; code&lt;=3){
+  if(code==3){yy_cancel_start();yy_avoid=false;}
+  yy_queue_audio((uint16_t)(9300+code),code==3);
+ }else if(type==3 &amp;&amp; (code&lt;=6 || code==0x10 || code==0x11 || (code&gt;=0x20 &amp;&amp; code&lt;=0x23))){
+  if(code==4 || code==5 || code==6 || code==0x10 || code==0x20)yy_cancel_start();
+  if(code==yy_last_status)return;
+  // Mode states are silent. Physical route events use TYPE07 and are never deduped.
+  if(code&gt;=0x20){yy_last_status=code;yy_last_status_audio=0;return;}
+  uint16_t id=(code==1 || code==2 || code==0x10)?9101:code&lt;=6?9100+code:9108;
+  if(id==yy_last_status_audio){yy_last_status=code;return;}
+  if(yy_queue_audio(id,code==4 || code==5 || code==6)){
+   yy_last_status=code;yy_last_status_audio=id;
   }
+ }
 }
-
-static void yy_expire(uint32_t now) {
-  if (yy_used &amp;&amp; (uint32_t)(now-yy_started) &gt;= 20) yy_used = 0;
-}
-
-static void yy_receive_byte(uint8_t byte, uint32_t now) {
-  yy_expire(now);
-  if (!yy_used) {
-    if (byte != 0xAA) return;
-    yy_started = now;
+static void yy_expire(uint32_t now){if(yy_used &amp;&amp; (uint32_t)(now-yy_started)&gt;=20)yy_used=0;}
+static void yy_receive_byte(uint8_t byte,uint32_t now){
+ yy_expire(now);
+ if(!yy_used){if(byte!=0xAA)return;yy_started=now;}
+ yy_frame[yy_used++]=byte;
+ for(;;){
+  if(yy_used&lt;2)return;
+  if(yy_frame[0]==0xAA &amp;&amp; yy_frame[1]==0x55){
+   if(yy_used&lt;6)return;
+   uint8_t t=yy_frame[2],c=yy_frame[3];
+   bool known=(t==2 &amp;&amp; c&lt;=2)||(t==4)||(t==6 &amp;&amp; c&lt;=1)||(t==7 &amp;&amp; c&gt;=1 &amp;&amp; c&lt;=3)||
+    (t==3 &amp;&amp; (c&lt;=6 || c==0x10 || c==0x11 || (c&gt;=0x20 &amp;&amp; c&lt;=0x23)));
+   if(known &amp;&amp; yy_frame[4]==(uint8_t)(t+c) &amp;&amp; yy_frame[5]==0x0D){yy_used=0;yy_dispatch(t,c);return;}
   }
-  yy_frame[yy_used++] = byte;
-  // Sliding prefix search preserves overlapping AA AA 55 and embedded headers.
-  for (;;) {
-    if (yy_used &lt; 2) return;
-    if (yy_frame[0] == 0xAA &amp;&amp; yy_frame[1] == 0x55) {
-      if (yy_used &lt; 6) return;
-      const uint8_t type = yy_frame[2], code = yy_frame[3];
-      const bool known = (type == 2 &amp;&amp; code &lt;= 2) ||
-        (type == 3 &amp;&amp; (code &lt;= 6 || code == 0x10 || code == 0x11));
-      if (known &amp;&amp; yy_frame[4] == (uint8_t)(type+code) &amp;&amp; yy_frame[5] == 0x0D) {
-        yy_used = 0;
-        yy_dispatch(type,code);
-        return;
-      }
-    }
-    for (uint8_t i=1; i&lt;yy_used; ++i) yy_frame[i-1] = yy_frame[i];
-    --yy_used;
-    if (yy_used &amp;&amp; yy_frame[0] != 0xAA) continue;
-    // Retained prefixes keep the original deadline (conservative timeout).
-    if (yy_used &lt; 2) return;
-  }
+  for(uint8_t i=1;i&lt;yy_used;++i)yy_frame[i-1]=yy_frame[i];
+  --yy_used;if(yy_used &amp;&amp; yy_frame[0]!=0xAA)continue;if(yy_used&lt;2)return;
+ }
 }
-
-static void yy_init() {
-  yy_audio_queue = xQueueCreate(24, sizeof(YaoyaoAudio));
-  // Audio allocation failure must never disable the stop command UART.
-  yy_ready = true;
+static void yy_play_done(uint32_t cookie,int32_t reason){
+ YaoyaoDone d={cookie,reason};
+ if(yy_done_queue)xQueueSend(yy_done_queue,&amp;d,0);
 }
-
-static void yy_rx_poll() {
-  if (!yy_ready) { delay(1); return; }
-  // Budget bounds CPU use under continuous noise; no String/readString timeout.
-  for (uint16_t i=0; i&lt;128 &amp;&amp; Serial1.available()&gt;0; ++i) {
-    const int byte = Serial1.read();
-    if (byte &gt;= 0) yy_receive_byte((uint8_t)byte, (uint32_t)millis());
-  }
-  yy_expire((uint32_t)millis());
-  delay(1);
+static void yy_init(){
+ yy_audio_queue=xQueueCreate(24,sizeof(YaoyaoAudio));
+ yy_done_queue=xQueueCreate(8,sizeof(YaoyaoDone));
+ yy_serial_mutex=xSemaphoreCreateMutex();yy_ready=true;
 }
-
-static void yy_audio_poll() {
-  if (!yy_ready || !yy_audio_queue) { delay(1); return; }
-  YaoyaoAudio item;
-  if (xQueueReceive(yy_audio_queue, &amp;item, 0) != pdTRUE) { delay(2); return; }
-  // An urgent stopped/failure/fault state cancels queued, outdated feedback.
-  while (item.epoch == yy_epoch) {
-    if (prompt_play_by_cmd_id(item.id, -1, NULL, item.urgent != 0) == 0) break;
-    delay(2);
+static void yy_rx_poll(){
+ if(!yy_ready){delay(1);return;}
+ for(uint16_t i=0;i&lt;128 &amp;&amp; Serial1.available()&gt;0;++i){int b=Serial1.read();if(b&gt;=0)yy_receive_byte(b,millis());}
+ yy_expire(millis());
+ if(yy_active_cookie &amp;&amp; (uint32_t)(millis()-yy_active_since)&gt;=10000)yy_cancel_start();
+ YaoyaoDone d;
+ while(yy_done_queue &amp;&amp; xQueueReceive(yy_done_queue,&amp;d,0)==pdTRUE){
+  if(d.cookie==yy_active_cookie &amp;&amp; yy_active_cookie){
+   if(d.reason==0)yy_write_frame(5,yy_token);
+   yy_cancel_start();
   }
+ }
+ delay(1);
+}
+static void yy_audio_poll(){
+ if(!yy_ready || !yy_audio_queue){delay(1);return;}
+ YaoyaoAudio item;
+ if(xQueueReceive(yy_audio_queue,&amp;item,0)!=pdTRUE){delay(2);return;}
+ while(item.epoch==yy_epoch){
+  if(item.cookie){
+   if(item.cookie!=yy_active_cookie)break;
+   if(yy_prompt_play(item.id,yy_play_done,item.cookie)==0)break;
+  }else if(prompt_play_by_cmd_id(item.id,-1,NULL,item.urgent!=0)==0)break;
+  delay(2);
+ }
 }
 
     </field>
@@ -252,49 +260,89 @@ static void yy_audio_poll() {
                                                                                                     <field name="huifu"></field>
                                                                                                     <field name="id">23</field>
                                                                                                     <next>
-                                                                                                      <block type="asr_add_id" id="yaoyao_27">
-                                                                                                        <field name="NAME">已接受</field>
-                                                                                                        <field name="id">9000</field>
+                                                                                                      <block type="asr_id" id="yaoyao_27">
+                                                                                                        <field name="ASR">避障模式</field>
+                                                                                                        <field name="leibie">命令词</field>
+                                                                                                        <field name="huifu"></field>
+                                                                                                        <field name="id">24</field>
                                                                                                         <next>
-                                                                                                          <block type="asr_add_id" id="yaoyao_28">
-                                                                                                            <field name="NAME">忙碌中</field>
-                                                                                                            <field name="id">9001</field>
+                                                                                                          <block type="asr_id" id="yaoyao_28">
+                                                                                                            <field name="ASR">退出避障模式</field>
+                                                                                                            <field name="leibie">唤醒词</field>
+                                                                                                            <field name="huifu"></field>
+                                                                                                            <field name="id">25</field>
                                                                                                             <next>
                                                                                                               <block type="asr_add_id" id="yaoyao_29">
-                                                                                                                <field name="NAME">无法执行</field>
-                                                                                                                <field name="id">9002</field>
+                                                                                                                <field name="NAME">已接受</field>
+                                                                                                                <field name="id">9000</field>
                                                                                                                 <next>
                                                                                                                   <block type="asr_add_id" id="yaoyao_30">
-                                                                                                                    <field name="NAME">空闲</field>
-                                                                                                                    <field name="id">9100</field>
+                                                                                                                    <field name="NAME">忙碌中</field>
+                                                                                                                    <field name="id">9001</field>
                                                                                                                     <next>
                                                                                                                       <block type="asr_add_id" id="yaoyao_31">
-                                                                                                                        <field name="NAME">执行中</field>
-                                                                                                                        <field name="id">9101</field>
+                                                                                                                        <field name="NAME">无法执行</field>
+                                                                                                                        <field name="id">9002</field>
                                                                                                                         <next>
                                                                                                                           <block type="asr_add_id" id="yaoyao_32">
-                                                                                                                            <field name="NAME">已到达</field>
-                                                                                                                            <field name="id">9103</field>
+                                                                                                                            <field name="NAME">空闲</field>
+                                                                                                                            <field name="id">9100</field>
                                                                                                                             <next>
                                                                                                                               <block type="asr_add_id" id="yaoyao_33">
-                                                                                                                                <field name="NAME">已停止</field>
-                                                                                                                                <field name="id">9104</field>
+                                                                                                                                <field name="NAME">执行中</field>
+                                                                                                                                <field name="id">9101</field>
                                                                                                                                 <next>
                                                                                                                                   <block type="asr_add_id" id="yaoyao_34">
-                                                                                                                                    <field name="NAME">失败</field>
-                                                                                                                                    <field name="id">9105</field>
+                                                                                                                                    <field name="NAME">已到达</field>
+                                                                                                                                    <field name="id">9103</field>
                                                                                                                                     <next>
                                                                                                                                       <block type="asr_add_id" id="yaoyao_35">
-                                                                                                                                        <field name="NAME">故障</field>
-                                                                                                                                        <field name="id">9106</field>
+                                                                                                                                        <field name="NAME">已停止</field>
+                                                                                                                                        <field name="id">9104</field>
                                                                                                                                         <next>
                                                                                                                                           <block type="asr_add_id" id="yaoyao_36">
-                                                                                                                                            <field name="NAME">已完成</field>
-                                                                                                                                            <field name="id">9108</field>
+                                                                                                                                            <field name="NAME">失败</field>
+                                                                                                                                            <field name="id">9105</field>
                                                                                                                                             <next>
                                                                                                                                               <block type="asr_add_id" id="yaoyao_37">
-                                                                                                                                                <field name="NAME">收到</field>
-                                                                                                                                                <field name="id">9201</field>
+                                                                                                                                                <field name="NAME">故障</field>
+                                                                                                                                                <field name="id">9106</field>
+                                                                                                                                                <next>
+                                                                                                                                                  <block type="asr_add_id" id="yaoyao_38">
+                                                                                                                                                    <field name="NAME">已完成</field>
+                                                                                                                                                    <field name="id">9108</field>
+                                                                                                                                                    <next>
+                                                                                                                                                      <block type="asr_add_id" id="yaoyao_39">
+                                                                                                                                                        <field name="NAME">收到</field>
+                                                                                                                                                        <field name="id">9201</field>
+                                                                                                                                                        <next>
+                                                                                                                                                          <block type="asr_add_id" id="yaoyao_40">
+                                                                                                                                                            <field name="NAME">开启避障模式</field>
+                                                                                                                                                            <field name="id">9300</field>
+                                                                                                                                                            <next>
+                                                                                                                                                              <block type="asr_add_id" id="yaoyao_41">
+                                                                                                                                                                <field name="NAME">遇到障碍开始绕障</field>
+                                                                                                                                                                <field name="id">9301</field>
+                                                                                                                                                                <next>
+                                                                                                                                                                  <block type="asr_add_id" id="yaoyao_42">
+                                                                                                                                                                    <field name="NAME">已绕过障碍物</field>
+                                                                                                                                                                    <field name="id">9302</field>
+                                                                                                                                                                    <next>
+                                                                                                                                                                      <block type="asr_add_id" id="yaoyao_43">
+                                                                                                                                                                        <field name="NAME">已退出避障模式</field>
+                                                                                                                                                                        <field name="id">9303</field>
+                                                                                                                                                                      </block>
+                                                                                                                                                                    </next>
+                                                                                                                                                                  </block>
+                                                                                                                                                                </next>
+                                                                                                                                                              </block>
+                                                                                                                                                            </next>
+                                                                                                                                                          </block>
+                                                                                                                                                        </next>
+                                                                                                                                                      </block>
+                                                                                                                                                    </next>
+                                                                                                                                                  </block>
+                                                                                                                                                </next>
                                                                                                                                               </block>
                                                                                                                                             </next>
                                                                                                                                           </block>
@@ -366,19 +414,19 @@ static void yy_audio_poll() {
       </block>
     </statement>
   </block>
-  <block type="hardware_init" id="yaoyao_38" x="750" y="260">
+  <block type="hardware_init" id="yaoyao_44" x="750" y="260">
     <statement name="DO">
-      <block type="serial_begin" id="yaoyao_39">
+      <block type="serial_begin" id="yaoyao_45">
         <field name="serial_select">Serial1</field>
         <field name="TX">PA_2</field>
         <field name="RX">PA_3</field>
         <value name="CONTENT">
-          <block type="math_number" id="yaoyao_40">
+          <block type="math_number" id="yaoyao_46">
             <field name="NUM">115200</field>
           </block>
         </value>
         <next>
-          <block type="block_with_textarea" id="yaoyao_41">
+          <block type="block_with_textarea" id="yaoyao_47">
             <field name="input">vol_set(7);
 yy_init();
             </field>
@@ -387,216 +435,236 @@ yy_init();
       </block>
     </statement>
   </block>
-  <block type="procedures_defnoreturn" id="yaoyao_42" x="750" y="520">
+  <block type="procedures_defnoreturn" id="yaoyao_48" x="750" y="520">
     <field name="NAME">ASR_CODE</field>
     <comment pinned="false" h="80" w="160">描述该功能...</comment>
     <statement name="STACK">
-      <block type="block_with_textarea" id="yaoyao_43">
+      <block type="block_with_textarea" id="yaoyao_49">
         <field name="input">set_state_enter_wakeup(8589934); // 8589.934秒，SDK安全上限</field>
         <next>
-          <block type="controls_switch_case" id="yaoyao_44">
-            <mutation elseif="20"></mutation>
+          <block type="controls_switch_case" id="yaoyao_50">
+            <mutation elseif="22"></mutation>
             <value name="IF0">
-              <block type="asr_snid" id="yaoyao_45"></block>
+              <block type="asr_snid" id="yaoyao_51"></block>
             </value>
             <value name="IF1">
-              <block type="math_number" id="yaoyao_46">
+              <block type="math_number" id="yaoyao_52">
                 <field name="NUM">1</field>
               </block>
             </value>
             <statement name="DO1">
-              <block type="block_with_textarea" id="yaoyao_47">
+              <block type="block_with_textarea" id="yaoyao_53">
                 <field name="input">yy_send_command(0x01); // 寻找红色水瓶</field>
               </block>
             </statement>
             <value name="IF2">
-              <block type="math_number" id="yaoyao_48">
+              <block type="math_number" id="yaoyao_54">
                 <field name="NUM">2</field>
               </block>
             </value>
             <statement name="DO2">
-              <block type="block_with_textarea" id="yaoyao_49">
+              <block type="block_with_textarea" id="yaoyao_55">
                 <field name="input">yy_send_command(0x02); // 停止任务</field>
               </block>
             </statement>
             <value name="IF3">
-              <block type="math_number" id="yaoyao_50">
+              <block type="math_number" id="yaoyao_56">
                 <field name="NUM">3</field>
               </block>
             </value>
             <statement name="DO3">
-              <block type="block_with_textarea" id="yaoyao_51">
+              <block type="block_with_textarea" id="yaoyao_57">
                 <field name="input">yy_send_command(0x02); // 停车</field>
               </block>
             </statement>
             <value name="IF4">
-              <block type="math_number" id="yaoyao_52">
+              <block type="math_number" id="yaoyao_58">
                 <field name="NUM">4</field>
               </block>
             </value>
             <statement name="DO4">
-              <block type="block_with_textarea" id="yaoyao_53">
+              <block type="block_with_textarea" id="yaoyao_59">
                 <field name="input">yy_send_command(0x02); // 停止</field>
               </block>
             </statement>
             <value name="IF5">
-              <block type="math_number" id="yaoyao_54">
+              <block type="math_number" id="yaoyao_60">
                 <field name="NUM">5</field>
               </block>
             </value>
             <statement name="DO5">
-              <block type="block_with_textarea" id="yaoyao_55">
+              <block type="block_with_textarea" id="yaoyao_61">
                 <field name="input">yy_send_command(0x03); // 查询状态</field>
               </block>
             </statement>
             <value name="IF6">
-              <block type="math_number" id="yaoyao_56">
+              <block type="math_number" id="yaoyao_62">
                 <field name="NUM">6</field>
               </block>
             </value>
             <statement name="DO6">
-              <block type="block_with_textarea" id="yaoyao_57">
+              <block type="block_with_textarea" id="yaoyao_63">
                 <field name="input">yy_send_command(0x03); // 现在什么状态</field>
               </block>
             </statement>
             <value name="IF7">
-              <block type="math_number" id="yaoyao_58">
+              <block type="math_number" id="yaoyao_64">
                 <field name="NUM">10</field>
               </block>
             </value>
             <statement name="DO7">
-              <block type="block_with_textarea" id="yaoyao_59">
+              <block type="block_with_textarea" id="yaoyao_65">
                 <field name="input">yy_send_command(0x10); // 前进</field>
               </block>
             </statement>
             <value name="IF8">
-              <block type="math_number" id="yaoyao_60">
+              <block type="math_number" id="yaoyao_66">
                 <field name="NUM">11</field>
               </block>
             </value>
             <statement name="DO8">
-              <block type="block_with_textarea" id="yaoyao_61">
+              <block type="block_with_textarea" id="yaoyao_67">
                 <field name="input">yy_send_command(0x10); // 向前走</field>
               </block>
             </statement>
             <value name="IF9">
-              <block type="math_number" id="yaoyao_62">
+              <block type="math_number" id="yaoyao_68">
                 <field name="NUM">12</field>
               </block>
             </value>
             <statement name="DO9">
-              <block type="block_with_textarea" id="yaoyao_63">
+              <block type="block_with_textarea" id="yaoyao_69">
                 <field name="input">yy_send_command(0x11); // 后退</field>
               </block>
             </statement>
             <value name="IF10">
-              <block type="math_number" id="yaoyao_64">
+              <block type="math_number" id="yaoyao_70">
                 <field name="NUM">13</field>
               </block>
             </value>
             <statement name="DO10">
-              <block type="block_with_textarea" id="yaoyao_65">
+              <block type="block_with_textarea" id="yaoyao_71">
                 <field name="input">yy_send_command(0x11); // 向后走</field>
               </block>
             </statement>
             <value name="IF11">
-              <block type="math_number" id="yaoyao_66">
+              <block type="math_number" id="yaoyao_72">
                 <field name="NUM">14</field>
               </block>
             </value>
             <statement name="DO11">
-              <block type="block_with_textarea" id="yaoyao_67">
+              <block type="block_with_textarea" id="yaoyao_73">
                 <field name="input">yy_send_command(0x12); // 左转</field>
               </block>
             </statement>
             <value name="IF12">
-              <block type="math_number" id="yaoyao_68">
+              <block type="math_number" id="yaoyao_74">
                 <field name="NUM">15</field>
               </block>
             </value>
             <statement name="DO12">
-              <block type="block_with_textarea" id="yaoyao_69">
+              <block type="block_with_textarea" id="yaoyao_75">
                 <field name="input">yy_send_command(0x12); // 向左转</field>
               </block>
             </statement>
             <value name="IF13">
-              <block type="math_number" id="yaoyao_70">
+              <block type="math_number" id="yaoyao_76">
                 <field name="NUM">16</field>
               </block>
             </value>
             <statement name="DO13">
-              <block type="block_with_textarea" id="yaoyao_71">
+              <block type="block_with_textarea" id="yaoyao_77">
                 <field name="input">yy_send_command(0x12); // 向左原地旋转</field>
               </block>
             </statement>
             <value name="IF14">
-              <block type="math_number" id="yaoyao_72">
+              <block type="math_number" id="yaoyao_78">
                 <field name="NUM">17</field>
               </block>
             </value>
             <statement name="DO14">
-              <block type="block_with_textarea" id="yaoyao_73">
+              <block type="block_with_textarea" id="yaoyao_79">
                 <field name="input">yy_send_command(0x13); // 右转</field>
               </block>
             </statement>
             <value name="IF15">
-              <block type="math_number" id="yaoyao_74">
+              <block type="math_number" id="yaoyao_80">
                 <field name="NUM">18</field>
               </block>
             </value>
             <statement name="DO15">
-              <block type="block_with_textarea" id="yaoyao_75">
+              <block type="block_with_textarea" id="yaoyao_81">
                 <field name="input">yy_send_command(0x13); // 向右转</field>
               </block>
             </statement>
             <value name="IF16">
-              <block type="math_number" id="yaoyao_76">
+              <block type="math_number" id="yaoyao_82">
                 <field name="NUM">19</field>
               </block>
             </value>
             <statement name="DO16">
-              <block type="block_with_textarea" id="yaoyao_77">
+              <block type="block_with_textarea" id="yaoyao_83">
                 <field name="input">yy_send_command(0x13); // 向右原地旋转</field>
               </block>
             </statement>
             <value name="IF17">
-              <block type="math_number" id="yaoyao_78">
+              <block type="math_number" id="yaoyao_84">
                 <field name="NUM">20</field>
               </block>
             </value>
             <statement name="DO17">
-              <block type="block_with_textarea" id="yaoyao_79">
+              <block type="block_with_textarea" id="yaoyao_85">
                 <field name="input">yy_send_command(0x14); // 加速</field>
               </block>
             </statement>
             <value name="IF18">
-              <block type="math_number" id="yaoyao_80">
+              <block type="math_number" id="yaoyao_86">
                 <field name="NUM">21</field>
               </block>
             </value>
             <statement name="DO18">
-              <block type="block_with_textarea" id="yaoyao_81">
+              <block type="block_with_textarea" id="yaoyao_87">
                 <field name="input">yy_send_command(0x14); // 快一点</field>
               </block>
             </statement>
             <value name="IF19">
-              <block type="math_number" id="yaoyao_82">
+              <block type="math_number" id="yaoyao_88">
                 <field name="NUM">22</field>
               </block>
             </value>
             <statement name="DO19">
-              <block type="block_with_textarea" id="yaoyao_83">
+              <block type="block_with_textarea" id="yaoyao_89">
                 <field name="input">yy_send_command(0x15); // 减速</field>
               </block>
             </statement>
             <value name="IF20">
-              <block type="math_number" id="yaoyao_84">
+              <block type="math_number" id="yaoyao_90">
                 <field name="NUM">23</field>
               </block>
             </value>
             <statement name="DO20">
-              <block type="block_with_textarea" id="yaoyao_85">
+              <block type="block_with_textarea" id="yaoyao_91">
                 <field name="input">yy_send_command(0x15); // 慢一点</field>
+              </block>
+            </statement>
+            <value name="IF21">
+              <block type="math_number" id="yaoyao_92">
+                <field name="NUM">24</field>
+              </block>
+            </value>
+            <statement name="DO21">
+              <block type="block_with_textarea" id="yaoyao_93">
+                <field name="input">yy_send_command(0x16); // 避障模式</field>
+              </block>
+            </statement>
+            <value name="IF22">
+              <block type="math_number" id="yaoyao_94">
+                <field name="NUM">25</field>
+              </block>
+            </value>
+            <statement name="DO22">
+              <block type="block_with_textarea" id="yaoyao_95">
+                <field name="input">yy_send_command(0x17); // 退出避障模式</field>
               </block>
             </statement>
           </block>
@@ -604,28 +672,28 @@ yy_init();
       </block>
     </statement>
   </block>
-  <block type="thread_app" id="yaoyao_86" x="750" y="900">
+  <block type="thread_app" id="yaoyao_96" x="750" y="900">
     <field name="app_name">yaoyao_uart_rx</field>
     <field name="uxPriority">5</field>
     <field name="mem">512</field>
     <statement name="DO">
-      <block type="controls_repeat_forever" id="yaoyao_87">
+      <block type="controls_repeat_forever" id="yaoyao_97">
         <statement name="DO">
-          <block type="block_with_textarea" id="yaoyao_88">
+          <block type="block_with_textarea" id="yaoyao_98">
             <field name="input">yy_rx_poll();</field>
           </block>
         </statement>
       </block>
     </statement>
   </block>
-  <block type="thread_app" id="yaoyao_89" x="750" y="1150">
+  <block type="thread_app" id="yaoyao_99" x="750" y="1150">
     <field name="app_name">yaoyao_audio</field>
     <field name="uxPriority">4</field>
     <field name="mem">512</field>
     <statement name="DO">
-      <block type="controls_repeat_forever" id="yaoyao_90">
+      <block type="controls_repeat_forever" id="yaoyao_100">
         <statement name="DO">
-          <block type="block_with_textarea" id="yaoyao_91">
+          <block type="block_with_textarea" id="yaoyao_101">
             <field name="input">yy_audio_poll();</field>
           </block>
         </statement>

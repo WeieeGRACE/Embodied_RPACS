@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module system_menu(
  input wire clk,rst_n,input wire [2:0] pressed,
- input wire [1:0] gear,
+ input wire [1:0] gear,input wire show_avoid,show_root,avoid_mode,
  output reg [2:0] group_id,output reg [3:0] item,
  output reg page,output reg voice_enable,
  output reg voice_candidate,output reg [1:0] gear_candidate,
@@ -10,8 +10,8 @@ module system_menu(
  output reg stop_request);
  reg [3:0] last_item;
  always @* case(group_id)
- 0:last_item=3;1:last_item=4;2:last_item=4;
- 3:last_item=7;default:last_item=1;
+ 0:last_item=4;1:last_item=4;2:last_item=4;
+ 3:last_item=7;5:last_item=0;default:last_item=1;
  endcase
  always @(posedge clk or negedge rst_n)
  if(!rst_n)begin
@@ -22,7 +22,8 @@ module system_menu(
  command_valid<=0;gear_commit<=0;stop_request<=0;
  if(pressed[0])begin
  stop_request<=1;
- if(page)page<=0;
+ if(avoid_mode || group_id==5)begin group_id<=0;item<=4;page<=0;end
+ else if(page)page<=0;
  else if(group_id!=0)begin item<={1'b0,group_id}-4'd1;group_id<=0;end
  end else if(pressed[1])begin
  if(!page)item<=item==last_item ? 0:item+4'd1;
@@ -30,9 +31,10 @@ module system_menu(
  else if(group_id==4 && item==1)gear_candidate<=gear_candidate==2 ? 0:gear_candidate+2'd1;
  end else if(pressed[2])begin
  if(!page)begin
- if(group_id==0)begin group_id<=item[2:0]+3'd1;item<=0;end
+ if(group_id==0)begin group_id<=item[2:0]+3'd1;item<=0;if(item==4)page<=1;end
  else begin page<=1;voice_candidate<=voice_enable;gear_candidate<=gear;end
  end else case(group_id)
+ 5:begin command_valid<=1;command<=8'h16;end
  2:begin command_valid<=1;command<=item==4 ? 8'h02:8'h10+item;end
  3:begin command_valid<=1;command<=8'h20+item;end
  4:if(item==0)begin
@@ -42,5 +44,7 @@ module system_menu(
  default:begin end
  endcase
  end
+ if(show_avoid && !pressed[0])begin group_id<=5;item<=0;page<=1;end
+ if(show_root)begin group_id<=0;item<=4;page<=0;end
  end
 endmodule

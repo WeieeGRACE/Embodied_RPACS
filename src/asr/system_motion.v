@@ -13,6 +13,9 @@ module system_motion #(
  input wire clk_50m,reset_n,stop_gate,stop_request,uart_rx,voice_enable,
  input wire menu_valid,input wire [7:0] menu_command,
  input wire gear_commit,input wire [1:0] gear_value,
+ input wire [47:0] distances,input wire [2:0] tof_seen,tof_valid,post_turn,sample_mask,
+ input wire sensor_fault,output wire sensor_refresh,sensor_monitor,
+ output wire avoid_mode,auto_run,waiting,show_avoid,show_root,output wire [4:0] route_state,
  input wire encoder_a_l,encoder_b_l,encoder_a_r,encoder_b_r,
  input wire imu_spi_miso,imu_int1,imu_int2,imu_gnd_reserved,
  output wire imu_spi_sck,imu_spi_mosi,imu_cs_n,
@@ -92,29 +95,32 @@ module system_motion #(
  end
  reg fault_latched;
  wire tx_overflow;
- wire fault_now=imu_bad || enc_fault_l || enc_fault_r || tx_overflow || motion_fault!=0;
+ wire route_fault;
+ wire fault_now=sensor_fault || route_fault || imu_bad || enc_fault_l || enc_fault_r || tx_overflow || motion_fault!=0;
  always @(posedge clk or negedge rst_n)
  if(!rst_n)fault_latched<=0;else if(fault_now)fault_latched<=1;
  wire fault=fault_now || fault_latched;
  wire modules_ready=imu_ready && attitude_valid && yaw_seen && speed_seen && !calibrating && !fault;
+ wire ack_valid;wire [7:0] ack;
  asr_uart_rx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) receiver(
- .clk(clk),.rst_n(rst_n),.rx(uart_rx),.command_valid(command_valid),.command(command));
+ .clk(clk),.rst_n(rst_n),.rx(uart_rx),.command_valid(command_valid),.command(command),.ack_valid(ack_valid),.ack(ack));
  wire cv=command_valid;
- wire voice_allowed=voice_enable || command==8'h02 || command==8'h03;
- wire voice_stop=cv && command==8'h02;
- wire menu_stop=menu_valid && menu_command==8'h02;
- wire stopping=stop_gate || stop_request || voice_stop || menu_stop;
- wire busy,cmd_ready,done,aborted,rejected,drive_enable,controller_clear;
- reg stop_hold;
- always @(posedge clk_50m or posedge stop_gate)
- if(stop_gate)stop_hold<=1;
- else if(!rst_n)stop_hold<=0;
- else if(stopping)stop_hold<=1;
- else if(!busy)stop_hold<=0;
- wire menu_move=menu_valid && menu_command!=8'h02;
- wire [7:0] action=menu_move ? menu_command:command;
- wire move=command>=8'h10 && command<=8'h13;
- wire requested=menu_move || (cv && voice_enable && move);
+ wire busy,cmd_ready,done,aborted,rejected,drive_enable,controller_clear,command_pending;
+ wire stopping,route_cancel,route_press,request_refresh,manual_active;
+ wire [7:0] action,mode_status;wire aux_valid;wire [7:0] aux_type,aux_code;
+ wire start;
+ reg issue_valid;
+ reg [230:0] issue_payload;
+ system_dispatch #(.CLK_HZ(CLK_HZ)) dispatch(
+ .clk(clk),.rst_n(rst_n),.voice_enable(voice_enable),.cv(cv),.command(command),
+ .ack_valid(ack_valid),.ack(ack),.menu_valid(menu_valid),.menu_command(menu_command),
+ .stop_gate(stop_gate),.stop_request(stop_request),.ready(modules_ready),.fault(fault),
+ .busy(busy || command_pending || issue_valid),.cmd_ready(cmd_ready),.done(done),
+ .tof_ready(&tof_seen && &tof_valid),.post_fresh(&post_turn),.route_state(route_state),
+ .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.manual_active(manual_active),
+ .manual_action(action),.manual_submit(start),.stopping(stopping),.route_cancel(route_cancel),
+ .route_press(route_press),.refresh(request_refresh),.show_avoid(show_avoid),.show_root(show_root),
+ .response(response),.aux_valid(aux_valid),.aux_type(aux_type),.aux_code(aux_code),.mode_status(mode_status));
  wire debug_action=action>=8'h20 && action<=8'h27;
  wire rotate=action==8'h12 || action==8'h13;
  wire reverse=action==8'h11 || action==8'h13;
@@ -123,7 +129,7 @@ module system_motion #(
  wire signed [31:0] target_um_l,target_um_r;
  always @(posedge clk or negedge rst_n)
  if(!rst_n)gear<=1;
- else if(gear_commit)gear<=gear_value;
+ else if(gear_commit && !stopping && !fault)gear<=gear_value;
  else if(cv && voice_enable && !fault && !stopping)begin
  if(command==8'h14 && gear<2)gear<=gear+1'b1;
  if(command==8'h15 && gear>0)gear<=gear-1'b1;
@@ -133,11 +139,12 @@ module system_motion #(
  // 5 for the inner wheel. Round upwards to preserve integer conversion.
  localparam integer DEBUG_L=(64'd10*UM_PER_REV_L+COUNTS_L-1)/COUNTS_L;
  localparam integer DEBUG_R=(64'd10*UM_PER_REV_R+COUNTS_R-1)/COUNTS_R;
+ reg [31:0] gear_speed;
  reg [31:0] requested_l,requested_r,goal;
  reg [3:0] requested_mode;
  reg [1:0] requested_end;
  always @* begin
- requested_l=rotate ? LOW_UM:(gear+32'd1)*LOW_UM;
+ requested_l=rotate ? LOW_UM:gear_speed;
  requested_r=requested_l;
  requested_mode=rotate ? 6:7;requested_end=rotate ? 3:2;
  goal=rotate ? GOAL_MDEG:GOAL_UM;
@@ -154,17 +161,65 @@ module system_motion #(
  endcase
  end
  end
- wire start=requested && modules_ready && cmd_ready && !stopping && !stop_hold;
+ wire route_start,route_stop,route_rotate,route_reverse,route_refresh;
+ wire [1:0] route_end;wire [31:0] route_goal,route_speed,route_cap;
+ wire [7:0] route_reason;wire signed [31:0] route_heading;
+ wire command_submit,buffer_busy,buffer_ready;
+ wire [230:0] payload;wire [132:0] context_out;
+ obstacle_route #(.CLK_HZ(CLK_HZ),.WINDOW_CYCLES(WINDOW_CYCLES)) route(
+ .clk(clk),.rst_n(rst_n && auto_run),.press(route_press),
+ .ready(modules_ready && &tof_seen && &tof_valid),.fault(fault),.distances(distances),
+ .post_turn(post_turn),.sample_mask(sample_mask),.position_l(um_l),.position_r(um_r),.yaw(yaw),
+ .busy(buffer_busy),.cmd_ready(buffer_ready),.done(done),.aborted(aborted),.rejected(rejected),
+ .start(route_start),.stop(route_stop),.rotate(route_rotate),.reverse(route_reverse),.end_kind(route_end),
+ .goal(route_goal),.speed(route_speed),.speed_cap(route_cap),.refresh(route_refresh),.state(route_state),
+ .reason(route_reason),.route_fault(route_fault),.target_heading(route_heading));
+ assign sensor_refresh=request_refresh || route_refresh;
+ assign sensor_monitor=auto_run && !route_cancel;
+ wire cruise=route_state==1 || route_state==2;
+
+ always @(posedge clk or negedge rst_n)
+ if(!rst_n)gear_speed<=2*LOW_UM;else case(gear)
+ 0:gear_speed<=LOW_UM;1:gear_speed<=2*LOW_UM;default:gear_speed<=3*LOW_UM;endcase
+ wire [31:0] auto_speed=cruise && route_cap>LOW_UM ? gear_speed:LOW_UM;
+ obstacle_command_buffer buffer(
+ .clk(clk),.rst_n(rst_n),.cancel(!auto_run || route_cancel || route_stop || fault),
+ .request(route_start && auto_run && !stopping),.motion_ready(cmd_ready),.motion_busy(busy || issue_valid),
+ .proposal({(route_rotate ? 4'd6:(route_end==2 ? 4'd7:4'd2)),route_end,route_reverse,
+ (cruise ? gear_speed:route_speed),(cruise ? gear_speed:route_speed),route_goal,
+ (route_end==0 ? 32'd0:32'd10000),(3*LOW_UM),(LOW_UM/5),(LOW_UM/2)}),
+ .context_in({route_state,yaw,route_heading,um_l,um_r}),.ready(buffer_ready),.submit(command_submit),
+ .busy(buffer_busy),.pending(command_pending),.command(payload),.context_out(context_out));
+ wire manual_live=manual_active && !rotate && !debug_action;
+ localparam [31:0] MANUAL_TIMEOUT=ACTION_MS,GEAR_LIMIT=3*LOW_UM,
+ ACCEL_STEP=LOW_UM/5,DECEL_STEP=LOW_UM/2;
+ wire [31:0] manual_limit=debug_action ? ((DEBUG_L>DEBUG_R)?DEBUG_L:DEBUG_R):GEAR_LIMIT;
+ // Capture the entire selected transaction before controller validation.
+ // Stop/fault still reach the controller and bridge directly and cancel a
+ // captured transaction before it can execute; no cancelled command is replayed.
+ always @(posedge clk or negedge rst_n)
+ if(!rst_n)begin issue_valid<=0;issue_payload<=0;end
+ else begin
+ issue_valid<=!stopping && !fault && (start || command_submit);
+ if(start || command_submit)issue_payload<=command_submit ? payload:
+ {requested_mode,requested_end,reverse,requested_l,requested_r,goal,
+ MANUAL_TIMEOUT,manual_limit,ACCEL_STEP,DECEL_STEP};
+ end
  motion_control_and_mode_fsm #(.CLK_HZ(CLK_HZ),.STILL_THRESHOLD(0),.ALLOW_SINGLE_TIMED(1)) motion(
- .clk(clk),.rst_n(rst_n),.enable(modules_ready),.stop_request(stopping || stop_hold),
- .external_fault(fault_now || fault_latched),.clear_fault(1'b0),.cmd_valid(start),.cmd_ready(cmd_ready),
- .cmd_mode(requested_mode),.cmd_end(requested_end),.cmd_reverse(reverse),
- .cmd_speed_l(requested_l),.cmd_speed_r(requested_r),.cmd_goal(goal),
- .cmd_timeout_ms(ACTION_MS),.cmd_speed_limit(debug_action ? ((DEBUG_L>DEBUG_R)?DEBUG_L:DEBUG_R):3*LOW_UM),.cmd_accel_step(LOW_UM/5),.cmd_decel_step(LOW_UM/2),
+ .clk(clk),.rst_n(rst_n),.enable(modules_ready),.stop_request(stopping || (auto_run && route_stop)),
+ .external_fault(fault_now || fault_latched),.clear_fault(1'b0),.cmd_valid(issue_valid),.cmd_ready(cmd_ready),
+ .runtime_speed_cap(auto_run ? auto_speed:32'h7fffffff),
+ .runtime_speed_valid((auto_run && cruise) || manual_live),.runtime_speed(auto_run ? auto_speed:gear_speed),
+ .cmd_mode(issue_payload[230:227]),
+ .cmd_end(issue_payload[226:225]),.cmd_reverse(issue_payload[224]),
+ .cmd_speed_l(issue_payload[223:192]),.cmd_speed_r(issue_payload[191:160]),
+ .cmd_goal(issue_payload[159:128]),.cmd_timeout_ms(issue_payload[127:96]),
+ .cmd_speed_limit(issue_payload[95:64]),
+ .cmd_accel_step(issue_payload[63:32]),.cmd_decel_step(issue_payload[31:0]),
  .position_l(um_l),.position_r(um_r),.speed_l(raw_l),.speed_r(raw_r),.yaw_mdeg(yaw),
  .speed_valid_l(valid_l),.speed_valid_r(valid_r),.yaw_valid(yaw_valid),
  .target_l(target_um_l),.target_r(target_um_r),.drive_enable(drive_enable),.controller_clear(controller_clear),
- .busy(busy),.mode(),.phase(phase),.done(done),.aborted(aborted),.rejected(rejected),.reason(reason),.fault_code(motion_fault));
+ .busy(busy),.mode(),.phase(phase),.done(done),.aborted(aborted),.rejected(rejected),.reason(reason),.fault_code(motion_fault),.accepted(),.command_errors(),.feedback_ages());
  // Constant reciprocal converts physical speed to signed encoder counts/window.
  localparam [31:0] RECIP_L=(64'd16777216*COUNTS_L+UM_PER_REV_L/2)/UM_PER_REV_L;
  localparam [31:0] RECIP_R=(64'd16777216*COUNTS_R+UM_PER_REV_R/2)/UM_PER_REV_R;
@@ -180,16 +235,22 @@ module system_motion #(
  convert_speed=value<0 ? -$signed(product[15:0]):$signed(product[15:0]);
  end
  endfunction
- // A register separates physical-unit conversion and fault gating from PI arithmetic.
+ // Pipeline physical-unit targets before reciprocal conversion. This keeps
+ // fault/enable qualification out of the multiply path; the bridge enable is
+ // still gated directly by stop/fault in the same cycle.
+ reg signed [31:0] target_um_q_l,target_um_q_r;
  reg signed [15:0] target_l,target_r;
  always @(posedge clk or negedge rst_n)
- if(!rst_n)begin target_l<=0;target_r<=0;end
- else begin target_l<=convert_speed(target_um_l,RECIP_L);target_r<=convert_speed(target_um_r,RECIP_R);end
+ if(!rst_n)begin target_um_q_l<=0;target_um_q_r<=0;target_l<=0;target_r<=0;end
+ else begin
+ target_um_q_l<=target_um_l;target_um_q_r<=target_um_r;
+ target_l<=convert_speed(target_um_q_l,RECIP_L);target_r<=convert_speed(target_um_q_r,RECIP_R);
+ end
  function signed [15:0] sat16;
  input signed [31:0] value;
  begin sat16=value>32767 ? 16'sh7fff:value< -32768 ? 16'sh8000:value[15:0];end
  endfunction
- wire control_enable=drive_enable && !controller_clear && !fault && !stopping && !stop_hold;
+ wire control_enable=drive_enable && !controller_clear && !fault && !stopping;
  wire signed [15:0] control_l,control_r,ramp_l,ramp_r;
  localparam [15:0] PWM_LIMIT=CLK_HZ/PWM_HZ/4;
  dual_speed_pi_pid_controller pi(.clk(clk),.rst_n(rst_n),.control_tick(valid_l && valid_r),.enable(control_enable),
@@ -205,23 +266,32 @@ module system_motion #(
  .watchdog_timeout(1'b0),.pwm_signed_l(ramp_l),.pwm_signed_r(ramp_r),
  .PWMA(PWMA),.AIN1(AIN1),.AIN2(AIN2),.PWMB(PWMB),.BIN1(BIN1),.BIN2(BIN2),.STBY(STBY));
  reg [7:0] next_status;
- assign response=(!voice_allowed || command==8'h01 ||
- ((move || command==8'h14 || command==8'h15) && fault) ||
- (move && !modules_ready)) ? 8'h02:
- (move && (busy || !cmd_ready || menu_move || stopping || stop_hold)) ? 8'h01:8'h00;
  always @* begin
  next_status=status;
- if(done)next_status=8'h11;
+ if(done && !auto_run)next_status=8'h11;
  if(aborted && reason==2)next_status=8'h04;
- if((stopping || stop_hold) && !busy)next_status=8'h04;
+ if((stopping) && !busy)next_status=8'h04;
  if(start)next_status=8'h10;
+ if(avoid_mode && !manual_active)next_status=mode_status;
+ if(!avoid_mode && status>=8'h20)next_status=8'h04;
  if(fault)next_status=8'h06;
  end
  always @(posedge clk or negedge rst_n)
  if(!rst_n)status<=0;else status<=next_status;
+ // Register complete protocol events before the FIFO admission arithmetic.
+ // This removes the fault/ready/arbitration chain from the RAM write path.
+ reg pair_q,event_q,aux_q;
+ reg [7:0] response_q,status_q,event_status_q,aux_type_q,aux_code_q;
+ always @(posedge clk or negedge rst_n)
+ if(!rst_n)begin pair_q<=0;event_q<=0;aux_q<=0;response_q<=0;status_q<=0;event_status_q<=0;aux_type_q<=0;aux_code_q<=0;end
+ else begin
+ pair_q<=cv;response_q<=response;status_q<=next_status;
+ event_q<=next_status!=status && !cv;event_status_q<=next_status;
+ aux_q<=aux_valid;aux_type_q<=aux_type;aux_code_q<=aux_code;
+ end
  asr_packet_tx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) packets(
- .clk(clk),.rst_n(rst_n),.pair_valid(cv),.response(response),.pair_status(next_status),
- .event_valid(next_status!=status && !cv),.event_status(next_status),.tx(uart_tx),.overflow(tx_overflow));
+ .clk(clk),.rst_n(rst_n),.pair_valid(pair_q),.response(response_q),.pair_status(status_q),
+ .event_valid(event_q),.event_status(event_status_q),.aux_valid(aux_q),.aux_type(aux_type_q),.aux_code(aux_code_q),.tx(uart_tx),.overflow(tx_overflow));
  assign event_errors={fault,enc_fault_r,enc_fault_l,1'b0,
  (imu_error!=0 && imu_error!=4 && imu_error!=5 && imu_error!=6 && imu_error!=7),
  (imu_ready && sample_age>=IMU_TIMEOUT-1),(ready_seen && !imu_ready),

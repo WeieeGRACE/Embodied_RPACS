@@ -3,7 +3,7 @@ from pathlib import Path
 import binascii, hashlib, json, os, re, shutil, struct, zipfile
 import xml.etree.ElementTree as E
 ROOT=Path(__file__).resolve().parents[1]
-WORK=ROOT/'records/build/firmware_short_20261023'
+WORK=ROOT/'records/build/firmware_obstacle_20261025'
 image=WORK/'packed/fw.bin'
 fw=image.read_bytes()
 assert len(fw)<0x1F0000
@@ -41,8 +41,8 @@ def mp3_frames(data):
         return data[10+n:]
     return data
 silent=Path(os.environ.get('TIANWEN_HOME','D:/app/twenblock'))/'asrpro/demo_audio/空回复.mp3'
-assert mp3_frames(voice[23])==mp3_frames(silent.read_bytes())
-assert set(voice)=={0,23,9000,9001,9002,9100,9101,9103,9104,9105,9106,9108,10001,10002,9201}
+assert mp3_frames(voice[25])==mp3_frames(silent.read_bytes())
+assert set(voice)=={0,25,9000,9001,9002,9100,9101,9103,9104,9105,9106,9108,10001,10002,9201,9300,9301,9302,9303}
 for p in (WORK/'resources/voice/mp3').glob('*.mp3'):
     ident=int(re.match(r'\[(\d+)\]',p.name)[1])
     assert mp3_frames(voice[ident])==mp3_frames(p.read_bytes())
@@ -67,7 +67,7 @@ rows=[{re.sub(r'\d','',c.get('r')):''.join(c.itertext()) for c in r} for r in sh
 report=json.loads((ROOT/'records/blockly_validation.json').read_text(encoding='utf-8'))
 expected_audio={9000:'已接受',9001:'忙碌中',9002:'无法执行',9100:'空闲',
                 9101:'执行中',9103:'已到达',9104:'已停止',9105:'失败',
-                9106:'故障',9108:'已完成',9201:'收到'}
+                9106:'故障',9108:'已完成',9201:'收到',9300:'开启避障模式',9301:'遇到障碍开始绕障',9302:'已绕过障碍物',9303:'已退出避障模式'}
 assert {int(x['id']):x['text'] for x in report['audio']}==expected_audio
 assert next(x['reply'] for x in report['recognition'] if x['id']=='0')=='幺幺在，请说指令。'
 words={r['C']:r for r in rows[1:] if r.get('C') not in ['P1','','<welcome>','<inactivate>','<beep>']}
@@ -90,7 +90,7 @@ assert '//{playid:10001,voice:幺幺准备好了，请说幺幺耍起唤醒我�
 assert '//{playid:10002,voice:幺幺休息了，请说幺幺耍起唤醒我。}' in generated
 assert 'Serial1.begin(115200);' in generated and 'Serial1.begin();' not in generated
 
-release=ROOT/'release/yaoyao_asrpro_2m_20261023_short'
+release=ROOT/'release/yaoyao_asrpro_2m_20261025_obstacle'
 release.mkdir(parents=True,exist_ok=True)
 shutil.copyfile(image,release/'fw.bin')
 shutil.copyfile(ROOT/'asrpro.hd',release/'asrpro.hd')
@@ -98,7 +98,7 @@ shutil.copytree(WORK/'resources',release/'model',dirs_exist_ok=True)
 with zipfile.ZipFile(release/'model_resources.zip','w',zipfile.ZIP_DEFLATED) as z:
     for p in sorted((WORK/'resources').rglob('*')):
         if p.is_file():z.write(p,p.relative_to(WORK/'resources'))
-result={'date':'2026-10-23','software':'Tianwen Block AI 2026 autumn 0.2.8',
+result={'date':'2026-10-25','software':'Tianwen Block AI 2026 autumn 0.2.8',
         'romBytes':0x200000,'nvOffset':0x1F0000,'firmwareBytes':len(fw),
         'firmwareSHA256':hashlib.sha256(fw).hexdigest(),'aecEnabled':True,'wakeTimeoutMs':8589934,'receiptAfterTransmit':True,
         'recognition':report['recognition'],'audio':report['audio'],
@@ -109,8 +109,8 @@ result={'date':'2026-10-23','software':'Tianwen Block AI 2026 autumn 0.2.8',
                   'partition-table checksum','five partition CRC16s and exact bytes',
                   'bootloader exact bytes','current code file exact bytes',
                   'two current model payloads exact bytes plus SDK DNN pruning metadata',
-                  'command info exact bytes','21 word/ID/wake-class matches',
-                  '11 feedback audio IDs and silence/wake audio references',
+                  'command info exact bytes','23 word/ID/wake-class matches',
+                  '15 feedback audio IDs and silence/wake audio references',
                   'all packaged MP3 frames match current generated resources'],
         'hardwareTested':False,'deviceFlashed':False}
 (ROOT/'records/release_validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')

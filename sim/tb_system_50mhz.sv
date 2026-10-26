@@ -140,7 +140,7 @@ module tb_system_50mhz;
  frame('h10);wait(a || b);wait(dut.control.target_l==7 && dut.control.target_r==7);cycles(2);
  if(dut.control.target_l!=7 || dut.control.target_r!=7)$fatal(1,"50MHz physical speed conversion");
  frame(2);wait(!run_led);cycles(60000);
- if(st || fault_led || responses!=2 || stopped!=1)$fatal(1,"50MHz stop/response");
+ if(st || fault_led || responses!=2 || stopped!=1)$fatal(1,"50MHz stop/response st=%b fault=%b responses=%0d stopped=%0d status=%h",st,fault_led,responses,stopped,dut.status);
  $display("PASS main project menu + 50MHz, 115200 baud, 1MHz SPI, production 10ms speed window/20kHz PWM, calibrated enable and STOP");
  completed=1;$finish;
  end

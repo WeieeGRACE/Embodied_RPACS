@@ -1,0 +1,6 @@
+PASS 44 unique constrained pins, electrical settings, ten open-drain outputs, CPU/SSPI GPIO, saved 50MHz options, one IMU/encoder/motion/PI/driver owner, no test/heartbeat dependency, zero setup/hold violations and fresh bitstream
+
+Hash                                                             Path
+----                                                             ----
+C2E453B94A76D9A70CC9242DE378D87986AA630F558F8315C3046742C3EFA9DB D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS…
+

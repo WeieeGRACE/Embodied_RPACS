@@ -1,0 +1,285 @@
+{
+  "date": "2026-10-25",
+  "software": "Tianwen Block AI 2026 autumn 0.2.8",
+  "romBytes": 2097152,
+  "nvOffset": 2031616,
+  "firmwareBytes": 1622062,
+  "firmwareSHA256": "a612e72d21f58c14246ed8f74669d38066447993427a492f98a9ecdcc1546380",
+  "aecEnabled": true,
+  "wakeTimeoutMs": 8589934,
+  "receiptAfterTransmit": true,
+  "recognition": [
+    {
+      "phrase": "幺幺耍起",
+      "type": "唤醒词",
+      "id": "0",
+      "reply": "幺幺在，请说指令。"
+    },
+    {
+      "phrase": "寻找红色水瓶",
+      "type": "命令词",
+      "id": "1",
+      "reply": ""
+    },
+    {
+      "phrase": "停止任务",
+      "type": "唤醒词",
+      "id": "2",
+      "reply": ""
+    },
+    {
+      "phrase": "停车",
+      "type": "唤醒词",
+      "id": "3",
+      "reply": ""
+    },
+    {
+      "phrase": "停止",
+      "type": "唤醒词",
+      "id": "4",
+      "reply": ""
+    },
+    {
+      "phrase": "查询状态",
+      "type": "命令词",
+      "id": "5",
+      "reply": ""
+    },
+    {
+      "phrase": "现在什么状态",
+      "type": "命令词",
+      "id": "6",
+      "reply": ""
+    },
+    {
+      "phrase": "前进",
+      "type": "命令词",
+      "id": "10",
+      "reply": ""
+    },
+    {
+      "phrase": "向前走",
+      "type": "命令词",
+      "id": "11",
+      "reply": ""
+    },
+    {
+      "phrase": "后退",
+      "type": "命令词",
+      "id": "12",
+      "reply": ""
+    },
+    {
+      "phrase": "向后走",
+      "type": "命令词",
+      "id": "13",
+      "reply": ""
+    },
+    {
+      "phrase": "左转",
+      "type": "命令词",
+      "id": "14",
+      "reply": ""
+    },
+    {
+      "phrase": "向左转",
+      "type": "命令词",
+      "id": "15",
+      "reply": ""
+    },
+    {
+      "phrase": "向左原地旋转",
+      "type": "命令词",
+      "id": "16",
+      "reply": ""
+    },
+    {
+      "phrase": "右转",
+      "type": "命令词",
+      "id": "17",
+      "reply": ""
+    },
+    {
+      "phrase": "向右转",
+      "type": "命令词",
+      "id": "18",
+      "reply": ""
+    },
+    {
+      "phrase": "向右原地旋转",
+      "type": "命令词",
+      "id": "19",
+      "reply": ""
+    },
+    {
+      "phrase": "加速",
+      "type": "命令词",
+      "id": "20",
+      "reply": ""
+    },
+    {
+      "phrase": "快一点",
+      "type": "命令词",
+      "id": "21",
+      "reply": ""
+    },
+    {
+      "phrase": "减速",
+      "type": "命令词",
+      "id": "22",
+      "reply": ""
+    },
+    {
+      "phrase": "慢一点",
+      "type": "命令词",
+      "id": "23",
+      "reply": ""
+    },
+    {
+      "phrase": "避障模式",
+      "type": "命令词",
+      "id": "24",
+      "reply": ""
+    },
+    {
+      "phrase": "退出避障模式",
+      "type": "唤醒词",
+      "id": "25",
+      "reply": ""
+    }
+  ],
+  "audio": [
+    {
+      "id": "9000",
+      "text": "已接受"
+    },
+    {
+      "id": "9001",
+      "text": "忙碌中"
+    },
+    {
+      "id": "9002",
+      "text": "无法执行"
+    },
+    {
+      "id": "9100",
+      "text": "空闲"
+    },
+    {
+      "id": "9101",
+      "text": "执行中"
+    },
+    {
+      "id": "9103",
+      "text": "已到达"
+    },
+    {
+      "id": "9104",
+      "text": "已停止"
+    },
+    {
+      "id": "9105",
+      "text": "失败"
+    },
+    {
+      "id": "9106",
+      "text": "故障"
+    },
+    {
+      "id": "9108",
+      "text": "已完成"
+    },
+    {
+      "id": "9201",
+      "text": "收到"
+    },
+    {
+      "id": "9300",
+      "text": "开启避障模式"
+    },
+    {
+      "id": "9301",
+      "text": "遇到障碍开始绕障"
+    },
+    {
+      "id": "9302",
+      "text": "已绕过障碍物"
+    },
+    {
+      "id": "9303",
+      "text": "已退出避障模式"
+    }
+  ],
+  "originalWelcomeWakeSleepPreserved": true,
+  "executionStatusSpeechDeduplicated": true,
+  "packagedVoiceIDs": [
+    0,
+    25,
+    9000,
+    9001,
+    9002,
+    9100,
+    9101,
+    9103,
+    9104,
+    9105,
+    9106,
+    9108,
+    9201,
+    9300,
+    9301,
+    9302,
+    9303,
+    10001,
+    10002
+  ],
+  "partitions": {
+    "code": {
+      "offset": 16384,
+      "size": 146840,
+      "crc16": 53474,
+      "sha256": "ad535e6f8e1a4faf055b856310fec009eea4a40afef7033ec71bdf15114c7b49"
+    },
+    "asr": {
+      "offset": 163840,
+      "size": 32696,
+      "crc16": 59178,
+      "sha256": "81ac7de776096014a69a9a5718b10d7dfa564d00eb1395b6aa4de70008d3f4f7"
+    },
+    "dnn": {
+      "offset": 196608,
+      "size": 1366288,
+      "crc16": 23136,
+      "sha256": "efbb8fd60836c7d28b0f0a900fe171c082f96621213f0a6f3fbef7c772dffe8a"
+    },
+    "voice": {
+      "offset": 1564672,
+      "size": 49742,
+      "crc16": 7594,
+      "sha256": "67b1b79833d7549694d8a141170e75852058b91ae32e66532220d4325e311be4"
+    },
+    "user_file": {
+      "offset": 1617920,
+      "size": 4142,
+      "crc16": 17176,
+      "sha256": "79981dc07f4b3f14c0698bc4c7293d90a2d8747bddbe6b6a48dab5dba7b230fb"
+    }
+  },
+  "checks": [
+    "host behavioral checks including shared receipts, execution-state dedup, and timeout overflow",
+    "save/reopen baud 115200",
+    "full SDK build with AEC",
+    "empty command replies use vendor silent MP3",
+    "partition-table checksum",
+    "five partition CRC16s and exact bytes",
+    "bootloader exact bytes",
+    "current code file exact bytes",
+    "two current model payloads exact bytes plus SDK DNN pruning metadata",
+    "command info exact bytes",
+    "23 word/ID/wake-class matches",
+    "15 feedback audio IDs and silence/wake audio references",
+    "all packaged MP3 frames match current generated resources"
+  ],
+  "hardwareTested": false,
+  "deviceFlashed": false
+}

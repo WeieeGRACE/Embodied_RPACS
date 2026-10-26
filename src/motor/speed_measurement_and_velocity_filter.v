@@ -52,6 +52,11 @@ module speed_measurement_and_velocity_filter #(
     endfunction
     reg [WCW-1:0] window_counter;
     reg signed [31:0] window_sum;
+    // Capture the completed window first, then run the history/division
+    // network on the following clock. This keeps the encoder delta adder out
+    // of the long filter path while preserving one result per window.
+    reg signed [31:0] window_total_q;
+    reg window_total_valid;
     reg signed [SUM_WIDTH-1:0] history_sum;
     reg signed [31:0] samples [0:FILTER_LENGTH-1];
     reg [ACW-1:0] sample_count;
@@ -83,6 +88,8 @@ module speed_measurement_and_velocity_filter #(
         if (!rst_n) begin
             window_counter <= 0;
             window_sum <= 0;
+            window_total_q <= 0;
+            window_total_valid <= 1'b0;
             history_sum <= 0;
             speed_raw <= 0;
             speed_filtered <= 0;
@@ -96,21 +103,20 @@ module speed_measurement_and_velocity_filter #(
         end else begin
             speed_valid <= 1'b0;
             position <= sat32($signed(position) + $signed(delta_count));
-            if (window_counter == WINDOW_CYCLES-1) begin
-                window_counter <= 0;
-                speed_raw <= window_sum + delta_count;
-                direction <= ((window_sum + delta_count) < 0);
-                zero_speed <= ((window_sum + delta_count) == 0);
+            if (window_total_valid) begin
+                speed_raw <= window_total_q;
+                direction <= (window_total_q < 0);
+                zero_speed <= (window_total_q == 0);
                 speed_valid <= 1'b1;
 
                 // Replace the oldest sample and calculate the new average.
                 next_sum = history_sum;
                 if (sample_count == FILTER_LENGTH) begin
-                    next_sum = next_sum - oldest_sample + window_sum + delta_count;
+                    next_sum = next_sum - oldest_sample + window_total_q;
                 end else begin
-                    next_sum = next_sum + window_sum + delta_count;
+                    next_sum = next_sum + window_total_q;
                 end
-                samples[sample_index] <= window_sum + delta_count;
+                samples[sample_index] <= window_total_q;
                 if (sample_index == FILTER_LENGTH-1) sample_index <= 0;
                 else sample_index <= sample_index + 1'b1;
                 if (sample_count < FILTER_LENGTH) sample_count <= sample_count + 1'b1;
@@ -124,6 +130,12 @@ module speed_measurement_and_velocity_filter #(
                 end
                 speed_filtered <= sat32(avg_value);
                 history_sum <= next_sum;
+                window_total_valid <= 1'b0;
+            end
+            if (window_counter == WINDOW_CYCLES-1) begin
+                window_counter <= 0;
+                window_total_q <= window_sum + delta_count;
+                window_total_valid <= 1'b1;
                 window_sum <= 0;
             end else begin
                 window_counter <= window_counter + 1'b1;
