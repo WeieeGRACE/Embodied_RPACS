@@ -86,17 +86,26 @@ cd tests/uart_bridge
 ### 3.2 综合 + 资源报告
 
 ```powershell
-.\run_build.ps1              # 只综合，打印资源占用
-.\run_build.ps1 -Download    # 综合 + 烧写 SRAM（易失，不断电有效）
+cd tests/uart_bridge
+.\run_sim.ps1              # 仿真回归（compile + core + loopback）
+.\run_build.ps1            # 纯链路版本综合，打印资源
+.\run_build.ps1 -Download  # 纯链路版本综合 + 烧写 SRAM（易失）
+
+# IMU 变体（遥测带真实 yaw/pitch/roll）
+D:/Gowin/Gowin_V1.9.12_x64/IDE/bin/gw_sh.exe build_imu.tcl
+D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe --device GW5A-25A --run 2 `
+    --fsFile impl/pnr/uart_bridge_imu.fs --cable "Gowin USB Cable(FT2CH)"
 ```
 
 当前资源（GW5A-25，50 MHz）：
 
-| 资源 | 占用 | 占比 |
-| --- | --- | --- |
-| Logic | 1066 / 23040（850 LUT + 216 ALU） | 5% |
-| Register | 808 / 23685 | 4% |
-| CLS | 804 / 11520 | 7% |
+| 顶层 | Logic | Register | CLS | 备注 |
+| --- | --- | --- | --- | --- |
+| `uart_bridge_top`（纯链路） | 1066（5%） | 808（4%） | 804（7%） | 基准版本 |
+| `uart_bridge_imu_top`（链路 + 真实姿态） | 5305（24%） | 2529（11%） | 3615（32%） | +IMU 驱动/姿态解算、4 BSRAM、10 DSP |
+
+两个顶层分别用 `build.tcl` / `build_imu.tcl` 综合，产物 `impl/pnr/uart_bridge.fs` 与
+`impl/pnr/uart_bridge_imu.fs`。
 
 ### 3.3 串口台架测试
 

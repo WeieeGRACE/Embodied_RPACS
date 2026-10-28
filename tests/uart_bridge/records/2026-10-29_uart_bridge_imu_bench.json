@@ -1,0 +1,122 @@
+{
+  "port": "COM14",
+  "baud": 115200,
+  "started": "2026-10-29T00:31:25",
+  "parser_stats": {
+    "good": 108,
+    "sync_err": 8,
+    "len_err": 0,
+    "crc_err": 0,
+    "tail_err": 0,
+    "timeout": 0,
+    "type_err": 0
+  },
+  "frames_seen": {
+    "TELEM": 99,
+    "ACK": 9
+  },
+  "telem_rate_hz": 50.01,
+  "rx_bytes": 3068,
+  "duration_s": 1.98,
+  "checks": [
+    {
+      "name": "telemetry_stream_present",
+      "ok": true,
+      "detail": "fault=0x22"
+    },
+    {
+      "name": "telemetry_rate_50hz",
+      "ok": true,
+      "detail": "50.0 Hz"
+    },
+    {
+      "name": "clear_fault_ack_ok",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "link_lost_cleared_by_clear_fault",
+      "ok": true,
+      "detail": "fault=0x20"
+    },
+    {
+      "name": "setvel_ack_ok",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "setvel_ack_seq_echo",
+      "ok": true,
+      "detail": "expected 96 got 96"
+    },
+    {
+      "name": "telem_echoes_cmd_seq",
+      "ok": true,
+      "detail": "cmd_seq=96"
+    },
+    {
+      "name": "over_limit_rejected_by_ack",
+      "ok": true,
+      "detail": "REJECT_OVER_LIMIT"
+    },
+    {
+      "name": "stop_ack_ok",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "stop_fault_bit_in_telemetry",
+      "ok": true,
+      "detail": "fault=0x09"
+    },
+    {
+      "name": "setvel_refused_while_stopped",
+      "ok": true,
+      "detail": "REJECT_STOP_LATCHED"
+    },
+    {
+      "name": "clear_after_stop_ack_ok",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "stop_bit_cleared",
+      "ok": true,
+      "detail": "fault=0x00"
+    },
+    {
+      "name": "link_lost_after_heartbeat_stop",
+      "ok": true,
+      "detail": "detected in 278 ms"
+    },
+    {
+      "name": "link_lost_timing_plausible",
+      "ok": true,
+      "detail": "278 ms (default timeout 300 ms)"
+    },
+    {
+      "name": "hb_age_reported",
+      "ok": true,
+      "detail": "hb_age=311 ms"
+    },
+    {
+      "name": "recovery_clear_ack_ok",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "link_recovered",
+      "ok": true,
+      "detail": "fault=0x20"
+    },
+    {
+      "name": "crc_error_rate_below_1e-3",
+      "ok": true,
+      "detail": "0 (108 good frames)"
+    }
+  ],
+  "passed": 19,
+  "failed": 0,
+  "ok": true,
+  "finished": "2026-10-29T00:31:27"
+}

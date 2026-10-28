@@ -153,11 +153,53 @@ parser_stats good=30000 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
 
 ---
 
-## 8. 未完成 / 后续
+## 8. IMU 变体（遥测带真实姿态）
+
+用户要求"能读取板子上的传感器信息"，因此在链路核心不动的前提下加了第二个顶层
+`src/uart_bridge_imu_top.v`：复用主工程已验证的 `imu660ra_driver` + `imu_attitude_fixed`
+（200 Hz 采样、CORDIC/atan2/开方求姿态），把 roll/pitch/yaw（毫度）换算成 0.01° 填进 TELEM。
+
+### 8.1 资源开销（同一工程、两个顶层分别综合）
+
+| 顶层 | Logic | Register | CLS | BSRAM | DSP |
+| --- | --- | --- | --- | --- | --- |
+| `uart_bridge_top`（纯链路） | 1066（5%） | 808（4%） | 804（7%） | 0 | 0 |
+| `uart_bridge_imu_top`（链路 + IMU 姿态） | **5305（24%）** | 2529（11%） | **3615（32%）** | 4（pROM，IMU 配置镜像） | 10/28 |
+
+即 **IMU 驱动 + 姿态解算额外占 4239 Logic / 2811 CLS / 4 BSRAM / 10 DSP**。
+对主工程而言这部分**本来就有**（主工程已含 IMU + 姿态），所以把链路合入主工程只多 1066 Logic
+（结论仍见 §7）。独立测试工程里 24%/32% 余量充足。
+
+### 8.2 板级实测（烧写 `uart_bridge_imu.fs`，同样只写 SRAM）
+
+```
+19/19 checks passed   （records/2026-10-29_uart_bridge_imu_bench.json，失联检出 278 ms）
+```
+
+真实姿态样例（5 s，250 帧，误码 0；未发心跳故 fault=0x22）：
+
+```text
+0.087 yaw=  +1.28 pitch=  -3.56 roll=  -1.15 spd=(0,0) fault=0x22
+0.287 yaw=  +1.29 pitch=  -3.56 roll=  -1.15 spd=(0,0) fault=0x22
+0.687 yaw=  +1.30 pitch=  -3.58 roll=  -1.15 spd=(0,0) fault=0x22
+...
+# frames=250 stats={'good': 250, 'crc_err': 0, ...}
+```
+
+- pitch ≈ −3.6°、roll ≈ −1.15° —— 小车确实不是完全水平，是真实重力的测量结果；
+- yaw 在静止时缓慢漂移（+1.28 → +1.30，约 0.004°/s 量级），符合低成本 IMU 特性；
+- 完整样例：`records/2026-10-29_imu_telemetry_sample.txt`。
+
+> **烧写说明**：SRAM 掉电即失效，因此板子断电重启会恢复原来的整车固件；
+> 今晚最后烧的是 **IMU 变体**（便于明早直接看真实姿态）。
+
+---
+
+## 9. 未完成 / 后续
 
 | 项 | 说明 |
 | --- | --- |
-| IMU 姿态 | 本工程遥测的 yaw/pitch/roll 固定为 0；IMU 驱动未合入（避免引脚/资源冲突）。下一步做"链路 + IMU"最小组合板，让遥测带真实姿态 |
+| IMU 姿态 | ✅ 已做：`uart_bridge_imu_top.v` 把 imu660ra + 姿态解算接进遥测（§8），实测 pitch −3.6°/roll −1.15° 为真实重力测量 |
 | 编码器速度 | `COUNTS_PER_M=1116` 为占位值，需按实车轮径与减速比标定 |
 | 电机闭环 | 只到"目标速度寄存器"，未接 `src/motor` 闭环与 PWM；联调时按路径 1/2 决策 |
 | 以太网 v2 | 协议层已就绪（`transport.py: UdpTransport` 可直接跑同一帧格式），RTL 需新增 RGMII/UDP 字节源 |
@@ -165,7 +207,7 @@ parser_stats good=30000 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
 
 ---
 
-## 9. 复现步骤
+## 10. 复现步骤
 
 ```powershell
 cd tests/uart_bridge
@@ -188,7 +230,7 @@ python tools\soak_test.py --port COM14 --duration 600 --out records/soak.json
 
 ---
 
-## 10. 证据文件索引
+## 11. 证据文件索引
 
 | 文件 | 内容 |
 | --- | --- |
