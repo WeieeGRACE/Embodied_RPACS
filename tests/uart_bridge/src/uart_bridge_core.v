@@ -12,7 +12,7 @@ module uart_bridge_core #(
     parameter integer CLK_HZ             = 50_000_000,
     parameter integer TELEM_PERIOD_MS    = 20,
     parameter integer CMD_TIMEOUT_MS     = 500,
-    parameter integer HB_TIMEOUT_MS      = 200,
+    parameter integer HB_TIMEOUT_MS      = 300,   // 1.5x the 200 ms heartbeat period
     parameter integer BYTE_TIMEOUT_CYCLES= 250_000,   // 5 ms @ 50 MHz
     parameter integer DEFAULT_LIMIT_MM_S = 300,
     parameter integer MAX_LEN            = 32

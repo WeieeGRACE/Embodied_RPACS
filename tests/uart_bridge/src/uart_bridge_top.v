@@ -10,7 +10,7 @@ module uart_bridge_top #(
     parameter integer BAUD               = 115200,
     parameter integer TELEM_PERIOD_MS    = 20,
     parameter integer CMD_TIMEOUT_MS     = 500,
-    parameter integer HB_TIMEOUT_MS      = 200,
+    parameter integer HB_TIMEOUT_MS      = 300,   // 1.5x the 200 ms heartbeat period
     parameter integer DEFAULT_LIMIT_MM_S = 300,
     // encoder counts per metre (x1 decoding); only used for the telemetry speed field
     parameter integer COUNTS_PER_M       = 1116

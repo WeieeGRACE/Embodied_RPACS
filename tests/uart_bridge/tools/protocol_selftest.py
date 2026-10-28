@@ -56,16 +56,16 @@ def test_frame_roundtrip() -> None:
 
 
 def test_frame_bytes() -> None:
-    raw = P.msg_set_vel(200, -150)
-    expected_payload = bytes([0xC8, 0x00, 0x6A, 0xFF])
-    check("set_vel_header", raw[:4] == bytes([0xAA, 0x55, 0x01, 0x04]),
+    raw = P.msg_set_vel(200, -150, seq=0x2A)
+    expected_payload = bytes([0xC8, 0x00, 0x6A, 0xFF, 0x2A])
+    check("set_vel_header", raw[:4] == bytes([0xAA, 0x55, 0x01, 0x05]),
           raw[:4].hex(" "))
-    check("set_vel_payload", raw[4:8] == expected_payload, raw[4:8].hex(" "))
+    check("set_vel_payload", raw[4:9] == expected_payload, raw[4:9].hex(" "))
     check("set_vel_tail", raw[-1] == 0x0D, "%02X" % raw[-1])
-    crc = P.crc16_ccitt(bytes([0x01, 0x04]) + expected_payload)
-    check("set_vel_crc", raw[8:10] == crc.to_bytes(2, "little"),
-          raw[8:10].hex(" ") + " vs " + crc.to_bytes(2, "little").hex(" "))
-    check("set_vel_len", len(raw) == P.FRAME_OVERHEAD + 4, str(len(raw)))
+    crc = P.crc16_ccitt(bytes([0x01, 0x05]) + expected_payload)
+    check("set_vel_crc", raw[9:11] == crc.to_bytes(2, "little"),
+          raw[9:11].hex(" ") + " vs " + crc.to_bytes(2, "little").hex(" "))
+    check("set_vel_len", len(raw) == P.FRAME_OVERHEAD + 5, str(len(raw)))
 
 
 def test_errors() -> None:
@@ -107,7 +107,7 @@ def test_errors() -> None:
     out = []
     for byte in good:
         out += parser.feed(bytes([byte]))
-    check("byte_by_byte", len(out) == 1 and out[0].payload == good[4:8],
+    check("byte_by_byte", len(out) == 1 and out[0].payload == good[4:9],
           "frames=%d" % len(out))
 
 
@@ -159,8 +159,15 @@ def print_vectors() -> None:
     print("V3 01           CRC = 0x%04X" % P.crc16_ccitt(b"\x01"))
     telem = bytes([P.MSG_TELEM, 23]) + bytes(23)
     print("V4 TELEM zeros  CRC = 0x%04X" % P.crc16_ccitt(telem))
-    print("V5 SET_VEL(200,-150) full frame = %s"
-          % P.msg_set_vel(200, -150).hex(" "))
+    print("V5 SET_VEL(200,-150,seq=0x2A) full frame = %s"
+          % P.msg_set_vel(200, -150, 0x2A).hex(" "))
+    # 供 RTL 帧解析测试直接引用（SPEC_VECTORS 输出为 C 风格数组）
+    vec = ", ".join("0x%02X" % b for b in P.msg_set_vel(200, -150, 0x2A))
+    print("RTL_VECTOR_SET_VEL = {%s};" % vec)
+    vec2 = ", ".join("0x%02X" % b for b in P.msg_heartbeat(7))
+    print("RTL_VECTOR_HEARTBEAT = {%s};" % vec2)
+    vec3 = ", ".join("0x%02X" % b for b in P.msg_stop())
+    print("RTL_VECTOR_STOP = {%s};" % vec3)
 
 
 if __name__ == "__main__":

@@ -86,14 +86,14 @@ uint16_t crc16_ccitt(const uint8_t *p, size_t n, uint16_t crc) {
 | V2 | ASCII "123456789" | `31 32 33 34 35 36 37 38 39` | **`0x29B1`**（标准校验值，必须过） |
 | V3 | 单字节 | `01` | `0xF1D1` |
 | V4 | TELEM 全零载荷（TYPE=0x81, LEN=23, 23×`00`） | `81 17` + 23×`00` | `0xD80F` |
-| V5 | SET_VEL(200,−150) 完整帧 | `AA 55 01 04 C8 00 6A FF C0 0E 0D` | 帧内 CRC=`C0 0E`(LE)=`0x0EC0` |
+| V5 | SET_VEL(200,−150,seq=0x2A) 完整帧 | `AA 55 01 05 C8 00 6A FF 2A 46 E1 0D` | 帧内 CRC=`46 E1`(LE)=`0xE146` |
 
-### 2.4 完整帧示例（SET_VEL：左 200 mm/s、右 −150 mm/s）
+### 2.4 完整帧示例（SET_VEL：左 200 mm/s、右 −150 mm/s、seq=0x2A）
 
 ```text
-PAYLOAD = C8 00 6A FF        (int16 LE 200, int16 LE -150)
-CRC 覆盖 01 04 C8 00 6A FF   → 0x0EC0 → 小端 C0 0E
-整帧 = AA 55 01 04 C8 00 6A FF C0 0E 0D     （11 字节 = 7 + LEN）
+PAYLOAD = C8 00 6A FF 2A     (int16 LE 200, int16 LE -150, uint8 seq)
+CRC 覆盖 01 05 C8 00 6A FF 2A → 0xE146 → 小端 46 E1
+整帧 = AA 55 01 05 C8 00 6A FF 2A 46 E1 0D   （12 字节 = 7 + LEN）
 ```
 
 ---
@@ -104,7 +104,7 @@ CRC 覆盖 01 04 C8 00 6A FF   → 0x0EC0 → 小端 C0 0E
 
 | TYPE | 名称 | LEN | PAYLOAD | 周期 | 语义 |
 | --- | --- | --- | --- | --- | --- |
-| `0x01` | `SET_VEL` | 4 | `int16 v_left` (mm/s), `int16 v_right` (mm/s) | 20 Hz | 设目标速度。**不直接驱动 PWM**，只写"目标速度"寄存器，经安全仲裁后生效 |
+| `0x01` | `SET_VEL` | 5 | `int16 v_left` (mm/s), `int16 v_right` (mm/s), `uint8 seq` | 20 Hz | 设目标速度。**不直接驱动 PWM**，只写"目标速度"寄存器，经安全仲裁后生效。`seq` 由上位机自增，FPGA 原样回显到 `TELEM.cmd_seq` 用于统计丢帧 |
 | `0x02` | `STOP` | 0 | — | 事件 | 立即停车，**锁存**；需 `CLEAR_FAULT` 才能解除 |
 | `0x03` | `HEARTBEAT` | 1 | `uint8 seq` | 5 Hz | 保活。200 ms 未收到 → `LINK_LOST` |
 | `0x04` | `SET_LIMIT` | 2 | `uint16 limit_mm_s` | 事件 | 前进速度上限（默认 300 mm/s） |
@@ -130,7 +130,7 @@ CRC 覆盖 01 04 C8 00 6A FF   → 0x0EC0 → 小端 C0 0E
 16    speed_r         int16    mm/s      右轮实测速度
 18    fault           uint8    —         故障位图，见 §4.3
 19    link_seq        uint8    —         最近一次成功接收的 HEARTBEAT 序号
-20    cmd_seq         uint8    —         最近一次成功 SET_VEL 的序号（上位机自填，回显用于丢帧统计）
+20    cmd_seq         uint8    —         最近一次成功 SET_VEL 的 seq（原样回显，用于丢帧统计）
 21    hb_age_ms       uint16   ms        距上次心跳的毫秒数（饱和到 65535）
 ```
 
@@ -152,18 +152,24 @@ CRC 覆盖 01 04 C8 00 6A FF   → 0x0EC0 → 小端 C0 0E
 
 | 参数 | 值 | 说明 |
 | --- | --- | --- |
-| 心跳周期 | 200 ms（5 Hz） | 上位机发送 |
-| 心跳超时 | **200 ms**（1 个周期，可配 100..2000） | FPGA 侧看门狗 |
+| 心跳周期 | **100 ms（10 Hz）**，最小 200 ms（5 Hz） | 上位机发送 |
+| 心跳超时 | **300 ms**（可配 100..2000） | FPGA 侧看门狗默认值 |
 | 遥测周期 | 20 ms（50 Hz） | FPGA 发送 |
 | SET_VEL 周期 | 50 ms（20 Hz） | 上位机发送 |
 | 命令超时 | 500 ms | 超过该时间无 `SET_VEL` → 目标速度归零（不锁存故障） |
 
+> **为什么超时不是 200 ms**：v1.0 初稿写的是"心跳 5 Hz + 超时 200 ms"，两者相等，
+> PC 侧任何一点调度抖动都会误判失联（实测台架在 5 Hz 下确实反复触发）。
+> 现冻结为 **心跳 10 Hz、超时 300 ms**（150% 周期余量）；若上位机只能 5 Hz，
+> 仍有 100 ms 余量可用。
+
 ### 4.2 失联保护
 
 ```text
-心跳超时 (200 ms) → link_lost=1, target_speed=0, 锁存
+心跳超时 (300 ms) → link_lost=1, target_speed=0, 锁存
 恢复条件：收到合法 HEARTBEAT 且收到 CLEAR_FAULT
 任何情况下：停止(STOP) > 失联(LINK_LOST) > 上位机命令 > 语音命令
+上电即 link_lost=1：显式使能原则，第一次连接必须发一条 CLEAR_FAULT 才接受速度命令
 ```
 
 ### 4.3 故障位图（TELEM.fault）
@@ -254,13 +260,25 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 | T06 | 连续多帧背靠背 | 单元 | 全部正确解析 |
 | T07 | STOP 锁存 + 后续 SET_VEL | 单元 | 目标速度保持 0，ACK 拒绝 |
 | T08 | 重复心跳 / 重复 STOP | 单元 | 幂等 |
-| T09 | 心跳超时 200 ms | 单元 | link_lost=1，目标速度归零 |
+| T09 | 心跳超时（默认 300 ms） | 单元 | link_lost=1，目标速度归零 |
 | T10 | CLEAR_FAULT 恢复时序 | 单元 | 仅在链路恢复后生效 |
 | T11 | 遥测 50 Hz 节拍与内容 | 单元 | 周期 20 ms ±1 ms，字段正确 |
 | T12 | 全链路回环（RX→解析→遥测→TX） | 集成 | 上位机发命令 → 收到对应遥测 |
 | T13 | 上板：心跳 + 遥测 | 板级 | 50 Hz 遥测稳定，无 CRC 错 |
-| T14 | 上板：拔线 200 ms 后恢复 | 板级 | 先停车锁存，CLEAR_FAULT 后恢复 |
+| T14 | 上板：拔线 300 ms 后恢复 | 板级 | 先停车锁存，CLEAR_FAULT 后恢复 |
 | T15 | 上板：长时间（10 min）误码率 | 板级 | CRC 错误率 < 1e-6 |
+
+### 8.1 实现与验证状态（2026-10-29）
+
+| # | 用例 | 实现 | 验证手段 | 结果 |
+| --- | --- | --- | --- | --- |
+| T01 | CRC 向量 | `crc16_ccitt.v` / `protocol.py` | `tb_core.sv` 4 项 + Python 自检 | ✅ V2=0x29B1 等全部一致 |
+| T02–T06 | 帧解析与错误谱 | `host_frame_rx.v` | `tb_core.sv` 8 项 | ✅ CRC/尾/LEN/重同步/超时/逐字节 |
+| T07–T11 | 命令/安全/遥测 | `host_cmd_decode.v`、`host_link_watchdog.v`、`telem_builder.v` | `tb_core.sv` 20 项 | ✅ 含 ACK 状态码、锁存、恢复 |
+| T12 | 全链路回环 | 全套 | `tb_loopback.sv`（真实 115200） | ✅ ACK + TELEM 内容逐字节校验 |
+| T13 | 上板心跳+遥测 | `uart_bridge_top.v` | `uart_link.py bench` / `soak_test.py` | ✅ 50.0 Hz，误码 0 |
+| T14 | 上板失联恢复 | 同上 | `bench`：停心跳 299 ms 检出，恢复后 CLEAR_FAULT OK | ✅ |
+| T15 | 10 min 长稳 | 同上 | `soak_test.py --duration 600` | 见 `records/` |
 
 ---
 
@@ -269,3 +287,4 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 | 版本 | 日期 | 变更 |
 | --- | --- | --- |
 | v1.0 | 2026-10-28 | 首版冻结：帧格式、消息、时序、仲裁、UART 绑定、UDP 迁移约定 |
+| v1.1 | 2026-10-29 | ① `SET_VEL` 增加 `seq` 字节（LEN 4→5），用于丢帧统计；② 心跳超时 200→**300 ms**（与 5 Hz 心跳等周期会误判，实测证伪）；③ 补 §8.1 实现与验证状态；④ 明确"上电即 link_lost，需 CLEAR_FAULT 显式使能" |

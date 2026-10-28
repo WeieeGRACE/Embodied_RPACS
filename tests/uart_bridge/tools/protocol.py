@@ -53,7 +53,7 @@ TYPE_NAMES = {
 
 #: 各下行 TYPE 的合法 PAYLOAD 长度
 DOWNLINK_LEN = {
-    MSG_SET_VEL: 4,
+    MSG_SET_VEL: 5,
     MSG_STOP: 0,
     MSG_HEARTBEAT: 1,
     MSG_SET_LIMIT: 2,
@@ -230,12 +230,16 @@ class FrameParser:
 # --------------------------------------------------------------------------
 # 下行消息构造
 # --------------------------------------------------------------------------
-def msg_set_vel(v_left_mm_s: int, v_right_mm_s: int) -> bytes:
-    """SET_VEL：左右轮目标速度（mm/s，int16）。"""
+def msg_set_vel(v_left_mm_s: int, v_right_mm_s: int, seq: int = 0) -> bytes:
+    """SET_VEL：左右轮目标速度（mm/s，int16）+ 序号 seq（uint8，用于丢帧统计）。
+
+    seq 会被 FPGA 原样回显到 TELEM.cmd_seq，上位机据此计算命令丢失率。
+    """
     for v in (v_left_mm_s, v_right_mm_s):
         if not -32768 <= v <= 32767:
             raise ValueError("速度越界: %r" % (v,))
-    return build_frame(MSG_SET_VEL, struct.pack("<hh", v_left_mm_s, v_right_mm_s))
+    return build_frame(MSG_SET_VEL, struct.pack("<hhB", v_left_mm_s, v_right_mm_s,
+                                                seq & 0xFF))
 
 
 def msg_stop() -> bytes:
@@ -339,9 +343,10 @@ def build_ack(acked_type: int, seq: int, status: int) -> bytes:
 def describe(frame: Frame) -> str:
     """把一帧变成一行人类可读文本，供 CLI/日志使用。"""
     try:
-        if frame.msg_type == MSG_SET_VEL and len(frame.payload) == 4:
-            vl, vr = struct.unpack("<hh", frame.payload)
-            return "SET_VEL  v_left=%+6d mm/s  v_right=%+6d mm/s" % (vl, vr)
+        if frame.msg_type == MSG_SET_VEL and len(frame.payload) == 5:
+            vl, vr, seq = struct.unpack("<hhB", frame.payload)
+            return ("SET_VEL  v_left=%+6d mm/s  v_right=%+6d mm/s  seq=%d"
+                    % (vl, vr, seq))
         if frame.msg_type == MSG_SET_LIMIT and len(frame.payload) == 2:
             (lim,) = struct.unpack("<H", frame.payload)
             return "SET_LIMIT  limit=%d mm/s" % lim
