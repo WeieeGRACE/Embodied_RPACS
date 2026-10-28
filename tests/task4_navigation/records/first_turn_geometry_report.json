@@ -1,0 +1,20 @@
+{
+  "seed": "0x5441534B34",
+  "random_scenarios": 1000,
+  "body_corner_radius_mm": 341.76,
+  "pose_inflation_mm": 21.93,
+  "wall_half_thickness_assumption_mm": 1.5,
+  "endpoint_xy_perturbation_mm": 50,
+  "nominal_first_turn": {
+    "required_radius_mm": 365.19,
+    "available_clearance_mm": 276.57,
+    "pass": false,
+    "nearest_wall": "A_SIDE",
+    "signed_margin_mm": -65.19
+  },
+  "random_first_turn_passes": 0,
+  "random_first_turn_collisions": 1000,
+  "minimum_signed_margin_mm": -114.54,
+  "maximum_signed_margin_mm": -32.86,
+  "route_release": "NOT PROVEN / NOT RELEASED: route centerlines, measured braking distance, ToF error and survey-grade wall endpoints are not available. The A-point full in-place turn fails this geometry model; this does not prove every route must turn at A or is physically impossible."
+}

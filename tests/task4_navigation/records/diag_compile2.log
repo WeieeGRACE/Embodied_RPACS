@@ -1,0 +1,65 @@
+# do sim/run_board_compile.do
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 16:05:24 on Oct 27,2026
+# vlog -sv src/asr_feedback.v src/dual_ab_quadrature_encoder.v src/dual_speed_pi_pid_controller.v src/imu660ra_config_rom.v src/imu660ra_driver.v src/imu660ra_spi_master.v src/imu_attitude_fixed.v src/nav_event_segment_controller.v src/nav_map_wall_association.v src/nav_pose_range_guard.v src/nav_segment_table.v src/nav_segment_uart_logger.v src/nav_tof_wall_event.v src/obstacle_key.v src/obstacle_page.v src/obstacle_sensors.v src/oled_i2c_write_byte.v src/pwm_and_startup_ramp.v src/speed_measurement_and_velocity_filter.v src/task4_event_navigation_top.v src/task4_navigation_board_top.v src/task4_navigation_single_leg_probe_top.v src/task4_tof_driver.v src/tb6612_driver_interface.v src/tof_i2c.v src/tof_oled_text.v src/uart_tx.v sim/tb_nav_board_safe_default.v 
+# -- Compiling module asr_distance
+# -- Compiling module asr_yaw_unwrap
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module imu660ra_config_rom
+# -- Compiling module imu660ra_driver
+# -- Compiling module imu660ra_spi_master
+# -- Compiling module imu_attitude_fixed
+# -- Compiling module imu_attitude_bias_divider
+# -- Compiling module imu_attitude_atan2
+# -- Compiling module imu_attitude_sqrt
+# -- Compiling module imu_attitude_divider
+# -- Compiling module nav_event_segment_controller
+# -- Compiling module nav_map_wall_association
+# -- Compiling module nav_pose_range_guard
+# -- Compiling module nav_segment_table
+# -- Compiling module nav_segment_uart_logger
+# -- Compiling module nav_tof_wall_event
+# -- Compiling module obstacle_key
+# -- Compiling module obstacle_page
+# -- Compiling module obstacle_sensors
+# -- Compiling module oled_i2c_write_byte
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module task4_event_navigation_top
+# -- Compiling module task4_navigation_board_top
+# -- Compiling module task4_navigation_single_leg_probe_top
+# -- Compiling module tof_driver
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module tof_i2c_bits
+# -- Compiling module tof_i2c_reg
+# -- Compiling module tof_oled_text
+# -- Compiling module uart_tx
+# -- Compiling module tb_nav_board_safe_default
+# 
+# Top level modules:
+# 	tb_nav_board_safe_default
+# End time: 16:05:24 on Oct 27,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 16:05:24 on Oct 27,2026
+# vlog -sv src/nav_board_diagnostics.v src/task4_navigation_diagnostic_top.v sim/tb_nav_board_diagnostics.v sim/tb_oled_wire.v 
+# -- Compiling module nav_board_diagnostics
+# -- Compiling module task4_navigation_diagnostic_top
+# ** Error: (vlog-7) Failed to open design unit file "sim/tb_nav_board_diagnostics.v" in read mode.
+# No such file or directory. (errno = ENOENT)
+# ** Error: (vlog-7) Failed to open design unit file "sim/tb_oled_wire.v" in read mode.
+# No such file or directory. (errno = ENOENT)
+# End time: 16:05:24 on Oct 27,2026, Elapsed time: 0:00:00
+# Errors: 2, Warnings: 0
+# ** Error: D:/app/modesilm/win64/vlog failed.
+# Error in macro ./sim/run_board_compile.do line 3
+# D:/app/modesilm/win64/vlog failed.
+#     while executing
+# "vlog -sv src/nav_board_diagnostics.v src/task4_navigation_diagnostic_top.v sim/tb_nav_board_diagnostics.v sim/tb_oled_wire.v"
+# 
+# <EOF>

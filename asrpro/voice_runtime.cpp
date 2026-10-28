@@ -48,9 +48,11 @@ static void yy_dispatch(uint8_t type,uint8_t code){
  }else if(type==6 && code<=1){
   yy_avoid=code!=0;
   if(yy_avoid)set_state_enter_wakeup(8589934);else yy_cancel_start();
- }else if(type==7 && code>=1 && code<=3){
+ }else if(type==7 && code>=1 && code<=4){
   if(code==3){yy_cancel_start();yy_avoid=false;}
-  yy_queue_audio((uint16_t)(9300+code),code==3);
+  // Button starts are informational only: no completion cookie or TYPE05.
+  if(code==4){yy_cancel_start();yy_queue_audio(9300,true);}
+  else yy_queue_audio((uint16_t)(9300+code),code==3);
  }else if(type==3 && (code<=6 || code==0x10 || code==0x11 || (code>=0x20 && code<=0x23))){
   if(code==4 || code==5 || code==6 || code==0x10 || code==0x20)yy_cancel_start();
   if(code==yy_last_status)return;
@@ -73,7 +75,7 @@ static void yy_receive_byte(uint8_t byte,uint32_t now){
   if(yy_frame[0]==0xAA && yy_frame[1]==0x55){
    if(yy_used<6)return;
    uint8_t t=yy_frame[2],c=yy_frame[3];
-   bool known=(t==2 && c<=2)||(t==4)||(t==6 && c<=1)||(t==7 && c>=1 && c<=3)||
+   bool known=(t==2 && c<=2)||(t==4)||(t==6 && c<=1)||(t==7 && c>=1 && c<=4)||
     (t==3 && (c<=6 || c==0x10 || c==0x11 || (c>=0x20 && c<=0x23)));
    if(known && yy_frame[4]==(uint8_t)(t+c) && yy_frame[5]==0x0D){yy_used=0;yy_dispatch(t,c);return;}
   }

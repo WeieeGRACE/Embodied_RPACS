@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module name="task4_event_navigation_top" Register="52" Alu="57" Lut="82" T_Register="485(52)" T_Alu="279(57)" T_Lut="8861(82)" T_MULTALU27X18="12(0)">
+ <SubModule name="pose" Register="148" Alu="96" Lut="8212" MULTALU27X18="12" T_Register="148(148)" T_Alu="96(96)" T_Lut="8212(8212)" T_MULTALU27X18="12(12)"/>
+ <SubModule name="wall_event" Register="36" Lut="149" T_Register="36(36)" T_Lut="149(149)"/>
+ <SubModule name="controller" Register="249" Alu="126" Lut="413" T_Register="249(249)" T_Alu="126(126)" T_Lut="418(413)">
+  <SubModule name="table_i" Lut="5" T_Lut="5(5)"/>
+ </SubModule>
+</Module>

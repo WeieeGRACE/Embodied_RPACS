@@ -1,0 +1,17 @@
+{
+  "status": "SIMULATION_ASSUMPTIONS_ONLY",
+  "measured_parameters_complete": false,
+  "range_age_ms": 250,
+  "tof_error_mm": 10,
+  "tracking_position_error_mm": 10,
+  "tracking_yaw_error_deg": 2,
+  "control_latency_ms": 20,
+  "braking_distance_mm": 20,
+  "initial_speed_mm_s": 50,
+  "minimum_clearance_mm": 10,
+  "turn_sweep_step_deg": 2,
+  "random_seed": 361872903988,
+  "random_scenarios": 1000,
+  "board_route_enable_mask": 0,
+  "notes": "Body and 3 mm wall thickness are user supplied. All sensor, tracking, latency and braking budgets above are unmeasured simulation assumptions. No board route may be enabled from these values alone. Start and tracking errors are combined by maximum, not double counted. ToF error is an extra position budget. Age/control/braking motion is reserved at every action, including turns (conservative)."
+}

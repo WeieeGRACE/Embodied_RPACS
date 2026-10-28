@@ -1,0 +1,98 @@
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\asr_feedback.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\dual_ab_quadrature_encoder.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\dual_speed_pi_pid_controller.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu660ra_config_rom.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu660ra_driver.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu660ra_spi_master.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu_attitude_fixed.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_event_segment_controller.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_map_wall_association.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_segment_table.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_segment_uart_logger.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_tof_wall_event.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\obstacle_key.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\obstacle_page.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\obstacle_sensors.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\oled_i2c_write_byte.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\pwm_and_startup_ramp.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\speed_measurement_and_velocity_filter.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_event_navigation_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_board_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_single_leg_probe_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tb6612_driver_interface.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_tof_driver.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tof_i2c.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tof_oled_text.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\uart_tx.v'
+Compiling module 'task4_navigation_single_leg_probe_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_single_leg_probe_top.v":5)
+Compiling module 'task4_navigation_board_top(KEY_CYCLES=1000000,ENABLE_SINGLE_LEG=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_board_top.v":5)
+Compiling module 'imu660ra_driver(POWERUP_CYCLES=1000000,CONFIG_WAIT_CYCLES=1000000,ID_RETRY_CYCLES=50000,RETRY_CYCLES=50000000,SAMPLE_CYCLES=250000,HEALTH_CHECK_CYCLES=50000000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu660ra_driver.v":4)
+Compiling module 'imu660ra_spi_master'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu660ra_spi_master.v":3)
+Compiling module 'imu660ra_config_rom'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu660ra_config_rom.v":4)
+Extracting RAM for identifier 'rom'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu660ra_config_rom.v":11)
+Compiling module 'imu_attitude_fixed'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu_attitude_fixed.v":5)
+Compiling module 'imu_attitude_bias_divider'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu_attitude_fixed.v":287)
+Compiling module 'imu_attitude_atan2'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu_attitude_fixed.v":334)
+Compiling module 'imu_attitude_sqrt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu_attitude_fixed.v":387)
+Compiling module 'imu_attitude_divider'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\imu_attitude_fixed.v":422)
+Compiling module 'asr_yaw_unwrap(YAW_SIGN=-1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\asr_feedback.v":15)
+Compiling module 'dual_ab_quadrature_encoder(FILTER_CYCLES=50,INVERT_L=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\dual_ab_quadrature_encoder.v":3)
+Compiling module 'dual_ab_encoder_channel(FILTER_CYCLES=50,INVERT=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\dual_ab_quadrature_encoder.v":27)
+Compiling module 'dual_ab_encoder_channel(FILTER_CYCLES=50)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\dual_ab_quadrature_encoder.v":27)
+Compiling module 'asr_distance'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\asr_feedback.v":3)
+Compiling module 'speed_measurement_and_velocity_filter(ZERO_PAD_WARMUP=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\speed_measurement_and_velocity_filter.v":3)
+Compiling module 'obstacle_key'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\obstacle_key.v":2)
+Compiling module 'obstacle_sensors(RESET_CYCLES=50000,BOOT_CYCLES=1000000,POLL_CYCLES=500000,TIMEOUT_CYCLES=500000,NEAR_MM=25,SIDE_NEAR_MM=25)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\obstacle_sensors.v":3)
+Compiling module 'tof_driver(RESET_CYCLES=50000,BOOT_CYCLES=1000000,POLL_CYCLES=500000,MAX_POLLS=10,TIMEOUT_CYCLES=500000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_tof_driver.v":4)
+Compiling module 'tof_i2c_reg'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tof_i2c.v":99)
+Compiling module 'tof_i2c_bits'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tof_i2c.v":4)
+Compiling module 'task4_event_navigation_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_event_navigation_top.v":4)
+WARN  (EX3791) : Expression size 12 truncated to fit in target size 10("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_event_navigation_top.v":67)
+WARN  (EX3791) : Expression size 12 truncated to fit in target size 10("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_event_navigation_top.v":70)
+Compiling module 'nav_pose_range_guard(START_X_UM=32'sd2700000,START_Y_UM=32'sd300000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":4)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 25("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":40)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 26("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":43)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 16("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":56)
+WARN  (EX3791) : Expression size 41 truncated to fit in target size 32("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":66)
+Compiling module 'nav_segment_table'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_segment_table.v":5)
+Compiling module 'nav_map_wall_association'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_map_wall_association.v":9)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 16("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_map_wall_association.v":36)
+Compiling module 'nav_tof_wall_event'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_tof_wall_event.v":5)
+Compiling module 'nav_event_segment_controller'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_event_segment_controller.v":4)
+Compiling module 'dual_speed_pi_pid_controller'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\dual_speed_pi_pid_controller.v":3)
+Compiling module 'speed_pi_pid_channel'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\dual_speed_pi_pid_controller.v":27)
+Compiling module 'pwm_and_startup_ramp'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\pwm_and_startup_ramp.v":3)
+Compiling module 'pwm_startup_ramp_channel'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\pwm_and_startup_ramp.v":42)
+Compiling module 'tb6612_driver_interface'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tb6612_driver_interface.v":4)
+Compiling module 'tb6612_driver_channel'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tb6612_driver_interface.v":58)
+Compiling module 'obstacle_page'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\obstacle_page.v":2)
+Compiling module 'tof_oled_text'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tof_oled_text.v":5)
+Compiling module 'oled_i2c_write_byte'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\oled_i2c_write_byte.v":4)
+Compiling module 'nav_segment_uart_logger'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_segment_uart_logger.v":3)
+Compiling module 'uart_tx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\uart_tx.v":3)
+NOTE  (EX0101) : Current top module is "task4_navigation_single_leg_probe_top"
+[5%] Running netlist conversion ...
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+WARN  (NL0002) : The module "nav_segment_table" instantiated to "config_i" is swept in optimizing("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_event_navigation_top.v":95)
+WARN  (NL0002) : The module "nav_segment_table" instantiated to "table_i" is swept in optimizing("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_event_segment_controller.v":67)
+WARN  (NL0002) : The module "nav_map_wall_association" instantiated to "map_assoc" is swept in optimizing("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_event_navigation_top.v":112)
+[95%] Generate netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\gwsynthesis\task4_navigation_single_leg_probe.vg" completed
+[100%] Generate report file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\gwsynthesis\task4_navigation_single_leg_probe_syn.rpt.html" completed
+GowinSynthesis finish

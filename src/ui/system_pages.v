@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 module system_pages(
  input wire clk,rst_n,
+ input wire [7:0] start_diag,
  input wire [2:0] group_id,input wire [3:0] item,input wire page,
  input wire avoid_mode,auto_run,waiting,input wire [4:0] route_state,input wire [47:0] distances,input wire [2:0] tof_valid,
  input wire voice_enable,voice_candidate,input wire [1:0] gear,gear_candidate,
@@ -135,8 +136,12 @@ module system_pages(
  default:begin end
  endcase
  5:begin
- r1=!voice_enable ? "ENABLE VOICE FIRST   ":fault ? "FAULT RESET REQUIRED ":waiting ? "SPEAKING PLEASE WAIT ":auto_run ? (route_state==1 || route_state==2 ? "CRUISE               ":"AVOIDING             "):avoid_mode ? "PAUSED               ":"READY TO START       ";
- if(voice_enable && !fault)r1[39:0]=gear==0 ? " LOW ":gear==1 ? " MID ":" HIGH";
+ r1=fault ? "FAULT RESET REQUIRED ":waiting ? "SPEAKING PLEASE WAIT ":auto_run ? (route_state==1 || route_state==2 ? "CRUISE               ":"AVOIDING             "):
+ !ready ? "WAIT IMU / CHASSIS   ":!(&tof_valid) ? "TOF NOT READY        ":
+ busy ? "WAIT MOTION STOP     ":start_diag==7 ? "AUDIO TIMEOUT RETRY  ":
+ start_diag==8 ? "TOF LOST RETRY       ":start_diag==1 ? "VOICE OFF K2 START   ":
+ avoid_mode ? "PAUSED               ":"READY TO START       ";
+ if(auto_run || (!waiting && ready && &tof_valid && !fault && start_diag==0))r1[39:0]=gear==0 ? " LOW ":gear==1 ? " MID ":" HIGH";
  r2={"F:",(tof_valid[0] ? {hexchar(distances[15:12]),hexchar(distances[11:8]),hexchar(distances[7:4]),hexchar(distances[3:0])}:32'h2d2d2d2d),
  " L:",(tof_valid[1] ? {hexchar(distances[31:28]),hexchar(distances[27:24]),hexchar(distances[23:20]),hexchar(distances[19:16])}:32'h2d2d2d2d),
  " R:",(tof_valid[2] ? {hexchar(distances[47:44]),hexchar(distances[43:40]),hexchar(distances[39:36]),hexchar(distances[35:32])}:32'h2d2d2d2d)," "};

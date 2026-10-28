@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project><Template>FPGA</Template><Version>5</Version>
+<Device name="GW5A-25A" pn="GW5A-LV25UG324C2/I1">gw5a25a-008</Device>
+<FileList>
+<File path="src/nav_pose_range_guard.v" type="file.verilog" enable="1"/>
+<File path="src/nav_segment_table.v" type="file.verilog" enable="1"/>
+<File path="src/nav_tof_wall_event.v" type="file.verilog" enable="1"/>
+<File path="src/nav_event_segment_controller.v" type="file.verilog" enable="1"/>
+<File path="src/task4_event_navigation_top.v" type="file.verilog" enable="1" top="1"/>
+</FileList></Project>

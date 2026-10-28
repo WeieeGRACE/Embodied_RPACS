@@ -1,0 +1,39 @@
+# vlog -sv src/nav_pose_range_guard.v src/nav_route_supervisor.v sim/tb_nav_pose_range_guard.v sim/tb_nav_route_supervisor.v
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 17:23:48 on Oct 26,2026
+# vlog -sv src/nav_pose_range_guard.v src/nav_route_supervisor.v sim/tb_nav_pose_range_guard.v sim/tb_nav_route_supervisor.v 
+# -- Compiling module nav_pose_range_guard
+# -- Compiling module nav_route_supervisor
+# -- Compiling module tb_nav_pose_range_guard
+# -- Compiling module tb_nav_route_supervisor
+# 
+# Top level modules:
+# 	tb_nav_pose_range_guard
+# 	tb_nav_route_supervisor
+# End time: 17:23:48 on Oct 26,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+#  vsim -c work.tb_nav_pose_range_guard
+# vsim -c work.tb_nav_pose_range_guard 
+# Start time: 17:23:48 on Oct 26,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_nav_pose_range_guard(fast)
+#  run -all
+# PASS: range 20 discard, freshness aging, signed straight odometry, yaw fusion, fault latch
+# ** Note: $finish    : sim/tb_nav_pose_range_guard.v(30)
+#    Time: 100 ns  Iteration: 1  Instance: /tb_nav_pose_range_guard
+# End time: 17:23:49 on Oct 26,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0

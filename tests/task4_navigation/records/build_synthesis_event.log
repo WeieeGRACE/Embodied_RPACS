@@ -1,0 +1,47 @@
+*** GOWIN Tcl Command Line Console  *** 
+alog error: failed to open log file: 'C:/Users/Administartor/AppData/Local/GowinSemi/IDE/cache/sh.log'
+current device: GW5A-25A  GW5A-LV25UG324C2/I1
+add new file: "src/nav_pose_range_guard.v"
+add new file: "src/nav_route_supervisor.v"
+add new file: "src/task4_navigation_top.v"
+add new file: "src/nav_segment_table.v"
+add new file: "src/nav_tof_wall_event.v"
+add new file: "src/nav_event_segment_controller.v"
+add new file: "src/task4_event_navigation_top.v"
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_route_supervisor.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_segment_table.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_tof_wall_event.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_event_segment_controller.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_event_navigation_top.v'
+Compiling module 'task4_navigation_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_top.v":5)
+Compiling module 'nav_pose_range_guard'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":4)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 25("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":37)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 26("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":40)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 16("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":53)
+WARN  (EX3791) : Expression size 64 truncated to fit in target size 32("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":61)
+WARN  (EX3791) : Expression size 64 truncated to fit in target size 32("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v":62)
+Compiling module 'nav_route_supervisor'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_route_supervisor.v":5)
+NOTE  (EX0101) : Current top module is "task4_navigation_top"
+[5%] Running netlist conversion ...
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+[95%] Generate netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\gwsynthesis\task4_navigation_synthesis.vg" completed
+[100%] Generate report file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\gwsynthesis\task4_navigation_synthesis_syn.rpt.html" completed
+GowinSynthesis finish

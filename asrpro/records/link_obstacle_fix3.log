@@ -1,0 +1,12 @@
+../../../startup/asrpro_init.c:90:12: warning: type of 'efuse_check_idle' does not match original declaration [-Wlto-type-mismatch]
+../../../driver/ci130x_chip_driver/src/ci130x_efuse.c:73:6: note: return value type mismatch
+../../../driver/ci130x_chip_driver/src/ci130x_efuse.c:73:6: note: type '_Bool' should match type 'int'
+../../../driver/ci130x_chip_driver/src/ci130x_efuse.c:73:6: note: 'efuse_check_idle' was previously declared here
+../../../driver/ci130x_chip_driver/src/ci130x_efuse.c:73:6: note: code may be misoptimized unless '-fno-strict-aliasing' is used
+d:/app/twenblock/asrpro/gcc/bin/../lib/gcc/riscv-nuclei-elf/9.2.0/../../../../riscv-nuclei-elf/bin/ld.exe: C:\Users\ADMINI~1\AppData\Local\Temp\yaoyao.elf.eFhnTf.ltrans1.ltrans.o: in function `.L1673':
+<artificial>:(.text+0x5cd2): undefined reference to `snid'
+d:/app/twenblock/asrpro/gcc/bin/../lib/gcc/riscv-nuclei-elf/9.2.0/../../../../riscv-nuclei-elf/bin/ld.exe: <artificial>:(.text+0x5cd6): undefined reference to `snid'
+d:/app/twenblock/asrpro/gcc/bin/../lib/gcc/riscv-nuclei-elf/9.2.0/../../../../riscv-nuclei-elf/bin/ld.exe: <artificial>:(.text+0x5cda): undefined reference to `ASR_CODE'
+d:/app/twenblock/asrpro/gcc/bin/../lib/gcc/riscv-nuclei-elf/9.2.0/../../../../riscv-nuclei-elf/bin/ld.exe: C:\Users\ADMINI~1\AppData\Local\Temp\yaoyao.elf.eFhnTf.ltrans1.ltrans.o: in function `.L2302':
+<artificial>:(.text.startup+0x772): undefined reference to `setup'
+collect2.exe: error: ld returned 1 exit status

@@ -1,0 +1,122 @@
+{
+  "status": "INCOMPLETE_NAVIGATION_VALIDATION",
+  "map_version": "task4-map-v1-image-derived",
+  "wall_thickness_mm": 3,
+  "seed": 361872903988,
+  "random_scenarios": 1000,
+  "directed_scenarios": 9,
+  "budget_components": {
+    "position_mm": 10,
+    "yaw_corner_mm": 11.927257221434603,
+    "tof_position_mm": 10,
+    "reaction_travel_mm": 13.5,
+    "brake_mm": 20,
+    "required_clearance_mm": 10
+  },
+  "total_pose_motion_inflation_mm": 75.4272572214346,
+  "endpoint_boxes_mm": 50,
+  "routes": {
+    "B": {
+      "nominal": {
+        "passed": true,
+        "clearance_mm": 5.087,
+        "first_action": 2,
+        "wall": "A_SIDE.0"
+      },
+      "endpoint_box_envelope": {
+        "passed": false,
+        "clearance_mm": 0,
+        "first_action": 2,
+        "wall": "A_SIDE.0"
+      },
+      "actions": 39,
+      "expanded": 1268,
+      "random_passes": 0,
+      "random_failures": 1000,
+      "board_enabled": false
+    },
+    "C": {
+      "nominal": {
+        "passed": true,
+        "clearance_mm": 3.597,
+        "first_action": 33,
+        "wall": "B_TOP.0"
+      },
+      "endpoint_box_envelope": {
+        "passed": false,
+        "clearance_mm": 0,
+        "first_action": 2,
+        "wall": "A_SIDE.0"
+      },
+      "actions": 45,
+      "expanded": 1129,
+      "random_passes": 0,
+      "random_failures": 1000,
+      "board_enabled": false
+    },
+    "D": {
+      "nominal": {
+        "passed": true,
+        "clearance_mm": 5.087,
+        "first_action": 2,
+        "wall": "A_SIDE.0"
+      },
+      "endpoint_box_envelope": {
+        "passed": false,
+        "clearance_mm": 0,
+        "first_action": 2,
+        "wall": "A_SIDE.0"
+      },
+      "actions": 47,
+      "expanded": 1400,
+      "random_passes": 0,
+      "random_failures": 1000,
+      "board_enabled": false
+    },
+    "E": {
+      "nominal": {
+        "passed": true,
+        "clearance_mm": 5.087,
+        "first_action": 52,
+        "wall": "D_RIGHT.0"
+      },
+      "endpoint_box_envelope": {
+        "passed": false,
+        "clearance_mm": 0,
+        "first_action": 2,
+        "wall": "A_SIDE.0"
+      },
+      "actions": 66,
+      "expanded": 2478,
+      "random_passes": 0,
+      "random_failures": 1000,
+      "board_enabled": false
+    },
+    "PATROL": {
+      "nominal": {
+        "passed": true,
+        "clearance_mm": 3.597,
+        "first_action": 65,
+        "wall": "B_TOP.0"
+      },
+      "endpoint_box_envelope": {
+        "passed": false,
+        "clearance_mm": 0,
+        "first_action": 2,
+        "wall": "A_SIDE.0"
+      },
+      "actions": 146,
+      "expanded": 3996,
+      "random_passes": 0,
+      "random_failures": 1000,
+      "board_enabled": false
+    }
+  },
+  "elapsed_s": 2.52,
+  "limitations": [
+    "100 mm XY / 45 degree lattice with forward/reverse straight motion and stationary turns; any no-path result is planner-resolution/model specific, not physical impossibility",
+    "Convex rotation hull is a conservative swept enclosure with a chord error bound. A failed enclosure means safety unproven, not necessarily actual contact",
+    "All safety parameters except vehicle envelope, start tolerance and wall thickness require board measurement",
+    "Directed scenes combine shared wall endpoints for A-side narrowing, B and D junction shifts, a tilted MID_H span and the diagonal X; 1000 random shared-vertex scenarios remain exploratory, while the +/-50 mm envelope decides route release"
+  ]
+}

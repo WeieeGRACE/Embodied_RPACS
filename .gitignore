@@ -156,6 +156,31 @@
 
 !/tests/asr_motion/impl/pnr/asr_motion_gpio.fs
 
+# Independent task 4 navigation test assets.
+!/tests/task4_navigation/
+!/tests/task4_navigation/**
+/tests/task4_navigation/work/
+/tests/task4_navigation/impl/temp/
+!/tests/task4_navigation/records/
+/tests/task4_navigation/records/*
+!/tests/task4_navigation/records/*.json
+!/tests/task4_navigation/records/*.md
+!/tests/task4_navigation/records/*.svg
+!/tests/task4_navigation/records/*.log
+!/tests/task4_navigation/data/
+!/tests/task4_navigation/data/*.json
+!/tests/task4_navigation/src/
+!/tests/task4_navigation/src/*.v
+!/tests/task4_navigation/sim/
+!/tests/task4_navigation/sim/*.do
+!/tests/task4_navigation/sim/*.sv
+!/tests/task4_navigation/tools/
+!/tests/task4_navigation/tools/*.py
+!/tests/task4_navigation/*.md
+!/tests/task4_navigation/*.ps1
+!/tests/task4_navigation/*.tcl
+!/tests/task4_navigation/*.gprj
+
 # Main project is self-contained, including its own build and simulation models.
 !/build.tcl
 !/verify_project.tcl

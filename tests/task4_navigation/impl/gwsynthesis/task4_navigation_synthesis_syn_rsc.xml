@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module name="task4_navigation_top" Register="20" Lut="37" T_Register="220(20)" T_Alu="96(0)" T_Lut="8496(37)" T_MULTALU27X18="12(0)">
+ <SubModule name="pose" Register="100" Alu="96" Lut="8217" MULTALU27X18="12" T_Register="100(100)" T_Alu="96(96)" T_Lut="8217(8217)" T_MULTALU27X18="12(12)"/>
+ <SubModule name="supervisor" Register="100" Lut="242" T_Register="100(100)" T_Lut="242(242)"/>
+</Module>

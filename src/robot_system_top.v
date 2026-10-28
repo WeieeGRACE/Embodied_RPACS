@@ -57,6 +57,7 @@ module robot_system_top #(
  wire signed [31:0] roll_mdeg,pitch_mdeg,yaw_wrapped,pos_l,pos_r,speed_l,speed_r;
  wire [7:0] status,imu_error,sensor_error,motion_fault,command,response;
  wire command_valid;wire [11:0] event_errors;
+ wire [7:0] start_diag;wire [63:0] debug_state;wire debug_valid;
  system_motion #(.CLK_HZ(CLK_HZ),.BAUD(UART_BAUD),.PWM_HZ(PWM_HZ),
  .WINDOW_CYCLES(WINDOW_CYCLES),.ENC_FILTER(ENC_FILTER),.DIR_DEADTIME(DIR_DEADTIME),
  .IMU_POWERUP(IMU_POWERUP_CYCLES),.IMU_WAIT(IMU_CONFIG_WAIT_CYCLES),
@@ -79,11 +80,13 @@ module robot_system_top #(
  .roll_mdeg(roll_mdeg),.pitch_mdeg(pitch_mdeg),.yaw_wrapped(yaw_wrapped),
  .pos_l(pos_l),.pos_r(pos_r),.speed_l(speed_l),.speed_r(speed_r),
  .imu_error(imu_error),.sensor_error(sensor_error),.gear(gear),.status(status),
- .motion_fault(motion_fault),.command_valid(command_valid),.command(command),.response(response),.event_errors(event_errors));
+ .motion_fault(motion_fault),.command_valid(command_valid),.command(command),.response(response),.event_errors(event_errors),
+ .start_diag(start_diag),.debug_state(debug_state),.debug_valid(debug_valid));
  assign led_heartbeat=voice_enable;
  system_event_logger #(.CLK_HZ(CLK_HZ),.BAUD(UART_BAUD),.WATCHDOG_PRESENT(0)) logger(
  .clk(clk_50m),.rst_n(rst_n),.imu_started(imu_ready),.imu_failed(led_fault),
- .imu_error(imu_error),.errors(event_errors),.tx(uart_tx));
+ .imu_error(imu_error),.errors(event_errors),.tx(uart_tx),.debug_state(debug_state),
+ .debug_valid(debug_valid));
  wire [23:0] tof_errors;wire [11:0] tof_statuses;
  obstacle_sensors #(.CLK_HZ(CLK_HZ),.I2C_HZ(TOF_I2C_HZ),.RESET_CYCLES(TOF_RESET_CYCLES),
  .BOOT_CYCLES(TOF_BOOT_CYCLES),.POLL_CYCLES(TOF_POLL_CYCLES),.MAX_POLLS(TOF_MAX_POLLS),
@@ -101,6 +104,7 @@ module robot_system_top #(
  tof_page tof_display(.seen(tof_seen),.valid(tof_valid),.distances(distances),
  .errors(tof_errors),.statuses(tof_statuses),.text(tof_text));
  system_pages pages(.clk(clk_50m),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page),
+ .start_diag(start_diag),
  .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.route_state(route_state),.distances(distances),.tof_valid(tof_valid),
  .voice_enable(voice_enable),.voice_candidate(voice_candidate),.gear(gear),.gear_candidate(gear_candidate),
  .ready(led_ready),.busy(led_run),.fault(led_fault),.imu_ready(imu_ready),.calibrating(calibrating),.attitude_valid(attitude_valid),

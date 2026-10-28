@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project><Template>FPGA</Template><Version>5</Version>
+<Device name="GW5A-25A" pn="GW5A-LV25UG324C2/I1">gw5a25a-008</Device>
+<FileList>
+<File path="src/asr_feedback.v" type="file.verilog" enable="1"/>
+<File path="src/dual_ab_quadrature_encoder.v" type="file.verilog" enable="1"/>
+<File path="src/dual_speed_pi_pid_controller.v" type="file.verilog" enable="1"/>
+<File path="src/imu660ra_config_rom.v" type="file.verilog" enable="1"/>
+<File path="src/imu660ra_driver.v" type="file.verilog" enable="1"/>
+<File path="src/imu660ra_spi_master.v" type="file.verilog" enable="1"/>
+<File path="src/imu_attitude_fixed.v" type="file.verilog" enable="1"/>
+<File path="src/nav_event_segment_controller.v" type="file.verilog" enable="1"/>
+<File path="src/nav_map_wall_association.v" type="file.verilog" enable="1"/>
+<File path="src/nav_pose_range_guard.v" type="file.verilog" enable="1"/>
+
+<File path="src/nav_segment_table.v" type="file.verilog" enable="1"/>
+<File path="src/nav_segment_uart_logger.v" type="file.verilog" enable="1"/>
+<File path="src/nav_tof_wall_event.v" type="file.verilog" enable="1"/>
+<File path="src/obstacle_key.v" type="file.verilog" enable="1"/>
+<File path="src/obstacle_page.v" type="file.verilog" enable="1"/>
+<File path="src/obstacle_sensors.v" type="file.verilog" enable="1"/>
+<File path="src/oled_i2c_write_byte.v" type="file.verilog" enable="1"/>
+<File path="src/pwm_and_startup_ramp.v" type="file.verilog" enable="1"/>
+<File path="src/speed_measurement_and_velocity_filter.v" type="file.verilog" enable="1"/>
+<File path="src/task4_event_navigation_top.v" type="file.verilog" enable="1"/>
+
+<File path="src/tb6612_driver_interface.v" type="file.verilog" enable="1"/>
+<File path="src/task4_tof_driver.v" type="file.verilog" enable="1"/>
+<File path="src/tof_i2c.v" type="file.verilog" enable="1"/>
+<File path="src/tof_oled_text.v" type="file.verilog" enable="1"/>
+<File path="src/uart_tx.v" type="file.verilog" enable="1"/>
+<File path="src/imu660ra_config.hex" type="file.data" enable="1"/>
+<File path="src/task4_navigation_board_top.cst" type="file.cst" enable="1"/>
+<File path="src/task4_navigation_board_top.sdc" type="file.sdc" enable="1"/>
+<File path="src/task4_navigation_board_top.v" type="file.verilog" enable="1"/>
+<File path="src/task4_navigation_single_leg_probe_top.v" type="file.verilog" enable="1" top="1"/></FileList></Project>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="-80 -80 3160 3160">
+<rect x="0" y="0" width="3000" height="3000" fill="#fff" stroke="#333" stroke-width="28"/>
+<line x1="0" y1="3000" x2="3000" y2="3000" stroke="#8b5a2b" stroke-width="30"/>
+<text x="1500.0" y="3000.0" font-size="42" fill="#333">OUT_BOTTOM</text>
+<line x1="3000" y1="3000" x2="3000" y2="0" stroke="#8b5a2b" stroke-width="30"/>
+<text x="3000.0" y="1500.0" font-size="42" fill="#333">OUT_RIGHT</text>
+<line x1="3000" y1="0" x2="0" y2="0" stroke="#8b5a2b" stroke-width="30"/>
+<text x="1500.0" y="0.0" font-size="42" fill="#333">OUT_TOP</text>
+<line x1="0" y1="0" x2="0" y2="3000" stroke="#8b5a2b" stroke-width="30"/>
+<text x="0.0" y="1500.0" font-size="42" fill="#333">OUT_LEFT</text>
+<line x1="0" y1="1800" x2="600" y2="1800" stroke="#8b5a2b" stroke-width="30"/>
+<text x="300.0" y="1800.0" font-size="42" fill="#333">B_TOP</text>
+<line x1="600" y1="2400" x2="600" y2="1800" stroke="#8b5a2b" stroke-width="30"/>
+<text x="600.0" y="2100.0" font-size="42" fill="#333">B_SIDE</text>
+<line x1="445.736" y1="425.7359999999999" x2="1294.264" y2="1274.264" stroke="#8b5a2b" stroke-width="30"/>
+<text x="870.0" y="850.0" font-size="42" fill="#333">C_X1</text>
+<line x1="445.736" y1="1274.264" x2="1294.264" y2="425.7359999999999" stroke="#8b5a2b" stroke-width="30"/>
+<text x="870.0" y="850.0" font-size="42" fill="#333">C_X2</text>
+<line x1="1200" y1="3000" x2="1200" y2="2400" stroke="#8b5a2b" stroke-width="30"/>
+<text x="1200.0" y="2700.0" font-size="42" fill="#333">SOUTH_STUB</text>
+<line x1="1200" y1="1800" x2="3000" y2="1800" stroke="#8b5a2b" stroke-width="30"/>
+<text x="2100.0" y="1800.0" font-size="42" fill="#333">MID_H</text>
+<line x1="1800" y1="2400" x2="1800" y2="600" stroke="#8b5a2b" stroke-width="30"/>
+<text x="1800.0" y="1500.0" font-size="42" fill="#333">MID_V</text>
+<line x1="2400" y1="1200" x2="2400" y2="600" stroke="#8b5a2b" stroke-width="30"/>
+<text x="2400.0" y="900.0" font-size="42" fill="#333">D_RIGHT</text>
+<line x1="1800" y1="1200" x2="2400" y2="1200" stroke="#8b5a2b" stroke-width="30"/>
+<text x="2100.0" y="1200.0" font-size="42" fill="#333">D_BOTTOM</text>
+<line x1="2400" y1="3000" x2="2400" y2="2400" stroke="#8b5a2b" stroke-width="30"/>
+<text x="2400.0" y="2700.0" font-size="42" fill="#333">A_SIDE</text>
+<circle cx="2700" cy="2700" r="35" fill="#d22"/><text x="2735" y="2690" font-size="100" fill="#d22">A</text>
+<circle cx="300" cy="2000" r="35" fill="#d22"/><text x="335" y="1990" font-size="100" fill="#d22">B</text>
+<circle cx="300" cy="600" r="35" fill="#d22"/><text x="335" y="590" font-size="100" fill="#d22">C</text>
+<circle cx="2100" cy="600" r="35" fill="#d22"/><text x="2135" y="590" font-size="100" fill="#d22">D</text>
+<circle cx="2100" cy="1350" r="35" fill="#d22"/><text x="2135" y="1340" font-size="100" fill="#d22">E</text>
+<circle cx="2700" cy="2700" r="365.2" fill="#f00" fill-opacity=".15" stroke="#d00" stroke-width="8"/>
+<text x="80" y="2900" font-size="65" fill="#900">A first 360-degree turn sweep (conservative disk)</text></svg>

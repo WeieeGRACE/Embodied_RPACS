@@ -4,7 +4,7 @@
   "romBytes": 2097152,
   "nvOffset": 2031616,
   "firmwareBytes": 1622062,
-  "firmwareSHA256": "a612e72d21f58c14246ed8f74669d38066447993427a492f98a9ecdcc1546380",
+  "firmwareSHA256": "b2755af0a931b391183e29b7a98dc85ec6c193be5ea256ce1bb8776d72c258ec",
   "aecEnabled": true,
   "wakeTimeoutMs": 8589934,
   "receiptAfterTransmit": true,
@@ -237,8 +237,8 @@
     "code": {
       "offset": 16384,
       "size": 146840,
-      "crc16": 53474,
-      "sha256": "ad535e6f8e1a4faf055b856310fec009eea4a40afef7033ec71bdf15114c7b49"
+      "crc16": 50367,
+      "sha256": "c1a0f86e693d6729ffff8b1c569e2a37d947453f09c9903fa00493f4fa9a168d"
     },
     "asr": {
       "offset": 163840,

@@ -1,0 +1,33 @@
+{
+  "map_version": "task4-map-v1-image-derived",
+  "units": "mm",
+  "workspace": [3000, 3000],
+  "coordinate_origin": "inner lower-left boundary",
+  "source": "../../../../地图.jpg and TASK4_ROUTE_BOOK.md; all internal endpoints are image-derived nominal estimates, not survey measurements",
+  "assumptions": {
+    "wall_thickness_mm": 3,
+    "wall_endpoint_xy_uncertainty_mm": 50,
+    "connected_vertices_share_perturbation": true,
+    "body_front_mm": 320,
+    "body_rear_mm": 0,
+    "body_half_width_mm": 120,
+    "wheel_track_mm": 240,
+    "start_xy_mm": [2700, 300],
+    "start_yaw_mdeg": 0,
+    "start_xy_error_mm": 10,
+    "start_yaw_error_mdeg": 2000,
+    "braking_distance_mm": null,
+    "warning": "3 mm wall thickness supplied by user; braking and localization error are not measured, so no path can be released as board-safe"
+  },
+  "goals_mm": {"A":[2700,300],"B":[300,1000],"C":[300,2400],"D":[2100,2400],"E":[2100,1650]},
+  "walls": [
+    {"id":"OUT_BOTTOM","a":[0,0],"b":[3000,0],"outer":true},{"id":"OUT_RIGHT","a":[3000,0],"b":[3000,3000],"outer":true},{"id":"OUT_TOP","a":[3000,3000],"b":[0,3000],"outer":true},{"id":"OUT_LEFT","a":[0,3000],"b":[0,0],"outer":true},
+    {"id":"B_TOP","a":[0,1200],"b":[600,1200]},{"id":"B_SIDE","a":[600,600],"b":[600,1200]},
+    {"id":"C_X1","a":[445.736,2574.264],"b":[1294.264,1725.736]},{"id":"C_X2","a":[445.736,1725.736],"b":[1294.264,2574.264]},
+    {"id":"SOUTH_STUB","a":[1200,0],"b":[1200,600]},
+    {"id":"MID_H","a":[1200,1200],"b":[3000,1200]},
+    {"id":"MID_V","a":[1800,600],"b":[1800,2400]},
+    {"id":"D_RIGHT","a":[2400,1800],"b":[2400,2400]},{"id":"D_BOTTOM","a":[1800,1800],"b":[2400,1800]},
+    {"id":"A_SIDE","a":[2400,0],"b":[2400,600]}
+  ]
+}

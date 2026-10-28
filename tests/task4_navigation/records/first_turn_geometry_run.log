@@ -1,0 +1,13 @@
+# 任务四几何审计结果
+
+- 地图：`task4-map-v1-image-derived`（图片标注估算，非实测）
+- 车体旋转角点半径：341.76 mm
+- 墙厚半值假设：1.5 mm；端点扰动：±50 mm/坐标轴
+- 起步位置/航向误差膨胀：21.93 mm
+- 固定随机种子：`0x5441534B34`，场景数：1000
+- 名义 A 点原地旋转：失败；最近墙段 `A_SIDE`，有符号净空余量 -65.19 mm
+- 扰动统计：0/1000 通过，1000/1000 失败；最差余量 -114.54 mm
+
+**路线结论：尚未证明安全，暂不放行上板。** NOT PROVEN / NOT RELEASED: route centerlines, measured braking distance, ToF error and survey-grade wall endpoints are not available. The A-point full in-place turn fails this geometry model; this does not prove every route must turn at A or is physically impossible.
+
+此审计只检查 A 点中心的全向原地旋转扫掠，不包含转弯前的平移退出、沿路线扫掠、制动滑行或其他目标点。因此不能推出完整路线必然碰撞或物理不可达。未知制动距离、ToF/定位误差未伪装为零；完成这些参数和逐路段检查前不能作路线安全结论。

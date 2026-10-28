@@ -1,0 +1,357 @@
+[
+  {
+    "path": "build_board.tcl",
+    "bytes": 428,
+    "sha256": "E893CED85F2238565FD0040490841D26B4923AD7DFB1C07901A110474D455CF5"
+  },
+  {
+    "path": "BUILD_REPORT.md",
+    "bytes": 2604,
+    "sha256": "A3C84E7118A960FA4162D5C7D0918701E35E27C2CE49759BF47E92DAAE031C96"
+  },
+  {
+    "path": "data/map_v1.json",
+    "bytes": 1721,
+    "sha256": "C2E96F968EE46061E0EE39CC8557ADC86AA9A6E3E09BB03C69947A998FE8BDDC"
+  },
+  {
+    "path": "data/route_segments_v1.json",
+    "bytes": 3178,
+    "sha256": "93A4531521F93969DD24B5201DDB66C6C4BC54C614AFB3D7BDA21AFE9EFB40C7"
+  },
+  {
+    "path": "data/safety.json",
+    "bytes": 843,
+    "sha256": "A12EC2696AFFDE75CE0BEC7DD1B1A951B0C06AC8D807196A7A8F8D9A2EB2F31F"
+  },
+  {
+    "path": "FIELD_TEST_GUIDE.md",
+    "bytes": 3690,
+    "sha256": "752604C94D727FCBCA43A53C98D936A4F3B374ABFE33EBF86388B4F0E51A3AD6"
+  },
+  {
+    "path": "impl/gwsynthesis/task4_navigation_board.vg",
+    "bytes": 2557044,
+    "sha256": "854324F7CF56F5890F821C13DEC6B61C66F1C7F911B798AF182601363850ACAC"
+  },
+  {
+    "path": "impl/pnr/task4_navigation_board_tr_content.html",
+    "bytes": 685474,
+    "sha256": "5A08763C1B1819CB57C92C17819D8BD86997817F19EB085B726F943EC5B4BAB9"
+  },
+  {
+    "path": "impl/pnr/task4_navigation_board.bin",
+    "bytes": 768640,
+    "sha256": "B61F05E52877DE70B73AFB1147FAD361F4119C6AF71E30EA56AD306E0B8E89B1"
+  },
+  {
+    "path": "impl/pnr/task4_navigation_board.fs",
+    "bytes": 6174012,
+    "sha256": "9F0CFC40F0E4214D8B37DE36AE9CA504577C1553F50412E4738BCDDB63491F2D"
+  },
+  {
+    "path": "impl/pnr/task4_navigation_board.pin.html",
+    "bytes": 79518,
+    "sha256": "E64A2407F046AC9299BA9E0901486F48A84218EA58F8B0CAE4132D9E7107F89E"
+  },
+  {
+    "path": "impl/pnr/task4_navigation_board.timing_paths",
+    "bytes": 37365,
+    "sha256": "1936B823EF9635A9924C29BDF4021EFCCB92880BC72FD8D768A47AD326F3A503"
+  },
+  {
+    "path": "IMPLEMENTATION_REPORT.md",
+    "bytes": 5652,
+    "sha256": "1B33AB3A23B1F9AEE63825931EEB419199E43D02CD057FFC7E57FEB699DF261A"
+  },
+  {
+    "path": "README.md",
+    "bytes": 991,
+    "sha256": "AE80399561C1F985BBDF84EDD633276BD558D19259099697C41DDCA9A279638C"
+  },
+  {
+    "path": "run_sim.ps1",
+    "bytes": 2862,
+    "sha256": "203DBDB98C30B88C49D56E0281D22A0113920E181D569177B4BD0432D030A2DC"
+  },
+  {
+    "path": "sim/run_board_compile.do",
+    "bytes": 814,
+    "sha256": "978109B695734978C214273A6835AF05F9E4A65B8BC90ED89324E0D4C9C97D28"
+  },
+  {
+    "path": "sim/run_board_safe.do",
+    "bytes": 56,
+    "sha256": "AC060553C3DF82548025D6D05D116491628D1B54D05D8A61D9E8DB85D751C29F"
+  },
+  {
+    "path": "sim/run_closed_loop.do",
+    "bytes": 49,
+    "sha256": "94615318EB00346CBBDF4E572C940DC0106295E903318BA9A08C0E7F89CFB9FD"
+  },
+  {
+    "path": "sim/run_event_segment.do",
+    "bytes": 43,
+    "sha256": "B6B1AEA92692AE6E480BC58773A94851A57172DAABCAC943A313BF0BA7401FA6"
+  },
+  {
+    "path": "sim/run_map_association.do",
+    "bytes": 58,
+    "sha256": "65F49FF2E8B72C029A74E8D11E9560A0069252D0AF63E760C15CAD809FB9BD74"
+  },
+  {
+    "path": "sim/run_nav.do",
+    "bytes": 429,
+    "sha256": "A689F72BDF68C69AE3B849256189978AC910082E677605360D25A98DFD710F10"
+  },
+  {
+    "path": "sim/run_pose.do",
+    "bytes": 46,
+    "sha256": "9CC834FE03D538288C0994647477E0686F7CD19BD9B0BBFC7051F581EF02247A"
+  },
+  {
+    "path": "sim/run_supervisor.do",
+    "bytes": 46,
+    "sha256": "855C1C9CF9171CCD2E83EEB9684C3A013E69A817849B2ED4F4A58224F2601902"
+  },
+  {
+    "path": "sim/tb_nav_board_safe_default.v",
+    "bytes": 4246,
+    "sha256": "A1BB248E5AD3CDB5390F19A1F239860B9A0C31E946B8D1B144EC6D0A76B33DD1"
+  },
+  {
+    "path": "sim/tb_nav_closed_loop.v",
+    "bytes": 10081,
+    "sha256": "DF36C2FB161A6D8D598361C720E81422E58E29D92D94BF8FCD5A2865397D965F"
+  },
+  {
+    "path": "sim/tb_nav_event_segment.v",
+    "bytes": 7862,
+    "sha256": "EFFC3FB023AA2D01C08EC7E20319FEBFC62A713CE1D017A93A6A1B9D5663EE82"
+  },
+  {
+    "path": "sim/tb_nav_map_wall_association.v",
+    "bytes": 1949,
+    "sha256": "4BCF20978936DE55C303A660A3429A6D7324F742BC84B2AE041E16D6C8CB8883"
+  },
+  {
+    "path": "sim/tb_nav_pose_range_guard.v",
+    "bytes": 2006,
+    "sha256": "A3750159C512E8EF9B67D842DB7D77E7486E2C8850ADA900703669749F83CAE4"
+  },
+  {
+    "path": "sim/tb_nav_route_supervisor.v",
+    "bytes": 2404,
+    "sha256": "D9B62EAD37A3FCB132E46B5F132550BDFD33F9F51A66F1A1B8B565ABBDF0ECD2"
+  },
+  {
+    "path": "sources_board.tcl",
+    "bytes": 1004,
+    "sha256": "32AF33927CAD0B21942A03358B590574DEC47A71E9CCA6802DB225BBBAFDEF4F"
+  },
+  {
+    "path": "src/asr_feedback.v",
+    "bytes": 1252,
+    "sha256": "2D6E83B554447CE7A2C0E6DDCB44A892BB1EFA948D91523E574D87A8E569B01F"
+  },
+  {
+    "path": "src/dual_ab_quadrature_encoder.v",
+    "bytes": 5138,
+    "sha256": "F823F7AC1B7EDEBF0C424867E94A021D9F1D97268409FC5A0C46ECDDF18DB06D"
+  },
+  {
+    "path": "src/dual_speed_pi_pid_controller.v",
+    "bytes": 3883,
+    "sha256": "53254230FD00511752CC561869C41D2F080291F79D662CC5800C2F0553480E38"
+  },
+  {
+    "path": "src/imu_attitude_fixed.v",
+    "bytes": 22479,
+    "sha256": "EEF7DA05E2841AF8507C6F1C2BC995B5A09499F8C3380885FD5C9D3706AFAF4A"
+  },
+  {
+    "path": "src/imu660ra_config_rom.v",
+    "bytes": 509,
+    "sha256": "8C7C3C36B759385E60B4EB5AA61430AA5CB245A2ECF58E33D1A0DF6F07131AFC"
+  },
+  {
+    "path": "src/imu660ra_config.hex",
+    "bytes": 24576,
+    "sha256": "107649DE633EBF83EC2C503AE26D7856E577B5075AA42A7ACA5B564CAA8F1CCB"
+  },
+  {
+    "path": "src/imu660ra_driver.v",
+    "bytes": 23418,
+    "sha256": "4BC58DB0FFE41B5E05C8F7D0678FFEB15A2F239E5FA01916E8427EA6A9E7BA8F"
+  },
+  {
+    "path": "src/imu660ra_spi_master.v",
+    "bytes": 2417,
+    "sha256": "A666C318250429DABDC9B389264898EDACC3DA42D6C7A71EE518F151A8D61B28"
+  },
+  {
+    "path": "src/nav_event_segment_controller.v",
+    "bytes": 20385,
+    "sha256": "061E0880124B4A581404CBE60BBF4B876BB0284251E22BDE151769A30E831837"
+  },
+  {
+    "path": "src/nav_map_wall_association.v",
+    "bytes": 5896,
+    "sha256": "B98A65AEA01315743CF0EEF662992D06CF940F6C0199D012CEA324E375A7AD29"
+  },
+  {
+    "path": "src/nav_pose_range_guard.v",
+    "bytes": 5628,
+    "sha256": "75629FC8DB5FBE032E0B2504ABB6425EE1FAD872FFBFCEDF167BBD2DC6223CCB"
+  },
+  {
+    "path": "src/nav_route_supervisor.v",
+    "bytes": 7845,
+    "sha256": "CBB7B2ACDE908D3EBB7D9E30C2157C2A53463E53BAF6066E3EFDDACC2EBEDA28"
+  },
+  {
+    "path": "src/nav_segment_table.v",
+    "bytes": 5570,
+    "sha256": "BCDE925B131C55C7AA44D571985BA083AFD3EAC75B9D889A00B8697E59456A9B"
+  },
+  {
+    "path": "src/nav_segment_uart_logger.v",
+    "bytes": 3346,
+    "sha256": "5B3E7501FD3974662E3FCEEFE553A7D116EF552EE2E58412E8BA111FDD25EC28"
+  },
+  {
+    "path": "src/nav_tof_wall_event.v",
+    "bytes": 4791,
+    "sha256": "012AFB618B64B72C2DA04CBC0C9AD88DFB1C9A3B8C3F0FEDE190B69F71E31B04"
+  },
+  {
+    "path": "src/obstacle_key.v",
+    "bytes": 507,
+    "sha256": "3B586A9E6850CA1FB98F9F852F238F303FD6C99B68169E6A144EB0ACCD9BC99D"
+  },
+  {
+    "path": "src/obstacle_page.v",
+    "bytes": 1181,
+    "sha256": "A5054E283AAF224D9D35A214D09A89E3C22B01236A85EB8CEFC7AB5649EF8972"
+  },
+  {
+    "path": "src/obstacle_sensors.v",
+    "bytes": 4641,
+    "sha256": "D5273DEDBE1068DD5E6FEB6F37BDCF347A458659C75DC01366DF3FD30E434084"
+  },
+  {
+    "path": "src/oled_i2c_write_byte.v",
+    "bytes": 5317,
+    "sha256": "FF8D0909C52296802E07421FA6A3C4F2997600CFBC0D3E86EEED9D7FD19EA1F7"
+  },
+  {
+    "path": "src/pwm_and_startup_ramp.v",
+    "bytes": 3798,
+    "sha256": "A189447F1C75A75000E172190445D24DD519501D906D498EEF27763CB68DFB51"
+  },
+  {
+    "path": "src/speed_measurement_and_velocity_filter.v",
+    "bytes": 5428,
+    "sha256": "C5D4E74FC1B4BFF419D29C86802FEACED49C3EE85057E81AD78C1FF7EC6C0080"
+  },
+  {
+    "path": "src/task4_event_navigation_top.v",
+    "bytes": 9864,
+    "sha256": "D337F08D1377AB2F679F32EC6EC0E5490987C0D063A9AC4EFC093821AF7CD293"
+  },
+  {
+    "path": "src/task4_navigation_board_top.cst",
+    "bytes": 3654,
+    "sha256": "F61221971ACE252D48F55BB98F9EC8DE0332D37F4056659B07BE2344BC32644C"
+  },
+  {
+    "path": "src/task4_navigation_board_top.sdc",
+    "bytes": 77,
+    "sha256": "15F460B435B40B5FF392BA2409CD966E0FD4A8A2C6582F0738A0F30D90586960"
+  },
+  {
+    "path": "src/task4_navigation_board_top.v",
+    "bytes": 16564,
+    "sha256": "7763141D320BE3F9B67256FC17B02563217FEB4BBF8E734565AC89A2477D721B"
+  },
+  {
+    "path": "src/task4_navigation_single_leg_probe_top.v",
+    "bytes": 2054,
+    "sha256": "BD6B4351F845529EB26A6F7D0591CD2D0567D1BF3A85AA45CFDECE7CEDA315A4"
+  },
+  {
+    "path": "src/task4_navigation_top.v",
+    "bytes": 3390,
+    "sha256": "D9F7FAC26C678496D27629AF49E3929FD9BA370AE9FC5F3CAFC48CA6C56CBDA2"
+  },
+  {
+    "path": "src/task4_tof_driver.v",
+    "bytes": 4367,
+    "sha256": "10D6B75D8D4BE617E41399A2962088325A44CE347D516B0B7B65600939159DC3"
+  },
+  {
+    "path": "src/tb6612_driver_interface.v",
+    "bytes": 5003,
+    "sha256": "A810B43D5D37F643FBA5DEB49FF656D2C4E91CC917DDE7943FB9E11026EFC3EE"
+  },
+  {
+    "path": "src/tof_driver.v",
+    "bytes": 7874,
+    "sha256": "DCECD46350C6C2CEF5E55ACCB2CD6D568022739D16C96851C367B282B0A146A3"
+  },
+  {
+    "path": "src/tof_i2c.v",
+    "bytes": 6292,
+    "sha256": "FFDA90CE9E2BBFCAA3F2681E7CD9195D4E171D04659686DD0C9503566C0D2FC2"
+  },
+  {
+    "path": "src/tof_oled_text.v",
+    "bytes": 12016,
+    "sha256": "24E370B65EEC3AC508C2F3F37CCD4725945B494429B1303C962081D069A1BAAA"
+  },
+  {
+    "path": "src/uart_tx.v",
+    "bytes": 925,
+    "sha256": "80B8ACDB44EE924424F5ED417B8F6E97166FA07C9A5BF36C1BACF735A022AAD1"
+  },
+  {
+    "path": "task4_navigation_board.gprj",
+    "bytes": 2464,
+    "sha256": "C4613BFF8E4B4800FAFE9B6C21D690B2ABF5CA9D200A9107B9A01C0B8592FCCB"
+  },
+  {
+    "path": "task4_navigation_board.gprj.user",
+    "bytes": 1621,
+    "sha256": "1C4B46DF55061CC7105959B7D389326A8739390E2370808908BF8391D7AED712"
+  },
+  {
+    "path": "tools/__pycache__/geometry_audit.cpython-314.pyc",
+    "bytes": 11958,
+    "sha256": "3E832C2700F9C2EE9AE5A6F1CDB44DF3C5DB5B7CAC53E7C9116729244A9BC072"
+  },
+  {
+    "path": "tools/__pycache__/navigation_geometry.cpython-314.pyc",
+    "bytes": 31276,
+    "sha256": "B7B46C5F0E06CD5C31D98F3F1EDA8847DAF4F2DF92F3EF775B8577AAB9FBA6DA"
+  },
+  {
+    "path": "tools/collision_prediction.py",
+    "bytes": 5937,
+    "sha256": "6481909760A3376FED7C646E29C3AC3D5C8A148B433004EDCC4B51E616350426"
+  },
+  {
+    "path": "tools/geometry_audit.py",
+    "bytes": 5483,
+    "sha256": "FA608A968484F6242B0841A8098D24C5C6E4B9EA9C9395012F08C9B8E31CACF6"
+  },
+  {
+    "path": "tools/navigation_geometry.py",
+    "bytes": 13624,
+    "sha256": "54F6D819E463A30B8465DC9A95E15C49CC23B4A29B287348C0677901C0AC0F55"
+  },
+  {
+    "path": "verify_board_saved_project.tcl",
+    "bytes": 459,
+    "sha256": "578735C896B0DEA69827413D520444F87E836F629AE74149E06C7A6C49FF33BE"
+  }
+]

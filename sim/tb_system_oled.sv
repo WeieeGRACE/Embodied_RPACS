@@ -8,7 +8,7 @@ module tb_system_oled;
  assign sda=ack_low?1'b0:1'bz;
  reg completed=0;reg av=0,ar=0,aw=0,ve=0;reg [4:0] rs=0;
  tof_page page(.seen(seen),.valid(valid),.distances(distances),.errors(errors),.statuses(statuses),.text(tof_text));
- system_pages pages(.clk(clk),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page_on),
+ system_pages pages(.start_diag(8'd0),.clk(clk),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page_on),
  .avoid_mode(av),.auto_run(ar),.waiting(aw),.route_state(rs),.distances(distances),.tof_valid(valid),
  .voice_enable(ve),.voice_candidate(1'b1),.gear(2'd1),.gear_candidate(2'd2),
  .ready(1'b1),.busy(1'b0),.fault(1'b0),.imu_ready(1'b1),.calibrating(1'b0),.attitude_valid(1'b1),
@@ -117,9 +117,9 @@ module tb_system_oled;
  dump("records/main_20261023/system_menu_tof.hex");
  $display("PASS settings, attitude signs/units, encoder count/speed, ToF bitmap and stale data masking");
  group_id=0;item=4;page_on=0;settle_frame();check_row(1,">OBSTACLE AVOID");
- group_id=5;item=0;page_on=1;settle_frame();check_row(0,"OBSTACLE AVOID");check_row(1,"ENABLE VOICE FIRST");
+ group_id=5;item=0;page_on=1;settle_frame();check_row(0,"OBSTACLE AVOID");check_row(1,"TOF NOT READY");
  ve=1;av=1;aw=1;valid=7;distances={16'd2000,16'd2000,16'd2000};settle_frame();
- check_row(1,"SPEAKING PLEASE  MID");check_row(2,"F:07D0 L:07D0 R:07D0");
+ check_row(1,"SPEAKING PLEASE WAIT");check_row(2,"F:07D0 L:07D0 R:07D0");
  aw=0;ar=1;rs=2;settle_frame();check_row(1,"CRUISE           MID");check_row(3,"K0 EXIT K2 PAUSE");
  ar=0;settle_frame();check_row(1,"PAUSED           MID");check_row(3,"K0 EXIT K2 START");
  $display("PASS obstacle OLED entry, voice-off prompt, waiting, cruise, paused, ranges and keys");

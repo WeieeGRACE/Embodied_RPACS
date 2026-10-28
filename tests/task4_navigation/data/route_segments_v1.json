@@ -1,0 +1,37 @@
+{
+  "map_version": "task4-map-v1-image-derived",
+  "route_table_status": "FULL_ROUTES_PENDING_GEOMETRY_VALIDATION; ROUTE_6_IS_RESTRICTED_SINGLE_LEG_TEST_ONLY",
+  "units": "mm/mdeg",
+  "note": "Routes 1-5 remain nominal/unvalidated. Route 6 is a restricted A-to-open-waypoint single-leg test for low-speed field calibration only; it is not a task target route. The board design must not enable routes 1-5.",
+  "routes": {
+    "1": {"name":"A-B", "segments":[
+      {"id":0,"from":"A","to":"AB_EXIT","min":450,"max":900,"hard_stop":1100,"wall_id":1,"tof_dir":1,"speed":50,"turn_target":90000},
+      {"id":1,"from":"AB_EXIT","to":"B_APPROACH","min":500,"max":1300,"hard_stop":1500,"wall_id":2,"tof_dir":0,"speed":50,"turn_target":180000},
+      {"id":2,"from":"B_APPROACH","to":"B","min":250,"max":800,"hard_stop":1000,"wall_id":3,"tof_dir":0,"speed":40,"turn_target":180000}
+    ]},
+    "2": {"name":"A-C", "segments":[
+      {"id":0,"from":"A","to":"AC_EXIT","min":450,"max":900,"hard_stop":1100,"wall_id":1,"tof_dir":1,"speed":50,"turn_target":90000},
+      {"id":1,"from":"AC_EXIT","to":"C_APPROACH","min":900,"max":1800,"hard_stop":2000,"wall_id":4,"tof_dir":1,"speed":50,"turn_target":180000},
+      {"id":2,"from":"C_APPROACH","to":"C","min":250,"max":800,"hard_stop":1000,"wall_id":5,"tof_dir":0,"speed":40,"turn_target":180000}
+    ]},
+    "3": {"name":"A-D", "segments":[
+      {"id":0,"from":"A","to":"AD_EXIT","min":450,"max":900,"hard_stop":1100,"wall_id":1,"tof_dir":1,"speed":50,"turn_target":-90000},
+      {"id":1,"from":"AD_EXIT","to":"D_APPROACH","min":900,"max":1900,"hard_stop":2100,"wall_id":6,"tof_dir":2,"speed":50,"turn_target":0},
+      {"id":2,"from":"D_APPROACH","to":"D","min":250,"max":800,"hard_stop":1000,"wall_id":7,"tof_dir":0,"speed":40,"turn_target":0}
+    ]},
+    "4": {"name":"A-E", "segments":[
+      {"id":0,"from":"A","to":"AE_EXIT","min":450,"max":900,"hard_stop":1100,"wall_id":1,"tof_dir":1,"speed":50,"turn_target":-90000},
+      {"id":1,"from":"AE_EXIT","to":"E_APPROACH","min":500,"max":1300,"hard_stop":1500,"wall_id":6,"tof_dir":2,"speed":50,"turn_target":180000},
+      {"id":2,"from":"E_APPROACH","to":"E","min":250,"max":800,"hard_stop":1000,"wall_id":8,"tof_dir":0,"speed":40,"turn_target":180000}
+    ]},
+    "5": {"name":"A-B-C-D-E", "segments":[
+      {"id":0,"from":"A","to":"B","min":450,"max":900,"hard_stop":1100,"wall_id":1,"tof_dir":1,"speed":50,"turn_target":90000},
+      {"id":1,"from":"B","to":"C","min":900,"max":1800,"hard_stop":2000,"wall_id":4,"tof_dir":1,"speed":50,"turn_target":180000},
+      {"id":2,"from":"C","to":"D","min":1200,"max":2200,"hard_stop":2400,"wall_id":6,"tof_dir":2,"speed":50,"turn_target":0},
+      {"id":3,"from":"D","to":"E","min":450,"max":1000,"hard_stop":1200,"wall_id":7,"tof_dir":0,"speed":40,"turn_target":180000}
+    ]},
+    "6": {"name":"A-OPEN-TEST (single leg only)","restricted":true,"segments":[
+      {"id":0,"from":"A","to":"OPEN_WAYPOINT_1","target_xy":[2700,750],"min":400,"max":430,"hard_stop":520,"forward_stop":120,"wall_id":10,"tof_dir":0,"event_range_min":100,"event_range_max":700,"turn_kind":"continuous_arc","speed":50,"target_yaw":0,"final":true}
+    ]}
+  }
+}

@@ -48,8 +48,9 @@ module tb_system_obstacle;
  if(dut.group_id!=0 || dut.page)$fatal(1,"root navigation");
  end endtask
  task choose(input integer gr,input integer it);begin
- root();while(dut.item!=gr-1)keypress(1);keypress(2);
- while(dut.item!=it)keypress(1);keypress(2);
+ root();$display("CHOOSE group=%0d item=%0d page=%b target=%0d",dut.group_id,dut.item,dut.page,gr);
+ while(dut.item!=gr-1)keypress(1);keypress(2);
+ while(dut.item!=it)begin keypress(1);$display("CHOOSE page item=%0d",dut.item);end keypress(2);
  if(!dut.page || dut.group_id!=gr || dut.item!=it)$fatal(1,"page selection");
  end endtask
  task boot;begin
@@ -231,33 +232,49 @@ module tb_system_obstacle;
  send('haa);send('h55);send(typ);send(code);send(typ+code);send(13);cycles(10);
  end endtask
  task start_avoid;integer old_requests;begin
+ if(dut.avoid_mode)begin
+ if(!dut.auto_run)keypress(2);
+ wait(dut.auto_run);wait(run_led);
+ end else begin
  old_requests=audio_requests;frame('h16);wait(dut.waiting);wait(audio_requests>old_requests);
  cycles(3000);off();if(dut.group_id!=5 || !dut.page)$fatal(1,"voice did not navigate to obstacle panel");
  typed_frame(5,audio_token+1);cycles(1000);off();if(dut.auto_run)$fatal(1,"wrong audio token started");
  typed_frame(5,audio_token);wait(dut.auto_run);wait(run_led);
+ end
  end endtask
- task pause_avoid;begin frame(2);wait(!run_led);cycles(2000);off();if(!dut.avoid_mode || dut.auto_run)$fatal(1,"STOP lost mode");end endtask
+ task pause_avoid;begin keypress(2);wait(!run_led);cycles(2000);off();if(!dut.avoid_mode || dut.auto_run)$fatal(1,"K2 lost mode");end endtask
+ task voice_noise;begin
+ frame(1);frame(2);frame(3);frame('h10);frame('h11);frame('h12);frame('h13);
+ frame('h14);frame('h15);frame('h16);frame('h17);
+ end endtask
+ task assert_voice_isolated;integer old_accepted,old_busy,old_reject;reg was_auto;begin
+ was_auto=dut.auto_run;old_accepted=accepted;old_busy=busy_replies;old_reject=reject_replies;
+ voice_noise();cycles(50000);off();
+ if(!dut.avoid_mode || dut.control.manual_active || dut.auto_run!=was_auto || dut.gear!=1 || accepted!=old_accepted || busy_replies!=old_busy || reject_replies!=old_reject)
+ $fatal(1,"voice changed avoidance control or received a reply");
+ end endtask
  task route_one(input bit right_detour);integer ch,extra_l,extra_r,base_clear,base_obstacle,shift_l,shift_r;
- integer home,return_l,return_r,actual_shift,old_gear;begin
+ integer home,return_l,return_r,actual_shift;begin
  ranges={16'd2000,16'(right_detour?650:2000),16'd700};
  wait(dut.distances==ranges);home=dut.control.yaw;base_clear=clear_events;base_obstacle=obstacle_events;
  if(!dut.auto_run)start_avoid();wait(dut.route_state==2);wait(st);
- // Every gear change must affect the running target without another movement command.
- frame('h14);cycles(15000);if(dut.gear!=2 || dut.control.motion.target_l!=1500)$fatal(1,"live cruise acceleration missing");
- frame('h14);if(dut.gear!=2)$fatal(1,"high saturation");
- frame('h15);cycles(15000);if(dut.control.motion.target_l!=1000)$fatal(1,"live cruise deceleration missing");
+ // Voice speed controls are isolated while the route owns the drivetrain.
+ frame('h14);frame('h15);cycles(15000);
+ if(dut.gear!=1 || dut.control.motion.target_l!=1000)$fatal(1,"voice changed avoidance cruise gear");
  ranges[15:0]=600;wait(dut.distances[15:0]==600);cycles(15000);
  if(dut.control.motion.target_l!=500)$fatal(1,"near cap must override gear");
- frame('h14);cycles(15000);if(dut.control.motion.target_l!=500)$fatal(1,"acceleration defeated near cap");
+ frame('h14);cycles(15000);if(dut.gear!=1 || dut.control.motion.target_l!=500)$fatal(1,"voice changed near-cap route speed");
  ranges[15:0]=130;wait(dut.route_state==4);wait(dut.control.motion.accepted);
  ch=right_detour?1:2;ranges={16'd2000,16'd2000,16'd2000};ranges[ch*16+:16]=400;
  wait(dut.route_state==6);shift_l=dut.control.um_l;shift_r=dut.control.um_r;
+ if(!right_detour)assert_voice_isolated();
  wait(((dut.control.um_l-shift_l)/2+(dut.control.um_r-shift_r)/2)>=350000);ranges[ch*16+:16]=900;
  wait(dut.route_state==22);extra_l=dut.control.um_l;extra_r=dut.control.um_r;
  wait(dut.route_state==7);actual_shift=dut.control.route.actual_shift;
  if((dut.control.um_l-extra_l)/2+(dut.control.um_r-extra_r)/2<300000)$fatal(1,"short lateral extra");
  ranges[ch*16+:16]=2000;wait(dut.route_state==9);
  wait(((dut.control.um_l-dut.control.route.pass_l)/2+(dut.control.um_r-dut.control.route.pass_r)/2)>=100000);ranges[ch*16+:16]=400;
+ if(!right_detour)assert_voice_isolated();
  wait(dut.control.route.box_seen);
  wait(((dut.control.um_l-dut.control.route.pass_l)/2+(dut.control.um_r-dut.control.route.pass_r)/2)>=400000);ranges[ch*16+:16]=900;
  wait(dut.route_state==11);extra_l=dut.control.um_l;extra_r=dut.control.um_r;
@@ -268,44 +285,43 @@ module tb_system_obstacle;
  if((dut.control.um_l-return_l)/2+(dut.control.um_r-return_r)/2<actual_shift)$fatal(1,"short return");
  wait(dut.route_state==2);wait(dut.control.route_cap==1000);cycles(15000);
  if(clear_events!=base_clear+1 || obstacle_events!=base_obstacle+1)$fatal(1,"route speech count");
- if(dut.control.motion.target_l!=1500)$fatal(1,"latest cruise gear not restored");
+ if(dut.gear!=1 || dut.control.motion.target_l!=1000)$fatal(1,"avoidance gear changed during voice isolation");
  if(dut.control.yaw-home>5000 || dut.control.yaw-home< -5000)$fatal(1,"heading not restored");
  if(fault_led)$fatal(1,"route fault");
- $display("PASS main obstacle full %s route, two300mm, return%0d, speech and live speed",right_detour?"right":"left",actual_shift);
+ $display("PASS main obstacle full %s route, two300mm, return%0d, speech and isolated voice",right_detour?"right":"left",actual_shift);
  end endtask
  always @(dut.route_state)$display("MAIN route=%0d auto=%b waiting=%b reason=%h time=%0t",dut.route_state,dut.auto_run,dut.waiting,dut.control.route_reason,$time);
  integer l0,old_done,old_clear,old_requests;
  initial begin
  wait(rst);wait(ready_led);wait(dut.tof_valid==7);cycles(2000);off();model_on=1;
- $display("MAIN boot ready");choose(5,0);keypress(2);cycles(2000);off();if(dut.avoid_mode)$fatal(1,"menu allowed voice-off start");
- choose(4,0);keypress(1);keypress(2);root();
- $display("MAIN voice enabled");
- // Menu and voice use the same actual-playback completion gate.
- old_requests=audio_requests;choose(5,0);keypress(2);wait(dut.waiting);wait(audio_requests>old_requests);
- cycles(3000);off();if(dut.auto_run)$fatal(1,"menu moved before speech completion");
- typed_frame(5,audio_token);wait(dut.auto_run);wait(run_led);pause_avoid();
+ $display("MAIN boot ready");choose(4,0);keypress(1);keypress(2);root();
+ if(!dut.voice_enable)$fatal(1,"voice enable setup failed");
+ choose(5,0);keypress(2);cycles(100);wait(dut.auto_run);wait(run_led);
+ if(dut.waiting || audio_requests!=0)$fatal(1,"button used gated audio request");
+ pause_avoid();
  route_one(0);route_one(1);pause_avoid();
- // ToF must not block a manual override, but auto restart must reject invalid ranges.
- start_avoid();wait(st);old_clear=clear_events;
- frame('h12);wait(!dut.auto_run);wait(dut.control.manual_active);wait(run_led);
- ranges={16'd40,16'd40,16'd40};old_done=done_events;frame('h13);cycles(1000);
- if(busy_replies==0)$fatal(1,"manual busy not refused");
+ // Voice commands stay blocked while running and paused, while K2/K0 and
+ // playback confirmations retain their independent control paths.
+ assert_voice_isolated();keypress(2);wait(dut.auto_run);wait(run_led);
+ pause_avoid();keypress(0);wait(!dut.avoid_mode);cycles(2000);off();
+ if(dut.group_id!=0)$fatal(1,"K0 did not return to root");
+ // Outside obstacle mode, normal voice movement, speed and status replies work.
+ ranges={16'd40,16'd40,16'd40};old_done=done_events;
+ frame('h12);wait(dut.control.manual_active);wait(run_led);
+ frame('h15);cycles(15000);if(dut.gear!=0)$fatal(1,"outside-mode gear control regressed");
  wait(!run_led);cycles(2000);off();
- if(fault_led || dut.auto_run || !dut.avoid_mode || clear_events!=old_clear || done_events!=old_done+1)$fatal(1,"manual override completion");
- frame('h16);cycles(1000);off();if(dut.waiting)$fatal(1,"invalid ToF allowed restart");
+ if(fault_led || dut.avoid_mode || done_events!=old_done+1)$fatal(1,"outside-mode voice motion failed");
+ if(accepted==0)$fatal(1,"outside-mode accepted response missing");
  ranges={16'd2000,16'd2000,16'd2000};wait(dut.tof_valid==7);
- // Backward distance goal survives immediate speed changes and does not resume.
- l0=dut.control.um_l;frame('h11);wait(st);frame('h15);cycles(15000);
- if(dut.control.motion.target_l!=-1000)$fatal(1,"manual live speed missing");
- wait(!run_led);cycles(2000);if(l0-dut.control.um_l<200000 || dut.auto_run)$fatal(1,"manual distance/resume");
- old_requests=exit_events;frame('h17);wait(!dut.avoid_mode);
- // TYPE07 follows already admitted response/status/heartbeat frames in the
- // real UART FIFO. Bound the wait by the complete queue drain, not 3 frames.
- for(integer drain=0;drain<50000 && (dut.group_id!=0 || exit_events==old_requests);drain++)cycles(1);
- if(dut.group_id!=0 || exit_events!=old_requests+1)$fatal(1,"voice exit navigation group=%0d events=%0d base=%0d",dut.group_id,exit_events,old_requests);
- start_avoid();wait(st);@(negedge clk);k0=0;#1;off();cycles(12);k0=1;cycles(12);wait(!run_led);cycles(2000);off();
+ // Voice entry still supports playback token validation while mode is off.
+ old_requests=audio_requests;frame('h16);wait(dut.waiting);wait(audio_requests>old_requests);
+ typed_frame(5,audio_token+1);cycles(1000);if(dut.auto_run)$fatal(1,"wrong token started outside-mode request");
+ typed_frame(5,audio_token);wait(dut.auto_run);wait(run_led);
+ // Voice exit is ignored in-mode; board K0 always cuts drive and exits.
+ frame('h17);cycles(1000);if(!dut.avoid_mode || !dut.auto_run)$fatal(1,"voice exit was not isolated");
+ @(negedge clk);k0=0;#1;off();cycles(12);k0=1;cycles(12);wait(!run_led);cycles(2000);off();
  if(dut.avoid_mode || dut.group_id!=0)$fatal(1,"K0 mode exit");
- $display("PASS main obstacle audio gate, menu navigation, takeover, busy, ToF bypass, live manual speed, exit");
+ $display("PASS main obstacle voice isolation, route completion, board pause/exit and outside-mode voice regression");
  completed=1;$finish;
  end
  initial begin #(64'd6000000000);$fatal(1,"obstacle suite watchdog state=%0d reason=%h",dut.route_state,dut.control.route_reason);end

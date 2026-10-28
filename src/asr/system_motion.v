@@ -28,7 +28,8 @@ module system_motion #(
  output reg [1:0] gear,output reg [7:0] status,
  output wire [7:0] motion_fault,
  output wire command_valid,output wire [7:0] command,
- output wire [7:0] response,output wire [11:0] event_errors
+ output wire [7:0] response,output wire [11:0] event_errors,
+ output wire [7:0] start_diag,output wire [63:0] debug_state,output wire debug_valid
 );
  wire clk=clk_50m;
  (* ASYNC_REG="TRUE" *) reg [1:0] reset_pipe;
@@ -105,6 +106,7 @@ module system_motion #(
  asr_uart_rx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) receiver(
  .clk(clk),.rst_n(rst_n),.rx(uart_rx),.command_valid(command_valid),.command(command),.ack_valid(ack_valid),.ack(ack));
  wire cv=command_valid;
+ wire voice_command_valid;
  wire busy,cmd_ready,done,aborted,rejected,drive_enable,controller_clear,command_pending;
  wire stopping,route_cancel,route_press,request_refresh,manual_active;
  wire [7:0] action,mode_status;wire aux_valid;wire [7:0] aux_type,aux_code;
@@ -113,6 +115,7 @@ module system_motion #(
  reg [230:0] issue_payload;
  system_dispatch #(.CLK_HZ(CLK_HZ)) dispatch(
  .clk(clk),.rst_n(rst_n),.voice_enable(voice_enable),.cv(cv),.command(command),
+ .voice_command_valid(voice_command_valid),
  .ack_valid(ack_valid),.ack(ack),.menu_valid(menu_valid),.menu_command(menu_command),
  .stop_gate(stop_gate),.stop_request(stop_request),.ready(modules_ready),.fault(fault),
  .busy(busy || command_pending || issue_valid),.cmd_ready(cmd_ready),.done(done),
@@ -120,7 +123,12 @@ module system_motion #(
  .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.manual_active(manual_active),
  .manual_action(action),.manual_submit(start),.stopping(stopping),.route_cancel(route_cancel),
  .route_press(route_press),.refresh(request_refresh),.show_avoid(show_avoid),.show_root(show_root),
- .response(response),.aux_valid(aux_valid),.aux_type(aux_type),.aux_code(aux_code),.mode_status(mode_status));
+ .response(response),.aux_valid(aux_valid),.aux_type(aux_type),.aux_code(aux_code),.mode_status(mode_status),.start_diag(start_diag));
+ // Registered by the USB logger; independent from ASR control traffic.
+ assign debug_state={start_diag,command,menu_command,ack,aux_type,aux_code,
+  3'd0,route_state,voice_enable,modules_ready,(&tof_seen && &tof_valid),fault,
+  busy,waiting,auto_run,avoid_mode};
+ assign debug_valid=menu_valid || command_valid || ack_valid || aux_valid;
  wire debug_action=action>=8'h20 && action<=8'h27;
  wire rotate=action==8'h12 || action==8'h13;
  wire reverse=action==8'h11 || action==8'h13;
@@ -130,7 +138,7 @@ module system_motion #(
  always @(posedge clk or negedge rst_n)
  if(!rst_n)gear<=1;
  else if(gear_commit && !stopping && !fault)gear<=gear_value;
- else if(cv && voice_enable && !fault && !stopping)begin
+ else if(voice_command_valid && voice_enable && !fault && !stopping)begin
  if(command==8'h14 && gear<2)gear<=gear+1'b1;
  if(command==8'h15 && gear>0)gear<=gear-1'b1;
  end
@@ -285,8 +293,8 @@ module system_motion #(
  always @(posedge clk or negedge rst_n)
  if(!rst_n)begin pair_q<=0;event_q<=0;aux_q<=0;response_q<=0;status_q<=0;event_status_q<=0;aux_type_q<=0;aux_code_q<=0;end
  else begin
- pair_q<=cv;response_q<=response;status_q<=next_status;
- event_q<=next_status!=status && !cv;event_status_q<=next_status;
+ pair_q<=voice_command_valid;response_q<=response;status_q<=next_status;
+ event_q<=next_status!=status && !voice_command_valid;event_status_q<=next_status;
  aux_q<=aux_valid;aux_type_q<=aux_type;aux_code_q<=aux_code;
  end
  asr_packet_tx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) packets(

@@ -1,0 +1,4 @@
+Reading netlist file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\gwsynthesis\task4_navigation.vg"
+Parsing netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\gwsynthesis\task4_navigation.vg" completed
+ERROR  (PA2024) : The number(394) of ports exceeds the resource limit 209 regular I/Os and 1 RECONFIG_N I/Os of current device, you can also use 4 JTAG, 2 MSPI, 3 CPU-MSPI, 1 READY, 1 DONE and 1 I2C I/Os by configuring Dual-Purpose Pin as regular I/Os.
+NOTE  (PA0005) : Processing netlist completed with errors

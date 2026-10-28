@@ -83,6 +83,7 @@ int main(){
   yy_audio_poll();yy_audio_poll();yy_audio_poll();CHECK(spoken==std::vector<uint16_t>({9301,9301,9302}));
   frame(3,0x20);frame(3,0x21);frame(3,0x22);frame(3,0x23);CHECK(yy_audio_queue->items.empty());
   frame(7,3);yy_audio_poll();CHECK(spoken.back()==9303);CHECK(!yy_avoid);
+  reset_rx();Serial1.tx.clear();spoken.clear();xQueueReset(yy_audio_queue);frame(7,4);yy_audio_poll();CHECK(spoken==std::vector<uint16_t>{9300});CHECK(yy_active_cookie==0);yy_rx_poll();CHECK(Serial1.tx.empty());
   reset_rx();Serial1.tx.clear();snid=25;ASR_CODE();CHECK(Serial1.tx[3]==0x17);CHECK(yy_audio_queue->items.empty());
   fail_allocate=true;yy_init();Serial1.tx.clear();snid=2;ASR_CODE();CHECK(Serial1.tx.size()==6);
   yy_audio_poll();CHECK(!yy_audio_queue);
