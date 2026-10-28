@@ -441,6 +441,18 @@ module tb_core;
               "core_estop_cleared_by_clear_fault");
         check(fault_out[2] == 1'b0, "core_estop_fault_bit_cleared");
 
+        // ================= core: clamp handles the int16 minimum =================
+        send_frame(8'h03, 1, head);
+        repeat (200) @(negedge clk);
+        head_setvel        = 64'h0;
+        head_setvel[15:0]  = -16'sd32768;      // -v would overflow int16 here
+        head_setvel[31:16] = 16'sd32767;
+        head_setvel[39:32] = 8'd9;
+        send_frame(8'h01, 5, head_setvel);
+        repeat (300) @(negedge clk);
+        check(target_l == -16'sd300 && target_r == 16'sd300,
+              "core_clamp_handles_int16_min");
+
         // ================= core: setvel_strobe output =================
         send_frame(8'h03, 1, head);
         repeat (200) @(negedge clk);

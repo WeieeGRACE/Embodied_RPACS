@@ -86,7 +86,7 @@ cd tests/uart_bridge
 .\run_sim.ps1
 ```
 
-预期：`compile / core / loopback` 三个套件全部 PASS（约 1 分钟）。
+预期：`compile / core / loopback / adapter / system` 五个套件 + Python↔RTL 一致性全部 PASS（约 30 秒）。
 
 ### 3.2 综合 + 资源报告
 
@@ -106,8 +106,8 @@ D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe --device GW5A-25A -
 
 | 顶层 | Logic | Register | CLS | 备注 |
 | --- | --- | --- | --- | --- |
-| `uart_bridge_top`（纯链路） | 1154（5%） | 842（4%） | 858（8%） | 基准版本 |
-| `uart_bridge_imu_top`（链路 + 真实姿态） | 5384（23%） | 2530（11%） | 3646（32%） | +IMU 驱动/姿态解算、4 BSRAM、10 DSP |
+| `uart_bridge_top`（纯链路） | 1174（6%） | 844（4%） | 881（8%） | 基准版本 |
+| `uart_bridge_imu_top`（链路 + 真实姿态） | 5430（24%） | 2564（11%） | 3671（32%） | +IMU 驱动/姿态解算、4 BSRAM、10 DSP |
 
 两个顶层分别用 `build.tcl` / `build_imu.tcl` 综合，产物 `impl/pnr/uart_bridge.fs` 与
 `impl/pnr/uart_bridge_imu.fs`。
@@ -153,7 +153,7 @@ STOP 锁存、失联检测（300 ms）、恢复、误码率。
 | 项目 | 结果 |
 | --- | --- |
 | 综合 + PnR + 位流 | ✅ 通过（GW5A-25A，50 MHz，无时序告警） |
-| 仿真回归 | ✅ 5 套共 **105 项**全过 + Python↔RTL 一致性 PASS |
+| 仿真回归 | ✅ 5 套共 **106 项**全过 + Python↔RTL 一致性 PASS |
 | 遥测速率 | ✅ 50.0 Hz（约 1540 B/s @115200，带宽占用约 13%） |
 | 台架验收 bench | ✅ **19/19 PASS**（含失联 299 ms 检测、STOP 锁存、限速裁剪） |
 | 10 min 长稳 | ✅ **30,000 帧 / 0 误码**，速率 50.0 Hz（±0.1） |
@@ -172,8 +172,8 @@ Logic **12036/23040（53%）**、Register 5138（22%）、CLS **7525/11520（66%
 
 | 版本 | Logic | CLS | 结论 |
 | --- | --- | --- | --- |
-| 完整版 | 1154 | 858 | ✅ 余量充足（合入后 CLS 仍余 ~3137） |
-| 精简版 | 1110 | 830 | ✅ 余量充足 |
+| 完整版 | 1174 | 881 | ✅ 余量充足（合入后 CLS 仍余 ~3114） |
+| 精简版 | 1110 | 830 | ✅ 余量充足（余 ~3165） |
 
 > **结论**：链路完全可以并入主工程，CLS 不再是瓶颈。
 > 历史备注：`PLAN.md` 的 20334/89%（余 792）与 10-28 23:40 的 19664/86%（余 998）

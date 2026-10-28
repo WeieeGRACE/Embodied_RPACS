@@ -341,7 +341,7 @@ def cmd_bench(args) -> int:
               ack is not None and ack.status == P.ACK_REJECT_LIMIT,
               ack.status_name if ack else "no ACK")
         link.set_limit(args.limit_restore)
-        time.sleep(0.05)      # 背靠背命令之间留间隔（ACK 队列深度 1，协议 §5.3）
+        time.sleep(0.05)      # 背靠背命令之间留间隔（ACK 队列深度 1，见协议 §5.1 末说明）
 
         # 5) STOP 锁存 + 遥测故障位
         link.stop_cmd()

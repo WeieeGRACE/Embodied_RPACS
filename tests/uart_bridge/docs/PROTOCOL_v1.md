@@ -2,7 +2,7 @@
 
 | 项 | 值 |
 | --- | --- |
-| 文档版本 | v1.0 |
+| 文档版本 | v1.1 |
 | 冻结时间 | 2026-10-28 |
 | 适用范围 | 深度相机/上位机（Orange Pi / PC）→ FPGA 主控 的命令与遥测链路 |
 | 状态 | **冻结**：帧格式与消息编码不再改动；新增消息只能追加 TYPE 编号 |
@@ -152,7 +152,7 @@ CRC 覆盖 01 05 C8 00 6A FF 2A → 0xE146 → 小端 46 E1
 
 | 参数 | 值 | 说明 |
 | --- | --- | --- |
-| 心跳周期 | **100 ms（10 Hz）**，最小 200 ms（5 Hz） | 上位机发送 |
+| 心跳周期 | **100 ms（10 Hz）**；最慢可放宽到 200 ms（5 Hz） | 上位机发送 |
 | 心跳超时 | **300 ms**（可配 100..2000） | FPGA 侧看门狗默认值 |
 | 遥测周期 | 20 ms（50 Hz） | FPGA 发送 |
 | SET_VEL 周期 | 50 ms（20 Hz） | 上位机发送 |
@@ -176,7 +176,7 @@ CRC 覆盖 01 05 C8 00 6A FF 2A → 0xE146 → 小端 46 E1
 
 | bit | 名称 | 触发 |
 | --- | --- | --- |
-| 0 | `STOP_LATCHED` | 收到 STOP 或急停 |
+| 0 | `STOP_LATCHED` | 收到 STOP（硬件急停在 bit2，见 §5.2） |
 | 1 | `LINK_LOST` | 心跳超时 |
 | 2 | `ESTOP` | 硬件急停按钮（若接入） |
 | 3 | `OVER_LIMIT` | 命令速度超过 SET_LIMIT 被裁剪 |
@@ -225,7 +225,7 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 > 不符时一律拒绝，避免把不完整的数据写进寄存器。
 >
 > **ACK 是尽力而为**：ACK 发送队列深度为 1，若上位机背靠背连发两条命令（间隔小于
-> 一帧发送时间 ~0.4 ms），第二条的 ACK 可能被丢弃（`ack_drop` 计数）。因此**判断命令是否
+> 一帧发送时间约 0.9 ms @115200），第二条的 ACK 可能被丢弃（`ack_drop` 计数）。因此**判断命令是否
 > 生效应以遥测为准**（`cmd_seq` 回显 / 故障位），或命令间隔 ≥ 1 ms（正常 20 Hz 命令流远大于此）。
 > 上位机侧的 `type_err` 统计（`protocol.py`）只用于诊断，FPGA 侧不维护该计数。
 
@@ -302,11 +302,11 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 | --- | --- | --- | --- | --- |
 | T01 | CRC 向量 | `crc16_ccitt.v` / `protocol.py` | `tb_core.sv` 4 项 + Python 自检 | ✅ V2=0x29B1 等全部一致 |
 | T02–T06 | 帧解析与错误谱 | `host_frame_rx.v` | `tb_core.sv` 8 项 + 一致性测试 25 帧 | ✅ CRC/尾/LEN/重同步/超时/逐字节 |
-| T07–T11 | 命令/安全/遥测 | `host_cmd_decode.v`、`host_link_watchdog.v`、`telem_builder.v` | `tb_core.sv` 23 项 | ✅ ACK 状态码、锁存、恢复、长度校验、急停 |
+| T07–T11 | 命令/安全/遥测 | `host_cmd_decode.v`、`host_link_watchdog.v`、`telem_builder.v` | `tb_core.sv` 40 项 | ✅ ACK 状态码、锁存、恢复、长度校验、急停、int16 极值 |
 | T12 | 全链路回环 | 全套 | `tb_loopback.sv`（真实 115200） | ✅ ACK + TELEM 内容逐字节校验 |
 | T13 | 上板心跳+遥测 | `uart_bridge_top.v` | `uart_link.py bench` / `soak_test.py` | ✅ 50.0 Hz，误码 0 |
 | T14 | 上板失联恢复 | 同上 | `bench`：停心跳 299 ms 检出，恢复后 CLEAR_FAULT OK | ✅ |
-| T15 | 10 min 长稳 | 同上 | `soak_test.py --duration 600` | ✅ 30,000 帧 0 误码（见 `records/`） |
+| T15 | 10 min 长稳 | 同上 | `soak_test.py --duration 600` | ✅ 30,004 帧 0 误码（见 `records/`） |
 
 > 另有 `tb_motion_adapter.sv`（19 项）与 `tb_system_closed_loop.sv`（12 项，含失联自动停车）
 > 覆盖"链路 → 电机侧"的整链行为，属于集成层验证，不在本表的协议用例内。

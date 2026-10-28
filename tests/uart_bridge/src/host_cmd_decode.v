@@ -97,7 +97,7 @@ module host_cmd_decode #(
                         if (frame_len != 8'd5) begin
                             ack_strobe <= 1'b1; ack_type <= frame_type;
                             ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
-                            unsupported_cnt <= unsupported_cnt + 16'd1;
+                            if (unsupported_cnt != 16'hFFFF) unsupported_cnt <= unsupported_cnt + 16'd1;
                         end else if (link_lost) begin
                             ack_strobe <= 1'b1; ack_type <= frame_type;
                             ack_seq <= pl_seq; ack_status <= ACK_REJ_LINK;
@@ -131,7 +131,7 @@ module host_cmd_decode #(
                         if (frame_len != 8'd0) begin
                             ack_strobe <= 1'b1; ack_type <= frame_type;
                             ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
-                            unsupported_cnt <= unsupported_cnt + 16'd1;
+                            if (unsupported_cnt != 16'hFFFF) unsupported_cnt <= unsupported_cnt + 16'd1;
                         end else begin
                             ack_strobe   <= 1'b1; ack_type <= frame_type;
                             ack_seq      <= 8'd0; ack_status <= ACK_OK;
@@ -144,7 +144,7 @@ module host_cmd_decode #(
                         end else begin
                             ack_strobe <= 1'b1; ack_type <= frame_type;
                             ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
-                            unsupported_cnt <= unsupported_cnt + 16'd1;
+                            if (unsupported_cnt != 16'hFFFF) unsupported_cnt <= unsupported_cnt + 16'd1;
                         end
                     end
                     T_SET_LIMIT: begin
@@ -155,7 +155,7 @@ module host_cmd_decode #(
                         end else begin
                             ack_strobe <= 1'b1; ack_type <= frame_type;
                             ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
-                            unsupported_cnt <= unsupported_cnt + 16'd1;
+                            if (unsupported_cnt != 16'hFFFF) unsupported_cnt <= unsupported_cnt + 16'd1;
                         end
                     end
                     T_CLEAR_FAULT: begin
@@ -163,7 +163,7 @@ module host_cmd_decode #(
                             // length mismatch: discard, do NOT unlock anything
                             ack_strobe <= 1'b1; ack_type <= frame_type;
                             ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
-                            unsupported_cnt <= unsupported_cnt + 16'd1;
+                            if (unsupported_cnt != 16'hFFFF) unsupported_cnt <= unsupported_cnt + 16'd1;
                         end else begin
                             if (link_ok) begin
                                 stop_latched <= 1'b0;
@@ -179,7 +179,7 @@ module host_cmd_decode #(
                     default: begin
                         ack_strobe <= 1'b1; ack_type <= frame_type;
                         ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
-                        unsupported_cnt <= unsupported_cnt + 16'd1;
+                        if (unsupported_cnt != 16'hFFFF) unsupported_cnt <= unsupported_cnt + 16'd1;
                     end
                 endcase
             end

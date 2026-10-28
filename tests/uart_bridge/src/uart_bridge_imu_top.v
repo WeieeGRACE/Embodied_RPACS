@@ -120,6 +120,16 @@ module uart_bridge_imu_top #(
         end
     end
 
+    // saturating 32-bit -> signed 16-bit (same rationale as uart_bridge_top)
+    function signed [15:0] sat16;
+        input signed [31:0] v;
+        begin
+            if (v > 32'sd32767)       sat16 = 16'sd32767;
+            else if (v < -32'sd32768) sat16 = -16'sd32768;
+            else                      sat16 = v[15:0];
+        end
+    endfunction
+
     // provisional speed scale (integer constant, no divider)
     localparam integer SPEED_K = 10000 / COUNTS_PER_M;
     reg  signed [31:0] enc_l_prev, enc_r_prev;
@@ -138,8 +148,8 @@ module uart_bridge_imu_top #(
             speed_div  <= 32'd0;
             enc_l_prev <= enc_l_cnt;
             enc_r_prev <= enc_r_cnt;
-            speed_l <= ((enc_l_cnt - enc_l_prev) * SPEED_K);
-            speed_r <= ((enc_r_cnt - enc_r_prev) * SPEED_K);
+            speed_l <= sat16((enc_l_cnt - enc_l_prev) * SPEED_K);
+            speed_r <= sat16((enc_r_cnt - enc_r_prev) * SPEED_K);
         end else begin
             speed_div <= speed_div + 32'd1;
         end

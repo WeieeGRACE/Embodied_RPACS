@@ -7,7 +7,7 @@
 # vmap uart_lib sim/work 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 02:32:46 on Oct 29,2026
+# Start time: 03:04:02 on Oct 29,2026
 # vlog -sv -work uart_lib src/uart_rx_8n1.v src/crc16_ccitt.v src/host_frame_rx.v src/host_cmd_decode.v src/host_link_watchdog.v src/telem_builder.v src/frame_tx_engine.v src/uart_bridge_core.v sim/tb_core.sv 
 # -- Compiling module uart_rx_8n1
 # -- Compiling module crc16_ccitt
@@ -22,10 +22,10 @@
 # Top level modules:
 # 	uart_rx_8n1
 # 	tb_core
-# End time: 02:32:46 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 03:04:02 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" uart_lib.tb_core 
-# Start time: 02:32:46 on Oct 29,2026
+# Start time: 03:04:02 on Oct 29,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vopt-143) Recognized 1 FSM in module "host_frame_rx(fast)".
 # ** Note: (vopt-143) Recognized 1 FSM in module "frame_tx_engine(fast)".
@@ -101,12 +101,13 @@
 # PASS core_estop_stays_latched_after_release
 # PASS core_estop_cleared_by_clear_fault
 # PASS core_estop_fault_bit_cleared
+# PASS core_clamp_handles_int16_min
 # PASS core_setvel_strobe_pulses_once
 # 
-# PASS tb_core (51 checks)
-# ** Note: $finish    : sim/tb_core.sv(455)
-#    Time: 9784340 ns  Iteration: 1  Instance: /tb_core
-# Break in Module tb_core at sim/tb_core.sv line 455
-# Stopped at sim/tb_core.sv line 455
-# End time: 02:32:47 on Oct 29,2026, Elapsed time: 0:00:01
+# PASS tb_core (52 checks)
+# ** Note: $finish    : sim/tb_core.sv(467)
+#    Time: 9801140 ns  Iteration: 1  Instance: /tb_core
+# Break in Module tb_core at sim/tb_core.sv line 467
+# Stopped at sim/tb_core.sv line 467
+# End time: 03:04:03 on Oct 29,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

@@ -96,8 +96,8 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
          motion FSM 自身的 cmd_valid/cmd_ready 握手仍是唯一入口（一次只接一条命令）。
 ```
 
-`uart_bridge_core` 的 `fault_out[0]`（STOP_LATCHED）与 `fault_out[1]`（LINK_LOST）
-应直接驱动 `stop_request`，确保任何软件异常都不会续行。
+`stop_latched_out`（含 STOP 与硬件急停）与 `fault_out[1]`（LINK_LOST）应直接驱动 `stop_request`，
+`estop_latched_out` 可单独接入急停指示，确保任何软件异常都不会续行。
 
 ---
 
@@ -107,9 +107,9 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
 
 | 版本 | Logic | Register | CLS | 其他 |
 | --- | --- | --- | --- | --- |
-| `uart_bridge_top`（完整） | 1154 | 842 | 858 | — |
+| `uart_bridge_top`（完整） | 1174 | 844 | 881 | — |
 | `uart_bridge_lite_top`（精简） | 1110 | 782 | 830 | 无 ACK、8 位计数器 |
-| `uart_bridge_imu_top`（链路+IMU） | 5384 | 2530 | 3646 | BSRAM 4、DSP 10 |
+| `uart_bridge_imu_top`（链路+IMU） | 5430 | 2564 | 3671 | BSRAM 4、DSP 10 |
 
 **主工程最新实测**（`impl/pnr/Embodied_RPACS.rpt.txt`，2026-10-29 02:06，主工程当晚
 做过一轮逻辑裁减 + Fmax 提升，commit `09f2766`）：
@@ -120,8 +120,8 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
 | Register | 5138/23685（22%） | 18547 |
 | CLS | 7525/11520（66%） | **3995** |
 
-**结论**：CLS 余 3995 ⇒ 完整版链路（858 CLS / 1154 Logic）**可以直接并入**，
-合入后 CLS 仍余约 3137；精简版余 3165。适配器另估 ~50 CLS / ~75 Logic（未单独综合）。
+**结论**：CLS 余 3995 ⇒ 完整版链路（881 CLS / 1174 Logic）**可以直接并入**，
+合入后 CLS 仍余约 3114；精简版余 3165。适配器另估 ~50 CLS / ~75 Logic（未单独综合）。
 **CLS 已不是瓶颈**。
 
 > 基线变化：`PLAN.md` 20334/89%（余 792）→ 10-28 23:40 的 19664/86%（余 998）→
@@ -143,7 +143,7 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
 | # | 检查 | 方法 | 期望 |
 | --- | --- | --- | --- |
 | 1 | 仿真回归不退化 | 主工程 `tools/run_system_sim.ps1`（七套件） | 全 PASS |
-| 2 | 链路回归不退化 | `tests/uart_bridge/run_sim.ps1`（四套件） | 全 PASS |
+| 2 | 链路回归不退化 | `tests/uart_bridge/run_sim.ps1`（五套件 + 一致性） | 全 PASS |
 | 3 | 停车优先 | 上位机发 SET_VEL 后按板载 STOP / 语音"停止" | 立即停，链路命令无效 |
 | 4 | 失联停车 | 拔 USB 串口 | ≤300 ms 内停，恢复需 `CLEAR_FAULT` |
 | 5 | 速度上限 | `SET_LIMIT=50` 后下发 300 | 实际不超过 50 mm/s，ACK=REJECT_OVER_LIMIT |
@@ -159,7 +159,7 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
 
 | 项目 | 状态 |
 | --- | --- |
-| 链路核心（帧/命令/安全/遥测） | ✅ 仿真 60 项 + 上板 19 项 + 600 s 长稳 |
+| 链路核心（帧/命令/安全/遥测） | ✅ 仿真 106 项 + 上板 19 项 + 600 s 长稳 |
 | 适配器映射与握手 | ✅ `tb_motion_adapter` 19 项（对 FSM 命令契约建模验证） |
 | 真实 motion FSM 联调 | ⛔ 未做（需改主工程/换基座，留待联调轮） |
 | 电机闭环/方向/限速 | ⛔ 未做（今晚明确不控制车运动） |

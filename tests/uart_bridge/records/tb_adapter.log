@@ -7,17 +7,17 @@
 # vmap uart_lib sim/work 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 02:32:52 on Oct 29,2026
+# Start time: 03:04:08 on Oct 29,2026
 # vlog -sv -work uart_lib src/host_link_motion_adapter.v sim/tb_motion_adapter.sv 
 # -- Compiling module host_link_motion_adapter
 # -- Compiling module tb_motion_adapter
 # 
 # Top level modules:
 # 	tb_motion_adapter
-# End time: 02:32:52 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 03:04:08 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" uart_lib.tb_motion_adapter 
-# Start time: 02:32:52 on Oct 29,2026
+# Start time: 03:04:08 on Oct 29,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vopt-143) Recognized 1 FSM in module "host_link_motion_adapter(fast)".
 # //  ModelSim SE-64 10.7 Dec  7 2017
@@ -69,5 +69,5 @@
 #    Time: 16140 ns  Iteration: 1  Instance: /tb_motion_adapter
 # Break in Module tb_motion_adapter at sim/tb_motion_adapter.sv line 167
 # Stopped at sim/tb_motion_adapter.sv line 167
-# End time: 02:32:53 on Oct 29,2026, Elapsed time: 0:00:01
+# End time: 03:04:09 on Oct 29,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

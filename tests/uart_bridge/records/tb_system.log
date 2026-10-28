@@ -7,7 +7,7 @@
 # vmap uart_lib sim/work 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 02:32:54 on Oct 29,2026
+# Start time: 03:04:11 on Oct 29,2026
 # vlog -sv -work uart_lib src/uart_rx_8n1.v src/crc16_ccitt.v src/host_frame_rx.v src/host_cmd_decode.v src/host_link_watchdog.v src/telem_builder.v src/frame_tx_engine.v src/uart_bridge_core.v src/host_link_motion_adapter.v ../../src/uart/uart_tx.v sim/tb_system_closed_loop.sv 
 # -- Compiling module uart_rx_8n1
 # -- Compiling module crc16_ccitt
@@ -23,10 +23,10 @@
 # 
 # Top level modules:
 # 	tb_system_closed_loop
-# End time: 02:32:54 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 03:04:11 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" uart_lib.tb_system_closed_loop 
-# Start time: 02:32:54 on Oct 29,2026
+# Start time: 03:04:11 on Oct 29,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Warning: sim/tb_system_closed_loop.sv(72): (vopt-2685) [TFMPC] - Too few port connections for 'u_core'.  Expected 36, found 35.
 # ** Warning: sim/tb_system_closed_loop.sv(72): (vopt-2718) [TFMPC] - Missing connection for port 'estop_latched_out'.
@@ -77,5 +77,5 @@
 #    Time: 620227290 ns  Iteration: 1  Instance: /tb_system_closed_loop
 # Break in Module tb_system_closed_loop at sim/tb_system_closed_loop.sv line 347
 # Stopped at sim/tb_system_closed_loop.sv line 347
-# End time: 02:33:13 on Oct 29,2026, Elapsed time: 0:00:19
+# End time: 03:04:29 on Oct 29,2026, Elapsed time: 0:00:18
 # Errors: 0, Warnings: 2

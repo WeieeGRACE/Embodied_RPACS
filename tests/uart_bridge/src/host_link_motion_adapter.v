@@ -99,6 +99,7 @@ module host_link_motion_adapter #(
     reg [3:0]  last_mode;
     reg        last_rev;
     reg [31:0] last_spd;
+    reg [31:0] last_spd_r;
 
     // ------------------------------------------------------- desired command
     wire signed [15:0] v_l = want_l;
@@ -106,8 +107,10 @@ module host_link_motion_adapter #(
     wire both_zero = (v_l == 16'sd0) && (v_r == 16'sd0);
     wire same_sign = ((v_l >= 0 && v_r >= 0) || (v_l <= 0 && v_r <= 0));
     wire anti_phase = !same_sign;
-    wire signed [15:0] avg_v  = (v_l + v_r) >>> 1;   // linear component
-    wire signed [15:0] diff_v = (v_r - v_l) >>> 1;   // rotational component
+    wire signed [31:0] v_l32 = v_l;
+    wire signed [31:0] v_r32 = v_r;
+    wire signed [31:0] avg_v  = (v_l32 + v_r32) >>> 1;   // linear component (32-bit safe)
+    wire signed [31:0] diff_v = (v_r32 - v_l32) >>> 1;   // rotational component
     wire straight_ok = same_sign && (v_l == v_r);
     wire rotate_ok   = anti_phase && (v_l == -v_r);
     wire mag_avg_ge  = ((avg_v  >= 0 ? avg_v  : -avg_v) >=
@@ -144,17 +147,19 @@ module host_link_motion_adapter #(
             if (mag_avg_ge) begin
                 d_mode = (avg_v >= 0) ? M_FORWARD : M_BACKWARD;
                 d_rev  = (avg_v < 0);
-                d_spd  = mag_um(avg_v);
+                d_spd  = mag_um(avg_v[15:0]);
             end else begin
                 d_mode = M_ROTATE;
                 d_rev  = (diff_v < 0);
-                d_spd  = mag_um(diff_v);
+                d_spd  = mag_um(diff_v[15:0]);
             end
         end
     end
 
     wire desired_changed = (d_mode != last_mode) || (d_rev != last_rev) ||
-                           (d_spd != last_spd) || (cmds_issued == 16'd0);
+                           (d_spd != last_spd) ||
+                           ((USE_VELOCITY_MODE != 0) && (d_spd_r != last_spd_r)) ||
+                           (cmds_issued == 16'd0);
 
     // The core raises setvel_strobe on the same clock edge that req_v_* are updated,
     // so the payload is sampled one cycle later (the values are held until the next
@@ -186,6 +191,7 @@ module host_link_motion_adapter #(
             last_mode      <= 4'd0;
             last_rev       <= 1'b0;
             last_spd       <= 32'd0;
+            last_spd_r     <= 32'd0;
             brake_done     <= 1'b0;
             cmds_issued    <= 16'd0;
             cmds_rejected  <= 16'd0;
@@ -240,6 +246,7 @@ module host_link_motion_adapter #(
                     last_mode      <= d_mode;
                     last_rev       <= d_rev;
                     last_spd       <= d_spd;
+                    last_spd_r     <= d_spd_r;
                     if (cmds_issued != 16'hFFFF) cmds_issued <= cmds_issued + 16'd1;
                     if (d_approx && differential_approx_cnt != 16'hFFFF)
                         differential_approx_cnt <= differential_approx_cnt + 16'd1;

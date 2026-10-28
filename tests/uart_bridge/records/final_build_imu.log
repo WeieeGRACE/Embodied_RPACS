@@ -33,12 +33,10 @@ Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\E
 Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_spi_master.v'
 Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_config_rom.v'
 Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu_attitude_fixed.v'
-WARN  (EX3073) : Port 'setvel_strobe_out' remains unconnected for this instance("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_imu_top.v":247)
+WARN  (EX3073) : Port 'setvel_strobe_out' remains unconnected for this instance("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_imu_top.v":257)
 Compiling module 'uart_bridge_imu_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_imu_top.v":11)
 Compiling module 'uart_rx_8n1'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_rx_8n1.v":4)
 Compiling module 'uart_tx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v":3)
-WARN  (EX3791) : Expression size 32 truncated to fit in target size 16("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_imu_top.v":141)
-WARN  (EX3791) : Expression size 32 truncated to fit in target size 16("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_imu_top.v":142)
 Compiling module 'imu660ra_driver(CONFIG_HEX_FILE="..\..\src\imu\imu660ra_config.hex")'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_driver.v":4)
 Compiling module 'imu660ra_spi_master'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_spi_master.v":3)
 Compiling module 'imu660ra_config_rom(INIT_FILE="..\..\src\imu\imu660ra_config.hex")'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\imu\imu660ra_config_rom.v":4)
@@ -109,5 +107,5 @@ Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_R
 Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\pnr\uart_bridge_imu.rpt.html" completed
 Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\pnr\uart_bridge_imu.rpt.txt" completed
 Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\pnr\uart_bridge_imu.tr.html" completed
-Thu Oct 29 02:21:44 2026
+Thu Oct 29 03:00:31 2026
 
