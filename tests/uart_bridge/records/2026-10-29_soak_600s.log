@@ -1,0 +1,37 @@
+﻿soak uart:COM14@115200  duration=600s  heartbeat=10.0Hz
+[    10s] frames=502    (+502) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=54ms
+[    20s] frames=1004   (+502) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=44ms
+[    30s] frames=1506   (+502) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=29ms
+[    60s] frames=3001   (+496) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=74ms
+[   120s] frames=6001   (+497) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=46ms
+[   180s] frames=9001   (+497) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=35ms
+[   240s] frames=12002  (+497) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=88ms
+[   300s] frames=15002  (+497) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=93ms
+[   360s] frames=18002  (+497) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=86ms
+[   420s] frames=21003  (+502) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=73ms
+[   480s] frames=24004  (+502) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=42ms
+[   540s] frames=27004  (+502) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=22ms
+[   600s] frames=30004  (+502) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=6ms
+
+== soak summary ==
+{
+  "port": "COM14",
+  "duration_s": 600.1,
+  "parser_stats": {
+    "good": 30004,
+    "sync_err": 0,
+    "len_err": 0,
+    "crc_err": 0,
+    "tail_err": 0,
+    "timeout": 0,
+    "type_err": 0
+  },
+  "frames_total": 30004,
+  "error_frames": 0,
+  "error_rate": 0.0,
+  "telem_rate_mean": 50.0,
+  "telem_rate_min": 49.93,
+  "telem_rate_max": 50.07,
+  "ok": true
+}
+report -> D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\records\2026-10-29_soak_600s.json

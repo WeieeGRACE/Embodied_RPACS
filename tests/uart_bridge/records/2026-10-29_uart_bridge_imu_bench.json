@@ -1,7 +1,7 @@
 {
   "port": "COM14",
   "baud": 115200,
-  "started": "2026-10-29T03:03:16",
+  "started": "2026-10-29T03:14:12",
   "parser_stats": {
     "good": 109,
     "sync_err": 0,
@@ -15,7 +15,7 @@
     "TELEM": 100,
     "ACK": 9
   },
-  "telem_rate_hz": 49.97,
+  "telem_rate_hz": 50.01,
   "rx_bytes": 3090,
   "duration_s": 1.99,
   "checks": [
@@ -47,12 +47,12 @@
     {
       "name": "setvel_ack_seq_echo",
       "ok": true,
-      "detail": "expected 118 got 118"
+      "detail": "expected 6 got 6"
     },
     {
       "name": "telem_echoes_cmd_seq",
       "ok": true,
-      "detail": "cmd_seq=118"
+      "detail": "cmd_seq=6"
     },
     {
       "name": "over_limit_rejected_by_ack",
@@ -87,17 +87,17 @@
     {
       "name": "link_lost_after_heartbeat_stop",
       "ok": true,
-      "detail": "detected in 220 ms"
+      "detail": "detected in 243 ms"
     },
     {
       "name": "link_lost_timing_plausible",
       "ok": true,
-      "detail": "220 ms (default timeout 300 ms)"
+      "detail": "243 ms (default timeout 300 ms)"
     },
     {
       "name": "hb_age_reported",
       "ok": true,
-      "detail": "hb_age=313 ms"
+      "detail": "hb_age=317 ms"
     },
     {
       "name": "recovery_clear_ack_ok",
@@ -118,5 +118,5 @@
   "passed": 19,
   "failed": 0,
   "ok": true,
-  "finished": "2026-10-29T03:03:18"
+  "finished": "2026-10-29T03:14:14"
 }

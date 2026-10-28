@@ -145,7 +145,7 @@ CONFORMANCE PASS
 ```
 duration 600.0 s
 frames_total 30004      error_frames 0      error_rate 0.0
-telem_rate mean 50.00 Hz  min 49.93  max 50.06
+telem_rate mean 50.00 Hz  min 49.93  max 50.07
 parser_stats good=30004 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
 ```
 
