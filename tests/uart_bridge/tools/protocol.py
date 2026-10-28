@@ -207,12 +207,14 @@ class FrameParser:
             crc_rx = struct.unpack("<H", buf[4 + length:6 + length])[0]
             crc_calc = crc16_ccitt(body)
             tail = buf[6 + length]
-            if crc_rx != crc_calc:
-                self.stats.crc_err += 1
-                del buf[0]
-                continue
+            # 注意检查顺序与 RTL 保持一致：先尾字节、后 CRC。
+            # 这样"两个都错"的帧在两端都计入 tail_err，一致性测试才能逐项对齐。
             if tail != TAIL:
                 self.stats.tail_err += 1
+                del buf[0]
+                continue
+            if crc_rx != crc_calc:
+                self.stats.crc_err += 1
                 del buf[0]
                 continue
             if self.validate_len and msg_type in DOWNLINK_LEN \

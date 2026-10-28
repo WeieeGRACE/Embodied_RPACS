@@ -1,5 +1,6 @@
 param(
-    [string]$ModelSim = 'D:/app/modesilm/win64/vsim.exe'
+    [string]$ModelSim = 'D:/app/modesilm/win64/vsim.exe',
+    [string]$Python   = 'python'
 )
 # Run every ModelSim suite of the uart_bridge project and fail loudly on any FAIL.
 $ErrorActionPreference = 'Stop'
@@ -24,6 +25,17 @@ try {
         }
         Write-Host "PASS $($s.name)  -> $log"
     }
+
+    # Python <-> RTL conformance on a shared adversarial corpus (optional: needs python)
+    $py = Get-Command $Python -ErrorAction SilentlyContinue
+    if ($py) {
+        & $py.Source tools/conformance.py --run --vsim $ModelSim *> records/conformance.log
+        if ($LASTEXITCODE -ne 0) { throw "conformance FAIL; see records/conformance.log" }
+        Write-Host "PASS conformance -> records/conformance.log"
+    } else {
+        Write-Host "SKIP conformance (python not found; pass -Python <path>)"
+    }
+
     Write-Output 'All uart_bridge simulation suites passed.'
 } finally {
     Pop-Location

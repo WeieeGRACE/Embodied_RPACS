@@ -65,6 +65,8 @@ tests/uart_bridge/
 │   ├── uart_link.py         CLI：ports/selftest/monitor/send/bench
 │   ├── soak_test.py         长稳测试（默认 10 min，统计误码率与遥测速率）
 │   ├── pi_host_example.py   Orange Pi 侧最小示例（--list/--monitor/--setvel）
+│   ├── conformance.py       Python↔RTL 一致性测试（--run 一条命令跑完）
+│   ├── decode_hex.py        把串口助手抓的 hex 日志解码成可读帧
 │   ├── protocol_selftest.py 协议自检（34 项）
 │   └── uart_link.ps1        PowerShell 前端
 ├── records/                 构建日志、台架测试 JSON、长稳日志、验证报告

@@ -56,6 +56,25 @@
 
 ---
 
+### 3.1 Python ↔ RTL 一致性测试（conformance）
+
+`tools/conformance.py --run` 一条命令完成：生成 435 字节对抗语料（25 个合法帧 + CRC 错
+6 处 + 尾字节错 3 处 + LEN 超限 + 垃圾字节 + `AA AA 55` 重叠 + 结尾截断帧）→ 让
+`tb_conformance.sv` 把同一语料喂给 `host_frame_rx` → 与 `protocol.py` 的解析结果逐帧比对。
+
+```text
+PASS stats: {'good': 25, 'crc': 5, 'len': 2, 'tail': 4}
+PASS frame count: 25
+PASS all 25 frames identical (type/len/payload, first 8 bytes)
+CONFORMANCE PASS
+```
+
+> 两侧对**同一段含噪数据**给出完全一致的帧与计数器，说明上位机与 FPGA 的协议理解一致。
+> 已知的固有差异（仅在"噪声里出现非法 `AA 55` 且紧贴真帧"时，流式解析器无法回退重扫）
+> 通过语料里的空闲间隔规避，并在 `tools/conformance.py` 文档字符串中说明。
+
+---
+
 ## 4. 资源与时序
 
 | 资源 | 占用 | 占比 |
