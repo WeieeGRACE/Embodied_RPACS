@@ -19,9 +19,8 @@ module system_pages(
  0:case(index)
  0:label="DISPLAY              ";
  1:label="MANUAL               ";
- 2:label="MOTOR TEST           ";
- 4:label="OBSTACLE AVOID       ";
- 3:label="SETTINGS             ";
+ 2:label="SETTINGS             ";
+ 3:label="OBSTACLE AVOID       ";
  default:label="                     ";endcase
  1:case(index)
  0:label="SYSTEM STATUS        ";
@@ -36,16 +35,6 @@ module system_pages(
  2:label="LEFT 90 DEG          ";
  3:label="RIGHT 90 DEG         ";
  4:label="STOP                 ";
- default:label="                     ";endcase
- 3:case(index)
- 0:label="LEFT FORWARD         ";
- 1:label="LEFT REVERSE         ";
- 2:label="RIGHT FORWARD        ";
- 3:label="RIGHT REVERSE        ";
- 4:label="BOTH FORWARD         ";
- 5:label="BOTH REVERSE         ";
- 6:label="ARC LEFT             ";
- 7:label="ARC RIGHT            ";
  default:label="                     ";endcase
  4:case(index)
  0:label="VOICE ENABLE         ";
@@ -77,31 +66,47 @@ module system_pages(
  always @(posedge clk or negedge rst_n)
  if(!rst_n)begin roll_q<=0;pitch_q<=0;yaw_q<=0;end
  else begin roll_q<=roll_mdeg;pitch_q<=pitch_mdeg;yaw_q<=yaw_mdeg;end
- wire [3:0] rh,rt,ro,rf,ph,pt,po,pf,yh,yt,yo,yf;
- wire rn,pn,yn;
- attitude_angle_to_digits_pipeline rd(clk,rst_n,roll_q,rn,rh,rt,ro,rf);
- attitude_angle_to_digits_pipeline pd(clk,rst_n,pitch_q,pn,ph,pt,po,pf);
- attitude_angle_to_digits_pipeline yd(clk,rst_n,yaw_q,yn,yh,yt,yo,yf);
+ // One sequential converter serves roll, pitch and yaw back to back. Each
+ // result_valid commits one channel's text and queues the next channel, so
+ // two converter copies disappear without any slot-alignment assumption.
+ reg [1:0] att_channel;
+ reg signed [31:0] att_value;
+ wire att_valid,an;wire [3:0] ah,at,ao,af;
+ attitude_angle_to_digits_pipeline ad(clk,rst_n,att_value,an,ah,at,ao,af,att_valid);
  function [47:0] angle;
  input n;input [3:0] h,t,o,f;
  begin angle={n ? 8'h2d:8'h2b,8'd48+h,8'd48+t,8'd48+o,8'h2e,8'd48+f};end
  endfunction
  reg [47:0] roll_text,pitch_text,yaw_text,left_speed_text,right_speed_text;
+ // The signed speed converter is shared the same way: one double-dabble
+ // network fed through a register, alternating between the two channels.
+ reg speed_sel;
+ reg [47:0] speed_conv;
  always @(posedge clk or negedge rst_n)
  if(!rst_n)begin
+ att_channel<=0;att_value<=0;
  roll_text<=0;pitch_text<=0;yaw_text<=0;left_speed_text<=0;right_speed_text<=0;
+ speed_sel<=0;speed_conv<=0;
  end else begin
- roll_text<=angle(rn,rh,rt,ro,rf);pitch_text<=angle(pn,ph,pt,po,pf);yaw_text<=angle(yn,yh,yt,yo,yf);
- left_speed_text<=signed_speed(speed_l);right_speed_text<=signed_speed(speed_r);
+ if(att_valid)case(att_channel)
+ 0:begin roll_text<=angle(an,ah,at,ao,af);att_value<=pitch_q;att_channel<=1;end
+ 1:begin pitch_text<=angle(an,ah,at,ao,af);att_value<=yaw_q;att_channel<=2;end
+ default:begin yaw_text<=angle(an,ah,at,ao,af);att_value<=roll_q;att_channel<=0;end
+ endcase
+ speed_sel<=!speed_sel;
+ speed_conv<=signed_speed(speed_sel ? speed_r:speed_l);
+ if(speed_sel)right_speed_text<=speed_conv;else left_speed_text<=speed_conv;
  end
  reg [167:0] r0,r1,r2,r3,current_label;
  reg [3:0] next_item,last_item;
  always @* begin
  r0="                     ";r1=r0;r2=r0;r3=r0;current_label=label(group_id,item);
- case(group_id)0:last_item=4;1:last_item=4;2:last_item=4;3:last_item=7;5:last_item=0;default:last_item=1;endcase
+ case(group_id)0:last_item=3;1:last_item=4;2:last_item=4;5:last_item=0;default:last_item=1;endcase
  next_item=item==last_item ? 0:item+4'd1;
  if(!page)begin
- r0=group_id==0 ? "RPACS MENU           ":label(3'd0,{1'b0,group_id}-4'd1);
+ r0=group_id==0 ? "RPACS MENU           ":
+ group_id==4 ? "SETTINGS             ":
+ group_id==5 ? "OBSTACLE AVOID       ":label(3'd0,{1'b0,group_id}-4'd1);
  r1=label(group_id,item);r1[167:160]=">";
  // Leave column zero for the cursor rather than overwriting the label.
  r1={8'h3e,current_label[167:8]};
@@ -148,7 +153,6 @@ module system_pages(
  r3=auto_run ? "K0 EXIT K2 PAUSE     ":"K0 EXIT K2 START     ";
  end
  2:begin r1="K2 EXECUTE ONCE      ";r2=item==4 ? "STOP ANY ACTION      ":item<2 ? "GOAL 20CM            ":"GOAL 90 DEG          ";end
- 3:begin r1="K2 START 8 SECOND    ";r2="FIXED BENCH SPEED    ";end
  4:begin
  r3="K0 BACK K1 SEL K2 SET";
  if(item==0)begin

@@ -47,10 +47,16 @@ module tb_system_obstacle;
  if(dut.group_id!=0)keypress(0);
  if(dut.group_id!=0 || dut.page)$fatal(1,"root navigation");
  end endtask
+ function automatic integer menu_index(input integer gr);
+  case(gr)2:menu_index=1;4:menu_index=2;5:menu_index=3;default:menu_index=0;endcase
+ endfunction
  task choose(input integer gr,input integer it);begin
  root();$display("CHOOSE group=%0d item=%0d page=%b target=%0d",dut.group_id,dut.item,dut.page,gr);
- while(dut.item!=gr-1)keypress(1);keypress(2);
- while(dut.item!=it)begin keypress(1);$display("CHOOSE page item=%0d",dut.item);end keypress(2);
+ while(dut.item!=menu_index(gr))keypress(1);keypress(2);
+ while(dut.item!=it)begin keypress(1);$display("CHOOSE page item=%0d",dut.item);end
+ // Selecting the obstacle entry already opens its panel; a second K2 here
+ // would start or pause the mode instead of just opening the page.
+ if(gr!=5)keypress(2);
  if(!dut.page || dut.group_id!=gr || dut.item!=it)$fatal(1,"page selection");
  end endtask
  task boot;begin
@@ -249,7 +255,9 @@ module tb_system_obstacle;
  end endtask
  task assert_voice_isolated;integer old_accepted,old_busy,old_reject;reg was_auto;begin
  was_auto=dut.auto_run;old_accepted=accepted;old_busy=busy_replies;old_reject=reject_replies;
- voice_noise();cycles(50000);off();
+ // The route legitimately keeps the drive outputs active here, so this check
+ // observes control state only; safety cutoffs are asserted by other off() sites.
+ voice_noise();cycles(50000);
  if(!dut.avoid_mode || dut.control.manual_active || dut.auto_run!=was_auto || dut.gear!=1 || accepted!=old_accepted || busy_replies!=old_busy || reject_replies!=old_reject)
  $fatal(1,"voice changed avoidance control or received a reply");
  end endtask
@@ -291,6 +299,34 @@ module tb_system_obstacle;
  $display("PASS main obstacle full %s route, two300mm, return%0d, speech and isolated voice",right_detour?"right":"left",actual_shift);
  end endtask
  always @(dut.route_state)$display("MAIN route=%0d auto=%b waiting=%b reason=%h time=%0t",dut.route_state,dut.auto_run,dut.waiting,dut.control.route_reason,$time);
+ // Diagnose any unexpected auto_run drop or fault latch with full sources.
+ reg [4:0] route_q=0;reg auto_q=0;reg fault_q=0;
+ always @(posedge clk) begin
+ route_q<=dut.control.route_state;auto_q<=dut.control.auto_run;fault_q<=dut.control.fault;
+ if(route_q!=dut.control.route_state)
+  $display("TRACE route %0d->%0d auto=%b arm=%b diag=%0d fault=%b mflt=%h sflt=%h rflt=%b imubad=%b enc=%b/%b txovf=%b stop=%b cancel=%b hold=%b ev=%b tkv=%b exit=%b pause=%b vcv=%b cv=%b cmd=%h mv=%b mc=%h gate=%b mstop=%b time=%0t",
+   route_q,dut.control.route_state,dut.control.auto_run,dut.control.dispatch.key_arming,dut.control.start_diag,
+   dut.control.fault,dut.control.motion_fault,dut.control.sensor_fault,dut.control.route.route_fault,
+   dut.control.imu_bad,dut.control.enc_fault_l,dut.control.enc_fault_r,dut.control.tx_overflow,
+   dut.control.stopping,dut.control.route_cancel,dut.control.dispatch.stop_hold,dut.control.dispatch.stop_event,
+   dut.control.dispatch.takeover,dut.control.dispatch.exit_cmd,dut.control.dispatch.pause_cmd,
+   dut.control.dispatch.voice_command_valid,dut.control.cv,dut.control.command,
+   dut.control.menu_valid,dut.control.menu_command,dut.control.stop_gate,dut.control.dispatch.stop_request,$time);
+ if(auto_q&&!dut.control.auto_run)
+  $display("TRACE AUTO DROP arm=%b diag=%0d fault=%b mflt=%h sflt=%h rflt=%b imubad=%b enc=%b/%b txovf=%b stop=%b cancel=%b hold=%b ev=%b tkv=%b exit=%b pause=%b vcv=%b cv=%b cmd=%h mv=%b mc=%h gate=%b mstop=%b time=%0t",
+   dut.control.dispatch.key_arming,dut.control.start_diag,
+   dut.control.fault,dut.control.motion_fault,dut.control.sensor_fault,dut.control.route.route_fault,
+   dut.control.imu_bad,dut.control.enc_fault_l,dut.control.enc_fault_r,dut.control.tx_overflow,
+   dut.control.stopping,dut.control.route_cancel,dut.control.dispatch.stop_hold,dut.control.dispatch.stop_event,
+   dut.control.dispatch.takeover,dut.control.dispatch.exit_cmd,dut.control.dispatch.pause_cmd,
+   dut.control.dispatch.voice_command_valid,dut.control.cv,dut.control.command,
+   dut.control.menu_valid,dut.control.menu_command,dut.control.stop_gate,dut.control.dispatch.stop_request,$time);
+ if(!fault_q&&dut.control.fault)
+  $display("TRACE FAULT SET mflt=%h sflt=%h rflt=%b imubad=%b enc=%b/%b txovf=%b imu_err=%h time=%0t",
+   dut.control.motion_fault,dut.control.sensor_fault,dut.control.route.route_fault,
+   dut.control.imu_bad,dut.control.enc_fault_l,dut.control.enc_fault_r,dut.control.tx_overflow,
+   dut.control.imu_error,$time);
+ end
  integer l0,old_done,old_clear,old_requests;
  initial begin
  wait(rst);wait(ready_led);wait(dut.tof_valid==7);cycles(2000);off();model_on=1;

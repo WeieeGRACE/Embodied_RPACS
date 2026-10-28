@@ -47,8 +47,11 @@ module tb_robot_system;
  if(dut.group_id!=0)keypress(0);
  if(dut.group_id!=0 || dut.page)$fatal(1,"root navigation");
  end endtask
+ function automatic integer menu_index(input integer gr);
+  case(gr)2:menu_index=1;4:menu_index=2;5:menu_index=3;default:menu_index=0;endcase
+ endfunction
  task choose(input integer gr,input integer it);begin
- root();while(dut.item!=gr-1)keypress(1);keypress(2);
+ root();while(dut.item!=menu_index(gr))keypress(1);keypress(2);
  while(dut.item!=it)keypress(1);keypress(2);
  if(!dut.page || dut.group_id!=gr || dut.item!=it)$fatal(1,"page selection");
  end endtask
@@ -235,24 +238,6 @@ module tb_robot_system;
  if(it==3 && y0-dut.control.yaw<90000)$fatal(1,"short right");
  $display("PASS menu quantitative action %0d distance=%0d/%0d yaw=%0d",it,dut.control.um_l-l0,dut.control.um_r-r0,dut.control.yaw-y0);
  end endtask
- task debug_action(input integer it);begin
- choose(3,it);cycles(1000);off();
- l0=dut.control.pos_l;r0=dut.control.pos_r;d0=done_events;
- keypress(2);wait(run_led);t0=$time;
- wait(!run_led || fault_led);cycles(2000);off();
- if(fault_led || done_events!=d0+1 || $time-t0<160000000)$fatal(1,"8s debug action %d failed fault=%d",it,dut.motion_fault);
- case(it)
- 0:if(dut.pos_l<=l0 || dut.pos_r!=r0)$fatal(1,"left forward");
- 1:if(dut.pos_l>=l0 || dut.pos_r!=r0)$fatal(1,"left reverse");
- 2:if(dut.pos_r<=r0 || dut.pos_l!=l0)$fatal(1,"right forward");
- 3:if(dut.pos_r>=r0 || dut.pos_l!=l0)$fatal(1,"right reverse");
- 4:if(dut.pos_r<=r0 || dut.pos_l<=l0)$fatal(1,"both forward");
- 5:if(dut.pos_r>=r0 || dut.pos_l>=l0)$fatal(1,"both reverse");
- 6:if(dut.pos_l<=l0 || dut.pos_r-r0<=dut.pos_l-l0)$fatal(1,"arc left");
- 7:if(dut.pos_r<=r0 || dut.pos_l-l0<=dut.pos_r-r0)$fatal(1,"arc right");
- endcase
- $display("PASS full 8s debug action %0d L=%0d R=%0d",it,dut.pos_l-l0,dut.pos_r-r0);
- end endtask
  initial begin
  wait(rst);cycles(100);off();if(voice_led || dut.group_id!=0)$fatal(1,"startup menu");
  // Bounce is ignored, long press selects once and K2 never acts as estop.
@@ -275,7 +260,6 @@ module tb_robot_system;
  if(dut.gear!=2)$fatal(1,"gear commit");keypress(1);keypress(1);keypress(2);cycles(10); // mid
  if(dut.gear!=1)$fatal(1,"gear wrap");root();
  manual_action(0);manual_action(1);manual_action(2);manual_action(3);
- for(integer j=0;j<8;j++)debug_action(j);
  $display("PASS all motions without USB heartbeat");
  choose(2,0);d0=done_events;keypress(2);wait(st);cycles(10000);
  frame('h11);cycles(1500);if(busy_replies==0)$fatal(1,"busy voice not rejected");

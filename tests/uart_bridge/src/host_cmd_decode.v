@@ -58,14 +58,19 @@ module host_cmd_decode #(
     wire        [15:0] pl_limit   = payload_head[15:0];
 
     // clamp magnitude of a signed speed to the configured limit
+    // (17-bit intermediates keep the negation from truncating; the caller guarantees
+    //  lim <= MAX_LIMIT_MM_S so |result| <= 30000 always fits in signed 16 bits)
+    localparam [15:0] MAX_LIMIT_MM_S = 16'd30000;
     function signed [15:0] clamp_speed;
         input signed [15:0] v;
         input        [15:0] lim;
-        integer mag;
+        reg signed [16:0] mag, lim_s, res;
         begin
-            mag = (v < 0) ? -v : v;
-            if (mag > lim) clamp_speed = (v < 0) ? -$signed({1'b0, lim}) : $signed({1'b0, lim});
-            else           clamp_speed = v;
+            mag   = (v < 0) ? -v : v;
+            lim_s = {1'b0, lim};
+            if (mag > lim_s) res = (v < 0) ? -lim_s : lim_s;
+            else             res = v;
+            clamp_speed = res[15:0];
         end
     endfunction
 
@@ -144,7 +149,7 @@ module host_cmd_decode #(
                     end
                     T_SET_LIMIT: begin
                         if (frame_len == 8'd2) begin
-                            if (pl_limit > 16'd0) limit_mm_s <= pl_limit;
+                            if (pl_limit > 16'd0) limit_mm_s <= (pl_limit > MAX_LIMIT_MM_S) ? MAX_LIMIT_MM_S : pl_limit;
                             ack_strobe <= 1'b1; ack_type <= frame_type;
                             ack_seq <= 8'd0; ack_status <= ACK_OK;
                         end else begin

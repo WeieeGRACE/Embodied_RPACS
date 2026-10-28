@@ -24,7 +24,7 @@ module system_dispatch #(parameter integer CLK_HZ=50000000,AUDIO_TIMEOUT_MS=1000
  // Ignore control frames for the entire mode lifetime, including audio wait
  // and pause. Playback confirmations remain on their independent ack input.
  assign voice_command_valid=cv && !avoid_mode;
- wire menu_move=menu_valid && ((menu_command>=8'h10 && menu_command<=8'h13) || (menu_command>=8'h20 && menu_command<=8'h27));
+ wire menu_move=menu_valid && menu_command>=8'h10 && menu_command<=8'h13;
  wire voice_move=voice_command_valid && command>=8'h10 && command<=8'h13;
  wire enter_cmd=voice_command_valid && command==8'h16;
  wire toggle_cmd=menu_valid && menu_command==8'h16;

@@ -3,7 +3,7 @@ param(
     [int]$Baud = 115200,
     [ValidateSet('monitor', 'heartbeat', 'bench', 'selftest', 'ports')]
     [string]$Action = 'monitor',
-    [string]$Python = 'C:\Users\Administartor\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe'
+    [string]$Python = 'python'   # 可传 -Python 指定解释器；默认走 PATH
 )
 # PowerShell front-end for uart_link.py (same tool, same protocol).
 #

@@ -116,7 +116,7 @@ module tb_system_oled;
  valid=5;errors=24'h000200;settle_frame();check_row(2,"LEFT :-----  E:02");
  dump("records/main_20261023/system_menu_tof.hex");
  $display("PASS settings, attitude signs/units, encoder count/speed, ToF bitmap and stale data masking");
- group_id=0;item=4;page_on=0;settle_frame();check_row(1,">OBSTACLE AVOID");
+ group_id=0;item=3;page_on=0;settle_frame();check_row(1,">OBSTACLE AVOID");
  group_id=5;item=0;page_on=1;settle_frame();check_row(0,"OBSTACLE AVOID");check_row(1,"TOF NOT READY");
  ve=1;av=1;aw=1;valid=7;distances={16'd2000,16'd2000,16'd2000};settle_frame();
  check_row(1,"SPEAKING PLEASE WAIT");check_row(2,"F:07D0 L:07D0 R:07D0");

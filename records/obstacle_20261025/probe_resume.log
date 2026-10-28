@@ -1,0 +1,105 @@
+# vlog -sv -work system_lib sim/models/vl53l0x_model.sv sim/tb_probe_resume.sv
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 01:38:24 on Oct 29,2026
+# vlog -sv -work system_lib sim/models/vl53l0x_model.sv sim/tb_probe_resume.sv 
+# -- Compiling module vl53l0x_model
+# -- Compiling module tb_probe_resume
+# 
+# Top level modules:
+# 	tb_probe_resume
+# End time: 01:38:24 on Oct 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+#  vsim -onfinish exit -voptargs=+acc system_lib.tb_probe_resume
+# vsim -onfinish exit -voptargs="+acc" system_lib.tb_probe_resume 
+# Start time: 01:38:24 on Oct 29,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# ** Note: (vopt-143) Recognized 2 FSMs in module "tb_probe_resume(fast)".
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_probe_resume(fast)
+# Loading work.robot_system_top(fast)
+# Loading work.system_keys(fast)
+# Loading work.system_menu(fast)
+# Loading work.system_motion(fast)
+# Loading work.imu660ra_driver(fast)
+# Loading work.imu660ra_spi_master(fast)
+# Loading work.imu660ra_config_rom(fast)
+# Loading work.imu_attitude_fixed(fast)
+# Loading work.imu_attitude_bias_divider(fast)
+# Loading work.imu_attitude_atan2(fast)
+# Loading work.imu_attitude_sqrt(fast)
+# Loading work.imu_attitude_divider(fast)
+# Loading work.asr_yaw_unwrap(fast)
+# Loading work.dual_ab_quadrature_encoder(fast)
+# Loading work.dual_ab_encoder_channel(fast)
+# Loading work.dual_ab_encoder_channel(fast__1)
+# Loading work.asr_distance(fast)
+# Loading work.speed_measurement_and_velocity_filter(fast)
+# Loading work.asr_uart_rx(fast)
+# Loading work.system_dispatch(fast)
+# Loading work.obstacle_route(fast)
+# Loading work.obstacle_command_buffer(fast)
+# Loading work.motion_control_and_mode_fsm(fast)
+# Loading work.dual_speed_pi_pid_controller(fast)
+# Loading work.speed_pi_pid_channel(fast)
+# Loading work.pwm_and_startup_ramp(fast)
+# Loading work.pwm_startup_ramp_channel(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# Loading work.asr_packet_tx(fast)
+# Loading work.uart_tx(fast)
+# Loading work.system_event_logger(fast)
+# Loading work.uart_tx(fast__1)
+# Loading work.obstacle_sensors(fast)
+# Loading work.tof_driver(fast)
+# Loading work.tof_i2c_reg(fast)
+# Loading work.tof_i2c_bits(fast)
+# Loading work.tof_page(fast)
+# Loading work.system_pages(fast)
+# Loading work.attitude_angle_to_digits_pipeline(fast)
+# Loading work.system_oled_text(fast)
+# Loading work.oled_i2c_write_byte(fast)
+# Loading work.vl53l0x_model(fast)
+# ** Warning: (vsim-3015) sim/tb_probe_resume.sv(35): [PCDPC] - Port size (1) does not match connection size (3) for port 'present'. The port definition is at: sim/models/vl53l0x_model.sv(5).
+#    Time: 0 ps  Iteration: 0  Instance: /tb_probe_resume/tof_models[0]/model File: sim/models/vl53l0x_model.sv
+# ** Warning: (vsim-3015) sim/tb_probe_resume.sv(35): [PCDPC] - Port size (1) does not match connection size (3) for port 'present'. The port definition is at: sim/models/vl53l0x_model.sv(5).
+#    Time: 0 ps  Iteration: 0  Instance: /tb_probe_resume/tof_models[1]/model File: sim/models/vl53l0x_model.sv
+# ** Warning: (vsim-3015) sim/tb_probe_resume.sv(35): [PCDPC] - Port size (1) does not match connection size (3) for port 'present'. The port definition is at: sim/models/vl53l0x_model.sv(5).
+#    Time: 0 ps  Iteration: 0  Instance: /tb_probe_resume/tof_models[2]/model File: sim/models/vl53l0x_model.sv
+#  run -all
+# BOOT ready
+# VOICE ON
+# [5109010000] AUTO 0->1 wait=0 arm=1 diag=9 fault=0 mflt=00 sflt=0 rflt=0 imu_bad=0 enc=0/0 txovf=0
+# [5109010000] ARMING 1
+# [5446030000] ARMING 0
+# [5446050000] ROUTE 0->1 auto=1 wait=0 arm=0 diag=0 fault=0 mflt=00 sflt=0 rflt=0 imu_bad=0 enc=0/0 txovf=0 stop_req=0 cancel=0
+# [5446070000] ROUTE 1->2 auto=1 wait=0 arm=0 diag=0 fault=0 mflt=00 sflt=0 rflt=0 imu_bad=0 enc=0/0 txovf=0 stop_req=0 cancel=0
+# STARTED route=2
+# PAUSING
+# [6246270000] ROUTE 2->0 auto=0 wait=0 arm=0 diag=0 fault=0 mflt=00 sflt=0 rflt=0 imu_bad=0 enc=0/0 txovf=0 stop_req=1 cancel=0
+# [6246270000] AUTO 1->0 wait=0 arm=0 diag=0 fault=0 mflt=00 sflt=0 rflt=0 imu_bad=0 enc=0/0 txovf=0
+# PAUSED auto=0
+# RESUMING
+# [7280770000] AUTO 0->1 wait=0 arm=1 diag=9 fault=0 mflt=00 sflt=0 rflt=0 imu_bad=0 enc=0/0 txovf=0
+# [7280770000] ARMING 1
+# [7623790000] ARMING 0
+# [7623810000] ROUTE 0->1 auto=1 wait=0 arm=0 diag=0 fault=0 mflt=00 sflt=0 rflt=0 imu_bad=0 enc=0/0 txovf=0 stop_req=0 cancel=0
+# [7623830000] ROUTE 1->2 auto=1 wait=0 arm=0 diag=0 fault=0 mflt=00 sflt=0 rflt=0 imu_bad=0 enc=0/0 txovf=0 stop_req=0 cancel=0
+# FINAL auto=1 route=2 diag=0 fault=0 waiting=0 arm=0
+# PROBE PASS resume works
+# ** Note: $finish    : sim/tb_probe_resume.sv(195)
+#    Time: 8481071 ns  Iteration: 0  Instance: /tb_probe_resume
+# End time: 01:38:27 on Oct 29,2026, Elapsed time: 0:00:03
+# Errors: 0, Warnings: 3

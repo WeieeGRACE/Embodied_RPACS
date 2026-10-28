@@ -2,9 +2,12 @@
 module tb_system_event_logger;
  reg clk=0,rst=0,failed=0;always #10 clk=~clk;
  reg [11:0] errors=0;wire tx;reg completed=0;
+ // Undriven tie keeps the debug parity x exactly like an absent debug source.
+ wire [63:0] debug_tie;
  system_event_logger #(.CLK_HZ(1000),.BAUD(50)) dut(
  .clk(clk),.rst_n(rst),.imu_started(1'b0),.imu_failed(failed),
- .imu_error(8'h05),.errors(errors),.tx(tx));
+ .imu_error(8'h05),.errors(errors),.tx(tx),
+ .debug_state(debug_tie),.debug_valid(1'b0));
  reg [63:0] expected[0:15],frame=0;reg [7:0] value;
  integer index=0,count=0,i;
  initial begin

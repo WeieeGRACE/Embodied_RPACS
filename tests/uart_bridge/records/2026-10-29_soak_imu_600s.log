@@ -1,4 +1,4 @@
-﻿soak uart:COM14@115200  duration=600s  heartbeat=10.0Hz
+soak uart:COM14@115200  duration=600s  heartbeat=10.0Hz
 [    10s] frames=503    (+503) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=68ms
 [    20s] frames=1004   (+501) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=35ms
 [    30s] frames=1506   (+502) errs=0   (+0) rate=50.0Hz fault=0x20 hb_age=23ms

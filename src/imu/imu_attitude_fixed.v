@@ -58,16 +58,15 @@ module imu_attitude_fixed #(
     reg signed [31:0] gyro_numerator_x, gyro_numerator_y, gyro_numerator_z;
     reg signed [12:0] remainder_x, remainder_y, remainder_z;
     // Keeping the fractional phase removes a per-sample rounding drift.
+    // For signed truncating division the remainder equals the low bits with
+    // the dividend's sign, so numerator - (numerator/4096)*4096 reduces to
+    // the signed low 12 bits and no subtract/multiply network is needed.
     wire signed [31:0] step_x = gyro_numerator_x / 32'sd4096;
     wire signed [31:0] step_y = gyro_numerator_y / 32'sd4096;
     wire signed [31:0] step_z = gyro_numerator_z / 32'sd4096;
-    // The signed remainder is in [-4095, 4095], so 13 bits retain it exactly.
-    wire signed [31:0] remainder_full_x = gyro_numerator_x - step_x * 32'sd4096;
-    wire signed [31:0] remainder_full_y = gyro_numerator_y - step_y * 32'sd4096;
-    wire signed [31:0] remainder_full_z = gyro_numerator_z - step_z * 32'sd4096;
-    wire signed [12:0] remainder_next_x = remainder_full_x[12:0];
-    wire signed [12:0] remainder_next_y = remainder_full_y[12:0];
-    wire signed [12:0] remainder_next_z = remainder_full_z[12:0];
+    wire signed [12:0] remainder_next_x = {{2{gyro_numerator_x[11]}},gyro_numerator_x[10:0]};
+    wire signed [12:0] remainder_next_y = {{2{gyro_numerator_y[11]}},gyro_numerator_y[10:0]};
+    wire signed [12:0] remainder_next_z = {{2{gyro_numerator_z[11]}},gyro_numerator_z[10:0]};
     reg [31:0] y_squared, z_squared;
     wire [31:0] square_product = $signed(square_operand) * $signed(square_operand);
     wire [32:0] norm_squared = {1'b0,square_product} + {1'b0,y_squared} + {1'b0,z_squared};

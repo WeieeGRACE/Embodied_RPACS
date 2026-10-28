@@ -46,6 +46,8 @@ endmodule
 // Clocked formatter for the main system page. It performs one decimal
 // double-dabble iteration per cycle so the OLED data path does not place an
 // eleven-stage combinational BCD network between attitude samples and text.
+// The input is sampled once at conversion start and result_valid pulses when
+// the digits are committed, so one shared instance can serve several channels.
 module attitude_angle_to_digits_pipeline(
     input wire clk,
     input wire rst_n,
@@ -54,13 +56,12 @@ module attitude_angle_to_digits_pipeline(
     output reg [3:0] hundreds,
     output reg [3:0] tens,
     output reg [3:0] ones,
-    output reg [3:0] tenths
+    output reg [3:0] tenths,
+    output reg result_valid
 );
     wire [17:0] magnitude = angle_mdeg[31]
         ? (~angle_mdeg[17:0] + 18'd1) : angle_mdeg[17:0];
-    reg [17:0] magnitude_q;
-    reg negative_q;
-    wire [17:0] rounded_deci = (magnitude_q + 18'd50) / 18'd100;
+    wire [17:0] rounded_deci = (magnitude + 18'd50) / 18'd100;
     wire [10:0] limited = (rounded_deci > 18'd1800)
         ? 11'd1800 : rounded_deci[10:0];
 
@@ -89,8 +90,6 @@ module attitude_angle_to_digits_pipeline(
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            magnitude_q <= 0;
-            negative_q <= 0;
             active <= 0;
             bit_index <= 0;
             binary_work <= 0;
@@ -101,14 +100,14 @@ module attitude_angle_to_digits_pipeline(
             tens <= 0;
             ones <= 0;
             tenths <= 0;
+            result_valid <= 0;
         end else begin
-            magnitude_q <= magnitude;
-            negative_q <= angle_mdeg[31];
+            result_valid <= 0;
             if (!active) begin
                 binary_work <= limited;
                 bcd_work <= 0;
                 bit_index <= 10;
-                negative_work <= negative_q;
+                negative_work <= angle_mdeg[31];
                 active <= 1;
             end else begin
                 binary_work <= {binary_work[9:0], 1'b0};
@@ -119,6 +118,7 @@ module attitude_angle_to_digits_pipeline(
                     ones <= bcd_next[7:4];
                     tenths <= bcd_next[3:0];
                     negative <= negative_work;
+                    result_valid <= 1;
                     active <= 0;
                 end else begin
                     bit_index <= bit_index - 1'b1;

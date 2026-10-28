@@ -129,7 +129,6 @@ module system_motion #(
   3'd0,route_state,voice_enable,modules_ready,(&tof_seen && &tof_valid),fault,
   busy,waiting,auto_run,avoid_mode};
  assign debug_valid=menu_valid || command_valid || ack_valid || aux_valid;
- wire debug_action=action>=8'h20 && action<=8'h27;
  wire rotate=action==8'h12 || action==8'h13;
  wire reverse=action==8'h11 || action==8'h13;
  wire [2:0] phase;
@@ -143,10 +142,6 @@ module system_motion #(
  if(command==8'h15 && gear>0)gear<=gear-1'b1;
  end
  localparam integer LOW_UM=(64'd50000*WINDOW_CYCLES)/CLK_HZ;
- // The old bench targets are counts/window: 10 for the outer wheel,
- // 5 for the inner wheel. Round upwards to preserve integer conversion.
- localparam integer DEBUG_L=(64'd10*UM_PER_REV_L+COUNTS_L-1)/COUNTS_L;
- localparam integer DEBUG_R=(64'd10*UM_PER_REV_R+COUNTS_R-1)/COUNTS_R;
  reg [31:0] gear_speed;
  reg [31:0] requested_l,requested_r,goal;
  reg [3:0] requested_mode;
@@ -156,18 +151,6 @@ module system_motion #(
  requested_r=requested_l;
  requested_mode=rotate ? 6:7;requested_end=rotate ? 3:2;
  goal=rotate ? GOAL_MDEG:GOAL_UM;
- if(debug_action)begin
- requested_end=1;goal=8000;
- requested_l=DEBUG_L;requested_r=DEBUG_R;
- requested_mode=(action==8'h21 || action==8'h23 || action==8'h25) ? 3:2;
- case(action)
- 8'h20,8'h21:requested_r=0;
- 8'h22,8'h23:requested_l=0;
- 8'h26:begin requested_mode=4;requested_l=DEBUG_L/2;end
- 8'h27:begin requested_mode=5;requested_r=DEBUG_R/2;end
- default:begin end
- endcase
- end
  end
  wire route_start,route_stop,route_rotate,route_reverse,route_refresh;
  wire [1:0] route_end;wire [31:0] route_goal,route_speed,route_cap;
@@ -198,10 +181,10 @@ module system_motion #(
  (route_end==0 ? 32'd0:32'd10000),(3*LOW_UM),(LOW_UM/5),(LOW_UM/2)}),
  .context_in({route_state,yaw,route_heading,um_l,um_r}),.ready(buffer_ready),.submit(command_submit),
  .busy(buffer_busy),.pending(command_pending),.command(payload),.context_out(context_out));
- wire manual_live=manual_active && !rotate && !debug_action;
+ wire manual_live=manual_active && !rotate;
  localparam [31:0] MANUAL_TIMEOUT=ACTION_MS,GEAR_LIMIT=3*LOW_UM,
  ACCEL_STEP=LOW_UM/5,DECEL_STEP=LOW_UM/2;
- wire [31:0] manual_limit=debug_action ? ((DEBUG_L>DEBUG_R)?DEBUG_L:DEBUG_R):GEAR_LIMIT;
+ wire [31:0] manual_limit=GEAR_LIMIT;
  // Capture the entire selected transaction before controller validation.
  // Stop/fault still reach the controller and bridge directly and cancel a
  // captured transaction before it can execute; no cancelled command is replayed.

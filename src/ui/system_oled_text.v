@@ -23,7 +23,8 @@ module system_oled_text #(
                      ST_PIXEL_LAUNCH      = 4'd5,
                      ST_PIXEL_WAIT        = 4'd6,
                      ST_FRAME_WAIT        = 4'd7,
-                     ST_PIXEL_PREPARE     = 4'd8;
+                     ST_PIXEL_PREPARE     = 4'd8,
+                     ST_PIXEL_LOOKUP      = 4'd9;
 
     reg [3:0] state;
     reg [31:0] timer;
@@ -40,8 +41,17 @@ module system_oled_text #(
     wire byte_busy;
     wire byte_done;
     wire byte_scl;
-    reg [7:0] screen_code;
     reg [671:0] display_text;
+    // Character scan position within one text row plus the glyph column.
+    reg [4:0] char_index;
+    reg [2:0] char_col;
+    reg [9:0] font_addr;
+    reg [7:0] font_byte;
+    // 128 characters x 6 columns, initialized from oled_font.hex. The
+    // synchronous read lets synthesis place the table in a BSRAM pROM
+    // instead of a per-character LUT mux tree.
+    reg [7:0] font_rom [0:767];
+    initial $readmemh("src/ui/oled_font.hex", font_rom);
 
     oled_i2c_write_byte #(.CLK_HZ(CLK_HZ), .I2C_HZ(I2C_HZ)) i2c_writer (
         .clk(clk), .rst_n(rst_n), .start(byte_start),
@@ -92,70 +102,11 @@ module system_oled_text #(
         end
     endfunction
 
-    // The required glyphs are the same 6-column ASCII table convention used
-    // by the official example: six vertical bytes per character, LSB at top.
-    function [47:0] font_glyph;
-        input [7:0] character;
-        begin
-            case (character)
-                "0": font_glyph = 48'h3E4549513E00;
-                "1": font_glyph = 48'h00407F420000;
-                "2": font_glyph = 48'h465149614200;
-                "3": font_glyph = 48'h314B45412100;
-                "4": font_glyph = 48'h107F12141800;
-                "5": font_glyph = 48'h394545452700;
-                "6": font_glyph = 48'h3049494A3C00;
-                "7": font_glyph = 48'h030509710100;
-                "8": font_glyph = 48'h364949493600;
-                "9": font_glyph = 48'h1E2949490600;
-                "A": font_glyph = 48'h7C1211127C00;
-                "B": font_glyph = 48'h364949497F00;
-                "C": font_glyph = 48'h224141413E00;
-                "D": font_glyph = 48'h1C2241417F00;
-                "E": font_glyph = 48'h414949497F00;
-                "F": font_glyph = 48'h010909097F00;
-                "S": font_glyph = 48'h324949492600;
-                "m": font_glyph = 48'h780418047C00;
-                "G": font_glyph = 48'h7A4949413E00;
-                "H": font_glyph = 48'h7F0808087F00;
-                "I": font_glyph = 48'h00417F410000;
-                "L": font_glyph = 48'h404040407F00;
-                "M": font_glyph = 48'h7F020C027F00;
-                "N": font_glyph = 48'h7F1008047F00;
-                "O": font_glyph = 48'h3E4141413E00;
-                "P": font_glyph = 48'h060909097F00;
-                "R": font_glyph = 48'h462919097F00;
-                "T": font_glyph = 48'h01017F010100;
-                "U": font_glyph = 48'h3F4040403F00;
-                "W": font_glyph = 48'h3F4038403F00;
-                "J": font_glyph = 48'h013F41412000;
-                "K": font_glyph = 48'h412214087F00;
-                "Q": font_glyph = 48'h5E2151413E00;
-                "V": font_glyph = 48'h1F2040201F00;
-                "X": font_glyph = 48'h631408146300;
-                "Z": font_glyph = 48'h434549516100;
-                ">": font_glyph = 48'h00081C224100;
-                "/": font_glyph = 48'h030408106000;
-                "=": font_glyph = 48'h141414141400;
-                "Y": font_glyph = 48'h070870080700;
-                ":": font_glyph = 48'h000036360000;
-                "+": font_glyph = 48'h08083E080800;
-                "-": font_glyph = 48'h080808080800;
-                ".": font_glyph = 48'h000060600000;
-                default: font_glyph = 48'd0;
-            endcase
-        end
-    endfunction
-
-    function [7:0] font_column;
-        input [7:0] character;
-        input [2:0] glyph_column;
-        reg [47:0] glyph;
-        begin
-            glyph = font_glyph(character);
-            font_column = (glyph >> (glyph_column * 8)) & 8'h7F;
-        end
-    endfunction
+    wire [7:0] current_char = screen_character(page, char_index);
+    // font address = character * 6 + glyph column (10 bits hold 767).
+    wire [10:0] font_addr_next = {current_char[6:0], 3'b000}
+                               + {1'b0, current_char[7:0], 1'b0}
+                               + {8'b0, char_col};
 
     function [7:0] page_command;
         input [2:0] page_number;
@@ -181,7 +132,7 @@ module system_oled_text #(
                 if (clear_mode) begin
                     byte_data = 0;
                 end else if (column < 126) begin
-                    byte_data = font_column(screen_code, column % 6);
+                    byte_data = font_byte;
                 end else begin
                     byte_data = 0;
                 end
@@ -198,11 +149,14 @@ module system_oled_text #(
             page <= 0;
             page_command_index <= 0;
             column <= 0;
+            char_index <= 0;
+            char_col <= 0;
+            font_addr <= 0;
+            font_byte <= 0;
             clear_mode <= 1'b1;
             byte_start <= 0;
             byte_data_mode_latched <= 0;
             byte_data_latched <= 0;
-            screen_code <= " ";
             display_text <= {84{8'h20}}; frame_done <= 0;
         end else begin
             frame_done <= 0;
@@ -248,13 +202,18 @@ module system_oled_text #(
                         end else begin
                             page_command_index <= 0;
                             column <= 0;
+                            char_index <= 0;
+                            char_col <= 0;
                             state <= ST_PIXEL_PREPARE;
                         end
                     end
                 end
                 // Separate signed decimal formatting from glyph lookup and I2C launch.
                 ST_PIXEL_PREPARE: begin
-                    screen_code <= screen_character(page, column / 6);
+                    font_addr <= font_addr_next[9:0];
+                    state <= ST_PIXEL_LOOKUP;
+                end
+                ST_PIXEL_LOOKUP: begin
                     state <= ST_PIXEL_LAUNCH;
                 end
                 ST_PIXEL_LAUNCH: begin
@@ -267,6 +226,8 @@ module system_oled_text #(
                     if (byte_done) begin
                         if (column == 127) begin
                             column <= 0;
+                            char_index <= 0;
+                            char_col <= 0;
                             if (clear_mode && page != 7) begin
                                 page <= page + 1'b1;
                                 page_command_index <= 0;
@@ -288,6 +249,8 @@ module system_oled_text #(
                             end
                         end else begin
                             column <= column + 1'b1;
+                            char_col <= char_col == 5 ? 3'd0 : char_col + 1'b1;
+                            if (char_col == 5) char_index <= char_index + 1'b1;
                             state <= ST_PIXEL_PREPARE;
                         end
                     end

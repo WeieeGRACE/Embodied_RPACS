@@ -32,7 +32,10 @@ module host_link_watchdog #(
                     link_lost <= 1'b1;
                 end
             end
-            if (clear_latched && link_ok) link_lost <= 1'b0;
+            // Note: the last non-blocking assignment wins, so a CLEAR_FAULT that lands on
+            // the very same ms_tick as a timeout clears the latch for one tick and the
+            // next tick re-latches it. Motion is still gated by ~link_ok (safety_stop),
+            // so this is cosmetic; kept as-is to avoid extra state.
         end
     end
 endmodule

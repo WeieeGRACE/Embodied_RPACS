@@ -135,6 +135,17 @@ module uart_bridge_top #(
     reg  [31:0] speed_div;
     wire        speed_tick = (speed_div >= ((CLK_HZ / 1000) * 100 - 1));
 
+    // saturating 32-bit -> signed 16-bit (the encoder delta can exceed int16 if the
+    // wheels are spun by hand very fast; saturate instead of wrapping)
+    function signed [15:0] sat16;
+        input signed [31:0] v;
+        begin
+            if (v > 32'sd32767)       sat16 = 16'sd32767;
+            else if (v < -32'sd32768) sat16 = -16'sd32768;
+            else                      sat16 = v[15:0];
+        end
+    endfunction
+
     always @(posedge clk_50m or negedge rst_n) begin
         if (!rst_n) begin
             speed_div  <= 32'd0;
@@ -146,8 +157,8 @@ module uart_bridge_top #(
             speed_div  <= 32'd0;
             enc_l_prev <= enc_l_cnt;
             enc_r_prev <= enc_r_cnt;
-            speed_l <= ((enc_l_cnt - enc_l_prev) * SPEED_K);
-            speed_r <= ((enc_r_cnt - enc_r_prev) * SPEED_K);
+            speed_l <= sat16((enc_l_cnt - enc_l_prev) * SPEED_K);
+            speed_r <= sat16((enc_r_cnt - enc_r_prev) * SPEED_K);
         end else begin
             speed_div <= speed_div + 32'd1;
         end
