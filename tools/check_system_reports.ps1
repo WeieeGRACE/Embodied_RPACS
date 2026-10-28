@@ -3,6 +3,14 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 function Require($condition, [string]$message) { if (!$condition) { throw $message } }
 function Read-Project([string]$relative) { Get-Content -LiteralPath (Join-Path $projectRoot $relative) -Raw }
+# Windows PowerShell 5.1 cannot parse Gowin's process configs (case-duplicate
+# keys), so pull the few checked fields out with a regex instead of JSON.
+function Get-OptionValue([string]$text, [string]$key) {
+    if ($text -match ('"(?i)' + [regex]::Escape($key) + '"\s*:\s*("[^"]*"|[^,}
+
+]+)')) { return $Matches[1].Trim('"') }
+    return $null
+}
 function Html-Rows([string]$html) {
     foreach ($row in [regex]::Matches($html, '(?is)<tr\b[^>]*>(.*?)</tr>')) {
         $cells = @([regex]::Matches($row.Groups[1].Value, '(?is)<t[dh]\b[^>]*>(.*?)</t[dh]>') | ForEach-Object {
@@ -61,8 +69,8 @@ $deviceConfig=Read-Project 'impl/pnr/device.cfg'
 Require ($deviceConfig -match 'set CPU regular_io = true' -and $deviceConfig -match 'set SSPI regular_io = true') 'OLED dual-purpose pins not released'
 Require ((Read-Project 'impl/pnr/cmd.do') -match '-global_freq 50\.000') 'Wrong PnR frequency'
 foreach($config in @('impl/Embodied_RPACS_process_config.json','impl/project_process_config.json')) {
- $options=(Read-Project $config) | ConvertFrom-Json -AsHashtable
- Require ($options.CPU -and $options.SSPI -and [double]$options.Global_Freq -eq 50 -and $options.TopModule -eq 'robot_system_top') "Wrong saved IDE options: $config"
+ $optionsText=Read-Project $config
+ Require ((Get-OptionValue $optionsText 'CPU') -eq 'true' -and (Get-OptionValue $optionsText 'SSPI') -eq 'true' -and [double](Get-OptionValue $optionsText 'Global_Freq') -eq 50 -and (Get-OptionValue $optionsText 'TopModule') -eq 'robot_system_top') "Wrong saved IDE options: $config"
 }
 $netlist=Read-Project 'impl/gwsynthesis/Embodied_RPACS.vg'
 Require ($netlist -match '(?s)TBUF oled_sda_s0\s*\(\s*\.O\(oled_sda\),\s*\.I\(GND\),\s*\.OEN\(') 'OLED SDA must only drive low or release'

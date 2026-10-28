@@ -66,10 +66,11 @@ module system_pages(
  always @(posedge clk or negedge rst_n)
  if(!rst_n)begin roll_q<=0;pitch_q<=0;yaw_q<=0;end
  else begin roll_q<=roll_mdeg;pitch_q<=pitch_mdeg;yaw_q<=yaw_mdeg;end
- // One sequential converter serves roll, pitch and yaw back to back. Each
- // result_valid commits one channel's text and queues the next channel, so
- // two converter copies disappear without any slot-alignment assumption.
- reg [1:0] att_channel;
+ // One sequential converter serves roll, pitch and yaw back to back. The
+ // committed text slot follows att_conv - the channel whose value is inside
+ // the converter - so the one-cycle-delayed result_valid handshake cannot
+ // skew labels against digits the way a parallel channel counter would.
+ reg [1:0] att_conv;
  reg signed [31:0] att_value;
  wire att_valid,an;wire [3:0] ah,at,ao,af;
  attitude_angle_to_digits_pipeline ad(clk,rst_n,att_value,an,ah,at,ao,af,att_valid);
@@ -80,22 +81,26 @@ module system_pages(
  reg [47:0] roll_text,pitch_text,yaw_text,left_speed_text,right_speed_text;
  // The signed speed converter is shared the same way: one double-dabble
  // network fed through a register, alternating between the two channels.
+ // sel_d pairs the routing decision with the converter's registered output,
+ // both describing the same cycle's select.
  reg speed_sel;
+ reg sel_d;
  reg [47:0] speed_conv;
  always @(posedge clk or negedge rst_n)
  if(!rst_n)begin
- att_channel<=0;att_value<=0;
+ att_conv<=0;att_value<=0;
  roll_text<=0;pitch_text<=0;yaw_text<=0;left_speed_text<=0;right_speed_text<=0;
- speed_sel<=0;speed_conv<=0;
+ speed_sel<=0;sel_d<=0;speed_conv<=0;
  end else begin
- if(att_valid)case(att_channel)
- 0:begin roll_text<=angle(an,ah,at,ao,af);att_value<=pitch_q;att_channel<=1;end
- 1:begin pitch_text<=angle(an,ah,at,ao,af);att_value<=yaw_q;att_channel<=2;end
- default:begin yaw_text<=angle(an,ah,at,ao,af);att_value<=roll_q;att_channel<=0;end
+ if(att_valid)case(att_conv)
+ 0:begin roll_text<=angle(an,ah,at,ao,af);att_value<=pitch_q;att_conv<=1;end
+ 1:begin pitch_text<=angle(an,ah,at,ao,af);att_value<=yaw_q;att_conv<=2;end
+ default:begin yaw_text<=angle(an,ah,at,ao,af);att_value<=roll_q;att_conv<=0;end
  endcase
  speed_sel<=!speed_sel;
+ sel_d<=speed_sel;
  speed_conv<=signed_speed(speed_sel ? speed_r:speed_l);
- if(speed_sel)right_speed_text<=speed_conv;else left_speed_text<=speed_conv;
+ if(sel_d)right_speed_text<=speed_conv;else left_speed_text<=speed_conv;
  end
  reg [167:0] r0,r1,r2,r3,current_label;
  reg [3:0] next_item,last_item;

@@ -52,6 +52,11 @@ module system_oled_text #(
     // instead of a per-character LUT mux tree.
     reg [7:0] font_rom [0:767];
     initial $readmemh("src/ui/oled_font.hex", font_rom);
+    // Registered synchronous read so synthesis can place the table in a
+    // BSRAM pROM rather than a per-character LUT mux tree.
+    always @(posedge clk or negedge rst_n)
+    if (!rst_n) font_byte <= 0;
+    else font_byte <= font_rom[font_addr];
 
     oled_i2c_write_byte #(.CLK_HZ(CLK_HZ), .I2C_HZ(I2C_HZ)) i2c_writer (
         .clk(clk), .rst_n(rst_n), .start(byte_start),
@@ -103,8 +108,8 @@ module system_oled_text #(
     endfunction
 
     wire [7:0] current_char = screen_character(page, char_index);
-    // font address = character * 6 + glyph column (10 bits hold 767).
-    wire [10:0] font_addr_next = {current_char[6:0], 3'b000}
+    // font address = character * 6 + glyph column: *4 + *2 (10 bits hold 767).
+    wire [10:0] font_addr_next = {current_char[6:0], 2'b00}
                                + {1'b0, current_char[7:0], 1'b0}
                                + {8'b0, char_col};
 
@@ -152,7 +157,6 @@ module system_oled_text #(
             char_index <= 0;
             char_col <= 0;
             font_addr <= 0;
-            font_byte <= 0;
             clear_mode <= 1'b1;
             byte_start <= 0;
             byte_data_mode_latched <= 0;

@@ -66,6 +66,7 @@ module attitude_angle_to_digits_pipeline(
         ? 11'd1800 : rounded_deci[10:0];
 
     reg active;
+    reg cool;
     reg [3:0] bit_index;
     reg [10:0] binary_work;
     reg [15:0] bcd_work;
@@ -91,6 +92,7 @@ module attitude_angle_to_digits_pipeline(
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             active <= 0;
+            cool <= 0;
             bit_index <= 0;
             binary_work <= 0;
             bcd_work <= 0;
@@ -103,7 +105,12 @@ module attitude_angle_to_digits_pipeline(
             result_valid <= 0;
         end else begin
             result_valid <= 0;
-            if (!active) begin
+            if (cool) begin
+                // One idle cycle after completion: the consumer replaces the
+                // input during its result_valid handshake, so the restart must
+                // sample the new value, not the one just converted.
+                cool <= 0;
+            end else if (!active) begin
                 binary_work <= limited;
                 bcd_work <= 0;
                 bit_index <= 10;
@@ -120,6 +127,7 @@ module attitude_angle_to_digits_pipeline(
                     negative <= negative_work;
                     result_valid <= 1;
                     active <= 0;
+                    cool <= 1;
                 end else begin
                     bit_index <= bit_index - 1'b1;
                 end

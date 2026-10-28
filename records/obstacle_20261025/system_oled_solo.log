@@ -1,0 +1,187 @@
+# do sim/run_system_oled.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap system_lib sim/work_system_menu 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 03:53:37 on Oct 29,2026
+# vlog -sv -work system_lib src/obstacle/obstacle_route.v src/obstacle/obstacle_sensors.v src/obstacle/obstacle_command.v src/obstacle/system_dispatch.v src/robot_system_top.v src/asr/system_motion.v src/asr/asr_uart_rx.v src/asr/asr_packet_tx.v src/asr/asr_feedback.v src/ui/system_keys.v src/ui/system_menu.v src/ui/system_pages.v src/ui/system_oled_text.v src/tof/tof_driver.v src/tof/tof_i2c.v src/tof/tof_page.v src/motor/motion_control_and_mode_fsm.v src/motor/dual_ab_quadrature_encoder.v src/motor/speed_measurement_and_velocity_filter.v src/motor/dual_speed_pi_pid_controller.v src/motor/pwm_and_startup_ramp.v src/motor/tb6612_driver_interface.v src/imu/imu_attitude_fixed.v src/imu/attitude_angle_to_digits.v src/imu/oled_i2c_write_byte.v src/imu/imu660ra_driver.v src/imu/imu660ra_spi_master.v src/imu/imu660ra_config_rom.v src/uart/uart_tx.v src/uart/system_event_logger.v 
+# -- Compiling module obstacle_route
+# -- Compiling module obstacle_sensors
+# -- Compiling module obstacle_command_buffer
+# -- Compiling module obstacle_turn_trace
+# -- Compiling module obstacle_command_trace
+# -- Compiling module system_dispatch
+# -- Compiling module robot_system_top
+# -- Compiling module system_motion
+# -- Compiling module asr_uart_rx
+# -- Compiling module asr_packet_tx
+# -- Compiling module asr_distance
+# -- Compiling module asr_yaw_unwrap
+# -- Compiling module system_keys
+# -- Compiling module system_menu
+# -- Compiling module system_pages
+# -- Compiling module system_oled_text
+# -- Compiling module tof_driver
+# -- Compiling module tof_three
+# -- Compiling module tof_i2c_bits
+# -- Compiling module tof_i2c_reg
+# -- Compiling module tof_page
+# -- Compiling module motion_control_and_mode_fsm
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module imu_attitude_fixed
+# -- Compiling module imu_attitude_bias_divider
+# -- Compiling module imu_attitude_atan2
+# -- Compiling module imu_attitude_sqrt
+# -- Compiling module imu_attitude_divider
+# -- Compiling module attitude_angle_to_digits
+# -- Compiling module attitude_angle_to_digits_pipeline
+# -- Compiling module oled_i2c_write_byte
+# -- Compiling module imu660ra_driver
+# -- Compiling module imu660ra_spi_master
+# -- Compiling module imu660ra_config_rom
+# -- Compiling module uart_tx
+# -- Compiling module system_event_logger
+# 
+# Top level modules:
+# 	obstacle_turn_trace
+# 	obstacle_command_trace
+# 	robot_system_top
+# 	tof_three
+# 	attitude_angle_to_digits
+# End time: 03:53:37 on Oct 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 03:53:38 on Oct 29,2026
+# vlog -sv -work system_lib sim/tb_system_oled.sv 
+# -- Compiling module tb_system_oled
+# 
+# Top level modules:
+# 	tb_system_oled
+# End time: 03:53:38 on Oct 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" system_lib.tb_system_oled 
+# Start time: 03:53:38 on Oct 29,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# ** Note: (vopt-143) Recognized 1 FSM in module "system_pages(fast)".
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_system_oled(fast)
+# Loading work.tof_page(fast)
+# Loading work.system_pages(fast)
+# Loading work.attitude_angle_to_digits_pipeline(fast)
+# Loading work.system_oled_text(fast)
+# Loading work.oled_i2c_write_byte(fast)
+# PREP t=8319810000 page=2 ci=8 cc=0 cur=20 addrnext=0c0 addr=0c5 fbyte=00 disp=20
+# PREP t=8325810000 page=2 ci=8 cc=1 cur=20 addrnext=0c1 addr=0c0 fbyte=00 disp=20
+# PREP t=8331810000 page=2 ci=8 cc=2 cur=20 addrnext=0c2 addr=0c1 fbyte=00 disp=20
+# PREP t=8337810000 page=2 ci=8 cc=3 cur=20 addrnext=0c3 addr=0c2 fbyte=00 disp=20
+# PREP t=8343810000 page=2 ci=8 cc=4 cur=20 addrnext=0c4 addr=0c3 fbyte=00 disp=20
+# PREP t=8349810000 page=2 ci=8 cc=5 cur=20 addrnext=0c5 addr=0c4 fbyte=00 disp=20
+# PASS main OLED root menu complete bitmap and key legend
+# PREP t=11463730000 page=2 ci=8 cc=0 cur=20 addrnext=0c0 addr=0c5 fbyte=00 disp=20
+# PREP t=11469730000 page=2 ci=8 cc=1 cur=20 addrnext=0c1 addr=0c0 fbyte=00 disp=20
+# PREP t=11475730000 page=2 ci=8 cc=2 cur=20 addrnext=0c2 addr=0c1 fbyte=00 disp=20
+# PREP t=11481730000 page=2 ci=8 cc=3 cur=20 addrnext=0c3 addr=0c2 fbyte=00 disp=20
+# PREP t=11487730000 page=2 ci=8 cc=4 cur=20 addrnext=0c4 addr=0c3 fbyte=00 disp=20
+# PREP t=11493730000 page=2 ci=8 cc=5 cur=20 addrnext=0c5 addr=0c4 fbyte=00 disp=20
+# PREP t=14607650000 page=2 ci=8 cc=0 cur=44 addrnext=198 addr=0c5 fbyte=00 disp=44
+# PREP t=14613650000 page=2 ci=8 cc=1 cur=44 addrnext=199 addr=198 fbyte=00 disp=44
+# PREP t=14619650000 page=2 ci=8 cc=2 cur=44 addrnext=19a addr=199 fbyte=7f disp=44
+# PREP t=14625650000 page=2 ci=8 cc=3 cur=44 addrnext=19b addr=19a fbyte=41 disp=44
+# PREP t=14631650000 page=2 ci=8 cc=4 cur=44 addrnext=19c addr=19b fbyte=41 disp=44
+# PREP t=14637650000 page=2 ci=8 cc=5 cur=44 addrnext=19d addr=19c fbyte=22 disp=44
+# PASS main OLED action page and tear-free page switching
+# PREP t=17751570000 page=2 ci=8 cc=0 cur=4e addrnext=1d4 addr=1df fbyte=3e disp=4e
+# PREP t=17757570000 page=2 ci=8 cc=1 cur=4e addrnext=1d5 addr=1d4 fbyte=00 disp=4e
+# PREP t=17763570000 page=2 ci=8 cc=2 cur=4e addrnext=1d6 addr=1d5 fbyte=7f disp=4e
+# PREP t=17769570000 page=2 ci=8 cc=3 cur=4e addrnext=1d7 addr=1d6 fbyte=04 disp=4e
+# PREP t=17775570000 page=2 ci=8 cc=4 cur=4e addrnext=1d8 addr=1d7 fbyte=08 disp=4e
+# PREP t=17781570000 page=2 ci=8 cc=5 cur=4e addrnext=1d9 addr=1d8 fbyte=10 disp=4e
+# PREP t=20895490000 page=2 ci=8 cc=0 cur=49 addrnext=1b6 addr=1b5 fbyte=7f disp=49
+# PREP t=20901490000 page=2 ci=8 cc=1 cur=49 addrnext=1b7 addr=1b6 fbyte=00 disp=49
+# PREP t=20907490000 page=2 ci=8 cc=2 cur=49 addrnext=1b8 addr=1b7 fbyte=00 disp=49
+# PREP t=20913490000 page=2 ci=8 cc=3 cur=49 addrnext=1b9 addr=1b8 fbyte=41 disp=49
+# PREP t=20919490000 page=2 ci=8 cc=4 cur=49 addrnext=1ba addr=1b9 fbyte=7f disp=49
+# PREP t=20925490000 page=2 ci=8 cc=5 cur=49 addrnext=1bb addr=1ba fbyte=41 disp=49
+# PREP t=24039410000 page=2 ci=8 cc=0 cur=31 addrnext=126 addr=125 fbyte=3e disp=31
+# PREP t=24045410000 page=2 ci=8 cc=1 cur=31 addrnext=127 addr=126 fbyte=00 disp=31
+# PREP t=24051410000 page=2 ci=8 cc=2 cur=31 addrnext=128 addr=127 fbyte=00 disp=31
+# PREP t=24057410000 page=2 ci=8 cc=3 cur=31 addrnext=129 addr=128 fbyte=42 disp=31
+# PREP t=24063410000 page=2 ci=8 cc=4 cur=31 addrnext=12a addr=129 fbyte=7f disp=31
+# PREP t=24069410000 page=2 ci=8 cc=5 cur=31 addrnext=12b addr=12a fbyte=40 disp=31
+# PREP t=27183330000 page=2 ci=8 cc=0 cur=35 addrnext=13e addr=18b fbyte=7c disp=35
+# PREP t=27189330000 page=2 ci=8 cc=1 cur=35 addrnext=13f addr=13e fbyte=00 disp=35
+# PREP t=27195330000 page=2 ci=8 cc=2 cur=35 addrnext=140 addr=13f fbyte=27 disp=35
+# PREP t=27201330000 page=2 ci=8 cc=3 cur=35 addrnext=141 addr=140 fbyte=45 disp=35
+# PREP t=27207330000 page=2 ci=8 cc=4 cur=35 addrnext=142 addr=141 fbyte=45 disp=35
+# PREP t=27213330000 page=2 ci=8 cc=5 cur=35 addrnext=143 addr=142 fbyte=45 disp=35
+# PREP t=30327250000 page=2 ci=8 cc=0 cur=33 addrnext=132 addr=131 fbyte=46 disp=33
+# PREP t=30333250000 page=2 ci=8 cc=1 cur=33 addrnext=133 addr=132 fbyte=00 disp=33
+# PREP t=30339250000 page=2 ci=8 cc=2 cur=33 addrnext=134 addr=133 fbyte=21 disp=33
+# PREP t=30345250000 page=2 ci=8 cc=3 cur=33 addrnext=135 addr=134 fbyte=41 disp=33
+# PREP t=30351250000 page=2 ci=8 cc=4 cur=33 addrnext=136 addr=135 fbyte=45 disp=33
+# PREP t=30357250000 page=2 ci=8 cc=5 cur=33 addrnext=137 addr=136 fbyte=4b disp=33
+# PREP t=33471170000 page=2 ci=8 cc=0 cur=2d addrnext=10e addr=113 fbyte=08 disp=2d
+# PREP t=33477170000 page=2 ci=8 cc=1 cur=2d addrnext=10f addr=10e fbyte=00 disp=2d
+# PREP t=33483170000 page=2 ci=8 cc=2 cur=2d addrnext=110 addr=10f fbyte=08 disp=2d
+# PREP t=33489170000 page=2 ci=8 cc=3 cur=2d addrnext=111 addr=110 fbyte=08 disp=2d
+# PREP t=33495170000 page=2 ci=8 cc=4 cur=2d addrnext=112 addr=111 fbyte=08 disp=2d
+# PREP t=33501170000 page=2 ci=8 cc=5 cur=2d addrnext=113 addr=112 fbyte=08 disp=2d
+# PASS settings, attitude signs/units, encoder count/speed, ToF bitmap and stale data masking
+# PREP t=36615090000 page=2 ci=8 cc=0 cur=20 addrnext=0c0 addr=0c5 fbyte=00 disp=20
+# PREP t=36621090000 page=2 ci=8 cc=1 cur=20 addrnext=0c1 addr=0c0 fbyte=00 disp=20
+# PREP t=36627090000 page=2 ci=8 cc=2 cur=20 addrnext=0c2 addr=0c1 fbyte=00 disp=20
+# PREP t=36633090000 page=2 ci=8 cc=3 cur=20 addrnext=0c3 addr=0c2 fbyte=00 disp=20
+# PREP t=36639090000 page=2 ci=8 cc=4 cur=20 addrnext=0c4 addr=0c3 fbyte=00 disp=20
+# PREP t=36645090000 page=2 ci=8 cc=5 cur=20 addrnext=0c5 addr=0c4 fbyte=00 disp=20
+# PREP t=39759010000 page=2 ci=8 cc=0 cur=3a addrnext=15c addr=1cd fbyte=40 disp=3a
+# PREP t=39765010000 page=2 ci=8 cc=1 cur=3a addrnext=15d addr=15c fbyte=00 disp=3a
+# PREP t=39771010000 page=2 ci=8 cc=2 cur=3a addrnext=15e addr=15d fbyte=00 disp=3a
+# PREP t=39777010000 page=2 ci=8 cc=3 cur=3a addrnext=15f addr=15e fbyte=36 disp=3a
+# PREP t=39783010000 page=2 ci=8 cc=4 cur=3a addrnext=160 addr=15f fbyte=36 disp=3a
+# PREP t=39789010000 page=2 ci=8 cc=5 cur=3a addrnext=161 addr=160 fbyte=00 disp=3a
+# PREP t=42902930000 page=2 ci=8 cc=0 cur=3a addrnext=15c addr=1cd fbyte=40 disp=3a
+# PREP t=42908930000 page=2 ci=8 cc=1 cur=3a addrnext=15d addr=15c fbyte=00 disp=3a
+# PREP t=42914930000 page=2 ci=8 cc=2 cur=3a addrnext=15e addr=15d fbyte=00 disp=3a
+# PREP t=42920930000 page=2 ci=8 cc=3 cur=3a addrnext=15f addr=15e fbyte=36 disp=3a
+# PREP t=42926930000 page=2 ci=8 cc=4 cur=3a addrnext=160 addr=15f fbyte=36 disp=3a
+# PREP t=42932930000 page=2 ci=8 cc=5 cur=3a addrnext=161 addr=160 fbyte=00 disp=3a
+# PREP t=46046850000 page=2 ci=8 cc=0 cur=3a addrnext=15c addr=1cd fbyte=40 disp=3a
+# PREP t=46052850000 page=2 ci=8 cc=1 cur=3a addrnext=15d addr=15c fbyte=00 disp=3a
+# PREP t=46058850000 page=2 ci=8 cc=2 cur=3a addrnext=15e addr=15d fbyte=00 disp=3a
+# PREP t=46064850000 page=2 ci=8 cc=3 cur=3a addrnext=15f addr=15e fbyte=36 disp=3a
+# PREP t=46070850000 page=2 ci=8 cc=4 cur=3a addrnext=160 addr=15f fbyte=36 disp=3a
+# PREP t=46076850000 page=2 ci=8 cc=5 cur=3a addrnext=161 addr=160 fbyte=00 disp=3a
+# PREP t=49190770000 page=2 ci=8 cc=0 cur=3a addrnext=15c addr=1cd fbyte=40 disp=3a
+# PREP t=49196770000 page=2 ci=8 cc=1 cur=3a addrnext=15d addr=15c fbyte=00 disp=3a
+# PREP t=49202770000 page=2 ci=8 cc=2 cur=3a addrnext=15e addr=15d fbyte=00 disp=3a
+# PREP t=49208770000 page=2 ci=8 cc=3 cur=3a addrnext=15f addr=15e fbyte=36 disp=3a
+# PREP t=49214770000 page=2 ci=8 cc=4 cur=3a addrnext=160 addr=15f fbyte=36 disp=3a
+# PREP t=49220770000 page=2 ci=8 cc=5 cur=3a addrnext=161 addr=160 fbyte=00 disp=3a
+# PASS obstacle OLED entry, voice-off prompt, waiting, cruise, paused, ranges and keys
+# ** Note: $finish    : sim/tb_system_oled.sv(126)
+#    Time: 50456631 ns  Iteration: 0  Instance: /tb_system_oled
+# Break in Module tb_system_oled at sim/tb_system_oled.sv line 126
+# Stopped at sim/tb_system_oled.sv line 126
+# End time: 03:53:43 on Oct 29,2026, Elapsed time: 0:00:05
+# Errors: 0, Warnings: 0

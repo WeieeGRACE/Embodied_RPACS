@@ -326,7 +326,23 @@ module tb_system_obstacle;
    dut.control.motion_fault,dut.control.sensor_fault,dut.control.route.route_fault,
    dut.control.imu_bad,dut.control.enc_fault_l,dut.control.enc_fault_r,dut.control.tx_overflow,
    dut.control.imu_error,$time);
- end
+end
+// One-cycle pulses never survive the route-state traces above; catch them here.
+reg se_q=0;reg tk_q=0;
+always @(posedge clk) begin
+ se_q<=dut.control.dispatch.stop_event;tk_q<=dut.control.dispatch.takeover;
+ if(!se_q&&dut.control.dispatch.stop_event)
+  $display("PULSE stop_event t=%0t tkv=%b exit=%b pause=%b busyin=%b gate=%b mstop=%b mv=%b mc=%h vcv=%b cv=%b cmd=%h amode=%b auto=%b rstop=%b rstart=%b",
+   $time,dut.control.dispatch.takeover,dut.control.dispatch.exit_cmd,dut.control.dispatch.pause_cmd,
+   dut.control.busy,dut.control.stop_gate,dut.control.dispatch.stop_request,
+   dut.control.menu_valid,dut.control.menu_command,dut.control.dispatch.voice_command_valid,
+   dut.control.cv,dut.control.command,dut.control.avoid_mode,dut.control.auto_run,
+   dut.control.route_stop,dut.control.route.start);
+ if(!tk_q&&dut.control.dispatch.takeover)
+  $display("PULSE takeover t=%0t cmd=%h cv=%b amode=%b manual=%b pending=%b auto=%b",
+   $time,dut.control.command,dut.control.cv,dut.control.avoid_mode,
+   dut.control.manual_active,dut.control.dispatch.pending_manual,dut.control.auto_run);
+end
  integer l0,old_done,old_clear,old_requests;
  initial begin
  wait(rst);wait(ready_led);wait(dut.tof_valid==7);cycles(2000);off();model_on=1;
@@ -341,11 +357,25 @@ module tb_system_obstacle;
  assert_voice_isolated();keypress(2);wait(dut.auto_run);wait(run_led);
  pause_avoid();keypress(0);wait(!dut.avoid_mode);cycles(2000);off();
  if(dut.group_id!=0)$fatal(1,"K0 did not return to root");
+ // The held K0 exit cascades into the documented root soft reset: voice
+ // defaults to off, the IMU recalibrates and ready drops until it finishes.
+ // Restore voice (without a trailing root() K0, which would cascade again)
+ // and wait for the chassis to report ready before the outside-mode section.
+ wait(ready_led);cycles(1000);
+ choose(4,0);keypress(1);keypress(2);
+ if(!dut.voice_enable)$fatal(1,"voice re-enable after K0 cascade reset");
  // Outside obstacle mode, normal voice movement, speed and status replies work.
  ranges={16'd40,16'd40,16'd40};old_done=done_events;
- frame('h12);wait(dut.control.manual_active);wait(run_led);
- frame('h15);cycles(15000);if(dut.gear!=0)$fatal(1,"outside-mode gear control regressed");
- wait(!run_led);cycles(2000);off();
+ $display("STEP outside-mode ranges40");cycles(2000);
+ frame('h12);
+ $display("STEP sent h12 t=%0t ready=%b fault=%b flatch=%b mflt=%h busy=%b pend=%b accman=%b stopping=%b cmdready=%b gear=%d imubad=%b enc=%b/%b txovf=%b",
+  $time,dut.control.dispatch.ready,dut.control.fault,dut.control.fault_latched,dut.control.motion_fault,
+  dut.control.busy,dut.control.dispatch.pending_manual,dut.control.dispatch.accepted_manual,
+  dut.control.stopping,dut.control.motion.cmd_ready,dut.gear,
+  dut.control.imu_bad,dut.control.enc_fault_l,dut.control.enc_fault_r,dut.control.tx_overflow);
+ wait(dut.control.manual_active);$display("STEP manual active");wait(run_led);$display("STEP run_led");
+ frame('h15);$display("STEP sent h15");cycles(15000);if(dut.gear!=0)$fatal(1,"outside-mode gear control regressed");
+ wait(!run_led);$display("STEP manual done");cycles(2000);off();
  if(fault_led || dut.avoid_mode || done_events!=old_done+1)$fatal(1,"outside-mode voice motion failed");
  if(accepted==0)$fatal(1,"outside-mode accepted response missing");
  ranges={16'd2000,16'd2000,16'd2000};wait(dut.tof_valid==7);

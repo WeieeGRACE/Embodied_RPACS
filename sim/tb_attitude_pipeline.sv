@@ -12,7 +12,7 @@ module tb_attitude_pipeline;
     attitude_angle_to_digits_pipeline dut (
         .clk(clk), .rst_n(rst_n), .angle_mdeg(angle_mdeg),
         .negative(negative), .hundreds(hundreds), .tens(tens),
-        .ones(ones), .tenths(tenths)
+        .ones(ones), .tenths(tenths), .result_valid()
     );
 
     task check_value;
