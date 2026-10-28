@@ -12,3 +12,7 @@ transcript
 vsim.wlf
 
 # 注意：records/*.log 是验证证据，需要入库，因此这里不要 ignore *.log
+
+# Python 缓存
+__pycache__/
+*.pyc
