@@ -129,11 +129,14 @@ def main() -> int:
                                                 P.MSG_CLEAR_FAULT)]
     print("分类: TELEM=%d ACK=%d 下行命令=%d" % (len(telem), len(acks), len(down)))
 
-    if len(telem) >= 2:
-        t0 = stamp_of(frames.index(telem[0]))
-        t1 = stamp_of(frames.index(telem[-1]))
+    # 遥测速率：用帧在列表中的位置取时间戳（不用 .index()，避免重复负载取到第一帧）
+    telem_idx = [i for i, f in enumerate(frames) if f.msg_type == P.MSG_TELEM]
+    if len(telem_idx) >= 2:
+        t0 = stamp_of(telem_idx[0])
+        t1 = stamp_of(telem_idx[-1])
         if t0 is not None and t1 is not None and t1 > t0:
-            print("遥测速率: %.2f Hz（按时间戳）" % ((len(telem) - 1) / (t1 - t0)))
+            print("遥测速率: %.2f Hz（按时间戳）"
+                  % ((len(telem_idx) - 1) / (t1 - t0)))
         else:
             print("遥测速率: 无时间戳，无法计算（可用 --json 导出后自行分析）")
 
@@ -165,7 +168,9 @@ def main() -> int:
             json.dump(out, fh, indent=2, ensure_ascii=False)
         print("JSON ->", args.json)
 
-    return 0 if parser.stats.good == len(frames) else 2
+    # 退出码：0 = 所有帧均合法；1 = 存在被丢弃的字节（帧/计数见上面输出）
+    errs = parser.stats.crc_err + parser.stats.tail_err + parser.stats.len_err
+    return 0 if errs == 0 else 1
 
 
 if __name__ == "__main__":

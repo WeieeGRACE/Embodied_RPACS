@@ -14,10 +14,13 @@ param(
 #
 # Close Fluent Serial Assistant before running: one owner per COM port.
 $ErrorActionPreference = 'Stop'
-$tool = Join-Path $PSScriptRoot 'tools\uart_link.py'
+$tool     = Join-Path $PSScriptRoot 'uart_link.py'
+$recDir   = Join-Path (Join-Path $PSScriptRoot '..') 'records'
 if (!(Test-Path $tool)) { throw "missing $tool" }
 if (!(Test-Path $Python)) {
-    $Python = (Get-Command python -ErrorAction Stop).Source
+    $pyCmd = Get-Command python -ErrorAction SilentlyContinue
+    if (!$pyCmd) { throw "python not found: pass -Python <path to python.exe>" }
+    $Python = $pyCmd.Source
 }
 $env:PYTHONIOENCODING = 'utf-8'
 $common = @('--port', $Port, '--baud', "$Baud")
@@ -27,7 +30,8 @@ switch ($Action) {
     'monitor'   { & $Python $tool monitor @common }
     'heartbeat' { & $Python $tool send @common heartbeat --count 20 --rate 10 }
     'bench'     {
-        $out = Join-Path $PSScriptRoot ("records/bench_" + (Get-Date -Format 'yyyyMMdd_HHmmss') + ".json")
+        New-Item -ItemType Directory -Force $recDir | Out-Null
+        $out = Join-Path $recDir ("bench_" + (Get-Date -Format 'yyyyMMdd_HHmmss') + ".json")
         & $Python $tool bench @common --out $out
         Write-Host "report: $out"
     }

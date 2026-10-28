@@ -106,7 +106,7 @@ CRC 覆盖 01 05 C8 00 6A FF 2A → 0xE146 → 小端 46 E1
 | --- | --- | --- | --- | --- | --- |
 | `0x01` | `SET_VEL` | 5 | `int16 v_left` (mm/s), `int16 v_right` (mm/s), `uint8 seq` | 20 Hz | 设目标速度。**不直接驱动 PWM**，只写"目标速度"寄存器，经安全仲裁后生效。`seq` 由上位机自增，FPGA 原样回显到 `TELEM.cmd_seq` 用于统计丢帧 |
 | `0x02` | `STOP` | 0 | — | 事件 | 立即停车，**锁存**；需 `CLEAR_FAULT` 才能解除 |
-| `0x03` | `HEARTBEAT` | 1 | `uint8 seq` | 5 Hz | 保活。200 ms 未收到 → `LINK_LOST` |
+| `0x03` | `HEARTBEAT` | 1 | `uint8 seq` | 10 Hz | 保活。300 ms 未收到 → `LINK_LOST` |
 | `0x04` | `SET_LIMIT` | 2 | `uint16 limit_mm_s` | 事件 | 前进速度上限（默认 300 mm/s） |
 | `0x05` | `CLEAR_FAULT` | 0 | — | 事件 | 显式复位锁存故障（`STOP` 锁存 / `LINK_LOST`），**且要求链路已恢复** |
 
@@ -141,7 +141,7 @@ CRC 覆盖 01 05 C8 00 6A FF 2A → 0xE146 → 小端 46 E1
 | `0x00` | OK，命令已生效 |
 | `0x01` | 被拒绝：链路未恢复（`LINK_LOST` 未清） |
 | `0x02` | 被拒绝：`STOP` 锁存中 |
-| `0x03` | 被拒绝：超速（超过 `SET_LIMIT`） |
+| `0x03` | **已接受但被裁剪**：命令超过 `SET_LIMIT`，实际按上限执行（FPGA 内部已 clamp） |
 | `0x04` | 不支持的命令 |
 
 ---
@@ -180,7 +180,7 @@ CRC 覆盖 01 05 C8 00 6A FF 2A → 0xE146 → 小端 46 E1
 | 1 | `LINK_LOST` | 心跳超时 |
 | 2 | `ESTOP` | 硬件急停按钮（若接入） |
 | 3 | `OVER_LIMIT` | 命令速度超过 SET_LIMIT 被裁剪 |
-| 4 | `CRC_ERR` | 累计 CRC 错误 > 阈值（诊断用，自清） |
+| 4 | `CRC_ERR` | 出现过 CRC 错（粘滞：置位后保持，直到收到下一个合法帧才清除，无阈值） |
 | 5 | `CMD_TIMEOUT` | 500 ms 无 SET_VEL（诊断用，自清） |
 | 6..7 | 保留 | — |
 
@@ -207,10 +207,38 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 | CRC 错 | 整帧丢弃，不改变任何状态 | `crc_err` |
 | 尾字节非 0D | 整帧丢弃 | `tail_err` |
 | 字节间超时（> 5 ms） | 丢弃半帧，回到找同步 | `timeout` |
-| PAYLOAD 长度与 TYPE 不符 | 丢弃，`status=0x04` | `type_err` |
+| PAYLOAD 长度与 TYPE 不符 | 见下方 §5.1（RTL 侧不回 `type_err` 计数，改用 `unsupported`） | `unsupported` |
 | 重复 STOP / 重复 HEARTBEAT | 幂等接受 | — |
 
 > **强制规则**：任何解析错误都**只能丢弃**，绝不允许把半帧内容写入任何寄存器。
+
+### 5.1 长度不符时的逐命令行为（v1.1 明确，已由 `tb_core` 覆盖）
+
+| 命令 | 长度不符时的行为 |
+| --- | --- |
+| `SET_VEL` / `SET_LIMIT` | 丢弃，回 `ACK 0x04`，`unsupported++`，**不改变速度/限速** |
+| `CLEAR_FAULT` | 丢弃，回 `ACK 0x04`，`unsupported++`，**绝不解锁任何锁存**（安全优先） |
+| `HEARTBEAT` | 丢弃并回 `ACK 0x04`；链路会因心跳超时进入 `LINK_LOST`（失效安全） |
+| `STOP` | **仍然执行停车**（安全优先），同时回 `ACK 0x04` 提醒上位机帧格式有误 |
+
+> 说明：`STOP` 与其它命令不同——停车是安全方向，宁可多停不可漏停；其余命令在长度
+> 不符时一律拒绝，避免把不完整的数据写进寄存器。
+>
+> **ACK 是尽力而为**：ACK 发送队列深度为 1，若上位机背靠背连发两条命令（间隔小于
+> 一帧发送时间 ~0.4 ms），第二条的 ACK 可能被丢弃（`ack_drop` 计数）。因此**判断命令是否
+> 生效应以遥测为准**（`cmd_seq` 回显 / 故障位），或命令间隔 ≥ 1 ms（正常 20 Hz 命令流远大于此）。
+> 上位机侧的 `type_err` 统计（`protocol.py`）只用于诊断，FPGA 侧不维护该计数。
+
+---
+
+## 5.2 接口时序契约（集成必看）
+
+| 信号 | 契约 |
+| --- | --- |
+| `setvel_strobe` | 与 `target_v_left/right` **同一时钟沿更新**；消费者必须在**下一拍**采样速度值（值会保持到下一个 SET_VEL） |
+| `host_frame_rx` 字节接口 | 每个字节之间**至少留 1 个空闲时钟**（`byte_valid` 拉低一拍）。当前字节源（UART）天然满足；若将来接 FIFO/RGMII 字节源，需保证该空隙或在适配器里加一拍缓冲 |
+| `host_link_watchdog` | 心跳超时锁存；`CLEAR_FAULT` 只在 `link_ok=1` 时解除 |
+| `ext_fault[2]` | 硬件急停：**锁存**，松开按钮不会自动恢复，必须 `CLEAR_FAULT`；会置 `STOP_LATCHED` 语义并强制目标速度为 0 |
 
 ---
 
@@ -222,7 +250,7 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 | 参数 | 115200 8N1，无流控 |
 | FPGA 引脚 | `uart_rx` = U8（输入，内部上拉），`uart_tx` = V8（输出，8 mA） |
 | 适配器 | U8/V8 → USB 串口（CH9102，PC 侧 **COM14**） |
-| 半帧超时 | 5 ms（≈ 5.7 个字节时间） |
+| 半帧超时 | 5 ms（≈ 57.6 个字节时间 @115200） |
 | 吞吐 | 最大约 11.5 kB/s；50 Hz TELEM（30 B/帧）= 1.5 kB/s，余量充足 |
 
 ---
@@ -235,14 +263,14 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 | 传输 | UDP 单播，默认端口 **50000**（命令）/ **50001**（遥测） |
 | 载荷 | **一个 UDP 报文恰好承载一个完整帧**（AA 55 … 0D），不复用字节流解析 |
 | MTU | 帧长 7+32=39 B ≪ 1500 B，无分片风险 |
-| 丢包 | UDP 不重传：靠 20 Hz SET_VEL / 5 Hz HEARTBEAT 的冗余；上位机按 `cmd_seq` 统计丢包率 |
+| 丢包 | UDP 不重传：靠 20 Hz SET_VEL / 10 Hz HEARTBEAT 的冗余；上位机按 `cmd_seq` 统计丢包率 |
 | 乱序 | 单链路单播，实测不乱序；若出现，按 `seq` 丢弃旧帧 |
-| RTL 适配 | 新增 `eth_udp_byte_source`，向帧解析器提供 `(byte, valid)`，**`host_frame_rx` 零改动** |
+| RTL 适配 | 新增 `eth_udp_byte_source`，向帧解析器提供 `(byte, valid)`，**`host_frame_rx` 逻辑零改动**；但字节源必须保证字节间至少 1 拍空隙（见 §5.2），或用一拍握手缓冲 |
 
 **迁移检查单**：
 1. `protocol.py` 的 `encode/decode` 不动；
 2. 只新增/替换 transport 实现（`transport_udp.py`）；
-3. RTL 只新增字节源适配器，帧解析/命令分发/遥测打包复用；
+3. RTL 只新增字节源适配器，帧解析/命令分发/遥测打包复用（注意 §5.2 的字节间隙契约）；
 4. 安全逻辑（心跳、STOP 锁存、仲裁）**不依赖传输层**，原样保留；
 5. 保留 UART 作为安全备份通道（PLAN §9.2）。
 
@@ -273,12 +301,15 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 | # | 用例 | 实现 | 验证手段 | 结果 |
 | --- | --- | --- | --- | --- |
 | T01 | CRC 向量 | `crc16_ccitt.v` / `protocol.py` | `tb_core.sv` 4 项 + Python 自检 | ✅ V2=0x29B1 等全部一致 |
-| T02–T06 | 帧解析与错误谱 | `host_frame_rx.v` | `tb_core.sv` 8 项 | ✅ CRC/尾/LEN/重同步/超时/逐字节 |
-| T07–T11 | 命令/安全/遥测 | `host_cmd_decode.v`、`host_link_watchdog.v`、`telem_builder.v` | `tb_core.sv` 20 项 | ✅ 含 ACK 状态码、锁存、恢复 |
+| T02–T06 | 帧解析与错误谱 | `host_frame_rx.v` | `tb_core.sv` 8 项 + 一致性测试 25 帧 | ✅ CRC/尾/LEN/重同步/超时/逐字节 |
+| T07–T11 | 命令/安全/遥测 | `host_cmd_decode.v`、`host_link_watchdog.v`、`telem_builder.v` | `tb_core.sv` 23 项 | ✅ ACK 状态码、锁存、恢复、长度校验、急停 |
 | T12 | 全链路回环 | 全套 | `tb_loopback.sv`（真实 115200） | ✅ ACK + TELEM 内容逐字节校验 |
 | T13 | 上板心跳+遥测 | `uart_bridge_top.v` | `uart_link.py bench` / `soak_test.py` | ✅ 50.0 Hz，误码 0 |
 | T14 | 上板失联恢复 | 同上 | `bench`：停心跳 299 ms 检出，恢复后 CLEAR_FAULT OK | ✅ |
-| T15 | 10 min 长稳 | 同上 | `soak_test.py --duration 600` | 见 `records/` |
+| T15 | 10 min 长稳 | 同上 | `soak_test.py --duration 600` | ✅ 30,000 帧 0 误码（见 `records/`） |
+
+> 另有 `tb_motion_adapter.sv`（19 项）与 `tb_system_closed_loop.sv`（12 项，含失联自动停车）
+> 覆盖"链路 → 电机侧"的整链行为，属于集成层验证，不在本表的协议用例内。
 
 ---
 
@@ -287,4 +318,4 @@ ASRPRO 通道行为与本协议**互不影响**，任一通道停车都必须先
 | 版本 | 日期 | 变更 |
 | --- | --- | --- |
 | v1.0 | 2026-10-28 | 首版冻结：帧格式、消息、时序、仲裁、UART 绑定、UDP 迁移约定 |
-| v1.1 | 2026-10-29 | ① `SET_VEL` 增加 `seq` 字节（LEN 4→5），用于丢帧统计；② 心跳超时 200→**300 ms**（与 5 Hz 心跳等周期会误判，实测证伪）；③ 补 §8.1 实现与验证状态；④ 明确"上电即 link_lost，需 CLEAR_FAULT 显式使能" |
+| v1.1 | 2026-10-29 | ① `SET_VEL` 增加 `seq` 字节（LEN 4→5），用于丢帧统计；② 心跳超时 200→**300 ms**（与 5 Hz 心跳等周期会误判，实测证伪）；③ 补 §8.1 实现与验证状态；④ 明确"上电即 link_lost，需 CLEAR_FAULT 显式使能"；⑤ 硬件急停 `ext_fault[2]` 改为**锁存**并纳入安全仲裁（此前只上报不生效）；⑥ 明确长度不符时逐命令行为（§5.1）与接口时序契约（§5.2）；⑦ ACK 0x03 语义修正为"已接受但被裁剪" |

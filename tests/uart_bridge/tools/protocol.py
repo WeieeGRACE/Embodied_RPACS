@@ -145,7 +145,18 @@ class Frame:
 
 @dataclass
 class ParseStats:
-    """流式解析统计（与 RTL 侧计数器一一对应）。"""
+    """流式解析统计。
+
+    与 RTL 的对应关系（重要，避免误读）：
+
+    * `good / len_err / crc_err / tail_err` 四个计数器与 RTL **语义一致、可在一致性
+      测试里逐项比对**；
+    * `sync_err` **对不齐**：本类是基于缓冲区的解析器，遇到坏帧只删掉 1 个字节后
+      重新全文扫描，因此一个 12 字节的坏帧会再产生若干个 sync_err；RTL 是流式状态机，
+      坏帧被整体消费，不会重扫。两者都"丢弃该帧"，只是计数方式不同；
+    * `timeout` 仅本类有（RTL 有字节间超时，但本类没有时钟信息）；`type_err` 仅本类有
+      （RTL 对长度不符回 ACK 0x04 并计入 unsupported）。
+    """
 
     good: int = 0
     sync_err: int = 0

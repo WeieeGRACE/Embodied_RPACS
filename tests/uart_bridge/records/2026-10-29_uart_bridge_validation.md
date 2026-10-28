@@ -4,7 +4,7 @@
 | --- | --- |
 | 日期 | 2026-10-29 |
 | 范围 | 上位机 ↔ FPGA 链路 v1：帧协议、命令分发、安全仲裁、遥测、板级验证 |
-| 结果 | **综合通过、仿真 60 项全过、板级台架 19/19 全过、600 s 长稳 0 误码** |
+| 结果 | **综合通过、仿真 105 项全过 + 一致性 PASS、板级台架 19/19×3 全过、600 s 长稳 0 误码** |
 | 器件 | GW5A-25A（GW5A-LV25UG324C2/I1），50 MHz |
 | 工具链 | Gowin EDA V1.9.12、ModelSim SE-64 10.7、Python 3.12 + pyserial 3.5 |
 | 串口 | COM14（CH9102 USB-UART），115200 8N1 |
@@ -19,7 +19,7 @@
 | 协议冻结文档 | `docs/PROTOCOL_v1.md`（v1.1，含 CRC 向量、时序、仲裁、以太网迁移） |
 | RTL（9 个模块） | `src/uart_rx_8n1.v`、`crc16_ccitt.v`、`host_frame_rx.v`、`host_cmd_decode.v`、`host_link_watchdog.v`、`telem_builder.v`、`frame_tx_engine.v`、`uart_bridge_core.v`、`uart_bridge_top.v` |
 | 约束 | `src/uart_bridge_top.cst`、`.sdc`（引脚与主工程一致） |
-| 仿真 | `sim/tb_core.sv`（36 项）、`sim/tb_loopback.sv`（24 项）、`run_*.do`、`run_sim.ps1` |
+| 仿真 | `sim/tb_core.sv`（51 项）、`tb_loopback.sv`（23 项）、`tb_motion_adapter.sv`（19 项）、`tb_system_closed_loop.sv`（12 项）、`tb_conformance.sv`、`run_*.do`、`run_sim.ps1` |
 | 上位机工具 | `tools/protocol.py`、`transport.py`（UART/UDP/文件三种传输）、`uart_link.py`、`soak_test.py`、`protocol_selftest.py`、`uart_link.ps1` |
 | 构建 | `build.tcl`、`run_build.ps1`、`uart_bridge.gprj` |
 | 产物 | `impl/pnr/uart_bridge.fs`（SRAM 位流）、`impl/pnr/uart_bridge.rpt.txt` |
@@ -35,6 +35,16 @@
    **心跳 10 Hz、超时 300 ms**（5 Hz 时仍有 100 ms 余量）。
 3. **上电即 `link_lost=1`**：显式使能原则，第一次连接必须发一条 `CLEAR_FAULT`
    才接受速度命令（台架已验证）。
+4. **硬件急停 `ext_fault[2]` 改为锁存并纳入安全仲裁**（独立代码评审发现的问题）：
+   v1.1 早期实现只在遥测里上报该位、**没有真正切断速度**，一旦集成时把真实急停按钮
+   接到这里，按住按钮车仍会继续走。现已改为：`estop` 置位即锁存 → 强制目标速度 0 →
+   `stop_latched_out` 同时置位 → 松开按钮不自动恢复，必须 `CLEAR_FAULT`（链路在线）。
+   `tb_core` 新增 5 项用例覆盖。
+5. **命令长度校验补齐**（同一评审发现）：`CLEAR_FAULT` 长度不符时**不再解锁任何锁存**（回
+   `ACK 0x04`）；`HEARTBEAT` 长度不符回 `ACK 0x04`；`STOP` 长度不符**仍然停车**（安全优先）
+   并回 `ACK 0x04`。行为表见协议 §5.1。
+6. **ACK 语义澄清**：ACK 队列深度 1，背靠背命令可能丢 ACK；判断命令生效应以遥测为准
+   （协议 §5.1 末尾说明）。台架脚本据此在连续命令间留 50 ms 间隔，19/19 连跑 3 次稳定。
 
 其余（帧格式、CRC 参数、消息编号、故障位图、仲裁优先级）与 v1.0 一致。
 
@@ -44,22 +54,28 @@
 
 | 套件 | 检查项 | 结果 | 日志 |
 | --- | --- | --- | --- |
-| `tb_core.sv` | **36 项全过**：CRC 向量 V1–V4、帧解析错误谱（CRC/尾/LEN/重同步/字节间超时/逐字节喂入）、命令解码、ACK 状态码、限速裁剪、STOP 锁存、失联与恢复、遥测节拍 | ✅ 0 fail | `records/tb_core.log` |
-| `tb_loopback.sv` | **24 项全过**：真实 115200 8N1 双向回环（TB 逐位发、逐位收），ACK 与 TELEM 逐字节校验（含 int32/int16 小端、seq 回显） | ✅ 0 fail | `records/tb_loopback.log` |
-| `protocol_selftest.py` | 34 项 Python 编解码自检 | ✅ 0 failures | — |
+| `tb_core.sv` | **51 项全过**：CRC 向量 V1–V4、帧解析错误谱（CRC/尾/LEN/重同步/字节间超时/逐字节喂入）、命令解码、ACK 状态码、限速裁剪、STOP 锁存、失联与恢复、遥测节拍、**长度不符命令**、**硬件急停锁存**、`setvel_strobe` 输出 | ✅ 0 fail | `records/tb_core.log` |
+| `tb_loopback.sv` | **23 项全过**：真实 115200 8N1 双向回环（TB 逐位发、逐位收），ACK 与 TELEM 逐字节校验（含 int32/int16 小端、seq 回显） | ✅ 0 fail | `records/tb_loopback.log` |
+| `tb_motion_adapter.sv` | **19 项全过**：电机侧适配器（模式/方向/幅值、差速近似、停车只发一次 BRAKE、停车期间拒绝命令、恢复、零速刹车） | ✅ 0 fail | `records/tb_adapter.log` |
+| `tb_system_closed_loop.sv` | **12 项全过**：串口→链路→适配器→轮子模型→编码器→遥测全闭环，含**失联自动停车** | ✅ 0 fail | `records/tb_system.log` |
+| `protocol_selftest.py` | **30 项** Python 编解码自检 | ✅ 0 failures | — |
+| `conformance.py --run` | Python ↔ RTL 一致性（见 §3.1） | ✅ PASS | `records/conformance.log` |
 
-复核命令：`.\run_sim.ps1`（编译 + 两套回归，约 1 分钟）。
+合计 **105 项 RTL 检查 + 30 项 Python 自检 + 25 帧一致性比对**。
+
+复核命令：`.\run_sim.ps1 -Python <python路径>`（5 套仿真 + 一致性，约 3 分钟）。
 
 关键覆盖点（对应 `docs/PROTOCOL_v1.md` §8 的 T01–T12）：CRC 标准值 `0x29B1` 双向一致；
 任何解析错误都不改变寄存器；`STOP` 锁存后 `SET_VEL` 被 ACK 拒绝（状态 0x02）；
-失联后 `CLEAR_FAULT` 在链路未恢复时被拒（0x01）。
+失联后 `CLEAR_FAULT` 在链路未恢复时被拒（0x01）；**LEN 不符的 CLEAR_FAULT 不会解锁任何锁存**；
+**硬件急停（`ext_fault[2]`）锁存且松开按钮不自动恢复**。
 
 ---
 
 ### 3.1 Python ↔ RTL 一致性测试（conformance）
 
 `tools/conformance.py --run` 一条命令完成：生成 435 字节对抗语料（25 个合法帧 + CRC 错
-6 处 + 尾字节错 3 处 + LEN 超限 + 垃圾字节 + `AA AA 55` 重叠 + 结尾截断帧）→ 让
+5 处 + 尾字节错 4 处 + LEN 超限 2 处 + 垃圾字节 + `AA AA 55` 重叠 + 结尾截断帧）→ 让
 `tb_conformance.sv` 把同一语料喂给 `host_frame_rx` → 与 `protocol.py` 的解析结果逐帧比对。
 
 ```text
@@ -69,7 +85,9 @@ PASS all 25 frames identical (type/len/payload, first 8 bytes)
 CONFORMANCE PASS
 ```
 
-> 两侧对**同一段含噪数据**给出完全一致的帧与计数器，说明上位机与 FPGA 的协议理解一致。
+> 两侧对**同一段含噪数据**给出完全一致的帧与 good/crc/len/tail 计数，说明上位机与 FPGA
+> 的协议理解一致。（`sync_err` 两边统计方式不同——缓冲解析器会重扫、流式状态机不会，
+> 详见 `protocol.py` 的 `ParseStats` 说明；一致性测试不比对该项。）
 > 已知的固有差异（仅在"噪声里出现非法 `AA 55` 且紧贴真帧"时，流式解析器无法回退重扫）
 > 通过语料里的空闲间隔规避，并在 `tools/conformance.py` 文档字符串中说明。
 
@@ -77,17 +95,17 @@ CONFORMANCE PASS
 
 ## 4. 资源与时序
 
-| 资源 | 占用 | 占比 |
-| --- | --- | --- |
-| Logic | **1066** / 23040（850 LUT + 216 ALU + 0 ROM16） | 5% |
-| Register | **808** / 23685（FF 802 + IO FF 6） | 4% |
-| CLS | **804** / 11520 | 7% |
-| SSRAM | 0 | — |
-| 时钟资源 | PRIMARY 1/8（13%） | — |
+三个顶层各自综合（`gw_sh build*.tcl`，GW5A-25A，50 MHz）：
 
-- 综合/PnR/位流生成全部通过，PnR 报告无时序告警（`impl/pnr/uart_bridge.rpt.txt`）。
+| 顶层 | Logic | Register | CLS | 其他 |
+| --- | --- | --- | --- | --- |
+| `uart_bridge_top`（纯链路） | **1077** / 23040（5%） | 808（4%） | **829** / 11520（8%） | — |
+| `uart_bridge_lite_top`（精简） | **998**（5%） | 747（4%） | **747**（7%） | — |
+| `uart_bridge_imu_top`（链路+IMU） | **5405**（24%） | 2529（11%） | **3640**（32%） | BSRAM 4（pROM）、DSP 10/28 |
+
+- 综合/PnR/位流生成全部通过；PnR 报告无时序违例（`impl/pnr/uart_bridge*.rpt.txt`）。
 - 单帧处理：TELEM 30 字节 @115200 = 2.6 ms，20 ms 周期下占用约 13% 串口带宽；
-  实测总带宽占用 2250 B/s ≈ 20%（含 ACK）。
+  实测总带宽约 1540 B/s（≈ 50 Hz × 30 B + ACK），占 115200 的 13%~14%。
 
 ---
 
@@ -139,9 +157,9 @@ parser_stats good=30000 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
 ### 5.3 IMU 变体长稳（同样 600 s）
 
 ```
-frames_total 30001      error_frames 0      error_rate 0.0
-telem_rate mean 50.00 Hz  min 49.95  max 50.08
-parser_stats good=30001 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
+frames_total 30005      error_frames 0      error_rate 0.0
+telem_rate mean 50.00 Hz  min 49.95  max 50.04
+parser_stats good=30005 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
 ```
 
 - 链路 + IMU SPI 轮询 + 姿态解算同时运行，**10 分钟零误码**；
@@ -166,10 +184,10 @@ UDP TRANSPORT PASS
 
 ```
 PASS link_established                         fault=0x22
-PASS corrupted_setvel_ignored                 cmd_seq 0 -> 0      （50 个 CRC 错帧全部丢弃）
+PASS corrupted_setvel_ignored                 cmd_seq 52 -> 52    （50 个 CRC 错帧全部丢弃）
 PASS telemetry_survives_garbage               61.3 Hz             （灌 2000 个随机字节）
-PASS garbage_does_not_execute                 cmd_seq=0
-PASS valid_frame_accepted_after_noise         cmd_seq 7           （噪声后立刻恢复）
+PASS garbage_does_not_execute                 cmd_seq=52
+PASS valid_frame_accepted_after_noise         cmd_seq 59          （噪声后立刻恢复）
 PASS link_still_ok                            fault=0x00
 6/6 checks passed
 ```
@@ -194,29 +212,41 @@ PASS link_still_ok                            fault=0x00
 
 ## 7. 集成到主工程的资源结论
 
-主工程现状：**Logic 20334/23040（89%）、CLS 10728/11520（94%）** → 剩余 Logic 2706、CLS 792。
+**主工程当前实测**（`impl/pnr/Embodied_RPACS.rpt.txt`，2026-10-28 23:40 生成）：
 
-| 维度 | 本链路需求 | 余量 | 结论 |
-| --- | --- | --- | --- |
-| Logic | 1066 | 2706 | ✅ 可容纳 |
-| **CLS** | **804** | **792** | ❌ **差 12（集成后 >100%）** |
+| 资源 | 占用 | 余量 |
+| --- | --- | --- |
+| Logic | 19664 / 23040（86%） | **3376** |
+| Register | 7486 / 23685（32%） | 16199 |
+| CLS | 10522 / 11520（92%） | **998** |
 
-三条可选路径：
+> 注意：`PLAN.md` 里写的 20334/89%、CLS 10728/94%（余 792）是**更早的基线**，
+> 主工程后来做过一轮资源优化（`src/ui/*`、`src/asr/*`、`src/obstacle/*`），
+> 因此以当前 PnR 报告为准。
 
-1. **以 `tests/task4_navigation` 为基座重新划分**（该板级工程 CLS 仅 53%），
-   把链路与导航一起放进去 —— 与 PLAN §9.3 的结论一致，推荐；
-2. **用"精简版"链路**（已实现并上板验证，见 §7.1）；
-3. 裁掉主工程 UI/日志 RTL 再合入 —— 回归面最大，不推荐。
+| 版本 | Logic | CLS | 主工程余量 | 结论 |
+| --- | --- | --- | --- | --- |
+| 完整版 `uart_bridge_top` | 1077 | 829 | Logic 3376 / CLS 998 | ✅ **可容纳**（余 CLS 169） |
+| 精简版 `uart_bridge_lite_top` | 998 | 747 | 同上 | ✅ 可容纳（余 CLS 251） |
+| 链路 + 适配器（估） | ~1150 | ~880 | 同上 | ⚠️ 余 CLS ~120，仍可但偏紧 |
+
+**结论更新**：链路**可以**直接合入当前主工程（CLS 余 169），之前"差 12 个 CLS"的结论
+基于过期基线，已作废。仍建议保留两条退路：
+
+1. 若还要往主工程加东西（适配器/仲裁/以太网），先换 `tests/task4_navigation` 基座；
+2. 或用精简版（余 251 CLS），代价是没有逐命令 ACK。
+
+> 集成时仍须遵守：只写目标速度、不写 PWM；保留 STOP/失联锁存语义（§6）。
 
 ### 7.1 精简版实测（`uart_bridge_lite_top`，已实现并上板验证）
 
 精简手段只有两项：诊断计数器 16→8 位 + **不发 ACK**（上位机改用 50 Hz 遥测里的
 `cmd_seq` 回显判断命令是否生效）。综合结果：
 
-| 版本 | Logic | Register | CLS | 结论 |
-| --- | --- | --- | --- | --- |
-| 完整版 `uart_bridge_top` | 1066 | 808 | **804** | 主工程 CLS 余量 792 → **差 12** |
-| **精简版 `uart_bridge_lite_top`** | **1004** | **747** | **753** | **可放进主工程（余 39 CLS）** |
+| 版本 | Logic | Register | CLS |
+| --- | --- | --- | --- |
+| 完整版 `uart_bridge_top` | 1077 | 808 | **829** |
+| **精简版 `uart_bridge_lite_top`** | **998** | 747 | **747** |
 
 上板验证（烧写 `uart_bridge_lite.fs`，持续心跳）：
 
@@ -230,7 +260,7 @@ parser stats      : {'good': 110, 'crc_err': 0, 'sync_err': 0, 'len_err': 0, ...
 ```
 
 > 代价：失去逐命令 ACK（但 20 Hz 命令流 + 遥测回显足以判断生效与否）、诊断计数器上限 255。
-> **39 CLS 余量仍偏紧**：接入时若还要加适配器/仲裁逻辑，建议同时走路径 1（换基座）。
+> 精简版价值在于**给主工程留更多余量**（251 vs 169 CLS）。
 
 > 结论：**当前形态不能直接合入主工程（CLS 差 12）**，须走路径 1 或 2。
 > 这一步留到"链路 + 电机"联调时决策，不在今晚改动主工程。
@@ -247,11 +277,11 @@ parser stats      : {'good': 110, 'crc_err': 0, 'sync_err': 0, 'len_err': 0, ...
 
 | 顶层 | Logic | Register | CLS | BSRAM | DSP |
 | --- | --- | --- | --- | --- | --- |
-| `uart_bridge_top`（纯链路） | 1066（5%） | 808（4%） | 804（7%） | 0 | 0 |
+| `uart_bridge_top`（纯链路） | 1077（5%） | 808（4%） | 829（8%） | 0 | 0 |
 | `uart_bridge_imu_top`（链路 + IMU 姿态） | **5305（24%）** | 2529（11%） | **3615（32%）** | 4（pROM，IMU 配置镜像） | 10/28 |
 
 即 **IMU 驱动 + 姿态解算额外占 4239 Logic / 2811 CLS / 4 BSRAM / 10 DSP**。
-对主工程而言这部分**本来就有**（主工程已含 IMU + 姿态），所以把链路合入主工程只多 1066 Logic
+对主工程而言这部分**本来就有**（主工程已含 IMU + 姿态），所以把链路合入主工程只多 1077 Logic
 （结论仍见 §7）。独立测试工程里 24%/32% 余量充足。
 
 ### 8.2 板级实测（烧写 `uart_bridge_imu.fs`，同样只写 SRAM）
@@ -320,8 +350,8 @@ python tools\soak_test.py --port COM14 --duration 600 --out records/soak.json
 | --- | --- |
 | `records/build_synth.log`、`build_synth2.log` | 综合/PnR 日志 |
 | `records/download_sram.log` | SRAM 烧写日志（User Code 0x000067E2） |
-| `records/tb_core.log` | 36 项仿真 PASS |
-| `records/tb_loopback.log` | 24 项真实波特率回环 PASS |
+| `records/tb_core.log` | 51 项仿真 PASS |
+| `records/tb_loopback.log` | 23 项真实波特率回环 PASS |
 | `records/2026-10-29_uart_bridge_bench.json` | 台架 19 项逐条结果 |
 | `records/2026-10-29_soak_600s.json/.log` | 10 min 长稳统计 |
 | `impl/pnr/uart_bridge.rpt.txt` | 资源/引脚报告 |

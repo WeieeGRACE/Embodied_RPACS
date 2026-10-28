@@ -20,8 +20,10 @@ module tb_system_closed_loop;
     always #10 clk = ~clk;
     reg rst_n = 0;
     integer errors = 0;
+    integer checks_run = 0;
 
     task automatic check(input bit cond, input string msg);
+        checks_run = checks_run + 1;
         if (!cond) begin
             errors = errors + 1;
             $display("FAIL %s (t=%0t)", msg, $time);
@@ -57,14 +59,7 @@ module tb_system_closed_loop;
     wire [15:0] telem_cnt, ack_cnt, ack_drop;
     wire        [7:0]  hb_seq, cmd_seq;
     wire [15:0] hb_age;
-
-    // "a SET_VEL was accepted" pulse derived from the telemetry seq echo
-    reg  [7:0] cmd_seq_d = 8'h00;
-    reg        setvel_seen = 1'b0;
-    always @(posedge clk) begin
-        setvel_seen <= (cmd_seq != cmd_seq_d);
-        cmd_seq_d   <= cmd_seq;
-    end
+    wire        setvel_strobe;      // real pulse from the core (not derived from seq)
 
     // plant state
     integer enc_l = 0, enc_r = 0;
@@ -84,6 +79,7 @@ module tb_system_closed_loop;
         .ext_fault(8'h00),
         .target_v_left(tgt_l), .target_v_right(tgt_r),
         .stop_latched_out(stop_latched),
+        .setvel_strobe_out(setvel_strobe),
         .link_ok_out(link_ok), .link_lost_out(link_lost),
         .fault_out(fault_bits),
         .good_cnt(good_cnt), .crc_err_cnt(crc_cnt), .len_err_cnt(len_cnt),
@@ -105,7 +101,7 @@ module tb_system_closed_loop;
     ) u_adapter (
         .clk(clk), .rst_n(rst_n),
         .req_v_left(tgt_l), .req_v_right(tgt_r),
-        .setvel_strobe(setvel_seen), .stop_latched(stop_latched),
+        .setvel_strobe(setvel_strobe), .stop_latched(stop_latched),
         .link_ok(link_ok), .link_lost(link_lost),
         .cmd_valid(cmd_valid), .cmd_mode(cmd_mode), .cmd_end(),
         .cmd_reverse(cmd_reverse), .cmd_speed_l(cmd_speed_l),
@@ -325,14 +321,34 @@ module tb_system_closed_loop;
         check(last_spd_l == 0 && last_spd_r == 0, "speeds_zero_after_stop");
         check(last_enc_l >= enc_before, "encoder_does_not_run_backwards");
 
+        // 4) link loss: clear the stop, spin up again, then stop sending heartbeats
+        head = 64'h0; head[7:0] = 8'd40;
+        send_frame(8'h03, 1, head);
+        repeat (200) @(posedge clk);
+        send_frame(8'h05, 0, 64'h0);            // CLEAR_FAULT
+        repeat (300) @(posedge clk);
+        head = 64'h0;
+        head[15:0] = 16'sd100; head[31:16] = 16'sd100; head[39:32] = 8'd66;
+        send_frame(8'h01, 5, head);
+        repeat (1_000_000) @(posedge clk);      // 20 ms: plant spins up (~100 mm/s)
+        check(tgt_l == 16'sd100 && tgt_r == 16'sd100,
+              "speed_command_active_before_link_loss");
+
+        repeat (400_000) @(posedge clk);        // 8 ms more: NO heartbeat from here on
+        repeat (25_000_000) @(posedge clk);     // 500 ms with the heartbeat silenced
+        check(link_lost == 1'b1, "link_lost_after_heartbeat_stop");
+        check(tgt_l == 16'sd0 && tgt_r == 16'sd0,
+              "link_loss_forces_zero_speed");
+        check(last_spd_l == 0, "plant_stopped_after_link_loss");
+
         $display("");
-        if (errors == 0) $display("PASS tb_system_closed_loop");
+        if (errors == 0) $display("PASS tb_system_closed_loop (%0d checks)", checks_run);
         else             $display("FAIL tb_system_closed_loop (%0d errors)", errors);
         $finish;
     end
 
     initial begin
-        #100_000_000;
+        #1_000_000_000;
         $display("FAIL tb_system_closed_loop timeout");
         $finish;
     end

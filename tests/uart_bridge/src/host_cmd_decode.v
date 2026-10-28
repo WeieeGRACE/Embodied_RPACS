@@ -118,16 +118,28 @@ module host_cmd_decode #(
                         end
                     end
                     T_STOP: begin
+                        // Safety command: a STOP with an unexpected length is still
+                        // honoured (fail-safe), but it is flagged to the host.
                         stop_latched <= 1'b1;
                         req_v_left   <= 16'sd0;
                         req_v_right  <= 16'sd0;
-                        ack_strobe   <= 1'b1; ack_type <= frame_type;
-                        ack_seq      <= 8'd0; ack_status <= ACK_OK;
+                        if (frame_len != 8'd0) begin
+                            ack_strobe <= 1'b1; ack_type <= frame_type;
+                            ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
+                            unsupported_cnt <= unsupported_cnt + 16'd1;
+                        end else begin
+                            ack_strobe   <= 1'b1; ack_type <= frame_type;
+                            ack_seq      <= 8'd0; ack_status <= ACK_OK;
+                        end
                     end
                     T_HEARTBEAT: begin
                         if (frame_len == 8'd1) begin
                             hb_strobe <= 1'b1;
                             hb_seq    <= payload_head[7:0];
+                        end else begin
+                            ack_strobe <= 1'b1; ack_type <= frame_type;
+                            ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
+                            unsupported_cnt <= unsupported_cnt + 16'd1;
                         end
                     end
                     T_SET_LIMIT: begin
@@ -142,15 +154,22 @@ module host_cmd_decode #(
                         end
                     end
                     T_CLEAR_FAULT: begin
-                        if (link_ok) begin
-                            stop_latched <= 1'b0;
+                        if (frame_len != 8'd0) begin
+                            // length mismatch: discard, do NOT unlock anything
                             ack_strobe <= 1'b1; ack_type <= frame_type;
-                            ack_seq <= 8'd0; ack_status <= ACK_OK;
+                            ack_seq <= 8'd0; ack_status <= ACK_UNSUPPORTED;
+                            unsupported_cnt <= unsupported_cnt + 16'd1;
                         end else begin
-                            ack_strobe <= 1'b1; ack_type <= frame_type;
-                            ack_seq <= 8'd0; ack_status <= ACK_REJ_LINK;
+                            if (link_ok) begin
+                                stop_latched <= 1'b0;
+                                ack_strobe <= 1'b1; ack_type <= frame_type;
+                                ack_seq <= 8'd0; ack_status <= ACK_OK;
+                            end else begin
+                                ack_strobe <= 1'b1; ack_type <= frame_type;
+                                ack_seq <= 8'd0; ack_status <= ACK_REJ_LINK;
+                            end
+                            clear_fault_strobe <= 1'b1;
                         end
-                        clear_fault_strobe <= 1'b1;
                     end
                     default: begin
                         ack_strobe <= 1'b1; ack_type <= frame_type;

@@ -46,6 +46,7 @@ class Link:
         self._hb_enabled.set()
         self._seq = 0
         self._lock = threading.Lock()
+        self._seq_lock = threading.Lock()
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
         self.telemetry: Deque[P.Telemetry] = deque(maxlen=2000)
@@ -66,6 +67,12 @@ class Link:
             self._thread.join(timeout=1.0)
         self.tp.close()
 
+    def _next_seq(self) -> int:
+        """心跳线程与命令行共用同一个序号计数器，必须加锁。"""
+        with self._seq_lock:
+            self._seq = (self._seq + 1) & 0xFF
+            return self._seq
+
     def _rx_loop(self) -> None:
         hb_deadline = time.time()
         while not self._stop.is_set():
@@ -80,9 +87,8 @@ class Link:
             if self._hb_enabled.is_set() and self.heartbeat_period > 0:
                 now = time.time()
                 if now >= hb_deadline:
-                    self._seq = (self._seq + 1) & 0xFF
                     try:
-                        self.send_raw(P.msg_heartbeat(self._seq))
+                        self.send_raw(P.msg_heartbeat(self._next_seq()))
                     except Exception:  # noqa: BLE001
                         pass
                     hb_deadline = now + self.heartbeat_period
@@ -112,15 +118,13 @@ class Link:
 
     def heartbeat(self, seq: Optional[int] = None) -> int:
         if seq is None:
-            self._seq = (self._seq + 1) & 0xFF
-            seq = self._seq
+            seq = self._next_seq()
         self.send(P.msg_heartbeat(seq))
         return seq
 
     def set_vel(self, left: int, right: int, seq: Optional[int] = None) -> int:
         if seq is None:
-            self._seq = (self._seq + 1) & 0xFF
-            seq = self._seq
+            seq = self._next_seq()
         self.send(P.msg_set_vel(left, right, seq))
         return seq
 
@@ -337,6 +341,7 @@ def cmd_bench(args) -> int:
               ack is not None and ack.status == P.ACK_REJECT_LIMIT,
               ack.status_name if ack else "no ACK")
         link.set_limit(args.limit_restore)
+        time.sleep(0.05)      # 背靠背命令之间留间隔（ACK 队列深度 1，协议 §5.3）
 
         # 5) STOP 锁存 + 遥测故障位
         link.stop_cmd()

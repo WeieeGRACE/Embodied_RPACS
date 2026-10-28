@@ -11,8 +11,10 @@ module tb_core;
 
     reg rst_n = 0;
     integer errors = 0;
+    integer checks_run = 0;
 
     task automatic check(input bit cond, input string msg);
+        checks_run = checks_run + 1;
         if (!cond) begin
             errors = errors + 1;
             $display("FAIL %s  (t=%0t)", msg, $time);
@@ -105,11 +107,14 @@ module tb_core;
 
     wire signed [15:0] target_l, target_r;
     wire        stop_out, link_ok_out, link_lost_out;
+    wire        setvel_pulse, estop_out;
     wire [7:0]  fault_out;
     wire [15:0] good_c, crc_c, len_c, tail_c, sync_c, to_c, unsup_c;
     wire [15:0] telem_cnt, ack_cnt, ack_drop;
     wire [7:0]  hb_seq, cmd_seq;
     wire [15:0] hb_age;
+
+    reg  [7:0]  ext_fault = 8'h00;
 
     uart_bridge_core #(
         .CLK_HZ(50_000_000),
@@ -125,8 +130,9 @@ module tb_core;
         .enc_l(32'sd1234), .enc_r(-32'sd5678),
         .yaw_cdeg(-16'sd9000), .pitch_cdeg(16'sd150), .roll_cdeg(-16'sd75),
         .speed_l_mm_s(16'sd180), .speed_r_mm_s(-16'sd160),
-        .ext_fault(8'h00),
+        .ext_fault(ext_fault),
         .target_v_left(target_l), .target_v_right(target_r),
+        .setvel_strobe_out(setvel_pulse), .estop_latched_out(estop_out),
         .stop_latched_out(stop_out), .link_ok_out(link_ok_out),
         .link_lost_out(link_lost_out), .fault_out(fault_out),
         .good_cnt(good_c), .crc_err_cnt(crc_c), .len_err_cnt(len_c),
@@ -145,6 +151,10 @@ module tb_core;
             tx_n = tx_n + 1;
         end
     end
+
+    // count the setvel_strobe pulses exposed by the core
+    integer setvel_edges = 0;
+    always @(posedge clk) if (rst_n && setvel_pulse) setvel_edges = setvel_edges + 1;
 
     task automatic send_b(input [7:0] b);
         @(negedge clk); rx_byte = b; rx_valid = 1;
@@ -210,13 +220,20 @@ module tb_core;
     endtask
 
     reg [63:0] head;
+    reg [63:0] head_setvel;
     integer i;
+    reg [15:0] unsup_c_before;
 
     // ------------------------------------------------------------ test script
     initial begin
         repeat (10) @(negedge clk);
         rst_n = 1;
         repeat (10) @(negedge clk);
+        // canonical SET_VEL payload used by several later tests
+        head_setvel        = 64'h0;
+        head_setvel[15:0]  = 16'sd200;
+        head_setvel[31:16] = -16'sd150;
+        head_setvel[39:32] = 8'd7;
 
         // ================= CRC vectors =================
         check(crc_out == 16'hFFFF, "crc_v1_reset_value_is_0xFFFF");
@@ -339,7 +356,7 @@ module tb_core;
         tx_n = 0;
         repeat (200000) @(negedge clk);        // 4 ms -> expect ~4 TELEM frames
         scan_tx();
-        check(telem_in_hist >= 3 && telem_in_hist <= 6, "core_telem_cadence_50hz_like");
+        check(telem_in_hist >= 3 && telem_in_hist <= 6, "core_telem_cadence_follows_period");
         check(telem_cnt >= 3, "core_telem_counter");
 
         // ================= core: heartbeat timeout =================
@@ -359,8 +376,81 @@ module tb_core;
         repeat (200) @(negedge clk);
         check(unsup_c == 16'd1, "core_unsupported_type_counted");
 
+        // ================= core: malformed lengths are rejected =================
+        // link is still down here, so first restore it
+        send_frame(8'h03, 1, head);
+        repeat (50000) @(negedge clk);
+        send_frame(8'h03, 1, head);
+        repeat (200) @(negedge clk);
+        check(link_ok_out == 1'b1, "core_link_restored");
+
+        unsup_c_before = unsup_c;
+        tx_n = 0;
+        send_frame(8'h05, 2, 64'h0);           // CLEAR_FAULT with LEN=2 (illegal)
+        repeat (300) @(negedge clk);
+        scan_tx();
+        check(ack_in_hist == 1 && last_ack_status == 8'h04,
+              "core_malformed_clear_fault_ack_unsupported");
+        check(unsup_c == unsup_c_before + 16'd1,
+              "core_malformed_clear_fault_counted");
+
+        tx_n = 0;
+        send_frame(8'h03, 2, 64'h0);           // HEARTBEAT with LEN=2 (illegal)
+        repeat (300) @(negedge clk);
+        scan_tx();
+        check(ack_in_hist == 1 && last_ack_status == 8'h04,
+              "core_malformed_heartbeat_ack_unsupported");
+
+        tx_n = 0;
+        send_frame(8'h02, 1, 64'h0);           // STOP with LEN=1 (illegal)
+        repeat (300) @(negedge clk);
+        scan_tx();
+        check(stop_out == 1'b1, "core_malformed_stop_still_stops");
+        check(ack_in_hist == 1 && last_ack_status == 8'h04,
+              "core_malformed_stop_ack_unsupported");
+
+        // ================= core: hardware E-stop is latched =================
+        send_frame(8'h05, 0, 64'h0);           // clear the stop first
+        repeat (300) @(negedge clk);
+        check(stop_out == 1'b0, "core_stop_cleared_before_estop_test");
+
+        send_frame(8'h03, 1, head);
+        repeat (200) @(negedge clk);
+        send_frame(8'h01, 5, head_setvel);     // a valid speed command
+        repeat (200) @(negedge clk);
+        check(target_l == 16'sd200, "core_speed_active_before_estop");
+
+        ext_fault = 8'h04;                     // press the E-stop (bit2)
+        repeat (50) @(negedge clk);
+        check(estop_out == 1'b1, "core_estop_latched");
+        check(stop_out == 1'b1, "core_estop_asserts_stop_out");
+        check(fault_out[2] == 1'b1, "core_estop_fault_bit");
+        check(target_l == 16'sd0 && target_r == 16'sd0,
+              "core_estop_forces_zero_speed");
+
+        ext_fault = 8'h00;                     // release the button
+        repeat (50) @(negedge clk);
+        check(estop_out == 1'b1 && target_l == 16'sd0,
+              "core_estop_stays_latched_after_release");
+
+        send_frame(8'h03, 1, head);
+        repeat (200) @(negedge clk);
+        send_frame(8'h05, 0, 64'h0);           // explicit clear
+        repeat (300) @(negedge clk);
+        check(estop_out == 1'b0 && stop_out == 1'b0,
+              "core_estop_cleared_by_clear_fault");
+        check(fault_out[2] == 1'b0, "core_estop_fault_bit_cleared");
+
+        // ================= core: setvel_strobe output =================
+        send_frame(8'h03, 1, head);
+        repeat (200) @(negedge clk);
+        setvel_edges = 0;
+        send_frame(8'h01, 5, head_setvel);
+        repeat (300) @(negedge clk);
+        check(setvel_edges == 1, "core_setvel_strobe_pulses_once");
+
         $display("");
-        if (errors == 0) $display("PASS tb_core (%0d checks)", 0);
+        if (errors == 0) $display("PASS tb_core (%0d checks)", checks_run);
         else             $display("FAIL tb_core (%0d errors)", errors);
         $finish;
     end

@@ -5,8 +5,8 @@
 //   * diagnostics counters 8-bit instead of 16-bit
 //   * no ACK frames (the host relies on the 50 Hz telemetry + cmd_seq echo instead)
 //
-// Measured on GW5A-25: see records/2026-10-29_uart_bridge_validation.md section 7
-// (full build 1066 Logic / 804 CLS -> this variant is the integration candidate).
+// Measured on GW5A-25: full build 1077 Logic / 829 CLS -> this variant 998 / 747.
+// See records/2026-10-29_uart_bridge_validation.md section 7 for the table.
 //
 // SAFETY: identical to uart_bridge_top - every motor driver output is tied to 0.
 module uart_bridge_lite_top #(

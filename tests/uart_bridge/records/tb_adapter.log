@@ -1,0 +1,72 @@
+﻿Reading D:/app/modesilm/tcl/vsim/pref.tcl
+
+# 10.7
+
+# do sim/run_adapter.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap uart_lib sim/work 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 02:05:38 on Oct 29,2026
+# vlog -sv -work uart_lib src/host_link_motion_adapter.v sim/tb_motion_adapter.sv 
+# -- Compiling module host_link_motion_adapter
+# -- Compiling module tb_motion_adapter
+# 
+# Top level modules:
+# 	tb_motion_adapter
+# End time: 02:05:38 on Oct 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" uart_lib.tb_motion_adapter 
+# Start time: 02:05:38 on Oct 29,2026
+# ** Note: (vsim-8009) Loading existing optimized design _opt1
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_motion_adapter(fast)
+# Loading work.host_link_motion_adapter(fast)
+#       [stub] captured mode=2 rev=0 spd=(100000,100000)
+# PASS fwd_mode_is_FORWARD
+# PASS fwd_direction
+# PASS fwd_speed_l_um_s
+#       [stub] captured mode=3 rev=1 spd=(80000,80000)
+# PASS rev_mode_is_BACKWARD
+# PASS rev_direction
+# PASS rev_speed_um_s
+#       [stub] captured mode=6 rev=0 spd=(100000,100000)
+# PASS rotate_mode
+# PASS rotate_ccw
+# PASS rotate_speed
+#       [stub] captured mode=6 rev=1 spd=(70000,70000)
+# PASS rotate_mode_cw
+# PASS rotate_cw_direction
+#       [stub] captured mode=2 rev=0 spd=(90000,90000)
+# PASS diff_approx_uses_forward
+# PASS diff_approx_speed_is_average_90
+# PASS diff_approx_counter
+#       [stub] captured mode=8 rev=0 spd=(0,0)
+# PASS stop_issues_exactly_one_command
+# PASS stop_mode_is_BRAKE
+# PASS no_command_while_stopped
+#       [stub] captured mode=2 rev=0 spd=(50000,50000)
+# PASS resume_after_stop_clear
+#       [stub] captured mode=8 rev=0 spd=(0,0)
+# PASS zero_speed_brakes
+# 
+# PASS tb_motion_adapter
+# ** Note: $finish    : sim/tb_motion_adapter.sv(167)
+#    Time: 16140 ns  Iteration: 1  Instance: /tb_motion_adapter
+# Break in Module tb_motion_adapter at sim/tb_motion_adapter.sv line 167
+# Stopped at sim/tb_motion_adapter.sv line 167
+# End time: 02:05:39 on Oct 29,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0

@@ -40,7 +40,9 @@ module uart_bridge_core #(
     // command interface (consumed by the motor side later; unused in the test top)
     output wire signed [15:0] target_v_left,
     output wire signed [15:0] target_v_right,
-    output wire               stop_latched_out,
+    output wire               setvel_strobe_out,  // one pulse per accepted SET_VEL
+    output wire               estop_latched_out,  // hardware E-stop latch (bit2)
+    output wire               stop_latched_out,   // STOP or E-stop latch
     output wire               link_ok_out,
     output wire               link_lost_out,
     output wire        [7:0]  fault_out,
@@ -146,10 +148,21 @@ module uart_bridge_core #(
     end
 
     // ------------------------------------------------------- safety arbiter
-    wire safety_stop = stop_latched | link_lost | ~link_ok | cmd_timeout;
+    // Hardware E-stop is latched like STOP: releasing the button does NOT resume
+    // motion, it needs an explicit CLEAR_FAULT while the link is healthy.
+    reg estop_latched;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) estop_latched <= 1'b0;
+        else if (ext_fault[2]) estop_latched <= 1'b1;
+        else if (clear_fault_strobe && link_ok) estop_latched <= 1'b0;
+    end
+
+    wire safety_stop = stop_latched | estop_latched | link_lost | ~link_ok | cmd_timeout;
     assign target_v_left  = safety_stop ? 16'sd0 : req_v_left;
     assign target_v_right = safety_stop ? 16'sd0 : req_v_right;
-    assign stop_latched_out = stop_latched;
+    assign stop_latched_out  = stop_latched | estop_latched;
+    assign estop_latched_out = estop_latched;
+    assign setvel_strobe_out = setvel_strobe;
     assign link_ok_out      = link_ok;
     assign link_lost_out    = link_lost;
 
@@ -192,7 +205,7 @@ module uart_bridge_core #(
                         cmd_timeout,          // bit5
                         crc_err_sticky,       // bit4
                         over_limit_sticky,    // bit3
-                        ext_fault[2],         // bit2 estop
+                        estop_latched,        // bit2 hardware E-stop (latched)
                         link_lost,            // bit1
                         stop_latched};        // bit0
 

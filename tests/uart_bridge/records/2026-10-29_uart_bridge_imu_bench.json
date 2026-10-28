@@ -1,10 +1,10 @@
 {
   "port": "COM14",
   "baud": 115200,
-  "started": "2026-10-29T00:31:25",
+  "started": "2026-10-29T02:02:30",
   "parser_stats": {
-    "good": 108,
-    "sync_err": 8,
+    "good": 148,
+    "sync_err": 0,
     "len_err": 0,
     "crc_err": 0,
     "tail_err": 0,
@@ -12,12 +12,12 @@
     "type_err": 0
   },
   "frames_seen": {
-    "TELEM": 99,
-    "ACK": 9
+    "TELEM": 140,
+    "ACK": 8
   },
-  "telem_rate_hz": 50.01,
-  "rx_bytes": 3068,
-  "duration_s": 1.98,
+  "telem_rate_hz": 49.9,
+  "rx_bytes": 4280,
+  "duration_s": 2.79,
   "checks": [
     {
       "name": "telemetry_stream_present",
@@ -47,12 +47,12 @@
     {
       "name": "setvel_ack_seq_echo",
       "ok": true,
-      "detail": "expected 96 got 96"
+      "detail": "expected 56 got 56"
     },
     {
       "name": "telem_echoes_cmd_seq",
       "ok": true,
-      "detail": "cmd_seq=96"
+      "detail": "cmd_seq=56"
     },
     {
       "name": "over_limit_rejected_by_ack",
@@ -61,13 +61,13 @@
     },
     {
       "name": "stop_ack_ok",
-      "ok": true,
-      "detail": "OK"
+      "ok": false,
+      "detail": "no ACK"
     },
     {
       "name": "stop_fault_bit_in_telemetry",
       "ok": true,
-      "detail": "fault=0x09"
+      "detail": "fault=0x21"
     },
     {
       "name": "setvel_refused_while_stopped",
@@ -82,17 +82,17 @@
     {
       "name": "stop_bit_cleared",
       "ok": true,
-      "detail": "fault=0x00"
+      "detail": "fault=0x20"
     },
     {
       "name": "link_lost_after_heartbeat_stop",
       "ok": true,
-      "detail": "detected in 278 ms"
+      "detail": "detected in 284 ms"
     },
     {
       "name": "link_lost_timing_plausible",
       "ok": true,
-      "detail": "278 ms (default timeout 300 ms)"
+      "detail": "284 ms (default timeout 300 ms)"
     },
     {
       "name": "hb_age_reported",
@@ -112,11 +112,11 @@
     {
       "name": "crc_error_rate_below_1e-3",
       "ok": true,
-      "detail": "0 (108 good frames)"
+      "detail": "0 (148 good frames)"
     }
   ],
-  "passed": 19,
-  "failed": 0,
-  "ok": true,
-  "finished": "2026-10-29T00:31:27"
+  "passed": 18,
+  "failed": 1,
+  "ok": false,
+  "finished": "2026-10-29T02:02:33"
 }

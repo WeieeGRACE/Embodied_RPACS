@@ -33,7 +33,7 @@ def test_crc_vectors() -> None:
           "got 0x%04X" % P.crc16_ccitt(b"123456789"))
     # V3: 单字节 0x01
     v3 = P.crc16_ccitt(b"\x01")
-    check("crc_v3_byte01", v3 == 0x1021 or True, "0x%04X" % v3)
+    check("crc_v3_byte01", v3 == 0xF1D1, "0x%04X" % v3)
     # 增量计算等价于一次计算
     a = P.crc16_ccitt(b"123456789")
     b = P.crc16_ccitt(b"56789", P.crc16_ccitt(b"1234"))

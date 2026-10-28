@@ -79,6 +79,16 @@ module host_link_motion_adapter #(
         end
     endfunction
 
+    // signed mm/s -> signed um/s (two's complement bit pattern)
+    function [31:0] signed_um;
+        input signed [15:0] v;
+        reg   signed [31:0] s;
+        begin
+            s = v;
+            signed_um = s * MM_S_TO_UM_S;
+        end
+    endfunction
+
     // latest request
     reg signed [15:0] want_l, want_r;
     reg               req_pending;
@@ -105,7 +115,8 @@ module host_link_motion_adapter #(
 
     reg [3:0]  d_mode;
     reg        d_rev;
-    reg [31:0] d_spd;
+    reg [31:0] d_spd;     // magnitude (legacy modes) / signed speed (VELOCITY mode)
+    reg [31:0] d_spd_r;   // right wheel, VELOCITY mode only
     reg        d_approx;
 
     always @(*) begin
@@ -116,8 +127,10 @@ module host_link_motion_adapter #(
         if (both_zero) begin
             d_mode = M_BRAKE;
         end else if (USE_VELOCITY_MODE != 0) begin
-            d_mode = M_VELOCITY;
-            d_spd  = mag_um(avg_v);
+            // mode 10 takes *signed* per-wheel speeds (two's complement in cmd_speed_*)
+            d_mode  = M_VELOCITY;
+            d_spd   = signed_um(v_l);
+            d_spd_r = signed_um(v_r);
         end else if (straight_ok) begin
             d_mode = (v_l >= 0) ? M_FORWARD : M_BACKWARD;
             d_rev  = (v_l < 0);
@@ -142,6 +155,15 @@ module host_link_motion_adapter #(
 
     wire desired_changed = (d_mode != last_mode) || (d_rev != last_rev) ||
                            (d_spd != last_spd) || (cmds_issued == 16'd0);
+
+    // The core raises setvel_strobe on the same clock edge that req_v_* are updated,
+    // so the payload is sampled one cycle later (the values are held until the next
+    // accepted SET_VEL, which is at least 50 ms away at 20 Hz).
+    reg setvel_d;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) setvel_d <= 1'b0;
+        else        setvel_d <= setvel_strobe;
+    end
 
     // ---------------------------------------------------------------- sequencer
     always @(posedge clk or negedge rst_n) begin
@@ -172,7 +194,7 @@ module host_link_motion_adapter #(
             cmd_valid <= 1'b0;
 
             // 1) latch a new request
-            if (setvel_strobe) begin
+            if (setvel_d) begin
                 want_l      <= req_v_left;
                 want_r      <= req_v_right;
                 req_pending <= 1'b1;
@@ -212,7 +234,7 @@ module host_link_motion_adapter #(
                     cmd_end        <= E_CONT;
                     cmd_reverse    <= d_rev;
                     cmd_speed_l    <= d_spd;
-                    cmd_speed_r    <= d_spd;
+                    cmd_speed_r    <= (USE_VELOCITY_MODE != 0) ? d_spd_r : d_spd;
                     cmd_goal       <= 32'd0;
                     cmd_timeout_ms <= CMD_TIMEOUT_MS[31:0];
                     last_mode      <= d_mode;

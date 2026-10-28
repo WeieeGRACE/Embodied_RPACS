@@ -13,7 +13,9 @@
 | 信号 | 方向 | 位宽 | 含义 |
 | --- | --- | --- | --- |
 | `target_v_left` / `target_v_right` | out | signed 16 | 目标轮速 mm/s，已按 `SET_LIMIT` 裁剪 |
-| `stop_latched_out` | out | 1 | STOP 锁存（必须 `CLEAR_FAULT` 解除） |
+| `setvel_strobe_out` | out | 1 | 每接受一条 `SET_VEL` 出一拍脉冲；**速度值与脉冲同拍更新，消费方要在下一拍采样**（`host_link_motion_adapter` 已这样做） |
+| `stop_latched_out` | out | 1 | STOP **或硬件急停**锁存（必须 `CLEAR_FAULT` 解除） |
+| `estop_latched_out` | out | 1 | 硬件急停锁存（`ext_fault[2]`），松开按钮不自动恢复 |
 | `link_ok_out` | out | 1 | 心跳新鲜（≤300 ms） |
 | `link_lost_out` | out | 1 | 失联锁存（上电即 1，显式使能原则） |
 | `fault_out` | out | 8 | 故障位图（见协议 §4.3） |
@@ -101,23 +103,35 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
 
 ## 4. 资源核算（用户明确关注）
 
-| 组合 | Logic | Register | CLS | 说明 |
+三个变体都是**实测**数值（`gw_sh build*.tcl` 后读 `impl/pnr/*.rpt.txt`）：
+
+| 版本 | Logic | Register | CLS | 其他 |
 | --- | --- | --- | --- | --- |
-| 主工程现状 | 20334/23040（89%） | 7536 | 10728/11520（94%） | 剩余 Logic 2706、CLS 792 |
-| + 链路核心 | +1066 | +808 | **+804** | **CLS 差 12，不能直接合** |
-| + 链路 + 适配器（估） | +1150 | +850 | +840 | 更不可能直接合 |
-| 链路 + IMU 姿态（参考） | 5305 | 2529 | 3615 | 主工程已有 IMU，不重复计 |
+| `uart_bridge_top`（完整） | 1077 | 808 | 829 | — |
+| `uart_bridge_lite_top`（精简） | 998 | 747 | 747 | 无 ACK、8 位计数器 |
+| `uart_bridge_imu_top`（链路+IMU） | 5405 | 2529 | 3640 | BSRAM 4、DSP 10 |
 
-**结论**：以现有主工程为基座放不下（CLS 差 12～50），必须二选一：
+**主工程当前实测**（`impl/pnr/Embodied_RPACS.rpt.txt`，2026-10-28 23:40）：
 
-1. **以 `tests/task4_navigation` 为基座重新划分**（CLS 仅 53%，Recommended，PLAN §9.3 同结论）；
-2. **精简链路到 ≤650 CLS**，可裁剪项（按收益排序）：
-   - 诊断计数器 16→8 位（省 ~40 CLS，丢失大计数量程）；
-   - 去掉 ACK 队列与 ACK 帧（省 ~120 CLS，上位机失去逐命令确认）；
+| 资源 | 占用 | 余量 |
+| --- | --- | --- |
+| Logic | 19664/23040（86%） | 3376 |
+| Register | 7486/23685（32%） | 16199 |
+| CLS | 10522/11520（92%） | **998** |
+
+**结论**：CLS 余 998 ⇒ 完整版链路（829 CLS / 1077 Logic）**可以直接并入**，剩 169 CLS；
+精简版剩 251 CLS。适配器另估 ~50 CLS / ~75 Logic（未单独综合，保守估计）。
+
+> 早前"CLS 差 12、放不下"的结论基于 `PLAN.md` 的过期基线（CLS 10728），已作废。
+
+若后续还要在主工程里继续加功能（适配器+仲裁+以太网 RTL），建议同时走下面任一条：
+
+1. **以 `tests/task4_navigation` 为基座重新划分**（CLS 仅 53%，PLAN §9.3 同结论）；
+2. **再精简链路**（当前已实现两项，剩余可裁剪项按收益排序）：
    - 收发共用 CRC 引擎（省 ~40 CLS，需加仲裁状态）；
    - 遥测负载 23→15 字节（去掉 pitch/roll/enc_r，省 ~80 CLS/FF）；
    - 命令解码只支持 SET_VEL/STOP（省 ~60 CLS）。
-   预计可到 **560~650 CLS**，仍保留安全锁存与失联保护。
+   预计可再降到 **约 650 CLS**，仍保留安全锁存与失联保护。
 
 ---
 

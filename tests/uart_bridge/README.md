@@ -54,10 +54,10 @@ tests/uart_bridge/
 │   ├── uart_bridge_top.v    板级顶层（不接电机）
 │   └── uart_bridge_top.cst/.sdc
 ├── sim/                     ModelSim 测试（SystemVerilog）
-│   ├── tb_core.sv           36 项：CRC 向量、帧解析错误谱、命令/ACK、安全、遥测节拍
-│   ├── tb_loopback.sv       24 项：真实 115200 双向回环，ACK/TELEM 内容校验
+│   ├── tb_core.sv           51 项：CRC 向量、帧解析错误谱、命令/ACK、安全、急停、长度校验、遥测节拍
+│   ├── tb_loopback.sv       23 项：真实 115200 双向回环，ACK/TELEM 内容校验
 │   ├── tb_motion_adapter.sv 19 项：电机侧适配器（模式/方向/幅值/刹车锁存/去重）
-│   ├── tb_system_closed_loop.sv 9 项：串口→链路→适配器→轮子模型→编码器→遥测 全闭环
+│   ├── tb_system_closed_loop.sv 12 项：串口→链路→适配器→轮子模型→编码器→遥测 全闭环 + 失联停车
 │   └── run_*.do
 ├── tools/                   上位机工具（Python + PowerShell）
 │   ├── protocol.py          与传输无关的编解码（流式解析 + 错误统计）
@@ -67,7 +67,7 @@ tests/uart_bridge/
 │   ├── pi_host_example.py   Orange Pi 侧最小示例（--list/--monitor/--setvel）
 │   ├── conformance.py       Python↔RTL 一致性测试（--run 一条命令跑完）
 │   ├── decode_hex.py        把串口助手抓的 hex 日志解码成可读帧
-│   ├── protocol_selftest.py 协议自检（34 项）
+│   ├── protocol_selftest.py 协议自检（30 项）
 │   └── uart_link.ps1        PowerShell 前端
 ├── records/                 构建日志、台架测试 JSON、长稳日志、验证报告
 ├── build.tcl / run_build.ps1 高云综合脚本（gw_sh）
@@ -106,8 +106,8 @@ D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe --device GW5A-25A -
 
 | 顶层 | Logic | Register | CLS | 备注 |
 | --- | --- | --- | --- | --- |
-| `uart_bridge_top`（纯链路） | 1066（5%） | 808（4%） | 804（7%） | 基准版本 |
-| `uart_bridge_imu_top`（链路 + 真实姿态） | 5305（24%） | 2529（11%） | 3615（32%） | +IMU 驱动/姿态解算、4 BSRAM、10 DSP |
+| `uart_bridge_top`（纯链路） | 1077（5%） | 808（4%） | 829（8%） | 基准版本 |
+| `uart_bridge_imu_top`（链路 + 真实姿态） | 5405（24%） | 2529（11%） | 3640（32%） | +IMU 驱动/姿态解算、4 BSRAM、10 DSP |
 
 两个顶层分别用 `build.tcl` / `build_imu.tcl` 综合，产物 `impl/pnr/uart_bridge.fs` 与
 `impl/pnr/uart_bridge_imu.fs`。
@@ -153,8 +153,8 @@ STOP 锁存、失联检测（300 ms）、恢复、误码率。
 | 项目 | 结果 |
 | --- | --- |
 | 综合 + PnR + 位流 | ✅ 通过（GW5A-25A，50 MHz，无时序告警） |
-| 仿真回归 | ✅ `tb_core` 36 项 + `tb_loopback` 24 项全过 |
-| 遥测速率 | ✅ 50.0 Hz（2250 B/s @115200，带宽占用约 20%） |
+| 仿真回归 | ✅ 5 套共 **105 项**全过 + Python↔RTL 一致性 PASS |
+| 遥测速率 | ✅ 50.0 Hz（约 1540 B/s @115200，带宽占用约 13%） |
 | 台架验收 bench | ✅ **19/19 PASS**（含失联 299 ms 检测、STOP 锁存、限速裁剪） |
 | 10 min 长稳 | ✅ **30,000 帧 / 0 误码**，速率 50.0 Hz（±0.1） |
 | 电机安全 | ✅ 电机输出全 0 / STBY=0，位流不可能驱动轮子 |
@@ -165,24 +165,22 @@ STOP 锁存、失联检测（300 ms）、恢复、误码率。
 
 ## 6. 与主工程集成时的资源结论（用户明确关注点）
 
-主工程 `Embodied_RPACS` 现状：**Logic 20334/23040（89%）、CLS 10728/11520（94%）**。
-剩余：Logic 2706、CLS 792。
+**主工程当前实测**（`impl/pnr/Embodied_RPACS.rpt.txt`，2026-10-28 23:40）：
+Logic **19664/23040（86%）**、CLS **10522/11520（92%）** → 余量：Logic 3376、**CLS 998**。
 
-本链路核心需要 **Logic 1066、CLS 804**：
+> `PLAN.md` 中 20334/89%、CLS 10728/94%（余 792）是更早的基线；主工程后来做过一轮
+> 资源优化，因此以当前 PnR 报告为准。**之前"CLS 差 12 放不下"的结论已作废。**
 
-| 维度 | 结论 |
-| --- | --- |
-| Logic | ✅ 放得下（剩 1640） |
-| **CLS** | ❌ **差 12 个**（804 > 792），集成后 CLS 会到 100% 以上 |
+| 版本 | Logic | CLS | 结论 |
+| --- | --- | --- | --- |
+| 完整版 | 1077 | 829 | ✅ 可容纳（余 CLS 169） |
+| 精简版 | 998 | 747 | ✅ 可容纳（余 CLS 251） |
 
-因此**直接把本工程合进主工程不可行**，三个可选路径（推荐第 1 条）：
+接入时仍建议保留两条退路（若还要加适配器/仲裁/以太网）：
+① 换 `tests/task4_navigation` 基座（该工程 CLS 仅 53%）；② 用精简版。
 
-1. **以 `tests/task4_navigation` 为基座重新划分**（该工程 CLS 仅 53%，PLAN §9.3 已建议）；
-2. 精简本链路后再合入（可裁项：8 位化诊断计数器、去掉 ACK、去掉 tx 侧 rd 地址复用），
-   预计可降到 **约 650 CLS**，留 140 余量；
-3. 裁掉主工程 UI/日志 RTL 后合入（回归面最大，不推荐）。
-
-> 结论已写入 `records/2026-10-29_uart_bridge_validation.md` §6 与 PLAN §9.3 的后续动作。
+> 详细接线、仲裁与验收清单见 `docs/INTEGRATION_GUIDE.md`；资源明细见
+> `records/2026-10-29_uart_bridge_validation.md` §7。
 
 ---
 
@@ -190,7 +188,7 @@ STOP 锁存、失联检测（300 ms）、恢复、误码率。
 
 | 项 | 状态 |
 | --- | --- |
-| IMU 姿态（yaw/pitch/roll） | 本工程遥测中固定为 0；IMU 驱动（`src/imu/imu660ra_driver.v`）未合入，避免资源与引脚冲突。下一步做"链路 + IMU"最小组合板 |
+| IMU 姿态（yaw/pitch/roll） | ✅ 已做 `uart_bridge_imu_top.v`（复用 `src/imu/imu660ra_driver.v` + 姿态解算），实测 pitch −3.6°/roll −1.15° 真实值；纯链路顶层的姿态字段固定为 0 |
 | 编码器速度换算 | `COUNTS_PER_M=1116` 为占位值，需按实车轮径/减速比标定 |
 | 以太网 v2 | 协议层已就绪（`UdpTransport`），RTL 需新增 RGMII/UDP 字节源 |
 | 与 ASRPRO 语音通道仲裁 | 仲裁优先级已在设计中预留（急停 > 停车 > 上位机 > 语音），本工程未接语音通道 |
