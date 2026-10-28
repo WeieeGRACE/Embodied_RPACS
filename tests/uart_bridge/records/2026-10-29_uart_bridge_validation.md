@@ -136,6 +136,30 @@ parser_stats good=30000 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
 - 每 10 s 窗口的心跳年龄 14–96 ms（心跳 10 Hz，周期 100 ms），未出现误判失联；
 - 证据：`records/2026-10-29_soak_600s.json`、`records/2026-10-29_soak_600s.log`。
 
+### 5.3 IMU 变体长稳（同样 600 s）
+
+```
+frames_total 30001      error_frames 0      error_rate 0.0
+telem_rate mean 50.00 Hz  min 49.95  max 50.08
+parser_stats good=30001 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
+```
+
+- 链路 + IMU SPI 轮询 + 姿态解算同时运行，**10 分钟零误码**；
+- 证据：`records/2026-10-29_soak_imu_600s.json/.log`。
+
+### 5.4 UDP 传输自检（为千兆网 v2 准备）
+
+`tools/udp_loopback_test.py`：本机回环，200 个报文（含 50 个故意坏 CRC）→
+**200 报文、150 合法帧 + 50 坏 CRC，每个报文恰好一帧**，解析结果与 UART 路径完全一致。
+
+```text
+sent datagrams : 200
+received       : 200 (每报文应恰好一帧)
+parsed frames  : 150  (期望 150 个合法帧)
+stats          : {'good': 150, 'crc_err': 50, ...}
+UDP TRANSPORT PASS
+```
+
 ---
 
 ## 6. 安全说明（重要）
