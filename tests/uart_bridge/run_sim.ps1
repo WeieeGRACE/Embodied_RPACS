@@ -10,7 +10,8 @@ try {
         @{ name = 'compile';  do = 'sim/run_compile.do' },
         @{ name = 'core';     do = 'sim/run_core.do' },
         @{ name = 'loopback'; do = 'sim/run_loopback.do' },
-        @{ name = 'adapter';  do = 'sim/run_adapter.do' }
+        @{ name = 'adapter';  do = 'sim/run_adapter.do' },
+        @{ name = 'system';   do = 'sim/run_system.do' }
     )
     foreach ($s in $suites) {
         $log = "records/tb_$($s.name).log"
