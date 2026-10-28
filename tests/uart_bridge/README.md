@@ -55,13 +55,16 @@ tests/uart_bridge/
 │   └── uart_bridge_top.cst/.sdc
 ├── sim/                     ModelSim 测试（SystemVerilog）
 │   ├── tb_core.sv           36 项：CRC 向量、帧解析错误谱、命令/ACK、安全、遥测节拍
-│   ├── tb_loopback.sv       20 项：真实 115200 双向回环，ACK/TELEM 内容校验
+│   ├── tb_loopback.sv       24 项：真实 115200 双向回环，ACK/TELEM 内容校验
+│   ├── tb_motion_adapter.sv 19 项：电机侧适配器（模式/方向/幅值/刹车锁存/去重）
+│   ├── tb_system_closed_loop.sv 9 项：串口→链路→适配器→轮子模型→编码器→遥测 全闭环
 │   └── run_*.do
 ├── tools/                   上位机工具（Python + PowerShell）
 │   ├── protocol.py          与传输无关的编解码（流式解析 + 错误统计）
 │   ├── transport.py         UART / UDP / 文件回放 三种传输实现
 │   ├── uart_link.py         CLI：ports/selftest/monitor/send/bench
 │   ├── soak_test.py         长稳测试（默认 10 min，统计误码率与遥测速率）
+│   ├── pi_host_example.py   Orange Pi 侧最小示例（--list/--monitor/--setvel）
 │   ├── protocol_selftest.py 协议自检（34 项）
 │   └── uart_link.ps1        PowerShell 前端
 ├── records/                 构建日志、台架测试 JSON、长稳日志、验证报告
