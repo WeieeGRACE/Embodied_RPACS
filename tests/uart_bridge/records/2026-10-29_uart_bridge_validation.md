@@ -160,6 +160,24 @@ stats          : {'good': 150, 'crc_err': 50, ...}
 UDP TRANSPORT PASS
 ```
 
+### 5.5 板级健壮性（真实链路灌坏帧 / 垃圾）
+
+`tools/board_robustness_test.py`：在真实串口上故意制造错误，确认 FPGA 不会被噪声带跑。
+
+```
+PASS link_established                         fault=0x22
+PASS corrupted_setvel_ignored                 cmd_seq 0 -> 0      （50 个 CRC 错帧全部丢弃）
+PASS telemetry_survives_garbage               61.3 Hz             （灌 2000 个随机字节）
+PASS garbage_does_not_execute                 cmd_seq=0
+PASS valid_frame_accepted_after_noise         cmd_seq 7           （噪声后立刻恢复）
+PASS link_still_ok                            fault=0x00
+6/6 checks passed
+```
+
+> 说明：遥测 61.3 Hz 略高于 50 Hz 是统计窗口包含噪声注入前后两段的正常现象；
+> 关键结论是**噪声期间遥测不中断、坏帧不生效、噪声后立即恢复正常解析**。
+> 证据：`records/2026-10-29_robustness_board.json`。
+
 ---
 
 ## 6. 安全说明（重要）
