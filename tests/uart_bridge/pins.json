@@ -1,0 +1,55 @@
+{
+  "project": "uart_bridge",
+  "device": "GW5A-25A (GW5A-LV25UG324C2/I1)",
+  "clock": "clk_50m 50 MHz (T9)",
+  "note": "pin map mirrors src/robot_system_top.cst of the main project; motor/ToF pins are kept inert by the bitstream",
+  "pins": [
+    { "port": "clk_50m",        "pin": "T9",  "mode": "in",    "function": "50 MHz clock" },
+    { "port": "reset_n",        "pin": "B16", "mode": "in",    "function": "reset (active low)" },
+
+    { "port": "uart_rx",        "pin": "U8",  "mode": "in",    "function": "host link RX (115200 8N1, CH9102 -> COM14)" },
+    { "port": "uart_tx",        "pin": "V8",  "mode": "out",   "function": "host link TX (telemetry 50 Hz, ACK)" },
+
+    { "port": "led_ready",      "pin": "D14", "mode": "out",   "function": "link usable (low = on)" },
+    { "port": "led_run",        "pin": "C14", "mode": "out",   "function": "blink at telemetry/attitude rate" },
+    { "port": "led_fault",      "pin": "B9",  "mode": "out",   "function": "any fault bit set" },
+    { "port": "led_heartbeat",  "pin": "A9",  "mode": "out",   "function": "flash on RX byte" },
+
+    { "port": "encoder_a_l",    "pin": "C17", "mode": "in",    "function": "left encoder A (x1 quadrature, read only)" },
+    { "port": "encoder_b_l",    "pin": "C18", "mode": "in",    "function": "left encoder B" },
+    { "port": "encoder_a_r",    "pin": "F14", "mode": "in",    "function": "right encoder A" },
+    { "port": "encoder_b_r",    "pin": "G14", "mode": "in",    "function": "right encoder B" },
+
+    { "port": "PWMA",           "pin": "U17", "mode": "out",   "function": "MOTOR - forced 0 by the bitstream" },
+    { "port": "AIN1",           "pin": "M16", "mode": "out",   "function": "MOTOR - forced 0" },
+    { "port": "AIN2",           "pin": "M14", "mode": "out",   "function": "MOTOR - forced 0" },
+    { "port": "PWMB",           "pin": "T17", "mode": "out",   "function": "MOTOR - forced 0" },
+    { "port": "BIN1",           "pin": "N15", "mode": "out",   "function": "MOTOR - forced 0" },
+    { "port": "BIN2",           "pin": "H12", "mode": "out",   "function": "MOTOR - forced 0" },
+    { "port": "STBY",           "pin": "G13", "mode": "out",   "function": "MOTOR standby - forced 0 (outputs disabled)" },
+
+    { "port": "imu_spi_sck",    "pin": "V15", "mode": "out",   "function": "IMU SPI clock (imu variant only)" },
+    { "port": "imu_spi_mosi",   "pin": "V16", "mode": "out",   "function": "IMU SPI MOSI" },
+    { "port": "imu_spi_miso",   "pin": "U18", "mode": "in",    "function": "IMU SPI MISO" },
+    { "port": "imu_cs_n",       "pin": "T18", "mode": "out",   "function": "IMU chip select" },
+    { "port": "imu_int1",       "pin": "N14", "mode": "in",    "function": "IMU interrupt 1" },
+    { "port": "imu_int2",       "pin": "N16", "mode": "in",    "function": "IMU interrupt 2" },
+    { "port": "imu_gnd_reserved","pin": "T11","mode": "in",    "function": "ground reservation / reserved input" },
+
+    { "port": "tof_front_scl",  "pin": "G16", "mode": "inout", "function": "ToF bus - released (z) by the bitstream" },
+    { "port": "tof_front_sda",  "pin": "G18", "mode": "inout", "function": "ToF bus - released" },
+    { "port": "tof_front_gpio1","pin": "F17", "mode": "in",    "function": "ToF GPIO1 (unused)" },
+    { "port": "tof_front_xshut_n","pin": "F18","mode":"inout", "function": "ToF XSHUT - released" },
+    { "port": "tof_left_scl",   "pin": "H13", "mode": "inout", "function": "ToF bus - released" },
+    { "port": "tof_left_sda",   "pin": "H14", "mode": "inout", "function": "ToF bus - released" },
+    { "port": "tof_left_gpio1", "pin": "K15", "mode": "in",    "function": "ToF GPIO1 (unused)" },
+    { "port": "tof_left_xshut_n","pin": "K16","mode": "inout", "function": "ToF XSHUT - released" },
+    { "port": "tof_right_scl",  "pin": "J13", "mode": "inout", "function": "ToF bus - released" },
+    { "port": "tof_right_sda",  "pin": "K14", "mode": "inout", "function": "ToF bus - released" },
+    { "port": "tof_right_gpio1","pin": "K12", "mode": "in",    "function": "ToF GPIO1 (unused)" },
+    { "port": "tof_right_xshut_n","pin": "K13","mode":"inout", "function": "ToF XSHUT - released" },
+
+    { "port": "asr_rx",         "pin": "D17", "mode": "in",    "function": "ASRPRO TX (voice link, unused here)" },
+    { "port": "asr_tx",         "pin": "D18", "mode": "out",   "function": "ASRPRO RX - held idle high" }
+  ]
+}

@@ -57,7 +57,7 @@ STOP 只发一次 BRAKE、停车期间拒绝新命令、解除后可恢复、零
    `neg_l/neg_r` 取各自符号（而不是共用一个 `cmd_reverse`）；
 3. 目标生成改为 `target_l = neg_l ? -vel_l : vel_l`（保留现有加减速斜坡与 `runtime_speed_cap`）；
 4. 停车/故障路径不变（BRAKE 优先），`cmd_timeout_ms` 沿用；
-5. 回归：`run_system_sim.ps1` 的七套件 + 现有动作命令必须零差异。
+5. 回归：主工程的 `tools/run_system_sim.ps1`（七套件）+ 现有动作命令必须零差异。
 
 适配器把 `USE_VELOCITY_MODE` 置 1 即可输出 mode 10。该改动**未在今晚实施**（涉及主工程
 回归，需专门一轮）。
@@ -125,7 +125,7 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
 
 | # | 检查 | 方法 | 期望 |
 | --- | --- | --- | --- |
-| 1 | 仿真回归不退化 | `run_system_sim.ps1`（主工程七套件） | 全 PASS |
+| 1 | 仿真回归不退化 | 主工程 `tools/run_system_sim.ps1`（七套件） | 全 PASS |
 | 2 | 链路回归不退化 | `tests/uart_bridge/run_sim.ps1`（四套件） | 全 PASS |
 | 3 | 停车优先 | 上位机发 SET_VEL 后按板载 STOP / 语音"停止" | 立即停，链路命令无效 |
 | 4 | 失联停车 | 拔 USB 串口 | ≤300 ms 内停，恢复需 `CLEAR_FAULT` |

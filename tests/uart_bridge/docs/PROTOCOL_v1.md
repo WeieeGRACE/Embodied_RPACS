@@ -78,7 +78,7 @@ uint16_t crc16_ccitt(const uint8_t *p, size_t n, uint16_t crc) {
 
 ### 2.3 CRC 测试向量（两端自检必须全过）
 
-由 `tools/protocol_selftest.py` 生成，RTL 的 `sim/tb_crc16.sv` 使用同一组向量，**双向比对**。
+由 `tools/protocol_selftest.py` 生成，RTL 的 `sim/tb_core.sv`（CRC 向量用例）使用同一组向量，**双向比对**。
 
 | # | 输入字节（TYPE..PAYLOAD） | 十六进制 | 期望 CRC |
 | --- | --- | --- | --- |
