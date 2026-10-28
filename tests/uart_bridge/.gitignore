@@ -1,0 +1,12 @@
+# 构建产物（可重新生成，不入库）
+impl/
+*.log
+*.wlf
+*.vstf
+sim/work/
+sim/work_*/
+sim/transcript
+sim/modelsim.ini
+transcript
+*.bak
+temp/
