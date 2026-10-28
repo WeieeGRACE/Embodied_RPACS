@@ -36,6 +36,7 @@ module host_link_watchdog #(
             // the very same ms_tick as a timeout clears the latch for one tick and the
             // next tick re-latches it. Motion is still gated by ~link_ok (safety_stop),
             // so this is cosmetic; kept as-is to avoid extra state.
+            if (clear_latched && link_ok) link_lost <= 1'b0;
         end
     end
 endmodule

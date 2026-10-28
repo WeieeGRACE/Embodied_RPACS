@@ -107,9 +107,9 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
 
 | 版本 | Logic | Register | CLS | 其他 |
 | --- | --- | --- | --- | --- |
-| `uart_bridge_top`（完整） | 1077 | 808 | 829 | — |
-| `uart_bridge_lite_top`（精简） | 998 | 747 | 747 | 无 ACK、8 位计数器 |
-| `uart_bridge_imu_top`（链路+IMU） | 5405 | 2529 | 3640 | BSRAM 4、DSP 10 |
+| `uart_bridge_top`（完整） | 1154 | 842 | 858 | — |
+| `uart_bridge_lite_top`（精简） | 1110 | 782 | 830 | 无 ACK、8 位计数器 |
+| `uart_bridge_imu_top`（链路+IMU） | 5384 | 2530 | 3646 | BSRAM 4、DSP 10 |
 
 **主工程当前实测**（`impl/pnr/Embodied_RPACS.rpt.txt`，2026-10-28 23:40）：
 
@@ -119,8 +119,8 @@ uart_bridge_core                    host_link_motion_adapter            motion_c
 | Register | 7486/23685（32%） | 16199 |
 | CLS | 10522/11520（92%） | **998** |
 
-**结论**：CLS 余 998 ⇒ 完整版链路（829 CLS / 1077 Logic）**可以直接并入**，剩 169 CLS；
-精简版剩 251 CLS。适配器另估 ~50 CLS / ~75 Logic（未单独综合，保守估计）。
+**结论**：CLS 余 998 ⇒ 完整版链路（858 CLS / 1154 Logic）**可以直接并入**，剩 140 CLS；
+精简版剩 168 CLS。适配器另估 ~50 CLS / ~75 Logic（未单独综合，保守估计）。
 
 > 早前"CLS 差 12、放不下"的结论基于 `PLAN.md` 的过期基线（CLS 10728），已作废。
 

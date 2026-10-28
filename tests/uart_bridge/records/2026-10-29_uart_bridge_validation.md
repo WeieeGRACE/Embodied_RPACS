@@ -99,9 +99,9 @@ CONFORMANCE PASS
 
 | 顶层 | Logic | Register | CLS | 其他 |
 | --- | --- | --- | --- | --- |
-| `uart_bridge_top`（纯链路） | **1077** / 23040（5%） | 808（4%） | **829** / 11520（8%） | — |
-| `uart_bridge_lite_top`（精简） | **998**（5%） | 747（4%） | **747**（7%） | — |
-| `uart_bridge_imu_top`（链路+IMU） | **5405**（24%） | 2529（11%） | **3640**（32%） | BSRAM 4（pROM）、DSP 10/28 |
+| `uart_bridge_top`（纯链路） | **1154** / 23040（5%） | 842（4%） | **858** / 11520（8%） | — |
+| `uart_bridge_lite_top`（精简） | **1110**（5%） | 782（3%） | **830**（8%） | — |
+| `uart_bridge_imu_top`（链路+IMU） | **5384**（23%） | 2530（11%） | **3646**（32%） | BSRAM 4（pROM）、DSP 10/28 |
 
 - 综合/PnR/位流生成全部通过；PnR 报告无时序违例（`impl/pnr/uart_bridge*.rpt.txt`）。
 - 单帧处理：TELEM 30 字节 @115200 = 2.6 ms，20 ms 周期下占用约 13% 串口带宽；
@@ -144,12 +144,12 @@ CONFORMANCE PASS
 
 ```
 duration 600.0 s
-frames_total 30000      error_frames 0      error_rate 0.0
-telem_rate mean 50.00 Hz  min 49.95  max 50.07
-parser_stats good=30000 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
+frames_total 30004      error_frames 0      error_rate 0.0
+telem_rate mean 50.00 Hz  min 49.93  max 50.06
+parser_stats good=30004 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
 ```
 
-- 10 分钟 **30,000 帧零误码**（目标 < 1e-6，实测 0）；
+- 10 分钟 **30,004 帧零误码**（目标 < 1e-6，实测 0）；
 - 遥测速率稳定在 50.0 Hz（±0.1 Hz）；
 - 每 10 s 窗口的心跳年龄 14–96 ms（心跳 10 Hz，周期 100 ms），未出现误判失联；
 - 证据：`records/2026-10-29_soak_600s.json`、`records/2026-10-29_soak_600s.log`。
@@ -226,15 +226,15 @@ PASS link_still_ok                            fault=0x00
 
 | 版本 | Logic | CLS | 主工程余量 | 结论 |
 | --- | --- | --- | --- | --- |
-| 完整版 `uart_bridge_top` | 1077 | 829 | Logic 3376 / CLS 998 | ✅ **可容纳**（余 CLS 169） |
-| 精简版 `uart_bridge_lite_top` | 998 | 747 | 同上 | ✅ 可容纳（余 CLS 251） |
-| 链路 + 适配器（估） | ~1150 | ~880 | 同上 | ⚠️ 余 CLS ~120，仍可但偏紧 |
+| 完整版 `uart_bridge_top` | 1154 | 858 | Logic 3376 / CLS 998 | ✅ **可容纳**（余 CLS 140） |
+| 精简版 `uart_bridge_lite_top` | 1110 | 830 | 同上 | ✅ 可容纳（余 CLS 168） |
+| 链路 + 适配器（估） | ~1230 | ~910 | 同上 | ⚠️ 余 CLS ~90，仍可但偏紧 |
 
-**结论更新**：链路**可以**直接合入当前主工程（CLS 余 169），之前"差 12 个 CLS"的结论
-基于过期基线，已作废。仍建议保留两条退路：
+**结论更新**：链路**可以**直接合入当前主工程（完整版余 CLS 140），之前"差 12 个 CLS"
+的结论基于过期基线，已作废。仍建议保留两条退路：
 
 1. 若还要往主工程加东西（适配器/仲裁/以太网），先换 `tests/task4_navigation` 基座；
-2. 或用精简版（余 251 CLS），代价是没有逐命令 ACK。
+2. 或用精简版（余 168 CLS），代价是没有逐命令 ACK。
 
 > 集成时仍须遵守：只写目标速度、不写 PWM；保留 STOP/失联锁存语义（§6）。
 
@@ -245,8 +245,8 @@ PASS link_still_ok                            fault=0x00
 
 | 版本 | Logic | Register | CLS |
 | --- | --- | --- | --- |
-| 完整版 `uart_bridge_top` | 1077 | 808 | **829** |
-| **精简版 `uart_bridge_lite_top`** | **998** | 747 | **747** |
+| 完整版 `uart_bridge_top` | 1154 | 842 | **858** |
+| **精简版 `uart_bridge_lite_top`** | **1110** | 782 | **830** |
 
 上板验证（烧写 `uart_bridge_lite.fs`，持续心跳）：
 
@@ -277,12 +277,12 @@ parser stats      : {'good': 110, 'crc_err': 0, 'sync_err': 0, 'len_err': 0, ...
 
 | 顶层 | Logic | Register | CLS | BSRAM | DSP |
 | --- | --- | --- | --- | --- | --- |
-| `uart_bridge_top`（纯链路） | 1077（5%） | 808（4%） | 829（8%） | 0 | 0 |
-| `uart_bridge_imu_top`（链路 + IMU 姿态） | **5305（24%）** | 2529（11%） | **3615（32%）** | 4（pROM，IMU 配置镜像） | 10/28 |
+| `uart_bridge_top`（纯链路） | 1154（5%） | 842（4%） | 858（8%） | 0 | 0 |
+| `uart_bridge_imu_top`（链路 + IMU 姿态） | **5384（23%）** | 2530（11%） | **3646（32%）** | 4（pROM，IMU 配置镜像） | 10/28 |
 
-即 **IMU 驱动 + 姿态解算额外占 4239 Logic / 2811 CLS / 4 BSRAM / 10 DSP**。
-对主工程而言这部分**本来就有**（主工程已含 IMU + 姿态），所以把链路合入主工程只多 1077 Logic
-（结论仍见 §7）。独立测试工程里 24%/32% 余量充足。
+即 **IMU 驱动 + 姿态解算额外占 4236 Logic / 2767 CLS / 4 BSRAM / 10 DSP**。
+对主工程而言这部分**本来就有**（主工程已含 IMU + 姿态），所以把链路合入主工程只多 1154 Logic
+（结论仍见 §7）。独立测试工程里 23%/31% 余量充足。
 
 ### 8.2 板级实测（烧写 `uart_bridge_imu.fs`，同样只写 SRAM）
 

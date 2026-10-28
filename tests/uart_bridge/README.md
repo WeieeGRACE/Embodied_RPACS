@@ -106,8 +106,8 @@ D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe --device GW5A-25A -
 
 | 顶层 | Logic | Register | CLS | 备注 |
 | --- | --- | --- | --- | --- |
-| `uart_bridge_top`（纯链路） | 1077（5%） | 808（4%） | 829（8%） | 基准版本 |
-| `uart_bridge_imu_top`（链路 + 真实姿态） | 5405（24%） | 2529（11%） | 3640（32%） | +IMU 驱动/姿态解算、4 BSRAM、10 DSP |
+| `uart_bridge_top`（纯链路） | 1154（5%） | 842（4%） | 858（8%） | 基准版本 |
+| `uart_bridge_imu_top`（链路 + 真实姿态） | 5384（23%） | 2530（11%） | 3646（32%） | +IMU 驱动/姿态解算、4 BSRAM、10 DSP |
 
 两个顶层分别用 `build.tcl` / `build_imu.tcl` 综合，产物 `impl/pnr/uart_bridge.fs` 与
 `impl/pnr/uart_bridge_imu.fs`。
@@ -173,8 +173,8 @@ Logic **19664/23040（86%）**、CLS **10522/11520（92%）** → 余量：Logic
 
 | 版本 | Logic | CLS | 结论 |
 | --- | --- | --- | --- |
-| 完整版 | 1077 | 829 | ✅ 可容纳（余 CLS 169） |
-| 精简版 | 998 | 747 | ✅ 可容纳（余 CLS 251） |
+| 完整版 | 1154 | 858 | ✅ 可容纳（余 CLS 140） |
+| 精简版 | 1110 | 830 | ✅ 可容纳（余 CLS 168） |
 
 接入时仍建议保留两条退路（若还要加适配器/仲裁/以太网）：
 ① 换 `tests/task4_navigation` 基座（该工程 CLS 仅 53%）；② 用精简版。

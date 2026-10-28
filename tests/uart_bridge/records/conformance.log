@@ -1,4 +1,4 @@
-corpus: 435 bytes, 25 frames, stats good=25 crc=5 len=2 tail=4
+﻿corpus: 435 bytes, 25 frames, stats good=25 crc=5 len=2 tail=4
 wrote D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\sim\vectors\conformance.hex
 wrote D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\sim\vectors\conformance_expected.txt
 running ModelSim ...

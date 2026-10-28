@@ -1,4 +1,4 @@
-Reading D:/app/modesilm/tcl/vsim/pref.tcl
+﻿Reading D:/app/modesilm/tcl/vsim/pref.tcl
 
 # 10.7
 
@@ -7,7 +7,7 @@ Reading D:/app/modesilm/tcl/vsim/pref.tcl
 # vmap uart_lib sim/work 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 02:05:30 on Oct 29,2026
+# Start time: 02:32:45 on Oct 29,2026
 # vlog -sv -work uart_lib src/uart_rx_8n1.v src/crc16_ccitt.v src/host_frame_rx.v src/host_cmd_decode.v src/host_link_watchdog.v src/telem_builder.v src/frame_tx_engine.v src/uart_bridge_core.v 
 # -- Compiling module uart_rx_8n1
 # -- Compiling module crc16_ccitt
@@ -21,6 +21,6 @@ Reading D:/app/modesilm/tcl/vsim/pref.tcl
 # Top level modules:
 # 	uart_rx_8n1
 # 	uart_bridge_core
-# End time: 02:05:30 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 02:32:45 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # COMPILE OK

@@ -1,6 +1,6 @@
 {
   "port": "COM14",
-  "started": "2026-10-29T02:02:33",
+  "started": "2026-10-29T02:32:16",
   "checks": [
     {
       "name": "link_established",
@@ -10,7 +10,7 @@
     {
       "name": "corrupted_setvel_ignored",
       "ok": true,
-      "detail": "cmd_seq 57 -> 57"
+      "detail": "cmd_seq 49 -> 49"
     },
     {
       "name": "telemetry_survives_garbage",
@@ -20,12 +20,12 @@
     {
       "name": "garbage_does_not_execute",
       "ok": true,
-      "detail": "cmd_seq=57"
+      "detail": "cmd_seq=49"
     },
     {
       "name": "valid_frame_accepted_after_noise",
       "ok": true,
-      "detail": "cmd_seq 64"
+      "detail": "cmd_seq 56"
     },
     {
       "name": "link_still_ok",
@@ -46,9 +46,9 @@
     "TELEM": 153,
     "ACK": 2
   },
-  "telem_rate_hz": 50.03,
+  "telem_rate_hz": 50.06,
   "passed": 6,
   "failed": 0,
   "ok": true,
-  "finished": "2026-10-29T02:02:36"
+  "finished": "2026-10-29T02:32:19"
 }
