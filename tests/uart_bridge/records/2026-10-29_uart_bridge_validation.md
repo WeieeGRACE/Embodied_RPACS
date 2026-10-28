@@ -144,9 +144,32 @@ parser_stats good=30000 crc_err=0 sync_err=0 tail_err=0 len_err=0 timeout=0
 
 1. **以 `tests/task4_navigation` 为基座重新划分**（该板级工程 CLS 仅 53%），
    把链路与导航一起放进去 —— 与 PLAN §9.3 的结论一致，推荐；
-2. **精简链路**：诊断计数器 16→8 位、去掉 ACK 队列（若不需要状态码）、
-   收发共用 CRC 引擎，预计可降到 **约 650 CLS**，给主工程留 ~140 CLS 余量；
+2. **用"精简版"链路**（已实现并上板验证，见 §7.1）；
 3. 裁掉主工程 UI/日志 RTL 再合入 —— 回归面最大，不推荐。
+
+### 7.1 精简版实测（`uart_bridge_lite_top`，已实现并上板验证）
+
+精简手段只有两项：诊断计数器 16→8 位 + **不发 ACK**（上位机改用 50 Hz 遥测里的
+`cmd_seq` 回显判断命令是否生效）。综合结果：
+
+| 版本 | Logic | Register | CLS | 结论 |
+| --- | --- | --- | --- | --- |
+| 完整版 `uart_bridge_top` | 1066 | 808 | **804** | 主工程 CLS 余量 792 → **差 12** |
+| **精简版 `uart_bridge_lite_top`** | **1004** | **747** | **753** | **可放进主工程（余 39 CLS）** |
+
+上板验证（烧写 `uart_bridge_lite.fs`，持续心跳）：
+
+```text
+TELEM frames      : 110
+ACK frames (lite) : 0        <- 符合设计（精简版不发 ACK）
+cmd_seq 77 echoed : True     <- SET_VEL 被接受，遥测回显
+STOP bit in fault : True     <- 停车锁存生效
+last fault        : 0x21     <- STOP_LATCHED | CMD_TIMEOUT（预期）
+parser stats      : {'good': 110, 'crc_err': 0, 'sync_err': 0, 'len_err': 0, ...}
+```
+
+> 代价：失去逐命令 ACK（但 20 Hz 命令流 + 遥测回显足以判断生效与否）、诊断计数器上限 255。
+> **39 CLS 余量仍偏紧**：接入时若还要加适配器/仲裁逻辑，建议同时走路径 1（换基座）。
 
 > 结论：**当前形态不能直接合入主工程（CLS 差 12）**，须走路径 1 或 2。
 > 这一步留到"链路 + 电机"联调时决策，不在今晚改动主工程。

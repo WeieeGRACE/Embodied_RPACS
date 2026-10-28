@@ -12,6 +12,9 @@ module uart_bridge_top #(
     parameter integer CMD_TIMEOUT_MS     = 500,
     parameter integer HB_TIMEOUT_MS      = 300,   // 1.5x the 200 ms heartbeat period
     parameter integer DEFAULT_LIMIT_MM_S = 300,
+    // resource knobs forwarded to the core (defaults = full feature set)
+    parameter integer CNT_W              = 16,
+    parameter integer ENABLE_ACK         = 1,
     // encoder counts per metre (x1 decoding); only used for the telemetry speed field
     parameter integer COUNTS_PER_M       = 1116
 )(
@@ -165,7 +168,9 @@ module uart_bridge_top #(
         .CMD_TIMEOUT_MS(CMD_TIMEOUT_MS),
         .HB_TIMEOUT_MS(HB_TIMEOUT_MS),
         .BYTE_TIMEOUT_CYCLES(CLK_HZ / 200),      // 5 ms
-        .DEFAULT_LIMIT_MM_S(DEFAULT_LIMIT_MM_S)
+        .DEFAULT_LIMIT_MM_S(DEFAULT_LIMIT_MM_S),
+        .CNT_W(CNT_W),
+        .ENABLE_ACK(ENABLE_ACK)
     ) u_core (
         .clk(clk_50m), .rst_n(rst_n),
         .rx_byte(rx_byte), .rx_valid(rx_valid),

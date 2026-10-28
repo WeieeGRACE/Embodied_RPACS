@@ -15,7 +15,10 @@ module uart_bridge_core #(
     parameter integer HB_TIMEOUT_MS      = 300,   // 1.5x the 200 ms heartbeat period
     parameter integer BYTE_TIMEOUT_CYCLES= 250_000,   // 5 ms @ 50 MHz
     parameter integer DEFAULT_LIMIT_MM_S = 300,
-    parameter integer MAX_LEN            = 32
+    parameter integer MAX_LEN            = 32,
+    // ---- resource knobs (defaults keep the verified full-feature behaviour) ----
+    parameter integer CNT_W              = 16,  // diagnostics counter width
+    parameter integer ENABLE_ACK         = 1    // 0: no ACK frames (saves ~120 CLS)
 )(
     input  wire              clk,
     input  wire              rst_n,
@@ -78,7 +81,7 @@ module uart_bridge_core #(
     host_frame_rx #(
         .MAX_LEN(MAX_LEN),
         .TIMEOUT_CYCLES(BYTE_TIMEOUT_CYCLES),
-        .CNT_W(16)
+        .CNT_W(CNT_W)
     ) u_rx (
         .clk(clk), .rst_n(rst_n),
         .byte_in(rx_byte), .byte_valid(rx_valid),
@@ -242,8 +245,8 @@ module uart_bridge_core #(
             tx_start       <= 1'b0;
             telem_snapshot <= 1'b0;
 
-            // 1) new ACK request from the decoder
-            if (ack_strobe) begin
+            // 1) new ACK request from the decoder (disabled in the lite build)
+            if (ENABLE_ACK != 0 && ack_strobe) begin
                 if (!ack_pending) begin
                     ack_pending  <= 1'b1;
                     ack_type_q   <= ack_type;
@@ -259,7 +262,7 @@ module uart_bridge_core #(
 
             // 3) arbitration: ACK has priority over TELEM
             if (!tx_busy && !tx_start) begin
-                if (ack_pending) begin
+                if (ENABLE_ACK != 0 && ack_pending) begin
                     ack_pending  <= 1'b0;
                     tx_is_ack    <= 1'b1;
                     tx_type_i    <= T_ACK;
