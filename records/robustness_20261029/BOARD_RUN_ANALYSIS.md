@@ -126,3 +126,12 @@ route_state：1 IDLE / 1 CRUISE_START / 2 CRUISE / 3 BRAKE_SELECT / 4 TURN_OUT /
   场景 12（PASS 中 3 段 200 ms 前向 60 mm 毛刺）覆盖，13/13 场景 0 故障 0 PAUSED。
 - 重建：主位流 SHA256 `F5DD42E8…`（6,443,628 字节，Logic 15910/70%、CLS 9614/84%、
   Fmax 56.049 MHz），P6-21 诊断位流 SHA256 `08DFDED3…`；等待下一次上板复测。
+
+## 2026-10-30 00:03–00:10 距离日志验证（PASS 前向滤波）
+
+详见 `records/robustness_20261029/board_run_20261030_0003_analysis.md`。要点：
+
+- 距离日志诊断固件（`EE00D375…`）连续两次会话共 **4 轮完整绕障**，PASS 段不再 `BLOCKED`；
+- 唯一一次停车在 SHIFT 段：前向连续 77–82 mm（>400 ms）、左侧墙 145 mm，属真实障碍的安全停车；
+- 0 条 `E` 行、0 次故障锁存；原始日志 `records/robustness_20261029/board_p6dist_live.log`。
+
