@@ -24,8 +24,29 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve()
-TESTS = HERE.parents[2]
-UART_TOOLS = Path(os.environ.get("UART_BRIDGE_TOOLS", TESTS / "uart_bridge" / "tools"))
+
+
+def _find_uart_tools() -> Path:
+    """按优先级找协议库：环境变量 > 仓库布局 > 板上 ~/uart_tools。"""
+    env = os.environ.get("UART_BRIDGE_TOOLS")
+    if env:
+        return Path(env)
+    candidates = [
+        HERE.parents[2] / "uart_bridge" / "tools",   # 仓库内 tests/uart_bridge/tools
+        HERE.parent / "uart_tools",                  # 与脚本同目录的 uart_tools
+        Path.home() / "uart_tools",                  # 板上部署位置
+        Path.cwd() / "uart_tools",
+    ]
+    for c in candidates:
+        try:
+            if (c / "protocol.py").is_file():
+                return c
+        except OSError:
+            continue
+    return candidates[0]
+
+
+UART_TOOLS = _find_uart_tools()
 if str(UART_TOOLS) not in sys.path:
     sys.path.insert(0, str(UART_TOOLS))
 

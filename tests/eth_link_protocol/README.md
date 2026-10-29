@@ -70,9 +70,10 @@ programmer_cli --device GW5A-25A --run 2 `
 
 **② 确认网线**：FPGA RJ45 ↔ Pi eth0。
 
-**③ Pi：跑验收**
+**③ Pi：跑验收**（工具已部署到 `~/eth_link_test.py` + `~/uart_tools/`，系统 python3 即可）
 
 ```bash
+sudo bash ~/pi_setup_eth.sh     # 每次开机后跑一次：配 IP + 静态 ARP（幂等）
 cd ~
 python3 eth_link_test.py                 # 6 项预检 + 6 项命令测试
 python3 eth_link_test.py --duration 10 --json eth_link.json
