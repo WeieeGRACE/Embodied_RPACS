@@ -20,7 +20,7 @@ function Html-Rows([string]$html) {
     }
 }
 $expectedPins = @{
- clk_50m='T9'; reset_n='B16'; key_enable_n='A15'; key_estop_n='C15'; uart_rx='U8'; uart_tx='V8'
+ clk_50m='T9'; reset_n='B16'; key_enable_n='A15'; key_estop_n='C15'
  encoder_a_l='C17';encoder_b_l='C18';encoder_a_r='F14';encoder_b_r='G14'
  PWMA='U17';AIN1='M16';AIN2='M14';PWMB='T17';BIN1='N15';BIN2='H12';STBY='G13'
  imu_spi_sck='V15';imu_spi_mosi='V16';imu_spi_miso='U18';imu_cs_n='T18';imu_int1='N14';imu_int2='N16'
@@ -30,9 +30,9 @@ $expectedPins = @{
  tof_left_scl='H13';tof_left_sda='H14';tof_left_gpio1='K15';tof_left_xshut_n='K16'
  tof_right_scl='J13';tof_right_sda='K14';tof_right_gpio1='K12';tof_right_xshut_n='K13'
 }
-$inputs=@('clk_50m','reset_n','key_enable_n','key_estop_n','uart_rx','encoder_a_l','encoder_b_l','encoder_a_r','encoder_b_r','imu_spi_miso','imu_int1','imu_int2','imu_gnd_reserved','asr_rx','tof_front_gpio1','tof_left_gpio1','tof_right_gpio1')
+$inputs=@('clk_50m','reset_n','key_enable_n','key_estop_n','encoder_a_l','encoder_b_l','encoder_a_r','encoder_b_r','imu_spi_miso','imu_int1','imu_int2','imu_gnd_reserved','asr_rx','tof_front_gpio1','tof_left_gpio1','tof_right_gpio1')
 $down=@('encoder_a_l','encoder_b_l','encoder_a_r','encoder_b_r','imu_int1','imu_int2')
-$up=@('key_enable_n','key_estop_n','uart_rx','asr_rx')
+$up=@('key_enable_n','key_estop_n','asr_rx')
 $cst=Read-Project 'src/robot_system_top.cst'
 $locations=[regex]::Matches($cst,'IO_LOC\s+"([^"]+)"\s+(\w+)')
 Require ($locations.Count -eq $expectedPins.Count) 'Unexpected constraint port count'
@@ -97,5 +97,5 @@ $bitstream=Join-Path $projectRoot 'impl/pnr/Embodied_RPACS.fs'
 Require (Test-Path -LiteralPath $bitstream) 'Missing bitstream'
 $reportDate=(Get-Item -LiteralPath $bitstream).LastWriteTimeUtc
 foreach($file in $files) { Require ((Get-Item -LiteralPath (Join-Path $projectRoot $file.path)).LastWriteTimeUtc -le $reportDate) "Stale bitstream: $($file.path)" }
-Write-Output 'PASS 44 unique constrained pins, electrical settings, ten open-drain outputs, CPU/SSPI GPIO, saved 50MHz options, one IMU/encoder/motion/PI/driver owner, no test/heartbeat dependency, zero setup/hold violations and fresh bitstream'
+Write-Output 'PASS 42 unique constrained pins, electrical settings, ten open-drain outputs, CPU/SSPI GPIO, saved 50MHz options, one IMU/encoder/motion/PI/driver owner, no test/heartbeat dependency, zero setup/hold violations and fresh bitstream'
 Get-FileHash -LiteralPath $bitstream -Algorithm SHA256 | Select-Object Hash,Path

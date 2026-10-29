@@ -8,11 +8,11 @@ module tb_system_50mhz;
  wire a,a1,a2,b,b1,b2,st,tx,sck,mosi,cs_n,ready_led,run_led,fault_led;
  tri1 [2:0] tscl,tsda,txshut;tri1 osda;wire oscl;
  robot_system_top #(.IMU_POWERUP_CYCLES(2),.IMU_CONFIG_WAIT_CYCLES(2),.IMU_CALIBRATION_SAMPLES(16),.DEBOUNCE_CYCLES(4)) dut(
- .clk_50m(clk),.reset_n(k0),.key_enable_n(k1),.key_estop_n(k2),.uart_rx(1'b1),.asr_rx(rx),
+ .clk_50m(clk),.reset_n(k0),.key_enable_n(k1),.key_estop_n(k2),.asr_rx(rx),
  .encoder_a_l(1'b0),.encoder_b_l(1'b0),.encoder_a_r(1'b0),.encoder_b_r(1'b0),
  .imu_spi_miso(miso),.imu_int1(1'b0),.imu_int2(1'b0),.imu_gnd_reserved(1'b0),
  .imu_spi_sck(sck),.imu_spi_mosi(mosi),.imu_cs_n(cs_n),
- .PWMA(a),.AIN1(a1),.AIN2(a2),.PWMB(b),.BIN1(b1),.BIN2(b2),.STBY(st),.asr_tx(tx),.uart_tx(),.oled_scl(oscl),.oled_sda(osda),
+ .PWMA(a),.AIN1(a1),.AIN2(a2),.PWMB(b),.BIN1(b1),.BIN2(b2),.STBY(st),.asr_tx(tx),.oled_scl(oscl),.oled_sda(osda),
  .tof_front_gpio1(1'b1),.tof_left_gpio1(1'b1),.tof_right_gpio1(1'b1),
  .tof_front_scl(tscl[0]),.tof_front_sda(tsda[0]),.tof_front_xshut_n(txshut[0]),
  .tof_left_scl(tscl[1]),.tof_left_sda(tsda[1]),.tof_left_xshut_n(txshut[1]),
