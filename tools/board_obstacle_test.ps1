@@ -58,6 +58,14 @@ try {
             $fsPath = (Resolve-Path -LiteralPath $FsFile).Path
             $programmer = 'D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe'
             if (!(Test-Path -LiteralPath $programmer)) { throw "programmer_cli.exe not found: $programmer" }
+            # Preflight: the FT2CH cable can enumerate while the FPGA is unpowered
+            # (battery flat). Fail with a clear message before the program attempt.
+            $scanLog = Join-Path $OutDir "board_scan_$stamp.log"
+            & $programmer --device $Device --scan *> $scanLog
+            $scanText = if (Test-Path -LiteralPath $scanLog) { Get-Content -LiteralPath $scanLog -Raw } else { '' }
+            if ($scanText -notmatch 'device\(s\) found') {
+                throw "No FPGA target found via the Gowin cable (see $scanLog). Power the robot board first (battery/switch); a power cycle clears SRAM, so a re-flash is required."
+            }
             $programLog = Join-Path $OutDir "board_program_$stamp.log"
             $hash = (Get-FileHash -LiteralPath $fsPath -Algorithm SHA256).Hash
             Write-Host "Programming SRAM with $fsPath"

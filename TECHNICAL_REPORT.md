@@ -355,13 +355,17 @@ CLS 余量仍有 3216，仍在“最小演示配置”预算内。
 
 ## 6. 上板验证步骤（用户接板后执行）
 
-1. 确认 Gowin USB Cable 与板子连接；调试串口可能重新枚举（COM 号会变，如 CH9102 从
-   COM14 变成 COM23），用设备管理器确认；串口工具不要同时占用该端口
-   （抓取脚本报 `Access to the port ... is denied` 即为被占用）。
-2. 下载 SRAM 位流（不烧 Flash）：
+1. 确认 Gowin USB Cable 与板子连接，并先给板上电（电池/开关）；本工程只烧 SRAM，断电后
+   位流丢失、每次上电都需重新烧写。板子没电时 `programmer_cli --scan` 会报
+   `No Gowin devices found`，`board_obstacle_test.ps1 -Program` 会先扫描并直接提示。
+   调试串口可能重新枚举（COM 号会变，如 CH9102 从 COM14 变成 COM23），用设备管理器确认；
+   串口工具不要同时占用该端口（抓取脚本报 `Access to the port ... is denied` 即为被占用）。
+2. 下载 SRAM 位流（不烧 Flash；`programmer_cli` 的 `--fsFile` 必须传**绝对路径**，
+   相对路径会报 `Not found any data File`）：
    ```powershell
+   $fs = (Resolve-Path impl/pnr/Embodied_RPACS.fs).Path
    & 'D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe' `
-     --device GW5A-25A --operation_index 2 --fsFile impl/pnr/Embodied_RPACS.fs
+     --device GW5A-25A --operation_index 2 --fsFile "$fs"
    ```
    或使用一键脚本（推荐）：`./tools/board_obstacle_test.ps1 -Port COM14 -Seconds 180 -Program`
    —— 自动 SRAM 烧写、只读串口抓取（不写串口，不影响 ASR 运动链路）、按心跳/`E ` 错误行

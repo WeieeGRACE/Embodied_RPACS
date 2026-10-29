@@ -21,8 +21,9 @@
 ```powershell
 cd tests/p6_uart_debug
 & 'D:/Gowin/Gowin_V1.9.12_x64/IDE/bin/gw_sh.exe' build.tcl      # -> impl/pnr/Embodied_RPACS_p6uart.fs
+$fs = (Resolve-Path impl/pnr/Embodied_RPACS_p6uart.fs).Path      # programmer_cli 需要绝对路径
 & 'D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe' `
-    --device GW5A-25A --operation_index 2 --fsFile impl/pnr/Embodied_RPACS_p6uart.fs
+    --device GW5A-25A --operation_index 2 --fsFile "$fs"
 ```
 
 已知构建结果（2026-10-29 18:14 重建，含最终近距就绪修复）：Logic 13420/23040 (59%)、
