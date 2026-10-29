@@ -10,6 +10,12 @@ param(
     [switch]$Timestamped
 )
 $ErrorActionPreference = 'Stop'
+# Resolve a relative -OutFile against the project root, not the caller's current
+# directory: previously "records/..." silently landed outside the repository
+# when the script was invoked from another working directory.
+$projectRoot = Split-Path -Parent $PSScriptRoot
+if (![System.IO.Path]::IsPathRooted($OutFile)) { $OutFile = Join-Path $projectRoot $OutFile }
+$OutFile = [System.IO.Path]::GetFullPath($OutFile)
 $sp = New-Object System.IO.Ports.SerialPort
 $sp.PortName = $Port
 $sp.BaudRate = 115200
