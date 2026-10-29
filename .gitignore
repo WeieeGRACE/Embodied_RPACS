@@ -346,3 +346,11 @@
 /tests/eth_link_protocol/sim/transcript
 /tests/eth_link_protocol/sim/vsim.wlf
 /tests/eth_link_protocol/transcript
+
+# Link v2 + motor control (test bitstream for on-car validation; not flashed overnight).
+!/tests/eth_motion_test/
+!/tests/eth_motion_test/**
+/tests/eth_motion_test/impl/
+/tests/eth_motion_test/sim/work/
+/tests/eth_motion_test/transcript
+/tests/eth_motion_test/modelsim.ini

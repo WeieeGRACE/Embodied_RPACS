@@ -145,3 +145,38 @@ tests/eth_link_protocol/
 2. 加 ARP 响应器，去掉静态 ARP；
 3. 遥测里的 IMU 姿态/编码器接真实信号（现在桥接层给核心的是 0，与 `uart_bridge_top` 的纯链路版一致）；
 4. 移植到主工程时按 `tests/uart_bridge/docs/INTEGRATION_GUIDE.md` 的路线，把 UART 版链路替换成 ETH 版。
+
+---
+
+## 9. 夜间实测记录（2026-10-30 00:30–01:2x，不涉及电机）
+
+| 测试 | 工具 | 结果 |
+| --- | --- | --- |
+| 协议验收 | `tools/eth_link_test.py` | **12/12 PASS**：遥测 150 帧/3 s = 50.00 Hz、0 解析错误、hb_age 50 ms、CLEAR/SET_VEL/STOP 的 ACK 与 seq 回显全部正确 |
+| 60 s 长稳 | `tools/eth_soak.py` | PASS：3001 帧 / 50.01 Hz / 0 丢包 / 健康帧 96.6% |
+| 相机 + 链路并发 300 s | `tools/cam_eth_soak.py` | PASS：相机 2399 帧 @ 8.0 fps（0 错误）、链路 15051 帧 @ 50.17 Hz（0 丢包）、CPU 均值 **4.9%**、最大帧间隔 82 ms |
+| 安全/故障语义 | `tools/eth_fault_test.py` | 见夜间报告 |
+| 无线串口（P6-21=L12） | `tools/../src/debug_text_logger.v` + 主工程解码器 | 100 ms/行、30 s 收 301 行、解码 0 错误 |
+
+### 帧率/限流实测结论
+
+- 链路在 Pi 上 **50 Hz 稳定**，CPU 占用 < 1%（纯链路）、≈5%（含 8 fps 深度相机）。
+- **心跳 300 ms 超时偏紧**：相机负载下出现过 330 ms 心跳间隔 → LINK_LOST 锁存。改进：上位机 20 Hz 心跳，或把 `HB_TIMEOUT_MS` 调到 500（需重编）。
+- **LINK_LOST 是锁存型**：恢复后必须 `CLEAR_FAULT`（脚本已做周期自动清除）。
+
+### 新增工具
+
+| 文件 | 说明 |
+| --- | --- |
+| `tools/eth_soak.py` | 长稳：50 Hz 遥测 + 5 Hz SET_VEL + 周期 STOP/CLEAR，统计速率/间隙/错误/CPU |
+| `tools/cam_eth_soak.py` | 相机 + 链路并发 soak（Pi 板上跑） |
+| `tools/eth_fault_test.py` | 协议安全/故障语义测试（心跳丢失、STOP 锁存、限幅、坏帧…） |
+| `src/debug_text_logger.v` + `src/eth_link_dbg_top.v` + `build_dbg.tcl` | 在 L12(P6-21) 输出 `D <16hex>` 调试文本的变体位流，用于验证无线串口 |
+
+```bash
+# Pi 侧常用命令
+python3 ~/eth_link_test.py
+python3 ~/eth_soak.py --duration 600
+~/rpacs_phase0/pyorbbecsdk-main/.venv/bin/python ~/cam_eth_soak.py --duration 300
+python3 ~/eth_fault_test.py
+```

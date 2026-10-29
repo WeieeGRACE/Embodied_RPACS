@@ -35,7 +35,14 @@ module eth_link_bridge #(
     output wire        rx_overflow,
     output wire        tx_overflow,
     output wire        link_ok,
-    output wire        stop_latched
+    output wire        stop_latched,
+    // SET_VEL 解出的目标轮速（mm/s，已按 SET_LIMIT 限幅）——给电机控制用
+    output wire signed [15:0] target_v_left,
+    output wire signed [15:0] target_v_right,
+    // 诊断输出（给调试文本日志用）
+    output wire [15:0] hb_age_ms_out,
+    output wire [7:0]  cmd_seq_out,
+    output wire [15:0] telem_sent_cnt_out
 );
     // ------------------------------------------------------------ 接收 FIFO
     localparam integer RF_DEPTH = 1 << RXFIFO_AW;
@@ -199,6 +206,11 @@ module eth_link_bridge #(
         end
     end
 
+    assign hb_age_ms_out     = hb_age;
+    assign cmd_seq_out       = cmd_seq;
+    assign telem_sent_cnt_out = telem_cnt;
+    assign target_v_left  = tgt_l;
+    assign target_v_right = tgt_r;
     assign frames_out  = tx_out_cnt;
     assign rx_overflow = rx_of;
     assign tx_overflow = tx_of;
