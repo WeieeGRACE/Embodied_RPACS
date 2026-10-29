@@ -3,7 +3,7 @@
 # vmap system_lib sim/work_system_menu 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 18:00:31 on Oct 29,2026
+# Start time: 21:07:34 on Oct 29,2026
 # vlog -sv -work system_lib src/obstacle/obstacle_route.v src/obstacle/obstacle_sensors.v src/obstacle/obstacle_command.v src/obstacle/system_dispatch.v src/robot_system_top.v src/asr/system_motion.v src/asr/asr_uart_rx.v src/asr/asr_packet_tx.v src/asr/asr_feedback.v src/ui/system_keys.v src/ui/system_menu.v src/ui/system_pages.v src/ui/system_oled_text.v src/tof/tof_driver.v src/tof/tof_i2c.v src/tof/tof_page.v src/motor/motion_control_and_mode_fsm.v src/motor/dual_ab_quadrature_encoder.v src/motor/speed_measurement_and_velocity_filter.v src/motor/dual_speed_pi_pid_controller.v src/motor/pwm_and_startup_ramp.v src/motor/tb6612_driver_interface.v src/imu/imu_attitude_fixed.v src/imu/attitude_angle_to_digits.v src/imu/oled_i2c_write_byte.v src/imu/imu660ra_driver.v src/imu/imu660ra_spi_master.v src/imu/imu660ra_config_rom.v src/uart/uart_tx.v src/uart/system_event_logger.v 
 # -- Compiling module obstacle_route
 # -- Compiling module obstacle_sensors
@@ -55,11 +55,10 @@
 # 	robot_system_top
 # 	tof_page
 # 	attitude_angle_to_digits
-# 	attitude_angle_to_digits_pipeline
-# End time: 18:00:31 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 21:07:34 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 18:00:31 on Oct 29,2026
+# Start time: 21:07:34 on Oct 29,2026
 # vlog -sv -work system_lib sim/models/vl53l0x_model.sv sim/tb_robot_system.sv sim/tb_system_event_logger.sv 
 # -- Compiling module vl53l0x_model
 # -- Compiling module tb_robot_system
@@ -68,14 +67,15 @@
 # Top level modules:
 # 	tb_robot_system
 # 	tb_system_event_logger
-# End time: 18:00:31 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 21:07:35 on Oct 29,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" system_lib.tb_robot_system 
-# Start time: 18:00:31 on Oct 29,2026
+# Start time: 21:07:35 on Oct 29,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vopt-143) Recognized 2 FSMs in module "tb_robot_system(fast)".
 # ** Note: (vopt-143) Recognized 1 FSM in module "motion_control_and_mode_fsm(fast)".
 # ** Note: (vopt-143) Recognized 1 FSM in module "imu_attitude_fixed(fast)".
+# ** Note: (vopt-143) Recognized 1 FSM in module "system_pages(fast)".
 # ** Note: (vopt-143) Recognized 1 FSM in module "system_oled_text(fast)".
 # ** Note: (vopt-143) Recognized 2 FSMs in module "tof_driver(fast)".
 # ** Note: (vopt-143) Recognized 1 FSM in module "asr_uart_rx(fast)".
@@ -135,6 +135,7 @@
 # Loading work.tof_i2c_reg(fast)
 # Loading work.tof_i2c_bits(fast)
 # Loading work.system_pages(fast)
+# Loading work.attitude_angle_to_digits_pipeline(fast)
 # Loading work.system_oled_text(fast)
 # Loading work.oled_i2c_write_byte(fast)
 # Loading work.vl53l0x_model(fast)
@@ -143,21 +144,22 @@
 # PASS menu quantitative action 1 distance=-204639/-200794 yaw=844
 # PASS menu quantitative action 2 distance=-189829/189829 yaw=90161
 # PASS menu quantitative action 3 distance=190114/-189402 yaw=-90156
+# PASS menu quantitative action 5 distance=755043/-762163 yaw=-360084
 # PASS all motions without USB heartbeat
 # PASS running K0 immediate cut, no restart, no false completion
 # PASS STOP/menu/voice arbitration and voice STOP
 # PASS disable voice stops action, disabled query/stop remain available
-# PASS menu quantitative action 0 distance=204497/200652 yaw=-778
+# PASS menu quantitative action 0 distance=203500/200651 yaw=-496
 # PASS integrated ToF normal/NACK/timeout/recovery and fault-gated display
 # PASS IMU/speed/timeout/still/overflow faults and root reset defaults
-# ** Note: $finish    : sim/tb_robot_system.sv(323)
-#    Time: 647620892 ns  Iteration: 0  Instance: /tb_robot_system
-# Break in Module tb_robot_system at sim/tb_robot_system.sv line 323
-# Stopped at sim/tb_robot_system.sv line 323
-# End time: 18:01:36 on Oct 29,2026, Elapsed time: 0:01:05
+# ** Note: $finish    : sim/tb_robot_system.sv(324)
+#    Time: 912840892 ns  Iteration: 0  Instance: /tb_robot_system
+# Break in Module tb_robot_system at sim/tb_robot_system.sv line 324
+# Stopped at sim/tb_robot_system.sv line 324
+# End time: 21:09:36 on Oct 29,2026, Elapsed time: 0:02:01
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" system_lib.tb_system_event_logger 
-# Start time: 18:01:36 on Oct 29,2026
+# Start time: 21:09:36 on Oct 29,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # Loading sv_std.std
 # Loading work.tb_system_event_logger(fast)
@@ -168,5 +170,5 @@
 #    Time: 616760 ns  Iteration: 1  Instance: /tb_system_event_logger
 # Break in Module tb_system_event_logger at sim/tb_system_event_logger.sv line 25
 # Stopped at sim/tb_system_event_logger.sv line 25
-# End time: 18:01:37 on Oct 29,2026, Elapsed time: 0:00:01
+# End time: 21:09:38 on Oct 29,2026, Elapsed time: 0:00:02
 # Errors: 0, Warnings: 0

@@ -6,10 +6,10 @@
 ## 下载文件
 
 - FPGA：交付包 `fpga/Embodied_RPACS.fs`（来源 `impl/pnr/Embodied_RPACS.fs`，
-  SHA256 `B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`；
-  Logic 13420/59%、CLS 8304/73%、Fmax 58.287 MHz、0 违例）。
-- P6-21 无线串口诊断位流（可选，`tests/p6_uart_debug/`）：`EC3ACEFF…B196EDC`
-  （Logic 13420/59%、CLS 8284/72%），接法见文末“远程串口采集”。
+  SHA256 `C1AF9B0729B4CE9FFB957A22CD34A0F4CEDBCDD7D73CC7C52674DB477EB709AE`；
+  6,443,652 字节，Logic 15897/69%、CLS 9640/84%、Fmax 54.996 MHz、0 违例）。
+- P6-21 无线串口诊断位流（可选，`tests/p6_uart_debug/`）：`B3A02502…3146C6A`
+  （6,443,652 字节，Logic 15897/69%、CLS 9640/84%、Fmax 54.996 MHz），接法见文末“远程串口采集”。
 - ASRPRO：交付包 `asrpro/fw.bin`，为含识别模型、音频、引导和应用的完整固件。
 - 天问工程：交付包 `asrpro/asrpro.hd`。新增播放完成接口须使用项目的隔离SDK构建流程；重新生成代码后直接使用未补丁SDK链接会缺少该接口。
 - 校验：交付包 `SHA256SUMS.txt`、`manifest.json`；数字记录 `validation/`。
@@ -55,7 +55,7 @@
 | 22 | 避障期间说退出避障模式 | 忽略语音退出；按K0退出并返回主菜单 | 待测 |
 | 23 | 避障等待播报、运行或暂停时发送ASR控制命令 | 忽略控制命令；播放完成确认、路线播报和状态事件仍有效 | 待测 |
 | 24 | 查询状态多次 | 不重复触发绕障开始/完成事件播报 | 待测 |
-| 25 | 回归MANUAL、SETTINGS、OBSTACLE AVOID菜单与手动20cm/90° | 页面显示、动作与停止行为正常（DISPLAY诊断组与MOTOR TEST已按要求删除） | 待测 |
+| 25 | 回归MANUAL（20cm/90°/SPIN 360）、SETTINGS、OBSTACLE AVOID、IMU ATTITUDE菜单 | 页面显示、动作与停止行为正常；SPIN 360 原地右转一圈后停稳；姿态页显示 ROLL/PITCH/YAW（校准中 CALIBRATING） | 待测 |
 | 26 | 自主状态模拟测距/IMU持续故障（≥2 s） | 停车锁存，未复位前禁止运动；主菜单K0复位后重校准 | 待测 |
 | 27 | 转向完成后 ToF 短暂异常/精确20 mm 读数 | 不再出现 FAULT；连续 2 次 20 mm 视为“测距完成但不可用”，barrier 放行后继续；不再做 XSHUT 重初始化 | 待测 |
 | 28 | 转向后侧向有效近距 ≤85 mm（如 60 mm） | 不锁存传感器故障、也不再判“未就绪”拦死运动；路线按 `side_mm<=AVOID_MM` 走固定里程兜底进入 SHIFT（场景 7 已仿真覆盖 `near_shift=1`） | 待测 |
@@ -118,10 +118,12 @@ FPGA 调试串口无线转回电脑：
    `impl/pnr/Embodied_RPACS_p6uart.fs`：逻辑与主固件相同，仅把调试串口 TX 挪到
    **P6-21（GPIO18，FPGA 球 L12）**；接法为 **WCH-Link RX → P6-21**、
    **GND → P6-12 或 P6-30**，其余接线不变。当前位流 SHA256
-   `EC3ACEFF698DAB306DA2F04CD8CB6085D1EB61BD6BE4EBE7E26621531B196EDC`
-   （Logic 13420/59%、CLS 8284/72%）；P6-21 网络已按底板原理图第 5 页核对（NLGPIO18）。
+   `B3A0250255FEBFF622F11A247530F3AE51D6D640F937527BB6D69A7FC3146C6A`
+   （Logic 15897/69%、CLS 9640/84%，2026-10-29 21:14 随 PASS 兜底 + SPIN 360/姿态页
+   功能重建）；P6-21 网络已按底板原理图第 5 页核对（NLGPIO18）。
    注意：板载 FT2CH 下载器的 COM15 未接 FPGA UART，不能用来抓日志。
-   2026-10-29 18:15 已用板载 Gowin 下载器成功烧写一次（电池耗尽断电，充电后需重烧）。
+   2026-10-29 18:15 已用板载 Gowin 下载器成功烧写过一次；功能更新后需重新烧写
+   （SRAM 运行，每次断电重启都要重烧）。
 5. **注意**：手册注明“调试功能和串口助手不能同时使用”——跑演示/采日志时不要再让
    WCH-Link 做调试/下载；烧写 FPGA 仍用 Gowin USB Cable（WCH-Link 不能烧 Gowin 器件）。
    无线链路可能丢少量字节，日志按整行解析（`tools/decode_debug_log.ps1` 可解码 `D` 行）；

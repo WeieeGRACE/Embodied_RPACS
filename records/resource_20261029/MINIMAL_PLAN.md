@@ -144,7 +144,11 @@
   - 估算额外收益：0.1–0.2k；风险低-中。
 - **3C（不推荐）**：删实例 + 删 `roll_mdeg/pitch_mdeg` 端口 + 改 `system_motion`/top + 重写/删除 attitude 相关 TB（`sim/tb_imu_attitude_fixed.sv`、`sim/tb_attitude_pipeline.sv`、`run_attitude_pipeline.do`、`tools/run_system_sim.ps1` 的套件列表）。收益仅比 3B 多 0.1–0.3k，风险与工作量明显更高。
 
-### 3.4 Step 4（可选，上板验证通过后）—— 删 USB 事件日志
+#> **2026-10-29 题目要求变更**：恢复 IMU 姿态页（ROLL/PITCH/YAW）+ MANUAL SPIN 360 后，
+> post-PnR 实测 Logic 15897/23040 (69%)、CLS 9640/11520 (84%)、Fmax 54.996 MHz。
+> 资源预算按“满足题目要求后的最小演示配置”更新；PASS 中途截断兜底（场景 11）另计。
+
+## 3.4 Step 4（可选，上板验证通过后）—— 删 USB 事件日志
 
 - `src/robot_system_top.v`：删 `system_event_logger` 实例（L86-89）与 `debug_state/debug_valid/event_errors` 连线；按用户确认采用**删端口+约束**方案：删 `uart_tx`/`uart_rx` 顶层端口、`src/robot_system_top.cst` 的 `IO_LOC "uart_tx" V8` 与 `IO_LOC "uart_rx" U8`、`tools/check_system_reports.ps1` 的引脚期望（44→42）。
 - `src/asr/system_motion.v`：删 `debug_state/debug_valid/event_errors` 端口与组装（L128-131、L286-289）。

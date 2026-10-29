@@ -4,7 +4,7 @@
 # vmap fault_fixed_lib sim/work_fault_fixed 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 13:13:00 on Oct 29,2026
+# Start time: 21:48:13 on Oct 29,2026
 # vlog -sv -work fault_fixed_lib src/obstacle/obstacle_route.v src/obstacle/obstacle_sensors.v src/obstacle/obstacle_command.v src/obstacle/system_dispatch.v src/robot_system_top.v src/asr/system_motion.v src/asr/asr_uart_rx.v src/asr/asr_packet_tx.v src/asr/asr_feedback.v src/ui/system_keys.v src/ui/system_menu.v src/ui/system_pages.v src/ui/system_oled_text.v src/tof/tof_driver.v src/tof/tof_i2c.v src/tof/tof_page.v src/motor/motion_control_and_mode_fsm.v src/motor/dual_ab_quadrature_encoder.v src/motor/speed_measurement_and_velocity_filter.v src/motor/dual_speed_pi_pid_controller.v src/motor/pwm_and_startup_ramp.v src/motor/tb6612_driver_interface.v src/imu/imu_attitude_fixed.v src/imu/attitude_angle_to_digits.v src/imu/oled_i2c_write_byte.v src/imu/imu660ra_driver.v src/imu/imu660ra_spi_master.v src/imu/imu660ra_config_rom.v src/uart/uart_tx.v src/uart/system_event_logger.v 
 # -- Compiling module obstacle_route
 # -- Compiling module obstacle_sensors
@@ -23,7 +23,6 @@
 # -- Compiling module system_pages
 # -- Compiling module system_oled_text
 # -- Compiling module tof_driver
-# -- Compiling module tof_three
 # -- Compiling module tof_i2c_bits
 # -- Compiling module tof_i2c_reg
 # -- Compiling module tof_page
@@ -55,24 +54,22 @@
 # 	obstacle_turn_trace
 # 	obstacle_command_trace
 # 	robot_system_top
-# 	tof_three
 # 	tof_page
 # 	attitude_angle_to_digits
-# 	attitude_angle_to_digits_pipeline
-# End time: 13:13:00 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 21:48:13 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 13:13:00 on Oct 29,2026
+# Start time: 21:48:13 on Oct 29,2026
 # vlog -sv "+define+FIXED_RTL" -work fault_fixed_lib sim/models/vl53l0x_model.sv sim/tb_fault_turns.sv 
 # -- Compiling module vl53l0x_model
 # -- Compiling module tb_fault_turns
 # 
 # Top level modules:
 # 	tb_fault_turns
-# End time: 13:13:00 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 21:48:13 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" fault_fixed_lib.tb_fault_turns "+SCENARIO=2" "+FIXED=1" "+NEWMENU=1" 
-# Start time: 13:13:00 on Oct 29,2026
+# Start time: 21:48:13 on Oct 29,2026
 # ** Note: (vsim-8009) Loading existing optimized design _opt1
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
@@ -127,6 +124,7 @@
 # Loading work.tof_i2c_reg(fast)
 # Loading work.tof_i2c_bits(fast)
 # Loading work.system_pages(fast)
+# Loading work.attitude_angle_to_digits_pipeline(fast)
 # Loading work.system_oled_text(fast)
 # Loading work.oled_i2c_write_byte(fast)
 # Loading work.vl53l0x_model(fast)
@@ -153,17 +151,16 @@
 # EVENT wait_route target=8 ok=1 now=8 dut_ms=3710
 # EVENT TURN_DONE state=8 dut_ms=3710 time_ns=74200930000
 # EVENT INJECT_EXACT20 ch=0 mm=20 hold_ms=4500 expect_fault=0 route_state=8 dut_ms=3710 time_ns=74200930000
-# MAIN route=17 auto=1 waiting=0 reason=85 dut_ms=7709 time_ns=154189010000
-# MAIN route=0 auto=0 waiting=0 reason=00 dut_ms=7709 time_ns=154189030000
-# EVIDENCE AUTO_DROP dut_ms=7709 ctrl.fault=0 fault_latched=0 sensor_fault=0 route_fault=0 motion_fault=00 imu_bad=0 fault_led=0
-# EVENT NO_FAULT_WHILE_HELD ch=0 held_ms=4500 route_state=0
+# MAIN route=23 auto=1 waiting=0 reason=02 dut_ms=3720 time_ns=74408410000
+# MAIN route=6 auto=1 waiting=0 reason=02 dut_ms=3747 time_ns=74952850000
+# EVENT NO_FAULT_WHILE_HELD ch=0 held_ms=4500 route_state=6
 # EVENT RESTORE ch=0 mm=2000 dut_ms=8213 time_ns=164260931000
-# SNAPSHOT ctrl.fault=0 fault_latched=0 sensor_fault=0 fault_bits=0000 ch0_faults=00 ch1_faults=00 ch2_faults=00 route_state=0 route_fault=0 route_reason=00 motion_fault=00 imu_bad=0 imu_error=00 sensor_error=00 enc_fault=0/0 tx_overflow=0 post_turn=110 fresh=011 auto_run=0 avoid_mode=1 fault_led=0 status=20 fault_events=0 dut_ms=8215
+# SNAPSHOT ctrl.fault=0 fault_latched=0 sensor_fault=0 fault_bits=0000 ch0_faults=00 ch1_faults=00 ch2_faults=00 route_state=6 route_fault=0 route_reason=02 motion_fault=00 imu_bad=0 imu_error=00 sensor_error=00 enc_fault=0/0 tx_overflow=0 post_turn=111 fresh=111 auto_run=1 avoid_mode=1 fault_led=0 status=23 fault_events=0 dut_ms=8215
 # FAIL scenario B: expected permanent route 0x84 latch, observed route_reason=00 route_fault=0 sensor_fault=0 latch=0
-# FIXED_RUN_OBSERVED scenario=2 fault_seen=0 fault_latched=0 fault_dt_ms=-1 route_state=0 auto_run=0 avoid_mode=1 sensor_fault=0 fault_bits=0000 ch0=00 ch1=00 ch2=00 motion_fault=00 motion_fault_code=00 motion_reason=1 motion_done=0 motion_aborted=0 imu_bad=0 imu_error=00 route_fault=0 route_reason=00 fault_events=0 status=20 fault_led=0 post_turn=111 distances=07d0/07d0/0190 tof_resets=124/0/0 tof_shots=938/938/938 glitch_recover_req=124/0/0 driver_recover=124/0/0 dut_ms=8515
-# ** Note: $finish    : sim/tb_fault_turns.sv(810)
+# FIXED_RUN_OBSERVED scenario=2 fault_seen=0 fault_latched=0 fault_dt_ms=-1 route_state=6 auto_run=1 avoid_mode=1 sensor_fault=0 fault_bits=0000 ch0=00 ch1=00 ch2=00 motion_fault=00 motion_fault_code=00 motion_reason=0 motion_done=0 motion_aborted=0 imu_bad=0 imu_error=00 route_fault=0 route_reason=02 fault_events=0 status=23 fault_led=0 post_turn=111 distances=07d0/07d0/0190 tof_resets=0/0/0 tof_shots=938/938/938 clip_confirm=1/0/0 driver_recover=0/0/0 paused=0 blocked_seen=0 reached_shift=0 fallback_done=0 near_shift=0 pass_reached=0 pass_clip_done=0 dut_ms=8515
+# ** Note: $finish    : sim/tb_fault_turns.sv(927)
 #    Time: 170320931 ns  Iteration: 0  Instance: /tb_fault_turns
-# Break in Module tb_fault_turns at sim/tb_fault_turns.sv line 810
-# Stopped at sim/tb_fault_turns.sv line 810
-# End time: 13:13:20 on Oct 29,2026, Elapsed time: 0:00:20
+# Break in Module tb_fault_turns at sim/tb_fault_turns.sv line 927
+# Stopped at sim/tb_fault_turns.sv line 927
+# End time: 21:48:38 on Oct 29,2026, Elapsed time: 0:00:25
 # Errors: 0, Warnings: 0

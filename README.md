@@ -21,19 +21,25 @@ ACG525 / GW5A-LV25UG324C2/I1，50 MHz，Gowin 1.9.12。主工程、构建与仿�
    `fault=0` 且 `paused=0`，其中场景 10 断言进入兜底（`reached_shift=1`）、场景 7 断言
    近距兜底（`near_shift=1`）。第三轮又删除了 `valid` 里“距离必须 >85 mm”的就绪掩码：
    真实近距不再被判未就绪（否则整条路线 `ready=0`、运动指令被拦后 PAUSED），近距与
-   20 mm 截断统一走固定里程兜底。
-3. **资源优化**：主菜单裁剪为 3 项（MANUAL / SETTINGS / OBSTACLE AVOID），删除 DISPLAY
-   五页诊断 UI、菜单预览行与 ToF 诊断页；删除后 roll/pitch 无消费者，综合自动裁掉
-   atan/sqrt/divider 数据通路（yaw 与 90° 转向不受影响）。post-PnR（最终版）：
-   **Logic 13420/23040（59%）**（原 17661/77%）、**CLS 8304/11520（73%）**（原 86%）、
-   Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **58.287 MHz**、Setup/Hold 违例 0、TNS 0。
-4. **验证**：7 套主工程仿真全部 PASS、历史回归全绿、11 个转向后故障注入场景
-   （0 次故障锁存、0 次 PAUSED）。位流：`impl/pnr/Embodied_RPACS.fs`，
-   SHA256 `B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`。
+   20 mm 截断统一走固定里程兜底。**PASS 中途截断兜底（上板日志驱动）**：2026-10-29 20:36
+   板上 5 次尝试中 3 次在 PASS 阶段 BLOCKED（reason 0x04）——障碍侧通道在 PASS 开始后才出现
+   20 mm 截断，边缘检测失效后一路开到前向阈值；现已把“运行中途转为截断”也纳入固定里程兜底
+   （PASS/SHIFT），并新增故障注入场景 11 覆盖。
+3. **资源优化**：主菜单精简后为 4 项（MANUAL / SETTINGS / OBSTACLE AVOID / IMU ATTITUDE，
+   末项为题目要求的姿态显示），删除 DISPLAY 其余诊断 UI、菜单预览行与 ToF 诊断页；本轮把
+   IMU 姿态页恢复为单页（共用一套顺序小数格式化器），roll/pitch 数学随之回到综合。post-PnR：
+   **Logic 15897/23040（69%）**（原 17661/77%）、**CLS 9640/11520（84%）**（原 86%）、
+   Register 6736、BSRAM 9/56、DSP 8.5/28、Fmax **54.996 MHz**、Setup/Hold 违例 0、TNS 0。
+4. **题目新增功能**：MANUAL 增加 **SPIN 360**（用右转动作原地旋转 360°，30 s 动作超时）；
+   主菜单增加 **IMU ATTITUDE** 页，显示 ROLL / PITCH / YAW（±DDD.d°），IMU 校准中显示
+   CALIBRATING。两项均已进仿真与 OLED 位图回归。
+5. **验证**：7 套主工程仿真全部 PASS、历史回归全绿、**12 个**转向后故障注入场景
+   （0 次故障锁存、0 次 PAUSED；场景 10 全程截断兜底、场景 11 PASS 中途截断兜底）。
+   位流：`impl/pnr/Embodied_RPACS.fs`（6,443,652 字节），
+   SHA256 `C1AF9B0729B4CE9FFB957A22CD34A0F4CEDBCDD7D73CC7C52674DB477EB709AE`。
    配套语音固件 `asrpro/release/yaoyao_asrpro_2m_20261025_obstacle/fw.bin` 本轮未改动。
-   上板实测记录见 `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`；最终位流已重建，
-   板载 Gowin 下载器（FT2CH）已识别、P6-21 诊断位流已成功 SRAM 烧写，待机器人电池充电后
-   连续避障 3–5 次复测（步骤见技术报告第 6 节）。
+   上板实测记录见 `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`；本轮新增功能与
+   PASS 兜底修复已重建，等待用户重新烧写测试（步骤见技术报告第 6 节）。
 
 > 硬件提示：真实板上“IMU 地线掉开时避障反而稳定、插回又 PAUSED”指向地环路——本工程机械
 > 接线把 IMU 地接在 P11-3/LCD_GPIO0/T11（T11 是 FPGA 信号脚，`P11-2` 才是专用 GND）。
@@ -44,9 +50,9 @@ ACG525 / GW5A-LV25UG324C2/I1，50 MHz，Gowin 1.9.12。主工程、构建与仿�
 
 ## 菜单与按键
 
-K1 下一项，K2 选择。主菜单 3 项：MANUAL → SETTINGS → OBSTACLE AVOID。
-DISPLAY 诊断组（系统状态/IMU 姿态/ToF 距离/编码器速度/语音运动）与菜单预览行已按要求删除。
-手动页执行前后 20cm、左右 90°；SETTINGS 含语音开关与三档速度。
+K1 下一项，K2 选择。主菜单 4 项：MANUAL → SETTINGS → OBSTACLE AVOID → IMU ATTITUDE。
+手动页执行前后 20cm、左右 90°、**SPIN 360（右转原地一圈）**与 STOP；SETTINGS 含语音开关与
+三档速度；IMU ATTITUDE 页显示 ROLL/PITCH/YAW（校准中显示 CALIBRATING，K0 返回）。
 
 语音默认关闭；到 SETTINGS → VOICE ENABLE，用 K1 选择 ON、K2 确认。
 进入避障面板不运动；K2 先播报“开启避障模式”，正常播完才前进。运行中 K2 暂停，暂停后 K2 恢复。

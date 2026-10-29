@@ -3,7 +3,7 @@
 # vmap tb6612_work work_tb6612 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 16:52:45 on Oct 29,2026
+# Start time: 21:23:59 on Oct 29,2026
 # vlog -work tb6612_work ../src/motor/tb6612_driver_interface.v tb_tb6612_driver_interface.v 
 # -- Compiling module tb6612_driver_interface
 # -- Compiling module tb6612_driver_channel
@@ -11,10 +11,10 @@
 # 
 # Top level modules:
 # 	tb_tb6612_driver_interface
-# End time: 16:52:46 on Oct 29,2026, Elapsed time: 0:00:01
+# End time: 21:23:59 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" tb6612_work.tb_tb6612_driver_interface 
-# Start time: 16:52:46 on Oct 29,2026
+# Start time: 21:23:59 on Oct 29,2026
 # ** Note: (vsim-8009) Loading existing optimized design _opt
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
@@ -34,13 +34,13 @@
 # Loading work.tb6612_driver_channel(fast)
 # ** Warning: (vsim-WLF-5000) WLF file currently in use: vsim.wlf
 #           File in use by: CodexSandboxOffline  Hostname: YANG  ProcessID: 24168
-#           Attempting to use alternate WLF file "./wlft8w09by".
+#           Attempting to use alternate WLF file "./wlftv2zfr5".
 # ** Warning: (vsim-WLF-5001) Could not open WLF file: vsim.wlf
-#           Using alternate file: ./wlft8w09by
+#           Using alternate file: ./wlftv2zfr5
 # PASS: 30039 checks; standalone 50 MHz / 20 kHz; duties 0/625/1000/2500, deadtime 2500 clocks
 # ** Note: $finish    : tb_tb6612_driver_interface.v(79)
 #    Time: 3000472 ns  Iteration: 0  Instance: /tb_tb6612_driver_interface
 # Break in Module tb_tb6612_driver_interface at tb_tb6612_driver_interface.v line 79
 # Stopped at tb_tb6612_driver_interface.v line 79
-# End time: 16:52:46 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 21:24:00 on Oct 29,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 2

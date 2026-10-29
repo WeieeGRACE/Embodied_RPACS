@@ -1,6 +1,6 @@
 # do run_dual_closed_loop_test.do
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 16:51:49 on Oct 29,2026
+# Start time: 21:23:00 on Oct 29,2026
 # vlog -sv -work work_closed ../src/motor/dual_ab_quadrature_encoder.v ../src/motor/speed_measurement_and_velocity_filter.v ../src/motor/dual_speed_pi_pid_controller.v ../src/motor/pwm_and_startup_ramp.v ../src/motor/safety_protection_and_fault_arbitration.v ../src/motor/tb6612_driver_interface.v ../src/uart/uart_tx.v ../src/uart/closed_loop_uart_telemetry.v ../src/robot_closed_loop_test_top.v tb_dual_closed_loop_test.sv 
 # -- Compiling module dual_ab_quadrature_encoder
 # -- Compiling module dual_ab_encoder_channel
@@ -19,10 +19,10 @@
 # 
 # Top level modules:
 # 	tb_dual_closed_loop_test
-# End time: 16:51:49 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 21:23:00 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" work_closed.tb_dual_closed_loop_test 
-# Start time: 16:51:49 on Oct 29,2026
+# Start time: 21:23:00 on Oct 29,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Warning: tb_dual_closed_loop_test.sv(7): (vopt-2685) [TFMPC] - Too few port connections for 'dut'.  Expected 28, found 20.
 # ** Warning: tb_dual_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_fault_code'.
@@ -70,10 +70,10 @@
 #    Time: 20019461 ns  Iteration: 0  Instance: /tb_dual_closed_loop_test
 # Break in Module tb_dual_closed_loop_test at tb_dual_closed_loop_test.sv line 84
 # Stopped at tb_dual_closed_loop_test.sv line 84
-# End time: 16:51:51 on Oct 29,2026, Elapsed time: 0:00:02
+# End time: 21:23:02 on Oct 29,2026, Elapsed time: 0:00:02
 # Errors: 0, Warnings: 9
 # vsim -onfinish stop -voptargs="+acc" work_closed.tb_dual_closed_loop_test -gTEST_TARGET=-10 
-# Start time: 16:51:51 on Oct 29,2026
+# Start time: 21:23:02 on Oct 29,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Warning: tb_dual_closed_loop_test.sv(7): (vopt-2685) [TFMPC] - Too few port connections for 'dut'.  Expected 28, found 20.
 # ** Warning: tb_dual_closed_loop_test.sv(7): (vopt-2718) [TFMPC] - Missing connection for port 'status_fault_code'.
@@ -108,5 +108,5 @@
 #    Time: 20019461 ns  Iteration: 0  Instance: /tb_dual_closed_loop_test
 # Break in Module tb_dual_closed_loop_test at tb_dual_closed_loop_test.sv line 84
 # Stopped at tb_dual_closed_loop_test.sv line 84
-# End time: 16:51:53 on Oct 29,2026, Elapsed time: 0:00:02
+# End time: 21:23:04 on Oct 29,2026, Elapsed time: 0:00:02
 # Errors: 0, Warnings: 9

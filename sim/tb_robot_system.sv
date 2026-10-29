@@ -236,6 +236,7 @@ module tb_robot_system;
  if(it==1 && (l0-dut.control.um_l<200000 || r0-dut.control.um_r<200000))$fatal(1,"short reverse");
  if(it==2 && dut.control.yaw-y0<90000)$fatal(1,"short left");
  if(it==3 && y0-dut.control.yaw<90000)$fatal(1,"short right");
+ if(it==5 && y0-dut.control.yaw<360000)$fatal(1,"short spin360");
  $display("PASS menu quantitative action %0d distance=%0d/%0d yaw=%0d",it,dut.control.um_l-l0,dut.control.um_r-r0,dut.control.yaw-y0);
  end endtask
  initial begin
@@ -259,7 +260,7 @@ module tb_robot_system;
  choose(4,1);keypress(1);if(dut.gear!=1)$fatal(1,"unconfirmed gear");keypress(2);cycles(10);
  if(dut.gear!=2)$fatal(1,"gear commit");keypress(1);keypress(1);keypress(2);cycles(10); // mid
  if(dut.gear!=1)$fatal(1,"gear wrap");root();
- manual_action(0);manual_action(1);manual_action(2);manual_action(3);
+ manual_action(0);manual_action(1);manual_action(2);manual_action(3);manual_action(5);
  $display("PASS all motions without USB heartbeat");
  choose(2,0);d0=done_events;keypress(2);wait(st);cycles(10000);
  frame('h11);cycles(1500);if(busy_replies==0)$fatal(1,"busy voice not rejected");

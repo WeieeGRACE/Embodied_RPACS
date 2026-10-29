@@ -1,6 +1,6 @@
 # do run_motion_invalid.do
 # vsim -onfinish stop -suppress 3722 work_motion.tb_motion_invalid_parameter 
-# Start time: 16:52:48 on Oct 29,2026
+# Start time: 21:24:01 on Oct 29,2026
 # ** Note: (vsim-8009) Loading existing optimized design _opt2
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
@@ -24,5 +24,5 @@
 # ** Note: $finish    : ../src/motor/motion_control_and_mode_fsm.v(134)
 #    Time: 0 ps  Iteration: 0  Instance: /tb_motion_invalid_parameter/dut
 # Break at ../src/motor/motion_control_and_mode_fsm.v line 134
-# End time: 16:52:48 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 21:24:02 on Oct 29,2026, Elapsed time: 0:00:01
 # Errors: 1, Warnings: 0

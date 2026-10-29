@@ -1,8 +1,8 @@
 `timescale 1ns/1ps
-// Minimal obstacle-demo menu: MANUAL, SETTINGS, OBSTACLE AVOID.
-// The DISPLAY diagnostics group and the next-item preview row were removed to
-// free FPGA logic for later features; the obstacle panel itself still shows
-// state, gear, three ranges and the fault diagnostic bytes.
+// Obstacle-demo menu: MANUAL (incl. SPIN 360), SETTINGS, OBSTACLE AVOID and
+// IMU ATTITUDE. The DISPLAY diagnostics group and the next-item preview row
+// stay removed; the obstacle panel itself still shows state, gear, three ranges
+// and the fault diagnostic bytes.
 module system_menu(
  input wire clk,rst_n,input wire [2:0] pressed,
  input wire [1:0] gear,input wire show_avoid,show_root,avoid_mode,
@@ -14,7 +14,7 @@ module system_menu(
  output reg stop_request);
  reg [3:0] last_item;
  always @* case(group_id)
- 0:last_item=2;2:last_item=4;4:last_item=1;
+ 0:last_item=3;2:last_item=5;4:last_item=1;
  5:last_item=0;default:last_item=0;
  endcase
  always @(posedge clk or negedge rst_n)
@@ -36,12 +36,12 @@ module system_menu(
  end else if(pressed[2])begin
  if(!page)begin
  if(group_id==0)begin
- group_id<=item==0 ? 4'd2:(item==1 ? 4'd4:4'd5);
- item<=0;if(item==2)page<=1;end
+ group_id<=item==0 ? 4'd2:(item==1 ? 4'd4:(item==2 ? 4'd5:4'd6));
+ item<=0;if(item==2 || item==3)page<=1;end
  else begin page<=1;voice_candidate<=voice_enable;gear_candidate<=gear;end
  end else case(group_id)
  5:begin command_valid<=1;command<=8'h16;end
- 2:begin command_valid<=1;command<=item==4 ? 8'h02:8'h10+item;end
+ 2:begin command_valid<=1;command<=item==4 ? 8'h02:(item==5 ? 8'h14:8'h10+item);end
  4:if(item==0)begin
  voice_enable<=voice_candidate;
  if(voice_enable && !voice_candidate)stop_request<=1;

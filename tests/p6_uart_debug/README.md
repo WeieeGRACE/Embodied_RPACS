@@ -26,9 +26,9 @@ $fs = (Resolve-Path impl/pnr/Embodied_RPACS_p6uart.fs).Path      # programmer_cl
     --device GW5A-25A --operation_index 2 --fsFile "$fs"
 ```
 
-已知构建结果（2026-10-29 18:14 重建，含最终近距就绪修复）：Logic 13420/23040 (59%)、
-CLS 8284/11520 (72%)、Register 5690。
-Bitstream SHA256 `EC3ACEFF698DAB306DA2F04CD8CB6085D1EB61BD6BE4EBE7E26621531B196EDC`。
+已知构建结果（2026-10-29 21:14 重建，含 SPIN 360 / IMU ATTITUDE 与 PASS 兜底）：
+Logic 15897/23040 (69%)、CLS 9640/11520 (84%)、Register 6736、Fmax 54.996 MHz。
+Bitstream 6,443,652 字节，SHA256 `B3A0250255FEBFF622F11A247530F3AE51D6D640F937527BB6D69A7FC3146C6A`。
 
 ## 采集
 

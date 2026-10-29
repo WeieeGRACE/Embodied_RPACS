@@ -106,6 +106,7 @@ module robot_system_top #(
  .start_diag(start_diag),.route_reason(route_reason),
  .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.route_state(route_state),.distances(distances),.tof_valid(tof_valid),
  .tof_reused(reused),
+ .attitude_valid(attitude_valid),.roll_mdeg(roll_mdeg),.pitch_mdeg(pitch_mdeg),.yaw_wrapped(yaw_wrapped),
  .voice_enable(voice_enable),.voice_candidate(voice_candidate),.gear(gear),.gear_candidate(gear_candidate),
  .ready(led_ready),.busy(led_run),.fault(led_fault),
  .imu_error(imu_error),.sensor_error(sensor_error),.motion_fault(motion_fault),.command(command),.response(response),

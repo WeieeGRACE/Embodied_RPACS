@@ -148,8 +148,9 @@ module system_motion #(
   tof_reused,route_state,voice_enable,modules_ready,(&tof_seen && &tof_valid),fault,
   busy,waiting,auto_run,avoid_mode};
  assign debug_valid=menu_valid || command_valid || ack_valid || aux_valid;
- wire rotate=action==8'h12 || action==8'h13;
- wire reverse=action==8'h11 || action==8'h13;
+ wire spin360=action==8'h14;
+ wire rotate=action==8'h12 || action==8'h13 || spin360;
+ wire reverse=action==8'h11 || action==8'h13 || spin360;
  wire [2:0] phase;
  wire [3:0] reason;
  wire signed [31:0] target_um_l,target_um_r;
@@ -169,7 +170,8 @@ module system_motion #(
  requested_l=rotate ? LOW_UM:gear_speed;
  requested_r=requested_l;
  requested_mode=rotate ? 6:7;requested_end=rotate ? 3:2;
- goal=rotate ? GOAL_MDEG:GOAL_UM;
+ // Right-turn in place: 90 deg for the RIGHT 90 item, one full turn for SPIN 360.
+ goal=spin360 ? 32'd360000 : rotate ? GOAL_MDEG:GOAL_UM;
  end
  wire route_start,route_stop,route_rotate,route_reverse,route_refresh;
  wire [1:0] route_end;wire [31:0] route_goal,route_speed,route_cap;
@@ -214,7 +216,7 @@ module system_motion #(
  issue_valid<=!stopping && !fault && (start || command_submit);
  if(start || command_submit)issue_payload<=command_submit ? payload:
  {requested_mode,requested_end,reverse,requested_l,requested_r,goal,
- MANUAL_TIMEOUT,manual_limit,ACCEL_STEP,DECEL_STEP};
+ spin360 ? 32'd30000 : MANUAL_TIMEOUT,manual_limit,ACCEL_STEP,DECEL_STEP};
  end
  motion_control_and_mode_fsm #(.CLK_HZ(CLK_HZ),.STILL_THRESHOLD(0),.ALLOW_SINGLE_TIMED(1),.STOP_TIMEOUT_MS(3000)) motion(
  .clk(clk),.rst_n(rst_n),.enable(modules_ready),.stop_request(stopping || (auto_run && route_stop)),

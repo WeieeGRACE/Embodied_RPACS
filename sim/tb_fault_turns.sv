@@ -21,6 +21,10 @@
 //   8 H_TURN2 : exact 20 mm on LEFT ToF right after the SECOND turn (7->13)
 //   9 I_HOLD  : exact 20 mm on FRONT ToF, comm normal, held 2 s after the turn
 //               (hold20 reuses the old value but post_turn never goes fresh)
+//  10 K_CLIP  : obstacle-side lane permanently clamped at 20 mm from the turn
+//  11 PASS_CLIP: obstacle-side lane stays healthy through the barrier and only
+//               clamps at 20 mm once PASS has started (observed on the board
+//               as BLOCKED reason 0x04 after the edge detector stopped firing)
 //
 // The DUT runs the accelerated parameter set of tb_system_obstacle.sv
 // (CLK_HZ=1 MHz), so 1 DUT millisecond = 1000 clock cycles = 20 us of
@@ -42,6 +46,7 @@ module tb_fault_turns;
  localparam integer SC_H_TURN2 = 8;
  localparam integer SC_I_HOLD  = 9;
  localparam integer SC_K_CLIP  = 10;
+ localparam integer SC_PASS_CLIP = 11;
 
  reg clk=0; always #10 clk=~clk;
  reg k0=1,k1=1,k2=1,rx=1,miso=0;
@@ -66,6 +71,8 @@ module tb_fault_turns;
  integer reach_shift=0;         // scenario K: fallback detour entered
  integer fallback_done=0;       // scenario K: detour completed back to CRUISE
  integer near_shift=0;          // scenario G_NEAR: near-side fallback entered
+ integer pass_reached=0;        // scenario PASS_CLIP: PASS state entered
+ integer pass_clip_done=0;      // scenario PASS_CLIP: fallback pass finished, CRUISE resumed
  reg mark_valid=0;
 
  // first-fault snapshot (filled by the monitor below)
@@ -854,6 +861,42 @@ module tb_fault_turns;
     else if(!fixed_mode)
      $display("FAIL scenario K: expected baseline 0x84 latch, observed route_reason=%02h route_fault=%b",f_reason,f_rfault);
    end
+   SC_PASS_CLIP:begin
+    // Board evidence: the obstacle-side lane was healthy through WAIT_BACK and
+    // only clamped at 20 mm after PASS started. The edge detector then never
+    // fired again and the route drove on until front_block
+    // (BLOCKED reason 0x04, 3 of 5 runs on 2026-10-29).
+    // Drive a healthy box-edge detour up to WAIT_BACK first (same helper as
+    // H_TURN2), then let PASS start and clamp the obstacle-side lane.
+    drive_to_second_turn(ok_done);
+    if(!ok_done)begin $display("FAIL scenario PASS_CLIP: harness could not reach WAIT_BACK");$finish;end
+    wait_route(9,10000*DUT_MS,w_ok);
+    pass_reached=w_ok;
+    if(fixed_mode && w_ok)begin
+     $display("EVENT INJECT_PASS_CLIP ch=2 mm=20 route_state=9 dut_ms=%0d",cyc/DUT_MS);
+     ranges[47:32]=16'd20;
+     wait_route(2,80000*DUT_MS,w_ok);
+     pass_clip_done=w_ok;
+    end else begin
+     n=0;limit=5000*DUT_MS;
+     while(n<limit && f_cyc<0)begin @(posedge clk);n=n+1;end
+    end
+    cycles(5*DUT_MS);
+    ranges[47:32]=16'd2000;
+    cycles(5*DUT_MS);
+    print_snapshot();
+    $display("EVIDENCE PASS_CLIP pass_reached=%0d pass_clip_done=%0d fixed=%0d route_state=%0d paused=%b blocked_seen=%b fault=%b dut_ms=%0d",
+     pass_reached,pass_clip_done,fixed_mode,dut.route_state,pause_seen,blocked_seen,dut.control.fault,cyc/DUT_MS);
+    if(fixed_mode)begin
+     // Fixed RTL: a clip that appears during PASS must finish the pass on fixed
+     // mileage (fallback_pass becomes active via side_unusable) and resume CRUISE.
+     check_ok=(pass_reached==1)&&(pass_clip_done==1)&&(pause_seen==0)&&(blocked_seen==0)&&(dut.control.fault==0);
+     if(check_ok)
+      $display("PASS scenario PASS_CLIP(fixed): obstacle-side 20 mm clip starting in PASS -> fixed-mileage pass finished and CRUISE resumed (route_state=%0d)",dut.route_state);
+     else
+      $display("FAIL scenario PASS_CLIP(fixed): pass_reached=%0d done=%0d paused=%b blocked=%b fault=%b",pass_reached,pass_clip_done,pause_seen,blocked_seen,dut.control.fault);
+    end
+   end
    default:$fatal(1,"unknown scenario id %0d",scenario);
   endcase
 
@@ -861,7 +904,7 @@ module tb_fault_turns;
    // Observation-only run of the fixed RTL: allow the route to continue or the
    // fault to self-clear, then publish the authoritative fixed-version result.
    cycles(300*DUT_MS);
-   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d clip_confirm=%0d/%0d/%0d driver_recover=%0d/%0d/%0d paused=%b blocked_seen=%b reached_shift=%0d fallback_done=%0d near_shift=%0d dut_ms=%0d",
+   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d clip_confirm=%0d/%0d/%0d driver_recover=%0d/%0d/%0d paused=%b blocked_seen=%b reached_shift=%0d fallback_done=%0d near_shift=%0d pass_reached=%0d pass_clip_done=%0d dut_ms=%0d",
     scenario,(f_cyc>=0),dut.control.fault_latched,(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS,dut.route_state,
     dut.control.auto_run,dut.avoid_mode,dut.control.sensor_fault,dut.sensors.fault_bits,
     dut.sensors.channels[0].faults,dut.sensors.channels[1].faults,dut.sensors.channels[2].faults,
@@ -872,7 +915,7 @@ module tb_fault_turns;
     dut.post_turn,dut.distances[15:0],dut.distances[31:16],dut.distances[47:32],
     resets[0],resets[1],resets[2],shots[0],shots[1],shots[2],
     req_cnt0,req_cnt1,req_cnt2,rec_cnt0,rec_cnt1,rec_cnt2,
-    pause_seen,blocked_seen,reach_shift,fallback_done,near_shift,cyc/DUT_MS);
+    pause_seen,blocked_seen,reach_shift,fallback_done,near_shift,pass_reached,pass_clip_done,cyc/DUT_MS);
    completed=1;
   end else if(check_ok)begin
    $display("RESULT scenario=%0d PASS fault_seen=%b fault_dt_ms=%0d",scenario,(f_cyc>=0),(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS);

@@ -200,7 +200,10 @@ module obstacle_route #(
  end
  SHIFT:begin
  if(front_block || shift_limit)begin advance(BLOCKED);reason<=front_block ? 4:5;end
- else if(fallback_shift && shift_traveled>=FALLBACK_SHIFT_UM)advance(BRAKE_SHIFT);
+ // The obstacle-side lane may start clipping after the detour already began
+ // (e.g. the face profile was learned, then the wall reflection clamps the
+ // sensor). Treat that exactly like a clip at entry and finish on mileage.
+ else if((fallback_shift || side_unusable) && shift_traveled>=FALLBACK_SHIFT_UM)advance(BRAKE_SHIFT);
  else if(side_sample)begin
  if(cleared_side)begin
  if(clear_count==2)advance(BRAKE_SHIFT);else clear_count<=clear_count+1'b1;
@@ -226,7 +229,10 @@ module obstacle_route #(
  end
  PASS:begin
  if(front_block || pass_limit)begin advance(BLOCKED);reason<=front_block ? 4:5;end
- else if(fallback_pass && pass_traveled>=FALLBACK_PASS_UM)advance(BRAKE_EDGE);
+ // If the obstacle-side lane clips only after PASS started, the edge detector
+ // can never fire again; fall back to the fixed mileage measured from
+ // WAIT_BACK instead of driving on until the pass limit / front block.
+ else if((fallback_pass || side_unusable) && pass_traveled>=FALLBACK_PASS_UM)advance(BRAKE_EDGE);
  else if(side_sample)begin
  if(!pass_clear_seen)begin
  if(side_mm>=EDGE_MM)pass_clear_seen<=1;

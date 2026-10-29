@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
-// Minimal-demo OLED page suite: root 3-item menu (no next-item preview row),
-// MANUAL, SETTINGS and the OBSTACLE AVOID panel. The DISPLAY diagnostic pages
-// and the ToF diagnostic page were removed from the design in this round.
+// Demo OLED page suite: root 4-item menu (MANUAL / SETTINGS / OBSTACLE AVOID /
+// IMU ATTITUDE, no next-item preview row), MANUAL actions incl. SPIN 360,
+// SETTINGS, the OBSTACLE AVOID panel and the required IMU ATTITUDE page.
 module tb_system_oled;
  reg clk=0; always #10 clk=~clk;
  reg rst_n=0; reg [2:0] seen=0,valid=0;
@@ -10,9 +10,11 @@ module tb_system_oled;
  reg [2:0] group_id=0;reg [3:0] item=0;reg page_on=0; wire scl,frame_done; tri1 sda; reg ack_low=0;
  assign sda=ack_low?1'b0:1'bz;
  reg completed=0;reg av=0,ar=0,aw=0,ve=0;reg [4:0] rs=0;
+ reg att_valid=1;reg signed [31:0] roll_mdeg=0,pitch_mdeg=0,yaw_mdeg=0;
  system_pages pages(.clk(clk),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page_on),
  .start_diag(8'd0),.route_reason(8'd0),
  .avoid_mode(av),.auto_run(ar),.waiting(aw),.route_state(rs),.distances(distances),.tof_valid(valid),.tof_reused(3'd0),
+ .attitude_valid(att_valid),.roll_mdeg(roll_mdeg),.pitch_mdeg(pitch_mdeg),.yaw_wrapped(yaw_mdeg),
  .voice_enable(ve),.voice_candidate(1'b1),.gear(2'd1),.gear_candidate(2'd2),
  .ready(1'b1),.busy(1'b0),.fault(1'b0),
  .imu_error(8'd0),.sensor_error(8'd0),.motion_fault(8'd0),.command(8'h10),.response(8'd0),
@@ -98,17 +100,21 @@ module tb_system_oled;
  endtask
  initial begin
  repeat(5)@(negedge clk);rst_n=1;next_frame();
- // Root menu: 3 entries, current selection only, no next-item preview row.
+ // Root menu: 4 entries, current selection only, no next-item preview row.
  check_row(0,"RPACS MENU");check_row(1,">MANUAL");check_row(2,"");check_row(3,"K0 RST K1 NEXT K2 OK");
  dump("records/main_20261023/system_menu_root.hex");
  item=1;settle_frame();check_row(1,">SETTINGS");check_row(2,"");
  item=2;settle_frame();check_row(1,">OBSTACLE AVOID");check_row(2,"");
+ item=3;settle_frame();check_row(1,">IMU ATTITUDE");check_row(2,"");
  item=0;
- $display("PASS main OLED root 3-item menu bitmap, no preview row and key legend");
+ $display("PASS main OLED root 4-item menu bitmap, no preview row and key legend");
  // The page changes mid-frame. Old frame must remain a complete snapshot.
  wait(dut.page==1 && dut.column>20);@(negedge clk);group_id=2;item=3;page_on=1;
  next_frame();check_row(0,"RPACS MENU");settle_frame();
  check_row(0,"RIGHT 90 DEG");check_row(1,"K2 EXECUTE ONCE");check_row(2,"GOAL 90 DEG");check_row(3,"READY K0 BACK K2 RUN");
+ item=5;settle_frame();
+ check_row(0,"SPIN 360 DEG");check_row(1,"K2 EXECUTE ONCE");check_row(2,"GOAL 360 DEG");check_row(3,"READY K0 BACK K2 RUN");
+ item=3;
  $display("PASS main OLED action page and tear-free page switching");
  group_id=4;item=0;settle_frame();
  check_row(0,"VOICE ENABLE");check_row(1,"CURRENT OFF");check_row(2,"SELECT ON");check_row(3,"K0 BACK K1 SEL K2 SET");
@@ -122,6 +128,13 @@ module tb_system_oled;
  aw=0;ar=1;rs=2;settle_frame();check_row(1,"CRUISE           MID");check_row(3,"K0 EXIT K2 PAUSE");
  ar=0;settle_frame();check_row(1,"PAUSED R:00 S02 V7 U0");check_row(3,"K0 EXIT K2 RETRY");
  $display("PASS obstacle OLED entry, voice-off prompt, waiting, cruise, paused, ranges and keys");
+ // Required IMU ATTITUDE page: one sequential formatter serves roll/pitch/yaw.
+ group_id=6;item=0;page_on=1;roll_mdeg=32'sd12345;pitch_mdeg=-32'sd45600;yaw_mdeg=-32'sd90000;
+ repeat(8)next_frame();
+ check_row(0,"IMU ATTITUDE");check_row(1,"ROLL  +012.3 DEG     ");
+ check_row(2,"PITCH -045.6 DEG     ");check_row(3,"YAW   -090.0 DEG     ");
+ att_valid=0;repeat(4)next_frame();check_row(3,"CALIBRATING K0 BACK  ");
+ $display("PASS IMU attitude page rows, sign/decimal formatting and calibrating prompt");
  completed=1;$finish;
  end
  initial begin #100000000;$fatal(1,"main OLED watchdog");end

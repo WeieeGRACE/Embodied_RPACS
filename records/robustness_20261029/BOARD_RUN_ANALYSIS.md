@@ -86,3 +86,26 @@ route_state：1 IDLE / 1 CRUISE_START / 2 CRUISE / 3 BRAKE_SELECT / 4 TURN_OUT /
   **机器人电池没电**，板子已断电。待充电后重新扫描/烧写并采集 3–5 次连续避障。
 - 备注：板载 USB-UART（CH9102F，V8/U8）只在插 Type-C 数据线时枚举；FTDI 的 COM15
   是 FT2CH 第二通道，未接 FPGA UART，不能用于抓取。
+
+## 2026-10-29 20:33–20:42 板测（PASS 中途截断问题定位）
+
+- 20:33 板子上电、Gowin 下载器与 WCH-Link 同时在线；后台守护自动烧写 P6-21 诊断位流
+  （`tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`，即当时的 18:14 构建），
+  随后 COM24 只读采集 360 s，抓到 3367 行、0 条 `E ` 故障行。
+- 用户连续尝试 5 次：**2 次完整跑完**（约 47 s / 48 s，20:41:10、20:42:23 恢复 CRUISE），
+  **3 次在 PASS 阶段 BLOCKED**（20:37:41、20:39:09、20:39:57），表现为路线暂停
+  `reason=0x04`、`route_state=17`，随后 `auto_run=0` 面板 PAUSED。
+- 解码 `D` 行时间线（`records/robustness_20261029/board_wchlink_run_20261029_2046.log`）：
+  3 次失败都满足 `prev state=9 (PASS)`、`tof_reused=4`（RIGHT 通道 20 mm 截断确认）。
+  即 RIGHT 通道在 `WAIT_BACK` 时还正常，进入 PASS 后才转为 20 mm 截断；此时边缘检测
+  （`side_sample`）不再产生事件，路线一直直行到前向阈值 `front_block` 才进入 BLOCKED。
+- 根因与修复：`PASS`/`SHIFT` 的固定里程兜底原来只在进入该段时已知侧向不可用才启用。
+  现改为运行中途 `side_unusable` 也生效——`(fallback_pass || side_unusable) &&
+  pass_traveled>=FALLBACK_PASS_UM`（PASS）、`(fallback_shift || side_unusable) &&
+  shift_traveled>=FALLBACK_SHIFT_UM`（SHIFT）。新增故障注入场景 11 `PASS_CLIP` 覆盖：
+  进入 PASS 后钳 RIGHT=20 mm，修复版 `pass_reached=1`、`pass_clip_done=1`，
+  53.2 DUT-s 恢复 CRUISE，0 故障 0 PAUSED。
+- 20:33 还发现串口采集脚本的一个使用问题：`read_serial_log.ps1` 的相对 `-OutFile` 会按
+  调用者的当前目录解析，脚本改用绝对路径后采集正常（见 `README`/第 6 节示例）。
+- 本轮最终固件与 P6-21 诊断位流已重建（含 SPIN 360、IMU ATTITUDE 页与该 PASS 兜底），
+  等待用户重新烧写后复测。

@@ -6,10 +6,10 @@
 - 故障修复提交：`ef37e97`
 - 资源优化提交：见文末“提交记录”（本报告与最终构建一并提交）
 - 最终位流：`impl/pnr/Embodied_RPACS.fs`（保存工程 `verify_project.tcl` 构建）
-  - 大小 6,443,740 字节
-  - SHA256 `B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`
-  - （同一份源码的 `build.tcl` 构建为 Logic 13420/59%、Fmax 58.287 MHz、SHA
-    `D0C703045014A30335D126C3B93BDDEB82611D57D310428A2F0012E40F5D8585`，两者均通过验收检查）
+  - 大小 6,443,652 字节
+  - SHA256 `C1AF9B0729B4CE9FFB957A22CD34A0F4CEDBCDD7D73CC7C52674DB477EB709AE`
+  - （同一份源码的 `build.tcl` 构建为 Logic 15897/69%、Fmax 54.996 MHz、SHA
+    `E115E3C0E02D9C59640655CD2F8B4EE4985693D05A4EF2DD1F7E7CE617BFD192`，两者均通过验收检查）
 - 证据目录：`records/robustness_20261029/`、`records/fault_injection/`、`records/resource_20261029/`
 
 ## 1. 摘要
@@ -18,7 +18,7 @@
 或左转前进固定距离后右转完成时，OLED 避障面板出现 `FAULT RESET REQUIRED`，必须按 K0
 复位；同时要求稳定并行采集三路传感器、简化复杂逻辑、优化板级资源为后续扩展留余量。
 
-本轮工作分四部分：
+本轮工作分六部分：
 
 1. **故障复现**：把改动前用户的真实源码冻结点（`3556192`/`0bd1a77`）导出为只读基线，
    在 ModelSim 中用故障注入场景复现了全部锁存路径（`records/fault_injection/REPORT.md`）。
@@ -32,20 +32,30 @@
    （量程下限截断/测距失效），而旧策略把它丢弃导致“永远等不到转向后新鲜样本”。
    本轮改为“连续 2 次 20 mm = 测距完成但不可用”，作为 barrier 的新鲜事件放行，并让路线
    改走**固定里程兜底**（500/300/600/300 mm + 按实际横移回线）；删除上板证明无效的
-   XSHUT 重初始化。11 个注入场景现在断言 0 故障且 0 PAUSED（新场景 10 断言进入兜底）。
+       XSHUT 重初始化。12 个注入场景现在断言 0 故障且 0 PAUSED（场景 10 断言全程截断兜底，
+    场景 11 断言 PASS 中途截断兜底）。
    同一批上板日志还显示“IMU 地线掉开时反而稳定”，指向 IMU/ToF 地环路（§4.4、§7）。
 4. **资源优化**：审计发现上一轮文档所称“Logic 53%”来自一次 `font_byte` 未驱动的坏网表
    （综合把整条 OLED 文本链裁掉），不能作为余量依据；真实基线是 **17661/23040 (77%)，
    CLS 9858/11520 (86%)**，真正的瓶颈是 CLS。按用户“用最少资源满足避障演示”的要求，
-   删除 DISPLAY 五页诊断 UI 与菜单预览行（保留 OBSTACLE 面板/MANUAL/SETTINGS/语音/按键），
-   复用了综合自动裁剪，加固后仍为 **Logic 13420/23040 (59%)、CLS 8304/11520 (73%)、
-   Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax 58.287 MHz、TNS 0、Setup/Hold 违例 0**。
-   Logic 相对基线减少 4241（-18 个百分点），CLS 减少 1554（-13 个百分点），为后续
-   uart_bridge/任务四等功能留出约 3.2k CLS。
+   删除 DISPLAY 五页诊断 UI、菜单预览行与 ToF 诊断页（保留 OBSTACLE 面板/MANUAL/SETTINGS/
+   语音/按键）。本轮按题目要求恢复 **IMU ATTITUDE 单页**（共用一套顺序小数格式化器，
+   roll/pitch 数学随之回到综合），并增加 MANUAL SPIN 360；最终 post-PnR 为
+   **Logic 15897/23040 (69%)、CLS 9640/11520 (84%)、Register 6736、BSRAM 9/56、
+   DSP 8.5/28、Fmax 54.996 MHz、TNS 0、Setup/Hold 违例 0**。相对原始基线 Logic 减少 1764、
+   CLS 减少 218；相对“无姿态页裁剪版”增加约 2.5k Logic / 1.3k CLS，仍余 1880 CLS 供后续扩展。
+5. **上板 PASS 中途截断修复（第三轮上板日志驱动）**：2026-10-29 20:36 板上 5 次尝试中
+   3 次在 PASS 阶段 BLOCKED（reason 0x04）：障碍侧通道在 PASS 开始后才出现 20 mm 截断，
+   边缘检测失效后车辆一直开到前向阈值。现已在 PASS/SHIFT 中把“运行中途转为截断”也纳入
+   固定里程兜底，并新增故障注入场景 11（`pass_clip_done=1`，53.2 DUT-s 恢复 CRUISE）。
+6. **题目新增功能**：MANUAL 增加 **SPIN 360**（右转动作原地转 360°，动作超时延长到 30 s）；
+   主菜单增加 **IMU ATTITUDE** 页显示 ROLL/PITCH/YAW（±DDD.d°，校准中提示 CALIBRATING）。
+   功能已由 7 套仿真（含 OLED 位图与定量动作）与 12 场景故障注入覆盖。
 
-最终 7 套主工程仿真套件全部通过（`Errors: 0, Warnings: 0`），11 个故障注入场景
-0 故障 0 PAUSED，历史回归全绿。上板复测：板载 Gowin 下载器（FT2CH）已识别、P6-21
-诊断位流已成功 SRAM 烧写一次；机器人电池充电后按第 6 节连续避障 3–5 次复测。
+最终 7 套主工程仿真套件全部通过（`Errors: 0, Warnings: 0`），12 个故障注入场景
+0 故障 0 PAUSED，历史回归全绿。上板记录：20:36 的 5 次尝试中 2 次完整跑完、3 次在 PASS
+阶段 BLOCKED（reason 0x04，根因本轮已定位并修复）；最终位流与 P6-21 诊断位流已重建，
+等待用户按第 6 节重新烧写测试（含 SPIN 360 与 IMU ATTITUDE 页）。
 
 ## 2. 问题复现与根因
 
@@ -197,14 +207,48 @@
 - 至此障碍侧“不可用”的两种来源（量程下限截断、真实过近）走同一条恢复路径，传感器层
   不再猜测几何，避免“读到数据反而把整条路线卡死”。
 
+### 3.7 PASS 中途截断兜底（上板日志驱动）
+
+2026-10-29 20:36 的板测（5 次尝试，2 次完整跑完、3 次失败）把最后一条失败路径暴露出来：
+3 次失败都发生在 `PASS(9)` 状态（`prev=9`、`BLOCKED reason=0x04`、`tof_reused=4`）。原因是
+障碍侧通道在通过 `WAIT_BACK` 时还是健康的，进入 PASS 之后才出现精确 20 mm 截断；此时
+`side_sample` 不再产生事件，边缘检测永远不会触发，路线一直直行到前向阈值（`front_block`）
+后 BLOCKED。
+
+修复（`src/obstacle/obstacle_route.v`）：
+
+- `PASS`：`fallback_pass` 条件扩展为 `(fallback_pass || side_unusable) && pass_traveled>=
+  FALLBACK_PASS_UM`，即 PASS 运行中途侧向转为不可用时也按固定里程结束该段。
+- `SHIFT`：同样扩展为 `(fallback_shift || side_unusable) && shift_traveled>=
+  FALLBACK_SHIFT_UM`，防止横移过程中侧向突然截断导致 `cleared_side` 永不触发。
+- 新增故障注入场景 11 `PASS_CLIP`：先按健康箱面完成到 `WAIT_BACK`，进入 PASS 后再把 RIGHT
+  钳到 20 mm；修复后 `pass_reached=1`、`pass_clip_done=1`（53.2 DUT-s 恢复 CRUISE），
+  且 0 故障 0 PAUSED。
+
+### 3.8 题目新增功能：SPIN 360 与 IMU ATTITUDE 页
+
+题目要求“定点旋转（右转动作转 360°）放进运动控制菜单”“IMU 姿态显示在菜单里”，本轮实现：
+
+- **SPIN 360**：`system_menu` 的 MANUAL 组增加第 6 项（item=5，command=0x14）；
+  `system_dispatch` 的 `menu_move` 范围扩到 0x14；`system_motion` 把 action=0x14 解释为
+  `rotate=1, reverse=1`（右转），目标角改为 `360000` mdeg，动作超时从 10 s 延长到 30 s。
+  定量动作由 `tb_robot_system` 覆盖（实测 yaw 变化 −360084 mdeg，轮里程 ±760 mm 量级）。
+- **IMU ATTITUDE 页**：主菜单增加第 4 项（item=3 → group_id=6）；`system_pages` 恢复
+  ROLL/PITCH/YAW 显示，共用一套 `attitude_angle_to_digits_pipeline` 顺序小数格式化器
+  （roll/pitch/yaw 轮流转换，1 个二进制→BCD 网络），校准中显示 `CALIBRATING`，K0 返回。
+  恢复该页后 `imu_attitude_fixed` 的 roll/pitch 输出重新被消费，atan/sqrt/divider 数学回到
+  综合（这是本轮资源占用回升到 69% / CLS 84% 的主要原因，属题目要求）。
+- OLED 位图套件 `tb_system_oled` 已覆盖 4 项根菜单、MANUAL SPIN 360 行与 IMU ATTITUDE
+  的 ROLL/PITCH/YAW 行、符号/小数格式与 CALIBRATING 提示。
+
 ## 4. 验证
 
 ### 4.1 主工程 7 套仿真（最终源码）
 
 | 套件 | 覆盖 | 结果 |
 |---|---|---|
-| system | 菜单/按键/4 项定量动作/停止仲裁/ToF 正常+NACK+超时+恢复/IMU/反馈/超时/停稳/溢出故障/复位 | PASS |
-| system_oled | 根菜单 3 项（无预览行）、MANUAL/SETTINGS/避障面板整屏位图与时序 | PASS |
+| system | 菜单/按键/5 项定量动作（含 SPIN 360）/停止仲裁/ToF 正常+NACK+超时+恢复/IMU/反馈/超时/停稳/溢出故障/复位 | PASS |
+| system_oled | 根菜单 4 项（含 IMU ATTITUDE）、MANUAL（含 SPIN 360）/SETTINGS/避障面板/姿态页整屏位图与时序 | PASS |
 | system_50mhz | 真实 50 MHz、115200、1 MHz SPI、10 ms 测速、20 kHz PWM、菜单启用语音与 STOP | PASS |
 | system_dispatch | 播报门控、过期/重置确认、各路线阶段接管、无路暂停、优先级、缓冲取消不补发 | PASS |
 | live_speed | 实时升降速、斜坡步长、限速优先/解除、目标与里程不重置、暂停不运动 | PASS |
@@ -217,9 +261,9 @@
   非法跳变被容忍、连续 5 次才锁存、合法计数可衰减、清零/复位正确；历史默认参数仍立即锁存。
 - `tools/run_legacy_regression.ps1` 的 IMU/OLED/测速预取/编码器毛刺/地面/闭环/双轮/右轮/
   motion/tb6612 历史回归全部 PASS（`records/robustness_20261029/legacy_regression_encoder.log`）。
-- `tools/run_fault_injection.ps1` 在最终源码上 11/11 场景 0 次故障锁存、0 次 PAUSED
-  （`records/robustness_20261029/fault_injection_clip_fallback.log`；第一轮 10 场景证据见
-  `fault_injection_encoder.log`）。
+- `tools/run_fault_injection.ps1` 在最终源码上 **12/12** 场景 0 次故障锁存、0 次 PAUSED
+  （`records/robustness_20261029/fault_injection_features.log`；场景 10 全程截断兜底、
+  场景 11 PASS 中途截断兜底；第一轮 10 场景证据见 `fault_injection_encoder.log`）。
 
 日志：`records/robustness_20261029/*_minimal.log`、`records/obstacle_20261025/system*.log`；
 全部以 `Errors: 0, Warnings: 0` 结束。
@@ -256,16 +300,16 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 ### 4.3 构建与时序（最终）
 
 - 综合+PnR：`build.tcl` 与保存工程 `verify_project.tcl` 均成功，0 error。
-- 本轮（截断容错 + 近距就绪）post-PnR：Logic **13420/23040 (59%)**、Register 5690、CLS
-  **8304/11520 (73%)**、BSRAM 9/56、DSP 6.5/28。
-- Fmax **58.287 MHz**（目标 50 MHz，+16.6% 余量），Setup/Hold 违例 0，TNS 0/0。
+- 本轮（题目功能 + PASS 兜底）post-PnR：Logic **15897/23040 (69%)**、Register 6736、CLS
+  **9640/11520 (84%)**、BSRAM 9/56、DSP 8.5/28。
+- Fmax **54.996 MHz**（目标 50 MHz，+10% 余量），Setup/Hold 违例 0，TNS 0/0。
 - 44 个受约束管脚、电气属性、10 个开漏输出、CPU/SSPI 复用、单实例检查保持
   （`tools/check_system_reports.ps1` PASS，见
-  `records/robustness_20261029/report_check_clip_fallback_saved.log`）。
+  `records/robustness_20261029/report_check_features_final.log`）。
 - 交付位流：`impl/pnr/Embodied_RPACS.fs`（`verify_project.tcl` 构建）
-  - 大小 6,443,740 字节
-  - SHA256 `B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`
-  - （同一份源码的 `build.tcl` 构建 SHA `D0C703045014A30335D126C3B93BDDEB82611D57D310428A2F0012E40F5D8585`）
+  - 大小 6,443,652 字节
+  - SHA256 `C1AF9B0729B4CE9FFB957A22CD34A0F4CEDBCDD7D73CC7C52674DB477EB709AE`
+  - （同一份源码的 `build.tcl` 构建 SHA `E115E3C0E02D9C59640655CD2F8B4EE4985693D05A4EF2DD1F7E7CE617BFD192`）
 
 ### 4.4 上板验证（2026-10-29）
 
@@ -282,11 +326,15 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   “P11-2 才是专用 GND”）；该地线形成地环路/地跳动时，VL53L0X 会更容易进入量程下限截断。
   **建议把 IMU GND 改接 P11-2 或 P6-12/P6-30 专用地，三路 ToF 与被测地星形一点接地，
   不要经过 T11/LCD_GPIO0**；固件侧本轮已做截断容错与固定里程兜底作为双保险。
-- 交付位流已更新为截断容错+近距就绪版（SHA256 `B90071E6…`，见 4.3）。
+- 20:36 复测（保留串口日志的诊断固件）：5 次尝试中 2 次完整跑完、3 次在 PASS 阶段
+  `BLOCKED reason=0x04`；根因是障碍侧通道在 PASS 开始后才截断、边缘检测失效（见 3.7）。
+  本轮已修复 PASS/SHIFT 中途截断兜底并新增场景 11；交付位流已重建（SHA256 `C1AF9B07…`）。
+- 交付位流已更新为题目功能 + PASS 兜底版（SHA256 `C1AF9B07…`，见 4.3）。
 - 2026-10-29 18:10 板测进展：板载 Gowin 下载器（FT2CH）已被识别（`--scan` 找到
   GW5A-25A，ID 0x0001281B），已成功 SRAM 烧写 P6-21 诊断位流
-  `tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`（SHA256 `EC3ACEFF…`，
-  Logic 13420/59%、CLS 8284/72%），WCH-Link（单 USB 棒，COM24）按 RX→P6-21、
+  `tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`（当时代码的 SHA256 `EC3ACEFF…`，
+  Logic 13420/59%、CLS 8284/72%；该诊断位流已在本轮功能更新后重建为 `B3A02502…`），
+  WCH-Link（单 USB 棒，COM24）按 RX→P6-21、
   GND→P6-12 接好；随后用户确认机器人电池没电、板子断电，串口采集与 3–5 次连续避障
   复测待充电后继续（步骤见 4.4 上文与第 6 节）。
 
@@ -299,15 +347,17 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | 2 B | 转向后 20 mm 永久 | 无故障、无暂停；route_state=6 继续绕行（第一轮此处 4 s 后 BLOCKED/PAUSED） |
 | 7 G_NEAR | 转向后 RIGHT 有效 60 mm（≤ AVOID_MM） | 无故障、无暂停；**near_shift=1**：近距不再被判未就绪，经固定里程兜底进入 SHIFT（route_state=6） |
 | 10 K_CLIP_FALLBACK（新增） | 转向后 RIGHT 持续 20 mm，贯穿整个绕行 | 无故障、无暂停；**reached_shift=1、fallback_done=1**：固定里程兜底完成全程并恢复 CRUISE（58.4 DUT-s，route_state=2、auto_run=1） |
+| 11 PASS_CLIP（新增） | 健康箱面到 WAIT_BACK，进入 PASS 后 RIGHT 转 20 mm | 无故障、无暂停；**pass_reached=1、pass_clip_done=1**：按固定里程结束 PASS 并恢复 CRUISE（53.2 DUT-s） |
 | 其余 6 场景 | NACK/IMU/编码器/第二 barrier/负向对照 | 均无故障、无暂停 |
 | 7 套主工程仿真 | 全量 | PASS（Errors 0、Warnings 0） |
 | 历史回归 | IMU/OLED/测速/电机/motion 等 | PASS |
 
-一键回归：`./tools/run_fault_injection.ps1`（11 场景）。除 `fault_seen=0`/`fault_latched=0`
+一键回归：`./tools/run_fault_injection.ps1`（12 场景）。除 `fault_seen=0`/`fault_latched=0`
 外，本轮还断言 `paused=0`、`blocked_seen=0`（PAUSED 是用户可见的失败，即使没有故障锁存），
-场景 10 额外断言 `reached_shift=1`/`fallback_done=1`，场景 7 额外断言 `near_shift=1`。
-日志：`records/fault_injection/fixed_clip_fallback/`、
-`records/robustness_20261029/fault_injection_clip_fallback.log`。
+场景 10 额外断言 `reached_shift=1`/`fallback_done=1`，场景 11 断言 `pass_reached=1`/
+`pass_clip_done=1`，场景 7 额外断言 `near_shift=1`。日志：
+`records/fault_injection/fixed_final_regression/`、
+`records/robustness_20261029/fault_injection_features.log`。
 
 ## 5. 资源优化
 
@@ -324,9 +374,10 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 
 依据 `PROJECT_PLAN.md`（§8 实时避障、§13 验证标准）与用户确认“用最少资源满足演示要求”：
 
-保留：三路 ToF、IMU yaw、编码器/测速/PI/PWM、避障状态机、模式仲裁、OLED 避障面板、
-按键 K0/K1/K2、SETTINGS（语音开关+三档速度）、MANUAL 定量动作、ASR 语音、USB 事件日志。
-删除：DISPLAY 5 个诊断页、菜单下一项预览行、ToF 诊断页格式化链路、主菜单 4→3 项。
+保留：三路 ToF、IMU 姿态（roll/pitch/yaw）、编码器/测速/PI/PWM、避障状态机、模式仲裁、
+OLED 避障面板、按键 K0/K1/K2、SETTINGS（语音开关+三档速度）、MANUAL 五项动作（含 SPIN 360）、
+IMU ATTITUDE 页、ASR 语音、USB 事件日志（验收后按用户确认删除）。
+删除：DISPLAY 其余 4 个诊断页、菜单下一项预览行、ToF 诊断页格式化链路。
 
 ### 5.3 最终资源对比（post-PnR 实测）
 
@@ -342,11 +393,11 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | Fmax | 53.020 MHz | **64.469 MHz** | **+11.45 MHz（+29% 余量）** |
 | Setup/Hold 违例 / TNS | 0 / 0 | 0 / 0 | 保持 |
 
-本轮（截断容错 + 近距就绪）改动后（`verify_project.tcl` 构建）：Logic **13420/23040 (59%)**、
-CLS **8304/11520 (73%)**、Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **58.287 MHz**、
-SHA256 `B90071E6…`。相对资源优化版（13322 Logic / 8293 CLS）只增加 98 Logic / 11 CLS
-（截断确认 + 兜底状态机 + 近距就绪判定，同时删掉了 XSHUT 自愈与 `tof_three`），
-CLS 余量仍有 3216，仍在“最小演示配置”预算内。
+本轮（题目功能 + PASS 兜底）改动后（`verify_project.tcl` 构建）：Logic **15897/23040 (69%)**、
+CLS **9640/11520 (84%)**、Register 6736、BSRAM 9/56、DSP 8.5/28、Fmax **54.996 MHz**、
+SHA256 `C1AF9B07…`。相对上上版（13420/8304）增加 2477 Logic / 1336 CLS，主要来自题目要求的
+IMU 姿态页（roll/pitch 数学、姿态格式化器）与 SPIN 360/菜单项；CLS 余量 1880，仍可容纳
+`tests/uart_bridge`（881 CLS）等中小扩展，但后续大功能需先评估 CLS。
 
 主要节省来源（综合报告逐模块）：`attitude` 2593→773 LUT（roll/pitch 自动裁剪）、
 `pages` 2422→740 LUT（诊断页删除）、`tof_page` 595→0（移出综合）、DSP 8.5→6.5；
@@ -399,8 +450,8 @@ CLS 余量仍有 3216，仍在“最小演示配置”预算内。
 逻辑与主固件相同，只把调试串口 TX 从 V8 挪到 **P6-21（GPIO18，FPGA 球 L12；已按底板
 原理图第 5 页核对 P6-21 网络为 GPIO18）**，WCH-Link RX 接 P6-21、GND 接 P6-12/P6-30
 即可采集；位流 `tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`
-（SHA256 `EC3ACEFF698DAB306DA2F04CD8CB6085D1EB61BD6BE4EBE7E26621531B196EDC`，
-Logic 13420/59%、CLS 8284/72%）。注意：板载 FT2CH 的 COM15 是下载器第二通道，未接
+（SHA256 `B3A0250255FEBFF622F11A247530F3AE51D6D640F937527BB6D69A7FC3146C6A`，
+Logic 15897/69%、CLS 9640/84%、Fmax 54.996 MHz）。注意：板载 FT2CH 的 COM15 是下载器第二通道，未接
 FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type-C 数据线）或 P6-21。
 详见 `OBSTACLE_BOARD_TEST.md` 末尾“远程串口采集（WCH-LinkW 无线串口）”。
 
@@ -417,12 +468,12 @@ FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type
 - **接地是当前最大的硬件风险**：IMU 地线经 P11-3/LCD_GPIO0/T11 形成地环路时，VL53L0X
   截断概率显著升高（用户实测“地线掉开反而稳”）。建议按 4.4 节改为专用 GND 星形一点接地，
   再复测 3–5 次连续避障。
-- 删除 DISPLAY 诊断页后无法在 OLED 上查看 System Status/IMU 姿态/编码器页面；
-  故障诊断改由避障面板 F/S/M/I 码 + USB 事件日志承担。若需要恢复页面，可从 git 历史恢复
-  并在有资源余量（现有 3.2k CLS）时重新加入。
-- Fmax 从 53.02 提升到 **58.287 MHz**（+16.6% 余量；资源裁剪版曾达 64.469 MHz，
-  截断容错/兜底与近距就绪逻辑加入后回落），后续若继续加逻辑仍需每次跑
-  `check_system_reports.ps1` 确认 0 违例和 TNS 0。
+- 题目要求的 IMU ATTITUDE 页已恢复；System Status/ToF/编码器/语音运动等其余诊断页仍删
+  除以控制资源。故障诊断由避障面板 F/S/M/I 码 + USB 事件日志承担；其余页可从 git 历史恢复。
+- Fmax **54.996 MHz**（+10% 余量）：恢复 IMU 姿态页后逻辑/布线压力回升，但仍有安全余量；
+  后续若继续加逻辑必须每次跑 `check_system_reports.ps1` 确认 0 违例和 TNS 0。
+- CLS 已用到 **84%**（余 1880）：本轮为满足题目功能恢复姿态页所致，后续扩展优先加在
+  Logic/BSRAM/FF 上，或先按 Step 4 删除 USB 事件日志（预研实测 −107 CLS）+ 评估裁剪。
 - 事件日志（审计估算 ~0.42k LUT + 2 BSRAM，预研变体实测删除后 −56 Logic、−107 CLS、−193 FF、
   BSRAM 9→5）本轮保留用于上板取证。**用户 2026-10-29 已确认**：上板
   3–5 次连续避障验收通过后删除 `system_event_logger`，并同时移除 `uart_tx`/`uart_rx` 端口与
@@ -456,7 +507,7 @@ FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type
 | `592c66e` | 20 mm 截断容错（连续 2 次确认→新鲜测距事件）+ 固定里程兜底绕行 + 删除无效 XSHUT 自愈/`tof_three`；11 场景回归断言无故障且无 PAUSED |
 | `e08b523` | 全流程兜底验证（场景 10 fallback_done=1）+ WCH-Link 无线采集与 P6-21 板测文档 + 板测脚本增强 |
 | `ff056e4` / `a63b771` / `c804b4a` / `a828702` | P6-21 无线串口诊断位流工程；验收矩阵；PAUSED 路由/用户暂停分类；文档补充 |
-| 本提交 | **近距就绪掩码删除**（`valid` 只表示通道存活+新鲜，`side_unusable = clip \|\| side_mm<=AVOID_MM` 统一兜底；删除 `front_near_mm`/`NEAR_MM`）；场景 7 断言 `near_shift=1` 与 TB fixed 文案；P6-21 位流重建 **13420/59%、CLS 8284/72%**（SHA `EC3ACEFF…`）；上板进展与报告定稿（主位流 **13420/59%、CLS 8304/73%、Fmax 58.287 MHz**、SHA `B90071E6…`） |
+| 本提交 | **题目功能 + PASS 中途截断兜底**：MANUAL 增加 SPIN 360（右转 360°、30 s 超时）、主菜单/`system_pages` 恢复 IMU ATTITUDE 页；PASS/SHIFT 中途截断按固定里程兜底并新增场景 11（12/12 无故障无 PAUSED）；7 套仿真（含 OLED 位图与 SPIN 360 定量动作）与历史回归全绿；重建主位流 **15897/69%、CLS 9640/84%、Fmax 54.996 MHz**（SHA `C1AF9B07…`）与 P6-21 诊断位流 **B3A02502…** |
 
 复现命令：
 
@@ -467,7 +518,7 @@ FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type
 # 历史回归（已同步全绿）
 ./tools/run_legacy_regression.ps1
 
-# 转向后故障注入回归：11 场景，断言 0 次故障锁存、0 次 PAUSED，场景 10 断言进入兜底
+# 转向后故障注入回归：12 场景，断言 0 次故障锁存、0 次 PAUSED，场景 10/11 分别断言全程/中途截断兜底
 ./tools/run_fault_injection.ps1
 
 # 故障注入基线（用户旧版本）与修复后单场景对照
