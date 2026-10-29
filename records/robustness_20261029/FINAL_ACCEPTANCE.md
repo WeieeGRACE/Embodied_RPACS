@@ -82,3 +82,20 @@ CLS 仍余 3216，可合入 `tests/uart_bridge`（881 CLS）或任务四扩展�
    （或 `-AnalyzeOnly -Capture <log>` 离线复检）。
 3. 若仍 PAUSED：记录面板第三行 `PAUSED R:xx Sxx Vx Ux` 与串口日志，按 K2 继续。
 4. 通过后：按第 4 节确认是否删除事件日志，再出最终资源数字与定稿报告。
+
+## 8. 一键验收审计
+
+`python tools/audit_final.py` 从仓库根目录交叉核对全部交付物（当前 **86 项检查 0 失败**，
+日志 `records/robustness_20261029/final_audit.log`）：
+
+- 主位流 `impl/pnr/Embodied_RPACS.fs` 存在、大小 6,443,740、SHA256 `B90071E6…2A10`；
+  P6-21 诊断位流 SHA256 `EC3ACEFF…`；
+- post-PnR 报告 Logic 13420/23040、CLS 8304/11520、Register 5690、BSRAM 9/56、DSP 6.5/28、
+  Fmax 58.287 MHz；P6 变体 Logic 13420、CLS 8284、`uart_tx` 在 L12；
+- 11 个故障注入日志均为 `fault_seen=0/fault_latched=0/paused=0/blocked_seen=0`，
+  且无 `EVIDENCE FAULT_T0`；场景 7 `near_shift=1`、场景 10 `reached_shift=1/fallback_done=1`；
+- 回归汇总 “11 scenarios” 与 7 套仿真 `PASS all seven`/`Errors: 0, Warnings: 0`；
+- README/技术报告/板测清单/验收表的关键数字与 SHA 一致，无上一轮资源数字/位流哈希残留
+  （脚本内置黑名单检查）；
+- `release/Embodied_RPACS_main_20261029_clipfix/SHA256SUMS.txt` 与实际位流一致；
+- git 工作区（受版本控制文件）干净。
