@@ -99,16 +99,17 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
 
 ## 9. 一键验收审计
 
-`python tools/audit_final.py` 从仓库根目录交叉核对全部交付物（当前 **86 项检查 0 失败**，
-日志 `records/robustness_20261029/final_audit.log`）：
+`python tools/audit_final.py` 从仓库根目录交叉核对全部交付物（当前 **91 项检查 0 失败**，
+日志 `records/robustness_20261029/final_audit_features.log`）：
 
 - 主位流 `impl/pnr/Embodied_RPACS.fs` 存在、大小 6,443,652、SHA256 `C1AF9B0729B4CE9FFB957A22CD34A0F4CEDBCDD7D73CC7C52674DB477EB709AE`；
   P6-21 诊断位流 SHA256 `B3A0250255FEBFF622F11A247530F3AE51D6D640F937527BB6D69A7FC3146C6A`；
 - post-PnR 报告 Logic 15897/23040、CLS 9640/11520、Register 6736、BSRAM 9/56、DSP 8.5/28、
   Fmax 54.996 MHz；P6 变体 Logic 15897、CLS 9640、`uart_tx` 在 L12；
-- 11 个故障注入日志均为 `fault_seen=0/fault_latched=0/paused=0/blocked_seen=0`，
-  且无 `EVIDENCE FAULT_T0`；场景 7 `near_shift=1`、场景 10 `reached_shift=1/fallback_done=1`；
-- 回归汇总 “11 scenarios” 与 7 套仿真 `PASS all seven`/`Errors: 0, Warnings: 0`；
+- 12 个故障注入日志均为 `fault_seen=0/fault_latched=0/paused=0/blocked_seen=0`，
+  且无 `EVIDENCE FAULT_T0`；场景 7 `near_shift=1`、场景 10 `reached_shift=1/fallback_done=1`、
+  场景 11 `pass_reached=1/pass_clip_done=1`；
+- 回归汇总 “12 scenarios” 与 7 套仿真 `PASS all seven`/`Errors: 0, Warnings: 0`；
 - README/技术报告/板测清单/验收表的关键数字与 SHA 一致，无上一轮资源数字/位流哈希残留
   （脚本内置黑名单检查）；
 - `release/Embodied_RPACS_main_20261029_clipfix/SHA256SUMS.txt` 与实际位流一致；
