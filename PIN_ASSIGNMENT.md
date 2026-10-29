@@ -49,7 +49,8 @@ ToF SCL/SDA/XSHUT 均只驱动 0 或释放，无内部上下拉；GPIO1 仅作�
 > **调试串口与事件日志计划（2026-10-29 用户确认）**：上板 3–5 次连续避障验收期间仍保留
 > `system_event_logger` 与 V8/U8 调试串口；验收通过后删除事件日志，并**同步移除 `uart_tx`/`uart_rx`
 > 顶层端口与 `src/robot_system_top.cst` 中的 V8/U8 约束，释放这两个 FPGA 球**；
-> `tools/check_system_reports.ps1` 的受约束引脚期望由 44 调整为 42（以脚本实际统计为准）。
+> `tools/check_system_reports.ps1` 的受约束引脚期望由 44 调整为 42（预研变体已确认 IOB 104→102，
+> 即释放 V8/U8 两个球；资源实测 Logic 13364/58%、CLS 8197/72%、BSRAM 9→5、Fmax 61.113 MHz）。
 > 届时本表“UART 调试”相关行改为“已释放（历史）”，并同步更新 `PROJECT_PLAN.md` §16.4 与
 > `records/resource_20261029/MINIMAL_PLAN.md` Step 4。
 

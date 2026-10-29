@@ -151,7 +151,8 @@
 - 避障面板故障行改为直接显示四组十六进制码：`F:xx S:xx M:xx I:xx`（route reason /
   ToF 故障字 / motion fault code / imu error），例如 `F:84 S:00 M:05 I:00`。
   并在 `system_pages` 增加 `route_reason` 输入、`system_motion` 增加 `route_reason` 输出。
-- 事件串口日志保留（本轮上板验证依赖；如后续确认不需要可再省 ~0.42k LUT + 2 BSRAM）。
+- 事件串口日志保留（本轮上板验证依赖；验收通过后按用户确认删除，预研实测节省 56 Logic /
+  107 CLS / 193 FF / 4 BSRAM，并释放 V8/U8 两个引脚，见 §7）。
 - 故障码/行为说明更新到 `OBSTACLE_BOARD_TEST.md`。
 
 ### 3.5 复杂度简化与 UI 裁剪（资源优化内容见第 5 节）
@@ -422,11 +423,14 @@ FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type
 - Fmax 从 53.02 提升到 **58.287 MHz**（+16.6% 余量；资源裁剪版曾达 64.469 MHz，
   截断容错/兜底与近距就绪逻辑加入后回落），后续若继续加逻辑仍需每次跑
   `check_system_reports.ps1` 确认 0 违例和 TNS 0。
-- 事件日志（~0.42k LUT + 2 BSRAM）本轮保留用于上板取证。**用户 2026-10-29 已确认**：上板
+- 事件日志（审计估算 ~0.42k LUT + 2 BSRAM，预研变体实测删除后 −56 Logic、−107 CLS、−193 FF、
+  BSRAM 9→5）本轮保留用于上板取证。**用户 2026-10-29 已确认**：上板
   3–5 次连续避障验收通过后删除 `system_event_logger`，并同时移除 `uart_tx`/`uart_rx` 端口与
-  `.cst` 的 V8/U8 约束（释放两个 FPGA 球），`check_system_reports.ps1` 引脚期望 44→42，
-  重建后 Logic 约 12.9k（56%）、CLS 约 7.9k（69%）；同步更新 `PROJECT_PLAN.md` §16.4、
-  `PIN_ASSIGNMENT.md` 与 `records/resource_20261029/MINIMAL_PLAN.md`。验收前不改动。
+  `.cst` 的 V8/U8 约束（释放两个 FPGA 球），`check_system_reports.ps1` 引脚期望 44→42。
+  预研变体实测：Logic 13364/23040 (58%)、CLS 8197/11520 (72%)、Register 5497、BSRAM 9→5、
+  Fmax 61.113 MHz（即 Logic −56、CLS −107、FF −193、BSRAM −4；原 0.42k 估算偏高）；
+  同步更新 `PROJECT_PLAN.md` §16.4、`PIN_ASSIGNMENT.md` 与 `records/resource_20261029/MINIMAL_PLAN.md`。
+  验收前不改动。
 - 回退方法：本轮所有改动按提交拆分（基线→故障修复→资源优化→报告→编码器容错），
   可逐提交 `git revert`；位流与证据均在提交中。
 - **历史回归已同步为全绿**：`tools/run_legacy_regression.ps1` 中两个独立单测此前落后于流水线

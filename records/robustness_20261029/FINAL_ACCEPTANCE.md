@@ -46,7 +46,8 @@ CLS 仍余 3216，可合入 `tests/uart_bridge`（881 CLS）或任务四扩展�
   - USB 事件日志 `system_event_logger`：约 0.42k LUT + 2 BSRAM。**2026-10-29 用户确认：**
     上板 3–5 次连续避障验收期间保留（串口 `D`/`E` 行是验收证据）；**验收通过后删除**，
     同时移除 `uart_tx`/`uart_rx` 端口与 `.cst` V8/U8 约束（释放两个 FPGA 球）、
-    `check_system_reports.ps1` 引脚期望 44→42，重建后 Logic≈56%、CLS≈69%；并同步更新
+    `check_system_reports.ps1` 引脚期望 44→42，预研变体实测 Logic 13364 (58%)、CLS 8197 (72%)、
+    BSRAM 9→5（Logic −56 / CLS −107 / FF −193）；并同步更新
     `PROJECT_PLAN.md` 第 16.4 节、`PIN_ASSIGNMENT.md` 与 `records/resource_20261029/MINIMAL_PLAN.md`。
   - 故障面板 `F:xx S:xx M:xx I:xx`/PAUSED `R/S/V/U` 诊断字段：少量 LUT，建议保留到验收结束。
 - 结论：无其它未使用的用户功能可删；主工程已无 DISPLAY/MOTOR TEST 等历史诊断入口。

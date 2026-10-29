@@ -20,7 +20,7 @@
 | 估算收益 | **−2.7～−3.6k Logic**（其中 **849 LUT 为实测锚点**：`tof_page` 595 + `attitude_angle_to_digits` 254；其余为估算）→ Logic ≈ **14.1–15.0k（61–65%）**，CLS ≈ **7.9–8.4k（68–73%）**，FF ≈ **6.15–6.4k**。 |
 | 时序 | 当前关键路径（roll 陀螺积分 wrap 链）会被一并裁掉；预计 Fmax **53–58 MHz（估算，需实测）**，不要指望必然提升。 |
 | IMU 做法推荐 | **不要先改 `imu_attitude_fixed.v`**：删页后 roll/pitch 不再被消费，综合会级联裁剪其 atan/sqrt/divider 数据通路与 roll/pitch 组合逻辑（预计 −1.0～−1.4k）。仅当实测裁剪不足时，才用 **参数裁剪（`YAW_ONLY` 参数 + generate）**；**不推荐**改端口删单元。 |
-| MANUAL / 预览行 / 日志 | 预览行：**删**（~−0.2～0.3k，纯 UI 提示）。MANUAL：**保留**（收益仅 ~0.08–0.15k，但演示定位、任务 2 基础要求与 `tb_robot_system` 4 条手动动作测试都依赖它）。USB 日志：**本轮保留**（上板验收证据依赖），验收通过后可再删（~−0.42–0.45k + 4 个 SDPB）。 |
+| MANUAL / 预览行 / 日志 | 预览行：**删**（~−0.2～0.3k，纯 UI 提示）。MANUAL：**保留**（收益仅 ~0.08–0.15k，但演示定位、任务 2 基础要求与 `tb_robot_system` 4 条手动动作测试都依赖它）。USB 日志：**本轮保留**（上板验收证据依赖），验收通过后删（预研实测 −56 Logic/−107 CLS/−193 FF，BSRAM 9→5、释放 V8/U8）。 |
 | 落地后余量 | CLS 余量从 1662 提升到约 **3.1–3.6k**；届时合入 `tests/uart_bridge` 完整链路（881 CLS）约到 77–81% CLS，属于可接受范围。 |
 
 ---
@@ -148,7 +148,8 @@
 
 - `src/robot_system_top.v`：删 `system_event_logger` 实例（L86-89）与 `debug_state/debug_valid/event_errors` 连线；按用户确认采用**删端口+约束**方案：删 `uart_tx`/`uart_rx` 顶层端口、`src/robot_system_top.cst` 的 `IO_LOC "uart_tx" V8` 与 `IO_LOC "uart_rx" U8`、`tools/check_system_reports.ps1` 的引脚期望（44→42）。
 - `src/asr/system_motion.v`：删 `debug_state/debug_valid/event_errors` 端口与组装（L128-131、L286-289）。
-- 收益：**−0.42～0.45k Logic、−198 FF、BSRAM 9→5（删掉 4 个 SDPB）**。
+- 收益（预研变体实测）：**−56 Logic（13420→13364）、−107 CLS（8304→8197）、−193 FF、BSRAM 9→5、
+  Fmax 58.287→61.113 MHz**；原“−0.42～0.45k LUT”估算偏高，实际主要节省是 4 个 BSRAM、FF 与布线压力。
 - **执行时机（2026-10-29 用户确认）**：上板 3–5 次连续避障验收通过后执行。README 的板级验收与
   `records/obstacle_20261025/board_smoke_final.log` 依赖 USB 心跳/事件行，验收前删会失去串口取证能力。
   执行时采用“删端口+约束”方案：移除 `uart_tx`/`uart_rx` 顶层端口与 `src/robot_system_top.cst`
@@ -237,7 +238,7 @@
 
 | 步骤 | 内容 | 额外收益（估算） | 之后 Logic | 之后 CLS | BSRAM |
 | --- | --- | --- | --- | --- | --- |
-| Step 4 | 删 USB 事件日志 | −0.42～0.45k Logic、−198 FF | ≈13.7–14.6k（59–63%） | ≈7.6–8.1k（66–70%） | 9→5 |
+| Step 4 | 删 USB 事件日志 | 实测 −56 Logic、−107 CLS、−193 FF、BSRAM −4 | 13364（58%） | 8197（72%） | 9→5 |
 | Step 5（不建议） | 删 MANUAL 组 | −0.08～0.15k | ≈13.6–14.5k | ≈7.5–8.0k | 5 |
 
 > 若后续还要合入 `tests/uart_bridge` 完整链路（实测 1174 Logic / 881 CLS）：Minimal-A 后 CLS 约 8.0–8.4k + 881 ≈ **8.9–9.3k（77–81%）**，空间充足；而**当前基线（86%）直接合会到 93%**，故“先裁剪、后合入”的顺序不可颠倒。
