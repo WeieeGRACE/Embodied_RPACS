@@ -63,3 +63,35 @@
 | 一个轮子不转/反向 | 该电机接线；AIN/BIN 极性；驱动板供电 |
 | 速度抖/异响 | 电机电源电压不足；PWM 20 kHz 干扰；机械卡滞 |
 | 链路频繁断 | 网线/水晶头；心跳 300 ms 偏紧 → 改 20 Hz 心跳或重编 `HB_TIMEOUT_MS=500` |
+
+---
+
+## F. 驾驶助手（已部署到 Pi：`~/eth_drive.py`）
+
+明天不用手写 SET_VEL 循环，直接用这个（20 Hz 命令 + 斜坡 + 自动安全停车）：
+
+```bash
+# 轮子离地：前进 150 mm/s 3 秒（0.5 s 斜坡）
+python3 ~/eth_drive.py --left 150 --right 150 --seconds 3
+
+# 后退
+python3 ~/eth_drive.py --left -150 --right -150 --seconds 3
+
+# 原地转（左退右进）
+python3 ~/eth_drive.py --left -120 --right 120 --seconds 2
+
+# 落地低速直线 60 s
+python3 ~/eth_drive.py --left 100 --right 100 --seconds 60
+
+# 只停车 / 只清故障
+python3 ~/eth_drive.py --stop
+python3 ~/eth_drive.py --clear
+```
+
+内置安全：
+- 任何 `SET_VEL` 被拒 / 无 ACK / 故障位非 0（CMD_TIMEOUT 除外）→ **立即 STOP 并退出**（退出码 2）；
+- 松开 Ctrl-C 会自动 STOP；
+- 速度超过 300 mm/s 直接拒绝执行；
+- 结束自动 STOP + CLEAR_FAULT（不会把车留在停车锁存状态）。
+
+今晚已在无电机位流上验证过完整流程：建链 → 斜坡 11 步 → 巡航 2 s → 减速 → STOP(OK) → 完成。

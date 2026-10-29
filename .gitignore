@@ -355,3 +355,7 @@
 /tests/eth_motion_test/transcript
 /tests/eth_motion_test/modelsim.ini
 /tests/eth_link_protocol/sim/work_dbg/
+
+!/tests/eth_motion_test/tools/
+/tests/eth_motion_test/tools/*
+!/tests/eth_motion_test/tools/*.py
