@@ -42,7 +42,7 @@ try {
         $line = if ($observed.Count) { $observed[$observed.Count - 1].Value } else { '' }
         $clean = $code -eq 0 -and $line -match 'fault_seen=0' -and $line -match 'fault_latched=0' -and
             $line -match 'paused=0' -and $line -match 'blocked_seen=0'
-        if ($scenario -eq 10) { $clean = $clean -and $line -match 'reached_shift=1' }
+        if ($scenario -eq 10) { $clean = $clean -and $line -match 'reached_shift=1' -and $line -match 'fallback_done=1' }
         if ($clean) { Write-Host "  PASS $line" } else {
             Write-Host "  FAIL exit=$code $line"
             $failures += "scenario $scenario ($name): exit=$code"

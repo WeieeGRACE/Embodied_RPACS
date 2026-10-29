@@ -26,7 +26,7 @@ ACG525 / GW5A-LV25UG324C2/I1，50 MHz，Gowin 1.9.12。主工程、构建与仿�
    Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **59.226 MHz**、Setup/Hold 违例 0、TNS 0。
 4. **验证**：7 套主工程仿真全部 PASS、历史回归全绿、11 个转向后故障注入场景
    （0 次故障锁存、0 次 PAUSED）。位流：`impl/pnr/Embodied_RPACS.fs`，
-   SHA256 `B69DD9A04C3BCB6F06ED60B8311C14892A8FE185E804A341D0828F4423EA1B2C`。
+   SHA256 `2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362`。
    配套语音固件 `asrpro/release/yaoyao_asrpro_2m_20261025_obstacle/fw.bin` 本轮未改动。
    上板实测记录见 `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`；截断容错版等待
    重新烧写后连续避障 3–5 次复测（步骤见技术报告第 6 节）。

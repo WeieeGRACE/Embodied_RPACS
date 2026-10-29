@@ -7,9 +7,9 @@
 - 资源优化提交：见文末“提交记录”（本报告与最终构建一并提交）
 - 最终位流：`impl/pnr/Embodied_RPACS.fs`（保存工程 `verify_project.tcl` 构建）
   - 大小 6,443,292 字节
-  - SHA256 `B69DD9A04C3BCB6F06ED60B8311C14892A8FE185E804A341D0828F4423EA1B2C`
+  - SHA256 `2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362`
   - （同一份源码的 `build.tcl` 构建为 Logic 13521/59%、Fmax 59.226 MHz、SHA
-    `FD52B20A3DF82C32B2C0481C47605A586DEA5A4EF58E6DDAFB7DDDC43E390C2C`，两者均通过验收检查）
+    `FF002301C4DEFF7A59F8E58059ABAC1BC45A0BAB6279B11753CB7E086C8ECE84`，两者均通过验收检查）
 - 证据目录：`records/robustness_20261029/`、`records/fault_injection/`、`records/resource_20261029/`
 
 ## 1. 摘要
@@ -253,8 +253,8 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   `records/robustness_20261029/report_check_clip_fallback_saved.log`）。
 - 交付位流：`impl/pnr/Embodied_RPACS.fs`（`verify_project.tcl` 构建）
   - 大小 6,443,292 字节
-  - SHA256 `B69DD9A04C3BCB6F06ED60B8311C14892A8FE185E804A341D0828F4423EA1B2C`
-  - （同一份源码的 `build.tcl` 构建 SHA `FD52B20A3DF82C32B2C0481C47605A586DEA5A4EF58E6DDAFB7DDDC43E390C2C`）
+  - SHA256 `2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362`
+  - （同一份源码的 `build.tcl` 构建 SHA `FF002301C4DEFF7A59F8E58059ABAC1BC45A0BAB6279B11753CB7E086C8ECE84`）
 
 ### 4.4 上板验证（2026-10-29）
 
@@ -271,7 +271,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   “P11-2 才是专用 GND”）；该地线形成地环路/地跳动时，VL53L0X 会更容易进入量程下限截断。
   **建议把 IMU GND 改接 P11-2 或 P6-12/P6-30 专用地，三路 ToF 与被测地星形一点接地，
   不要经过 T11/LCD_GPIO0**；固件侧本轮已做截断容错与固定里程兜底作为双保险。
-- 交付位流已更新为截断容错版（SHA256 `B69DD9A0…`，见 4.3），等待用户重新烧写后复测
+- 交付位流已更新为截断容错版（SHA256 `2E4FBB05…`，见 4.3），等待用户重新烧写后复测
   3–5 次连续避障。
 
 ### 4.5 截断容错回归（本轮新增）
@@ -281,7 +281,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | 0 A_FRONT | 转向后 FRONT 精确 20 mm 保持 1.2 s | 无故障、无暂停；`clip_confirm=1`，`tof_resets=0`，barrier 通过并进入 SHIFT（route_state=6） |
 | 1 A_SIDE | 转向后 RIGHT 精确 20 mm 保持 1.2 s | 无故障、无暂停；`clip_confirm=1`，经固定里程兜底进入 SHIFT_EXTRA（route_state=22） |
 | 2 B | 转向后 20 mm 永久 | 无故障、无暂停；route_state=6 继续绕行（第一轮此处 4 s 后 BLOCKED/PAUSED） |
-| 10 K_CLIP_FALLBACK（新增） | 转向后 RIGHT 持续 20 mm | 无故障、无暂停；**reached_shift=1**，确认走固定里程兜底 |
+| 10 K_CLIP_FALLBACK（新增） | 转向后 RIGHT 持续 20 mm，贯穿整个绕行 | 无故障、无暂停；**reached_shift=1、fallback_done=1**：固定里程兜底完成全程并恢复 CRUISE（58.4 DUT-s，route_state=2、auto_run=1） |
 | 其余 7 场景 | NACK/IMU/编码器/近距/第二 barrier/负向对照 | 均无故障、无暂停 |
 | 7 套主工程仿真 | 全量 | PASS（Errors 0、Warnings 0） |
 | 历史回归 | IMU/OLED/测速/电机/motion 等 | PASS |
@@ -312,7 +312,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 
 ### 5.3 最终资源对比（post-PnR 实测）
 
-| 资源 | 基线 `0bd1a77` | 最终 `2CD51D8E…` | 变化 |
+| 资源 | 基线 `0bd1a77` | 上一轮最终 `2CD51D8E…` | 变化 |
 |---|---|---|---|
 | Logic | 17661/23040 (77%) | **13322/23040 (58%)** | **-4339 (-19pp)** |
 | — LUT | 14866 | 11062 | -3804 |
@@ -326,7 +326,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 
 本轮截断容错改动后（`verify_project.tcl` 构建）：Logic **13521/23040 (59%)**、
 CLS **8318/11520 (73%)**、Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **59.226 MHz**、
-SHA256 `B69DD9A0…`。相对上一版增加 199 Logic / 25 CLS（截断确认与兜底状态机），
+SHA256 `2E4FBB05…`。相对上一版增加 199 Logic / 25 CLS（截断确认与兜底状态机），
 CLS 余量仍有 3202，仍在“最小演示配置”预算内。
 
 主要节省来源（综合报告逐模块）：`attitude` 2593→773 LUT（roll/pitch 自动裁剪）、
@@ -366,6 +366,14 @@ CLS 余量仍有 3202，仍在“最小演示配置”预算内。
      `I`=IMU 错误码。
 8. 将串口日志与测试结论回填到 `records/robustness_20261029/board_*.log` 与本报告第 4.4 节。
 
+远程串口采集（可选）：车跑动时不方便拖 USB 线，可用 WCH-LinkW 的“无线串口调试助手”：
+车端只接 WCH-Link **RX ← FPGA UART TX（V8）** 与 **GND**（目标板自带电源时不要接 3V3），
+与电脑端接收器配对后在设备管理器出现 `WCH-Link SERIAL (COMxx)`（本机为 COM24），
+用 `./tools/read_serial_log.ps1 -Port COM24 -Seconds 300 -Timestamped -OutFile ...` 或
+`./tools/board_obstacle_test.ps1 -Port COM24 -Seconds 300` 只读采集，两端固定 115200。
+注意手册要求“调试功能和串口助手不能同时使用”；FPGA 烧写仍走 Gowin USB Cable。
+详见 `OBSTACLE_BOARD_TEST.md` 末尾“远程串口采集（WCH-LinkW 无线串口）”。
+
 ## 7. 风险、限制与后续
 
 - 仿真模型不能替代真实光学/机械/电源特性：20 mm 量程下限截断已改为“确认后作为新鲜
@@ -404,7 +412,7 @@ CLS 余量仍有 3202，仍在“最小演示配置”预算内。
 | `2bf8584` | 两个落后历史 TB 同步（测速预取时序、motion 新端口/abort 语义）+ `tools/board_obstacle_test.ps1`；历史回归全绿 |
 | `39d63f2` | `tools/run_fault_injection.ps1`（10 场景一键回归）+ 回归证据 + README/报告补充 |
 | `69d2c89` / `99a3e2f` | 编码器毛刺容错；串口新增 route_reason/tof_reused、PAUSED 面板显示 R/S/V/U；上板运行证据（1 次 PAUSED@WAIT_PARALLEL + 2 次完整绕障） |
-| 本提交 | 20 mm 截断容错（连续 2 次确认→新鲜测距事件）+ 固定里程兜底绕行 + 删除无效 XSHUT 自愈/`tof_three`；11 场景回归断言无故障且无 PAUSED；重建 **13521/59%、CLS 73%、Fmax 59.226 MHz**、SHA `B69DD9A0…` |
+| 本提交 | 20 mm 截断容错（连续 2 次确认→新鲜测距事件）+ 固定里程兜底绕行 + 删除无效 XSHUT 自愈/`tof_three`；11 场景回归断言无故障且无 PAUSED；重建 **13521/59%、CLS 73%、Fmax 59.226 MHz**、SHA `2E4FBB05…` |
 
 复现命令：
 

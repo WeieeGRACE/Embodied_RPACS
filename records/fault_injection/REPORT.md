@@ -575,11 +575,15 @@ eached_shift=1。
 | 0 A_FRONT（FRONT 20 mm 1.2 s） | fault=0、paused=0、clip_confirm=1、tof_resets=0、route_state=6 |
 | 1 A_SIDE（RIGHT 20 mm 1.2 s） | fault=0、paused=0、clip_confirm=1、route_state=22（经兜底进入 SHIFT_EXTRA） |
 | 2 B（20 mm 永久） | fault=0、paused=0、route_state=6（旧版此处 4 s 后 BLOCKED/PAUSED） |
-| 10 K_CLIP_FALLBACK（RIGHT 持续 20 mm） | fault=0、paused=0、**reached_shift=1** |
+| 10 K_CLIP_FALLBACK（RIGHT 持续 20 mm，贯穿整个绕行） | fault=0、paused=0、reached_shift=1、**fallback_done=1**：固定里程兜底完成全程后恢复 CRUISE（route_state=2、auto_run=1、58.4 DUT-s） |
 | 其余 7 场景 | fault=0、paused=0 |
 
+场景 10 在整段绕行期间把障碍侧通道一直钳在 20 mm：SHIFT 与 PASS 都由固定里程兜底接管，
+最终 barrier 仍能放行并恢复 CRUISE（`fallback_done=1`，58.4 DUT-s）——这是“侧向永久截断
+也能完整跑完演示”的仿真证据。
+
 7 套主工程仿真与历史回归同步重跑通过；新位流 SHA256
-B69DD9A04C3BCB6F06ED60B8311C14892A8FE185E804A341D0828F4423EA1B2C
+2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362
 （Logic 13521/59%、CLS 8318/73%、Fmax 59.226 MHz、0 违例）。
 证据：
 ecords/fault_injection/fixed_clip_fallback/*.log、

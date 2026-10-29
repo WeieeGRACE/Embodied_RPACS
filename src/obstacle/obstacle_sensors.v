@@ -8,7 +8,7 @@
 // Exact CLIP_MM (the VL53L0X minimum-range clamp) is never used as a geometry
 // value, but two consecutive clips prove the channel still finishes
 // measurements. They are therefore treated as a fresh post-turn shot for the
-// route barrier and reported on `clip_mask`/`reused`, so a noisy channel cannot
+// route barrier and reported on `reused`, so a noisy channel cannot
 // stall a 90-degree detour forever.
 module obstacle_sensors #(
  parameter integer CLK_HZ=50000000,I2C_HZ=100000,RESET_CYCLES=CLK_HZ/1000,

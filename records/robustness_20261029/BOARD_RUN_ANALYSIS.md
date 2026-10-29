@@ -53,7 +53,7 @@ ecords/fault_injection/REPORT.md §9）：
   持续 20 mm 时路线直接改走固定里程兜底，不再 4 s 后 PAUSED；删除上板证明无效的
   XSHUT 重初始化。
 - 新位流：impl/pnr/Embodied_RPACS.fs，SHA256
-  B69DD9A04C3BCB6F06ED60B8311C14892A8FE185E804A341D0828F4423EA1B2C
+  2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362
   （Logic 13521/59%、CLS 8318/73%、Fmax 59.226 MHz、0 违例）。
   仿真：11 个故障注入场景 0 故障 0 PAUSED（场景 10 断言进入兜底）、7 套主工程仿真 PASS。
   待用户接上 Gowin USB 线与调试串口后烧写 SRAM，连续跑 3–5 次避障复测。

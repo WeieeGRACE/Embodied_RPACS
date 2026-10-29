@@ -87,3 +87,25 @@ K0为当前页面返回/停止键，避障中直接退出；主菜单再按K0才
 
 记录每项通过/失败、三路距离、档位、路线方向及故障码。实际20cm/90°精度、制动余量、反光/黑色物体测距、扬声器回声及真实语音打断需要本轮上板确认。
 本地仿真的传感器及电机是数字模型，不能替代这些实测。
+
+## 远程串口采集（WCH-LinkW 无线串口）
+
+如果演示时不想让电脑 USB 线拖在车上，可用 WCH-LinkW 的“无线串口调试助手”模式把
+FPGA 调试串口无线转回电脑：
+
+1. **接法（车端 WCH-LinkW）**：只接三根线——WCH-Link 的 **RX** ← FPGA 调试串口
+   **V8（UART TX，115200 8N1，3.3 V）**、**GND ↔ GND**；目标板自带电源时**不要接 3V3/5V**
+   （手册警告电源冲突）。WCH-Link 的 RX/TX 不做波特率检测，必须两端一致设为 115200。
+2. **配对**：车端 WCH-LinkW 上电，与电脑端无线接收器配对成功（指示灯常亮/成功提示）；
+   推荐距离 ≤10 m，远离路由器/微波炉等 2.4 GHz 干扰源。
+3. **电脑端**：设备管理器出现 `WCH-Link SERIAL (COMxx)`（本机当前为 COM24）。用只读方式采集：
+   ```powershell
+   ./tools/read_serial_log.ps1 -Port COM24 -Seconds 300 -Timestamped `
+       -OutFile records/robustness_20261029/board_wchlink_run.log
+   # 或一键烧写+采集+自动判定（已有串口时加 -Port COM24）：
+   ./tools/board_obstacle_test.ps1 -Port COM24 -Seconds 300
+   ```
+4. **注意**：手册注明“调试功能和串口助手不能同时使用”——跑演示/采日志时不要再让
+   WCH-Link 做调试/下载；烧写 FPGA 仍用 Gowin USB Cable（WCH-Link 不能烧 Gowin 器件）。
+   无线链路可能丢少量字节，日志按整行解析（`tools/decode_debug_log.ps1` 可解码 `D` 行）；
+   若出现乱码先确认波特率与共地。
