@@ -92,7 +92,7 @@ module robot_system_top #(
  obstacle_sensors #(.CLK_HZ(CLK_HZ),.I2C_HZ(TOF_I2C_HZ),.RESET_CYCLES(TOF_RESET_CYCLES),
  .BOOT_CYCLES(TOF_BOOT_CYCLES),.POLL_CYCLES(TOF_POLL_CYCLES),.MAX_POLLS(TOF_MAX_POLLS),
  .TIMEOUT_CYCLES(TOF_TIMEOUT_CYCLES)) sensors(
- .clk(clk_50m),.rst_n(rst_n),.refresh(sensor_refresh),.monitor_enable(sensor_monitor),.front_near_mm(16'd85),
+ .clk(clk_50m),.rst_n(rst_n),.refresh(sensor_refresh),.monitor_enable(sensor_monitor),
  .gpio1({tof_right_gpio1,tof_left_gpio1,tof_front_gpio1}),
  .scl({tof_right_scl,tof_left_scl,tof_front_scl}),.sda({tof_right_sda,tof_left_sda,tof_front_sda}),
  .xshut_n({tof_right_xshut_n,tof_left_xshut_n,tof_front_xshut_n}),

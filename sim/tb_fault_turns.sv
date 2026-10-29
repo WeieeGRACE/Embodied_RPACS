@@ -15,8 +15,9 @@
 //   4 D       : IMU health-error burst (model_error=1) 150 ms during rotation
 //   5 E       : encoder-count injection during post-turn WAIT_STILL, 1.2 s
 //   6 CTRL    : negative control, exact 20 mm on FRONT for only 100 ms
-//   7 G_NEAR  : valid 60 mm on RIGHT side ToF right after the turn
-//               (non-20 <=85 mm near-distance latch)
+//   7 G_NEAR  : valid 60 mm on RIGHT side ToF right after the turn (baseline
+//               latches faults[4]; fixed RTL keeps it valid and takes the
+//               fixed-mileage fallback because 60 mm <= AVOID_MM)
 //   8 H_TURN2 : exact 20 mm on LEFT ToF right after the SECOND turn (7->13)
 //   9 I_HOLD  : exact 20 mm on FRONT ToF, comm normal, held 2 s after the turn
 //               (hold20 reuses the old value but post_turn never goes fresh)
@@ -64,6 +65,7 @@ module tb_fault_turns;
  integer mark_cyc=0;            // cycle of the last injection marker
  integer reach_shift=0;         // scenario K: fallback detour entered
  integer fallback_done=0;       // scenario K: detour completed back to CRUISE
+ integer near_shift=0;          // scenario G_NEAR: near-side fallback entered
  reg mark_valid=0;
 
  // first-fault snapshot (filled by the monitor below)
@@ -762,12 +764,32 @@ module tb_fault_turns;
    SC_G_NEAR:begin
     wait_turn_done(ok_turn);
     if(ok_turn)inject_near(2,16'd60,500);
+    // Fixed RTL: a real 60 mm obstacle-side reading cannot seed the box profile,
+    // so the route must take the fixed-mileage backstop instead of looping in
+    // SAMPLE_SHIFT until the barrier retries turn into PAUSED.
+    if(fixed_mode)begin
+     wait_route(6,4000*DUT_MS,w_ok);
+     if(!w_ok)wait_route(21,2000*DUT_MS,w_ok);
+     if(!w_ok)wait_route(22,2000*DUT_MS,w_ok);
+     near_shift=w_ok;
+    end
     print_snapshot();print_motor_off();
-    check_ok=(f_cyc>=0)&&(f_sfault==1)&&(f_ch2[4]==1)&&(dut.control.fault_latched==1);
-    if(check_ok)
-     $display("PASS scenario G_NEAR: valid 60 mm (non-20 <=85 mm) on RIGHT side ToF after turn -> sensor_fault latched via faults[4] (ch2 faults=%02h) at +%0d ms",f_ch2,(f_cyc-mark_cyc)/DUT_MS);
-    else
-     $display("FAIL scenario G_NEAR: expected faults[4] near-distance latch, observed sensor_fault=%b ch2_faults=%02h latch=%b",f_sfault,f_ch2,dut.control.fault_latched);
+    if(fixed_mode)begin
+     // Fixed RTL: a real 60 mm reading is trustworthy data (readiness no longer
+     // masks anything <=85 mm); it is closer than AVOID_MM, so the route must
+     // open the fixed-mileage backstop instead of waiting for a face profile.
+     check_ok=(near_shift==1)&&(dut.control.fault==0)&&(f_cyc<0);
+     if(check_ok)
+      $display("PASS scenario G_NEAR: valid 60 mm (non-20 <=85 mm) on RIGHT side ToF after turn -> no fault, fixed-mileage SHIFT entered (route_state=%0d)",dut.route_state);
+     else
+      $display("FAIL scenario G_NEAR(fixed): expected no fault and fallback SHIFT, observed near_shift=%0d fault=%b route_state=%0d",near_shift,dut.control.fault,dut.route_state);
+    end else begin
+     check_ok=(f_cyc>=0)&&(f_sfault==1)&&(f_ch2[4]==1)&&(dut.control.fault_latched==1);
+     if(check_ok)
+      $display("PASS scenario G_NEAR: valid 60 mm (non-20 <=85 mm) on RIGHT side ToF after turn -> sensor_fault latched via faults[4] (ch2 faults=%02h) at +%0d ms",f_ch2,(f_cyc-mark_cyc)/DUT_MS);
+     else
+      $display("FAIL scenario G_NEAR: expected faults[4] near-distance latch, observed sensor_fault=%b ch2_faults=%02h latch=%b",f_sfault,f_ch2,dut.control.fault_latched);
+    end
    end
    SC_H_TURN2:begin
     drive_to_second_turn(ok_done);
@@ -819,6 +841,13 @@ module tb_fault_turns;
     print_snapshot();
     $display("EVIDENCE CLIP_FALLBACK reached_shift=%0d fallback_done=%0d fixed=%0d route_state=%0d paused=%b blocked_seen=%b dut_ms=%0d",
      reach_shift,fallback_done,fixed_mode,dut.route_state,pause_seen,blocked_seen,cyc/DUT_MS);
+    if(fixed_mode)begin
+     check_ok=(reach_shift==1)&&(fallback_done==1)&&(pause_seen==0)&&(blocked_seen==0)&&(dut.control.fault==0);
+     if(check_ok)
+      $display("PASS scenario K_CLIP_FALLBACK(fixed): permanent obstacle-side 20 mm clip -> fixed-mileage detour completed and CRUISE resumed (route_state=%0d)",dut.route_state);
+     else
+      $display("FAIL scenario K_CLIP_FALLBACK(fixed): reached_shift=%0d fallback_done=%0d paused=%b blocked=%b fault=%b",reach_shift,fallback_done,pause_seen,blocked_seen,dut.control.fault);
+    end
     check_ok=(!fixed_mode)&&(f_cyc>=0)&&(f_rfault==1)&&(f_reason==8'h84)&&(f_bits==15'h0000)&&(f_sfault==0);
     if(check_ok)
      $display("PASS scenario K: baseline latched 0x84 on a permanent side clip after turn");
@@ -832,7 +861,7 @@ module tb_fault_turns;
    // Observation-only run of the fixed RTL: allow the route to continue or the
    // fault to self-clear, then publish the authoritative fixed-version result.
    cycles(300*DUT_MS);
-   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d clip_confirm=%0d/%0d/%0d driver_recover=%0d/%0d/%0d paused=%b blocked_seen=%b reached_shift=%0d fallback_done=%0d dut_ms=%0d",
+   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d clip_confirm=%0d/%0d/%0d driver_recover=%0d/%0d/%0d paused=%b blocked_seen=%b reached_shift=%0d fallback_done=%0d near_shift=%0d dut_ms=%0d",
     scenario,(f_cyc>=0),dut.control.fault_latched,(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS,dut.route_state,
     dut.control.auto_run,dut.avoid_mode,dut.control.sensor_fault,dut.sensors.fault_bits,
     dut.sensors.channels[0].faults,dut.sensors.channels[1].faults,dut.sensors.channels[2].faults,
@@ -843,7 +872,7 @@ module tb_fault_turns;
     dut.post_turn,dut.distances[15:0],dut.distances[31:16],dut.distances[47:32],
     resets[0],resets[1],resets[2],shots[0],shots[1],shots[2],
     req_cnt0,req_cnt1,req_cnt2,rec_cnt0,rec_cnt1,rec_cnt2,
-    pause_seen,blocked_seen,reach_shift,fallback_done,cyc/DUT_MS);
+    pause_seen,blocked_seen,reach_shift,fallback_done,near_shift,cyc/DUT_MS);
    completed=1;
   end else if(check_ok)begin
    $display("RESULT scenario=%0d PASS fault_seen=%b fault_dt_ms=%0d",scenario,(f_cyc>=0),(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS);

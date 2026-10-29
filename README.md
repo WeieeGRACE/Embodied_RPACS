@@ -12,24 +12,28 @@ ACG525 / GW5A-LV25UG324C2/I1，50 MHz，Gowin 1.9.12。主工程、构建与仿�
    停稳确认超时、有效近距 ≤85 mm 都会永久锁存。修复为分层容错：瞬时异常安全停车并
    自动重试/恢复，持续异常才锁存故障；转向后 barrier 只要求本状态真正使用的通道新鲜；
    编码器换向毛刺采用漏桶容错（历史板级记录过 IL=2/FL=1）。
-2. **20 mm 截断容错（第二轮，上板日志驱动）**：真实板 3 次避障中 1 次在 `WAIT_PARALLEL`
+2. **20 mm 截断容错 + 近距就绪（第二、三轮，上板日志驱动）**：真实板 3 次避障中 1 次在 `WAIT_PARALLEL`
    卡 4 s 后 PAUSED，串口证明障碍侧 VL53L0X 持续返回精确 20 mm（量程下限截断/测距失效），
    而旧策略把它永远丢弃 → 永远等不到“转向后新鲜样本”。现改为：连续 2 次 20 mm 视为
    “测距完成但目标过近/不可测”，作为 barrier 的新鲜事件放行（仍不参与几何距离），并让
    路线改走**固定里程兜底**（横移 500 + 额外 300 + 直行 600 + 额外 300 mm + 回线）；
    删除上板证明无效的“连续 4 次 20 mm 就 XSHUT 重初始化”。11 个故障注入场景现在同时断言
-   `fault=0` 且 `paused=0`，其中新场景 10 断言进入兜底（`reached_shift=1`）。
+   `fault=0` 且 `paused=0`，其中场景 10 断言进入兜底（`reached_shift=1`）、场景 7 断言
+   近距兜底（`near_shift=1`）。第三轮又删除了 `valid` 里“距离必须 >85 mm”的就绪掩码：
+   真实近距不再被判未就绪（否则整条路线 `ready=0`、运动指令被拦后 PAUSED），近距与
+   20 mm 截断统一走固定里程兜底。
 3. **资源优化**：主菜单裁剪为 3 项（MANUAL / SETTINGS / OBSTACLE AVOID），删除 DISPLAY
    五页诊断 UI、菜单预览行与 ToF 诊断页；删除后 roll/pitch 无消费者，综合自动裁掉
-   atan/sqrt/divider 数据通路（yaw 与 90° 转向不受影响）。post-PnR（截断容错版）：
-   **Logic 13521/23040（59%）**（原 17661/77%）、**CLS 8318/11520（73%）**（原 86%）、
-   Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **59.226 MHz**、Setup/Hold 违例 0、TNS 0。
+   atan/sqrt/divider 数据通路（yaw 与 90° 转向不受影响）。post-PnR（最终版）：
+   **Logic 13420/23040（59%）**（原 17661/77%）、**CLS 8304/11520（73%）**（原 86%）、
+   Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **58.287 MHz**、Setup/Hold 违例 0、TNS 0。
 4. **验证**：7 套主工程仿真全部 PASS、历史回归全绿、11 个转向后故障注入场景
    （0 次故障锁存、0 次 PAUSED）。位流：`impl/pnr/Embodied_RPACS.fs`，
-   SHA256 `2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362`。
+   SHA256 `B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`。
    配套语音固件 `asrpro/release/yaoyao_asrpro_2m_20261025_obstacle/fw.bin` 本轮未改动。
-   上板实测记录见 `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`；截断容错版等待
-   重新烧写后连续避障 3–5 次复测（步骤见技术报告第 6 节）。
+   上板实测记录见 `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`；最终位流已重建，
+   板载 Gowin 下载器（FT2CH）已识别、P6-21 诊断位流已成功 SRAM 烧写，待机器人电池充电后
+   连续避障 3–5 次复测（步骤见技术报告第 6 节）。
 
 > 硬件提示：真实板上“IMU 地线掉开时避障反而稳定、插回又 PAUSED”指向地环路——本工程机械
 > 接线把 IMU 地接在 P11-3/LCD_GPIO0/T11（T11 是 FPGA 信号脚，`P11-2` 才是专用 GND）。

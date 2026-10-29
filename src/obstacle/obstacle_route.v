@@ -64,6 +64,9 @@ module obstacle_route #(
  wire shift_limit=shifted_l>=PASS_LIMIT_UM || shifted_r>=PASS_LIMIT_UM;
  wire [2:0] clip_lane=left_side ? 2:1;
  wire side_clip=clip_mask[clip_lane];
+ // A genuine reading inside the minimum usable face distance cannot seed the
+ // box profile either; use the same fixed-mileage backstop.
+ wire side_unusable=side_clip || (side_mm<=AVOID_MM);
  wire signed [31:0] shift_traveled=((position_l-shift_l)>>>1)+((position_r-shift_r)>>>1);
  wire signed [31:0] pass_traveled=((position_l-pass_l)>>>1)+((position_r-pass_r)>>>1);
  wire stable_side={1'b0,side_mm}+STABLE_MM>={1'b0,box_distance} &&
@@ -167,8 +170,9 @@ module obstacle_route #(
  end
  WAIT_PARALLEL:if(!refresh && barrier_fresh)begin
  if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
- else if(side_clip)begin
- // The obstacle-side lane only reports the minimum-range clamp, so there is no
+ else if(side_unusable)begin
+ // The obstacle-side lane has no usable face distance (min-range clamp or a
+ // real reading closer than the usable face distance), so there is no
  // usable face distance to learn. Keep the obstacle distance conservative and
  // open the detour on fixed mileage instead of waiting for the barrier forever.
  box_distance<=AVOID_MM;fallback_shift<=1;shift_l<=position_l;shift_r<=position_r;
@@ -179,7 +183,7 @@ module obstacle_route #(
  // Learn the obstacle face while stationary. Only accepted new samples from
  // the near-box lane count; no event is manufactured for discarded20.
  SAMPLE_SHIFT:if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
- else if(side_clip)begin
+ else if(side_unusable)begin
  box_distance<=AVOID_MM;fallback_shift<=1;shift_l<=position_l;shift_r<=position_r;advance(SHIFT);
  end
  else if(side_sample)begin
@@ -216,7 +220,7 @@ module obstacle_route #(
  WAIT_BACK:if(!refresh && barrier_fresh)begin
  if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
  else begin pass_l<=position_l;pass_r<=position_r;box_seen<=0;stable_count<=0;clear_count<=0;
- if(side_clip)begin box_distance<=AVOID_MM;fallback_pass<=1;pass_clear_seen<=1;end
+ if(side_unusable)begin box_distance<=AVOID_MM;fallback_pass<=1;pass_clear_seen<=1;end
  else begin fallback_pass<=0;pass_clear_seen<=side_mm>=EDGE_MM;end
  advance(PASS);end
  end

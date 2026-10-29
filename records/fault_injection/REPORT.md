@@ -583,8 +583,8 @@ eached_shift=1。
 也能完整跑完演示”的仿真证据。
 
 7 套主工程仿真与历史回归同步重跑通过；新位流 SHA256
-2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362
-（Logic 13521/59%、CLS 8318/73%、Fmax 59.226 MHz、0 违例）。
+B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10
+（Logic 13420/59%、CLS 8304/73%、Fmax 58.287 MHz、0 违例）。
 证据：
 ecords/fault_injection/fixed_clip_fallback/*.log、
 
@@ -596,3 +596,36 @@ ecords/robustness_20261029/fault_injection_clip_fallback.log。
 物理现象（用户还观察到底线地环路会影响截断频率），因此本轮同时给出接地整改建议
 （IMU/ToF 使用专用 GND 星形一点接地，不经 T11/LCD_GPIO0）。截断容错版位流需上板
 连续避障 3–5 次复测确认。
+
+### 9.5 第三轮补充：近距就绪掩码删除与统一兜底（最终源码）
+
+第一轮删除“有效近距 ≤85 mm → `faults[4]` 锁存”时，`obstacle_sensors.valid` 里仍保留了
+“距离必须 > 85 mm”的就绪掩码。它是另一条独立的失败路径：转向后障碍侧若读到真实近距
+（例如 60 mm），该通道被判未就绪，而路线 `ready = modules_ready && &tof_seen && &tof_valid`，
+于是所有运动指令被拦，持续约 1 s 后 PAUSED（与 20 mm 截断的表现相同、根因不同）。
+
+最终源码改为：
+
+- `obstacle_sensors.v`：`valid[g] = good && (age<STALE_MS || confirmed) && comm_age<STALE_MS`，
+  只表示“通道存活且数据新鲜”；近距是可信几何，交给路线层比较。删除 `front_near_mm`
+  输入与 `NEAR_MM/SIDE_NEAR_MM` 参数。
+- `obstacle_route.v`：`side_unusable = side_clip || (side_mm <= AVOID_MM)`；
+  `WAIT_PARALLEL` / `SAMPLE_SHIFT` / `WAIT_BACK` 三处都用它触发同一固定里程兜底
+  （横移 500 / 额外 300 / 直行 600 / 额外 300 mm + 按实际横移回线）。
+- `sim/tb_fault_turns.sv` 场景 7（G_NEAR，转向后 RIGHT 有效 60 mm）：fixed 模式改为断言
+  `near_shift=1` 且 0 故障 0 PAUSED（旧 baseline 断言 `faults[4]` 锁存，保留在 baseline 分支）；
+  场景 10 增加 fixed 模式 PASS 文案。
+- `tools/run_fault_injection.ps1`：场景 7 增加 `near_shift=1` 断言。
+
+结果（最终源码，`records/fault_injection/fixed_clip_fallback/`）：
+
+| 场景 | 结果 |
+|---|---|
+| 7 G_NEAR（RIGHT 60 mm，≤AVOID_MM） | 无故障、无暂停，`near_shift=1`，route_state=6（固定里程 SHIFT） |
+| 10 K_CLIP_FALLBACK（RIGHT 持续 20 mm） | 无故障、无暂停，`reached_shift=1`、`fallback_done=1`，58.4 DUT-s 后恢复 CRUISE |
+| 其余 9 场景 | 无故障、无暂停 |
+
+11/11 场景 0 故障锁存、0 PAUSED；7 套主工程仿真 `Errors: 0, Warnings: 0`。
+最终位流 `impl/pnr/Embodied_RPACS.fs` SHA256
+`B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`
+（Logic 13420/59%、CLS 8304/73%、Fmax 58.287 MHz、0 违例）。

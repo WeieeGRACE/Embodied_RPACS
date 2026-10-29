@@ -52,7 +52,7 @@
 | 25 | 回归MANUAL、SETTINGS、OBSTACLE AVOID菜单与手动20cm/90° | 页面显示、动作与停止行为正常（DISPLAY诊断组与MOTOR TEST已按要求删除） | 待测 |
 | 26 | 自主状态模拟测距/IMU持续故障（≥2 s） | 停车锁存，未复位前禁止运动；主菜单K0复位后重校准 | 待测 |
 | 27 | 转向完成后 ToF 短暂异常/精确20 mm 读数 | 不再出现 FAULT；连续 2 次 20 mm 视为“测距完成但不可用”，barrier 放行后继续；不再做 XSHUT 重初始化 | 待测 |
-| 28 | 转向后侧向有效近距 ≤85 mm | 不锁存传感器故障；由路线停车/绕行或 PAUSED 处理 | 待测 |
+| 28 | 转向后侧向有效近距 ≤85 mm（如 60 mm） | 不锁存传感器故障、也不再判“未就绪”拦死运动；路线按 `side_mm<=AVOID_MM` 走固定里程兜底进入 SHIFT（场景 7 已仿真覆盖 `near_shift=1`） | 待测 |
 | 29 | 转向后侧向持续精确20 mm（截断确认） | 不锁存传感器故障；路线立即改走固定里程兜底（横移 500 mm + 额外 300 mm + 直行 600 mm + 额外 300 mm + 回线），不再停在 WAIT_PARALLEL | 待测 |
 | 30 | 运行中故障（若仍出现） | 面板第一行记录 `F:xx S:xx M:xx I:xx` 四组诊断码，记录后 K0 复位 | 待测 |
 | 31 | 转向后 PAUSED（若仍出现） | 面板第三行 `PAUSED R:xx Sxx Vx Ux`：R=route reason，S=route state，V=有效通道掩码，U=20 mm 截断确认掩码；按 K2 继续并记录该行 | 待测 |
@@ -98,7 +98,9 @@ FPGA 调试串口无线转回电脑：
    （手册警告电源冲突）。WCH-Link 的 RX/TX 不做波特率检测，必须两端一致设为 115200。
 2. **配对**：车端 WCH-LinkW 上电，与电脑端无线接收器配对成功（指示灯常亮/成功提示）；
    推荐距离 ≤10 m，远离路由器/微波炉等 2.4 GHz 干扰源。
-3. **电脑端**：设备管理器出现 `WCH-Link SERIAL (COMxx)`（本机当前为 COM24）。用只读方式采集：
+3. **电脑端**：设备管理器出现 `WCH-Link SERIAL (COMxx)`（本机当前为 COM24）。本机实测为
+   单个 WCH-Link USB 棒（杜邦线有线连接），同样使用该 COM 口；若用 LinkW 无线套装，
+   额外确认收发端配对与供电。用只读方式采集：
    ```powershell
    ./tools/read_serial_log.ps1 -Port COM24 -Seconds 300 -Timestamped `
        -OutFile records/robustness_20261029/board_wchlink_run.log
@@ -109,7 +111,11 @@ FPGA 调试串口无线转回电脑：
    P6/P11 排针未引出）。若不用板载 USB 口，可烧 `tests/p6_uart_debug/` 工程的位流
    `impl/pnr/Embodied_RPACS_p6uart.fs`：逻辑与主固件相同，仅把调试串口 TX 挪到
    **P6-21（GPIO18，FPGA 球 L12）**；接法为 **WCH-Link RX → P6-21**、
-   **GND → P6-12 或 P6-30**，其余接线不变。
+   **GND → P6-12 或 P6-30**，其余接线不变。当前位流 SHA256
+   `EC3ACEFF698DAB306DA2F04CD8CB6085D1EB61BD6BE4EBE7E26621531B196EDC`
+   （Logic 13420/59%、CLS 8284/72%）；P6-21 网络已按底板原理图第 5 页核对（NLGPIO18）。
+   注意：板载 FT2CH 下载器的 COM15 未接 FPGA UART，不能用来抓日志。
+   2026-10-29 18:15 已用板载 Gowin 下载器成功烧写一次（电池耗尽断电，充电后需重烧）。
 5. **注意**：手册注明“调试功能和串口助手不能同时使用”——跑演示/采日志时不要再让
    WCH-Link 做调试/下载；烧写 FPGA 仍用 Gowin USB Cable（WCH-Link 不能烧 Gowin 器件）。
    无线链路可能丢少量字节，日志按整行解析（`tools/decode_debug_log.ps1` 可解码 `D` 行）；

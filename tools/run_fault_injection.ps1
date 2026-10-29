@@ -7,6 +7,8 @@
 # user-visible failure even when no fault latches). Scenario 10 additionally
 # requires reached_shift=1: a permanently clipped obstacle-side lane must open
 # the fixed-mileage fallback detour instead of stalling WAIT_PARALLEL.
+# Scenario 7 (a real 60 mm reading <= AVOID_MM) requires near_shift=1: near
+# readings stay valid and open the same fallback instead of blocking motion.
 #
 # Usage:
 #   ./tools/run_fault_injection.ps1                 # all 11 scenarios
@@ -43,6 +45,7 @@ try {
         $clean = $code -eq 0 -and $line -match 'fault_seen=0' -and $line -match 'fault_latched=0' -and
             $line -match 'paused=0' -and $line -match 'blocked_seen=0'
         if ($scenario -eq 10) { $clean = $clean -and $line -match 'reached_shift=1' -and $line -match 'fallback_done=1' }
+        if ($scenario -eq 7) { $clean = $clean -and $line -match 'near_shift=1' }
         if ($clean) { Write-Host "  PASS $line" } else {
             Write-Host "  FAIL exit=$code $line"
             $failures += "scenario $scenario ($name): exit=$code"

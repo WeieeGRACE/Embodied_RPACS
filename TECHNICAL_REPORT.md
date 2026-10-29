@@ -6,10 +6,10 @@
 - 故障修复提交：`ef37e97`
 - 资源优化提交：见文末“提交记录”（本报告与最终构建一并提交）
 - 最终位流：`impl/pnr/Embodied_RPACS.fs`（保存工程 `verify_project.tcl` 构建）
-  - 大小 6,443,292 字节
-  - SHA256 `2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362`
-  - （同一份源码的 `build.tcl` 构建为 Logic 13521/59%、Fmax 59.226 MHz、SHA
-    `FF002301C4DEFF7A59F8E58059ABAC1BC45A0BAB6279B11753CB7E086C8ECE84`，两者均通过验收检查）
+  - 大小 6,443,740 字节
+  - SHA256 `B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`
+  - （同一份源码的 `build.tcl` 构建为 Logic 13420/59%、Fmax 58.287 MHz、SHA
+    `D0C703045014A30335D126C3B93BDDEB82611D57D310428A2F0012E40F5D8585`，两者均通过验收检查）
 - 证据目录：`records/robustness_20261029/`、`records/fault_injection/`、`records/resource_20261029/`
 
 ## 1. 摘要
@@ -38,14 +38,14 @@
    （综合把整条 OLED 文本链裁掉），不能作为余量依据；真实基线是 **17661/23040 (77%)，
    CLS 9858/11520 (86%)**，真正的瓶颈是 CLS。按用户“用最少资源满足避障演示”的要求，
    删除 DISPLAY 五页诊断 UI 与菜单预览行（保留 OBSTACLE 面板/MANUAL/SETTINGS/语音/按键），
-   复用了综合自动裁剪，第二轮加固后仍为 **Logic 13521/23040 (59%)、CLS 8318/11520 (73%)、
-   Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax 59.226 MHz、TNS 0、Setup/Hold 违例 0**。
-   Logic 相对基线减少 4140（-18 个百分点），CLS 减少 1540（-13 个百分点），为后续
+   复用了综合自动裁剪，加固后仍为 **Logic 13420/23040 (59%)、CLS 8304/11520 (73%)、
+   Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax 58.287 MHz、TNS 0、Setup/Hold 违例 0**。
+   Logic 相对基线减少 4241（-18 个百分点），CLS 减少 1554（-13 个百分点），为后续
    uart_bridge/任务四等功能留出约 3.2k CLS。
 
 最终 7 套主工程仿真套件全部通过（`Errors: 0, Warnings: 0`），11 个故障注入场景
-0 故障 0 PAUSED，历史回归全绿。上板复测（截断容错位流连续避障 3–5 次）待用户接板后
-按第 6 节执行。
+0 故障 0 PAUSED，历史回归全绿。上板复测：板载 Gowin 下载器（FT2CH）已识别、P6-21
+诊断位流已成功 SRAM 烧写一次；机器人电池充电后按第 6 节连续避障 3–5 次复测。
 
 ## 2. 问题复现与根因
 
@@ -186,6 +186,15 @@
   绕行，随后恢复巡航。侧向数据正常时仍走原有“学习箱面/边缘”的精确路线，行为不变。
 - 兜底路径仍然保留前向避障检查（`front_block`）、2 m 行程上限、10 s 动作超时和 K0 急停；
   区别只是“侧向几何不可用”不再导致 4 s 后 PAUSED。
+- **近距读数不再被判“未就绪”**（第三轮）：第一轮删除“有效近距 ≤85 mm → faults[4] 锁存”后，
+  `obstacle_sensors.valid` 里仍保留“距离必须 > 85 mm”的掩码。真实板转向后若障碍侧读到
+  真实近距（如 60 mm），该通道被判未就绪 → 路线 `ready=0` → 所有运动指令被拦，持续
+  1 s 即 PAUSED（这是与 20 mm 截断不同的另一条失败路径）。现改为：`valid` 只表示
+  “通道存活且数据新鲜”，近距就是真实几何，交给路线层比较；路线层把“障碍侧无可用面距”
+  统一为 `side_unusable = clip || side_mm <= AVOID_MM`，与截断共用同一固定里程兜底。
+  场景 7（RIGHT 注入真实 60 mm）断言 `near_shift=1` 且 0 故障 0 PAUSED。
+- 至此障碍侧“不可用”的两种来源（量程下限截断、真实过近）走同一条恢复路径，传感器层
+  不再猜测几何，避免“读到数据反而把整条路线卡死”。
 
 ## 4. 验证
 
@@ -246,16 +255,16 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 ### 4.3 构建与时序（最终）
 
 - 综合+PnR：`build.tcl` 与保存工程 `verify_project.tcl` 均成功，0 error。
-- 本轮（截断容错）post-PnR：Logic **13521/23040 (59%)**、Register 5690、CLS
-  **8318/11520 (73%)**、BSRAM 9/56、DSP 6.5/28。
-- Fmax **59.226 MHz**（目标 50 MHz，+18% 余量），Setup/Hold 违例 0，TNS 0/0。
+- 本轮（截断容错 + 近距就绪）post-PnR：Logic **13420/23040 (59%)**、Register 5690、CLS
+  **8304/11520 (73%)**、BSRAM 9/56、DSP 6.5/28。
+- Fmax **58.287 MHz**（目标 50 MHz，+16.6% 余量），Setup/Hold 违例 0，TNS 0/0。
 - 44 个受约束管脚、电气属性、10 个开漏输出、CPU/SSPI 复用、单实例检查保持
   （`tools/check_system_reports.ps1` PASS，见
   `records/robustness_20261029/report_check_clip_fallback_saved.log`）。
 - 交付位流：`impl/pnr/Embodied_RPACS.fs`（`verify_project.tcl` 构建）
-  - 大小 6,443,292 字节
-  - SHA256 `2E4FBB05692A39F80D12C51E38112A488A7B67C73090480BBA259987FED63362`
-  - （同一份源码的 `build.tcl` 构建 SHA `FF002301C4DEFF7A59F8E58059ABAC1BC45A0BAB6279B11753CB7E086C8ECE84`）
+  - 大小 6,443,740 字节
+  - SHA256 `B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`
+  - （同一份源码的 `build.tcl` 构建 SHA `D0C703045014A30335D126C3B93BDDEB82611D57D310428A2F0012E40F5D8585`）
 
 ### 4.4 上板验证（2026-10-29）
 
@@ -272,8 +281,13 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   “P11-2 才是专用 GND”）；该地线形成地环路/地跳动时，VL53L0X 会更容易进入量程下限截断。
   **建议把 IMU GND 改接 P11-2 或 P6-12/P6-30 专用地，三路 ToF 与被测地星形一点接地，
   不要经过 T11/LCD_GPIO0**；固件侧本轮已做截断容错与固定里程兜底作为双保险。
-- 交付位流已更新为截断容错版（SHA256 `2E4FBB05…`，见 4.3），等待用户重新烧写后复测
-  3–5 次连续避障。
+- 交付位流已更新为截断容错+近距就绪版（SHA256 `B90071E6…`，见 4.3）。
+- 2026-10-29 18:10 板测进展：板载 Gowin 下载器（FT2CH）已被识别（`--scan` 找到
+  GW5A-25A，ID 0x0001281B），已成功 SRAM 烧写 P6-21 诊断位流
+  `tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`（SHA256 `EC3ACEFF…`，
+  Logic 13420/59%、CLS 8284/72%），WCH-Link（单 USB 棒，COM24）按 RX→P6-21、
+  GND→P6-12 接好；随后用户确认机器人电池没电、板子断电，串口采集与 3–5 次连续避障
+  复测待充电后继续（步骤见 4.4 上文与第 6 节）。
 
 ### 4.5 截断容错回归（本轮新增）
 
@@ -282,14 +296,16 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | 0 A_FRONT | 转向后 FRONT 精确 20 mm 保持 1.2 s | 无故障、无暂停；`clip_confirm=1`，`tof_resets=0`，barrier 通过并进入 SHIFT（route_state=6） |
 | 1 A_SIDE | 转向后 RIGHT 精确 20 mm 保持 1.2 s | 无故障、无暂停；`clip_confirm=1`，经固定里程兜底进入 SHIFT_EXTRA（route_state=22） |
 | 2 B | 转向后 20 mm 永久 | 无故障、无暂停；route_state=6 继续绕行（第一轮此处 4 s 后 BLOCKED/PAUSED） |
+| 7 G_NEAR | 转向后 RIGHT 有效 60 mm（≤ AVOID_MM） | 无故障、无暂停；**near_shift=1**：近距不再被判未就绪，经固定里程兜底进入 SHIFT（route_state=6） |
 | 10 K_CLIP_FALLBACK（新增） | 转向后 RIGHT 持续 20 mm，贯穿整个绕行 | 无故障、无暂停；**reached_shift=1、fallback_done=1**：固定里程兜底完成全程并恢复 CRUISE（58.4 DUT-s，route_state=2、auto_run=1） |
-| 其余 7 场景 | NACK/IMU/编码器/近距/第二 barrier/负向对照 | 均无故障、无暂停 |
+| 其余 6 场景 | NACK/IMU/编码器/第二 barrier/负向对照 | 均无故障、无暂停 |
 | 7 套主工程仿真 | 全量 | PASS（Errors 0、Warnings 0） |
 | 历史回归 | IMU/OLED/测速/电机/motion 等 | PASS |
 
 一键回归：`./tools/run_fault_injection.ps1`（11 场景）。除 `fault_seen=0`/`fault_latched=0`
 外，本轮还断言 `paused=0`、`blocked_seen=0`（PAUSED 是用户可见的失败，即使没有故障锁存），
-场景 10 额外断言 `reached_shift=1`。日志：`records/fault_injection/fixed_clip_fallback/`、
+场景 10 额外断言 `reached_shift=1`/`fallback_done=1`，场景 7 额外断言 `near_shift=1`。
+日志：`records/fault_injection/fixed_clip_fallback/`、
 `records/robustness_20261029/fault_injection_clip_fallback.log`。
 
 ## 5. 资源优化
@@ -325,10 +341,11 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | Fmax | 53.020 MHz | **64.469 MHz** | **+11.45 MHz（+29% 余量）** |
 | Setup/Hold 违例 / TNS | 0 / 0 | 0 / 0 | 保持 |
 
-本轮截断容错改动后（`verify_project.tcl` 构建）：Logic **13521/23040 (59%)**、
-CLS **8318/11520 (73%)**、Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **59.226 MHz**、
-SHA256 `2E4FBB05…`。相对上一版增加 199 Logic / 25 CLS（截断确认与兜底状态机），
-CLS 余量仍有 3202，仍在“最小演示配置”预算内。
+本轮（截断容错 + 近距就绪）改动后（`verify_project.tcl` 构建）：Logic **13420/23040 (59%)**、
+CLS **8304/11520 (73%)**、Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **58.287 MHz**、
+SHA256 `B90071E6…`。相对资源优化版（13322 Logic / 8293 CLS）只增加 98 Logic / 11 CLS
+（截断确认 + 兜底状态机 + 近距就绪判定，同时删掉了 XSHUT 自愈与 `tof_three`），
+CLS 余量仍有 3216，仍在“最小演示配置”预算内。
 
 主要节省来源（综合报告逐模块）：`attitude` 2593→773 LUT（roll/pitch 自动裁剪）、
 `pages` 2422→740 LUT（诊断页删除）、`tof_page` 595→0（移出综合）、DSP 8.5→6.5；
@@ -374,9 +391,12 @@ CLS 余量仍有 3202，仍在“最小演示配置”预算内。
 `./tools/board_obstacle_test.ps1 -Port COM24 -Seconds 300` 只读采集，两端固定 115200。
 注意手册要求“调试功能和串口助手不能同时使用”；FPGA 烧写仍走 Gowin USB Cable。
 若连板载 USB 口也不方便使用，本仓库另有 **P6-21 诊断位流工程** `tests/p6_uart_debug/`：
-逻辑与主固件相同，只把调试串口 TX 从 V8 挪到 **P6-21（GPIO18，FPGA 球 L12）**，
-WCH-Link RX 接 P6-21、GND 接 P6-12/P6-30 即可无线采集；位流
-`tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`（SHA256 `AF7FC649…`）。
+逻辑与主固件相同，只把调试串口 TX 从 V8 挪到 **P6-21（GPIO18，FPGA 球 L12；已按底板
+原理图第 5 页核对 P6-21 网络为 GPIO18）**，WCH-Link RX 接 P6-21、GND 接 P6-12/P6-30
+即可采集；位流 `tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`
+（SHA256 `EC3ACEFF698DAB306DA2F04CD8CB6085D1EB61BD6BE4EBE7E26621531B196EDC`，
+Logic 13420/59%、CLS 8284/72%）。注意：板载 FT2CH 的 COM15 是下载器第二通道，未接
+FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type-C 数据线）或 P6-21。
 详见 `OBSTACLE_BOARD_TEST.md` 末尾“远程串口采集（WCH-LinkW 无线串口）”。
 
 ## 7. 风险、限制与后续
@@ -391,7 +411,8 @@ WCH-Link RX 接 P6-21、GND 接 P6-12/P6-30 即可无线采集；位流
 - 删除 DISPLAY 诊断页后无法在 OLED 上查看 System Status/IMU 姿态/编码器页面；
   故障诊断改由避障面板 F/S/M/I 码 + USB 事件日志承担。若需要恢复页面，可从 git 历史恢复
   并在有资源余量（现有 3.2k CLS）时重新加入。
-- Fmax 从 53.02 提升到 **64.469 MHz**（+29% 余量），后续若继续加逻辑仍需每次跑
+- Fmax 从 53.02 提升到 **58.287 MHz**（+16.6% 余量；资源裁剪版曾达 64.469 MHz，
+  截断容错/兜底与近距就绪逻辑加入后回落），后续若继续加逻辑仍需每次跑
   `check_system_reports.ps1` 确认 0 违例和 TNS 0。
 - 事件日志（~0.42k LUT + 2 BSRAM）本轮保留用于上板取证；演示验收通过后可再删，
   把 Logic 降到约 12.9k（56%）、CLS 约 7.9k（69%）。
@@ -417,7 +438,10 @@ WCH-Link RX 接 P6-21、GND 接 P6-12/P6-30 即可无线采集；位流
 | `2bf8584` | 两个落后历史 TB 同步（测速预取时序、motion 新端口/abort 语义）+ `tools/board_obstacle_test.ps1`；历史回归全绿 |
 | `39d63f2` | `tools/run_fault_injection.ps1`（10 场景一键回归）+ 回归证据 + README/报告补充 |
 | `69d2c89` / `99a3e2f` | 编码器毛刺容错；串口新增 route_reason/tof_reused、PAUSED 面板显示 R/S/V/U；上板运行证据（1 次 PAUSED@WAIT_PARALLEL + 2 次完整绕障） |
-| 本提交 | 20 mm 截断容错（连续 2 次确认→新鲜测距事件）+ 固定里程兜底绕行 + 删除无效 XSHUT 自愈/`tof_three`；11 场景回归断言无故障且无 PAUSED；重建 **13521/59%、CLS 73%、Fmax 59.226 MHz**、SHA `2E4FBB05…` |
+| `592c66e` | 20 mm 截断容错（连续 2 次确认→新鲜测距事件）+ 固定里程兜底绕行 + 删除无效 XSHUT 自愈/`tof_three`；11 场景回归断言无故障且无 PAUSED |
+| `e08b523` | 全流程兜底验证（场景 10 fallback_done=1）+ WCH-Link 无线采集与 P6-21 板测文档 + 板测脚本增强 |
+| `ff056e4` / `a63b771` / `c804b4a` / `a828702` | P6-21 无线串口诊断位流工程；验收矩阵；PAUSED 路由/用户暂停分类；文档补充 |
+| 本提交 | **近距就绪掩码删除**（`valid` 只表示通道存活+新鲜，`side_unusable = clip \|\| side_mm<=AVOID_MM` 统一兜底；删除 `front_near_mm`/`NEAR_MM`）；场景 7 断言 `near_shift=1` 与 TB fixed 文案；P6-21 位流重建 **13420/59%、CLS 8284/72%**（SHA `EC3ACEFF…`）；上板进展与报告定稿（主位流 **13420/59%、CLS 8304/73%、Fmax 58.287 MHz**、SHA `B90071E6…`） |
 
 复现命令：
 

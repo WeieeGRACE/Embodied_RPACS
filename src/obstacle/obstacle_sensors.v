@@ -13,10 +13,10 @@
 module obstacle_sensors #(
  parameter integer CLK_HZ=50000000,I2C_HZ=100000,RESET_CYCLES=CLK_HZ/1000,
  BOOT_CYCLES=CLK_HZ/50,POLL_CYCLES=CLK_HZ/100,MAX_POLLS=10,
- TIMEOUT_CYCLES=CLK_HZ/100,STALE_MS=250,NEAR_MM=85,SIDE_NEAR_MM=85,
+ TIMEOUT_CYCLES=CLK_HZ/100,STALE_MS=250,
  CLIP_MM=20,CLIP_CONFIRM=2,
  FAIL_MS=2000,AGE_FAULT_MS=1500,HOLD_MS=120
-)(input wire clk,rst_n,refresh,monitor_enable,input wire [15:0] front_near_mm,input wire [2:0] gpio1,
+)(input wire clk,rst_n,refresh,monitor_enable,input wire [2:0] gpio1,
  inout wire [2:0] scl,sda,xshut_n,
  output wire [47:0] distances,ages,raw_distances,comm_ages,
  output wire [2:0] seen,valid,post_turn,event_mask,raw_event_mask,reused,
@@ -49,8 +49,11 @@ module obstacle_sensors #(
   assign ages[g*16+:16]=age;assign comm_ages[g*16+:16]=comm_age;
   assign seen[g]=have;
   assign reused[g]=confirmed;
-  assign valid[g]=good && (age<STALE_MS || confirmed) && comm_age<STALE_MS &&
-                  accepted>(g==0 ? front_near_mm:SIDE_NEAR_MM);
+  // Readiness means the channel is alive and fresh. A valid near reading is
+  // useful obstacle data: masking it out cleared every lane after a turn and
+  // blocked all motion commands (route PAUSED). Geometry checks live in the
+  // route layer, which compares the actual distances.
+  assign valid[g]=good && (age<STALE_MS || confirmed) && comm_age<STALE_MS;
   assign post_turn[g]=fresh;
   assign errors[g*8+:8]=error;assign statuses[g*4+:4]=status;
   assign event_mask[g]=accepted_event;assign raw_event_mask[g]=raw_event;
