@@ -87,7 +87,8 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
    采集：`./tools/board_obstacle_test.ps1 -Port COM24 -Seconds 300 -FailOnPause`
    （或 `-AnalyzeOnly -Capture <log>` 离线复检）。
 3. 若仍 PAUSED：记录面板第三行 `PAUSED R:xx Sxx Vx Ux` 与串口日志，按 K2 继续。
-4. 通过后：按第 4 节确认是否删除事件日志，再出最终资源数字与定稿报告。
+4. 通过后：按第 4 节确认是否删除事件日志，再出最终资源数字与定稿报告（在最新 main 上重做删减，
+   不直接合并旧预研分支 `post-acceptance-no-logger`，原因见 `MINIMAL_PLAN.md` §3.4）。
 
 ## 8. 题目要求新增功能（2026-10-29 用户提出）
 

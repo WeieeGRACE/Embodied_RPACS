@@ -159,6 +159,10 @@
   执行时采用“删端口+约束”方案：移除 `uart_tx`/`uart_rx` 顶层端口与 `src/robot_system_top.cst`
   的 V8/U8 约束，释放两个 FPGA 球；`tools/check_system_reports.ps1` 引脚期望 44→42；
   同步更新 `PIN_ASSIGNMENT.md`、`PROJECT_PLAN.md` §16.4 与 `TECHNICAL_REPORT.md`。
+- **执行方式（2026-10-29 复核）**：**不要直接合并旧分支 `post-acceptance-no-logger`（`d09f097`）**——
+  它基于功能轮之前的 main，与当前 main 在 `src/asr/system_motion.v`、`tests/p6_uart_debug/README.md`
+  及历史日志处冲突（`git merge-tree` 已实测）。验收通过后应在最新 main 上按本节步骤重新删减、
+  重建位流并复测资源，旧分支仅作改动清单参考；收益数字以验收后重建为准。
 
 ### 3.5 Step 5（不建议）—— 删 MANUAL 组
 
