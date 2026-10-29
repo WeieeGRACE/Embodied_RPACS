@@ -147,7 +147,7 @@ module system_motion #(
 // DIAGNOSTIC VARIANT (tests/p6_uart_debug/build_distance.tcl only): the D line
 // carries the three accepted ToF distances instead of the status bitfield so a
 // board capture can be decoded with tools/decode_distance_log.py. Bit layout:
-//   [15:0] front_mm  [31:16] left_mm  [47:32] right_mm
+//   [15:0] right_mm  [31:16] left_mm  [47:32] front_mm
 //   [50:48] tof_reused  [55:51] route_state  [56] fault
 //   [57] auto_run  [58] avoid_mode  [63:59] zero
 assign debug_state={5'b0,avoid_mode,auto_run,fault,route_state,tof_reused,
