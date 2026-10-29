@@ -154,6 +154,13 @@
 - `src/asr/system_motion.v`：删 `debug_state/debug_valid/event_errors` 端口与组装（L128-131、L286-289）。
 - 收益（预研变体实测）：**−56 Logic（13420→13364）、−107 CLS（8304→8197）、−193 FF、BSRAM 9→5、
   Fmax 58.287→61.113 MHz**；原“−0.42～0.45k LUT”估算偏高，实际主要节省是 4 个 BSRAM、FF 与布线压力。
+- **功能轮基线复测（2026-10-29 22:17，`.tmp_nolog2` 临时工程，同一 build.tcl 参数）**：把“删日志 +
+  删调试串口 + 删 `system_motion` 调试端口”应用到当前功能版源码，实测 **Logic 15498/23040 (68%)、
+  Register 6543、CLS 9404/11520 (82%)、BSRAM 5/56、DSP 8.5/28、Fmax 57.115 MHz、0 违例、
+  42 个受约束引脚**；相对主位流（15897/69%、6736、9640/84%、9、54.996 MHz）即 **Logic −399、
+  CLS −236、FF −193、BSRAM −4、Fmax +2.1 MHz**，CLS 余量从 1880 提升到约 2116。交付位流未改动；
+  验收后仍需按 `verify_project.tcl` 重建并同步改仿真 TB 的 uart 端口。
+  证据：`records/resource_20261029/nolog_variant_features_{build,resources}.log`。
 - **执行时机（2026-10-29 用户确认）**：上板 3–5 次连续避障验收通过后执行。README 的板级验收与
   `records/obstacle_20261025/board_smoke_final.log` 依赖 USB 心跳/事件行，验收前删会失去串口取证能力。
   执行时采用“删端口+约束”方案：移除 `uart_tx`/`uart_rx` 顶层端口与 `src/robot_system_top.cst`

@@ -48,7 +48,10 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
     上板 3–5 次连续避障验收期间保留（串口 `D`/`E` 行是验收证据）；**验收通过后删除**，
     同时移除 `uart_tx`/`uart_rx` 端口与 `.cst` V8/U8 约束（释放两个 FPGA 球）、
     `check_system_reports.ps1` 引脚期望 44→42；预研变体（加功能前源码）实测删除后 Logic 13364 (58%)、
-    CLS 8197 (72%)、BSRAM 9→5（Logic −56 / CLS −107 / FF −193）；并同步更新
+    CLS 8197 (72%)、BSRAM 9→5（Logic −56 / CLS −107 / FF −193）；**功能轮基线复测**
+    （2026-10-29 22:17）为 Logic 15498 (68%)、CLS 9404 (82%)、Register 6543、BSRAM 5、
+    Fmax 57.115 MHz（相对主位流 Logic −399 / CLS −236 / FF −193 / BSRAM −4，0 违例、42 引脚；
+    证据 `records/resource_20261029/nolog_variant_features_*.log`）；并同步更新
     `PROJECT_PLAN.md` 第 16.4 节、`PIN_ASSIGNMENT.md` 与 `records/resource_20261029/MINIMAL_PLAN.md`。
   - 故障面板 `F:xx S:xx M:xx I:xx`/PAUSED `R/S/V/U` 诊断字段：少量 LUT，建议保留到验收结束。
 - 结论：无其它未使用的用户功能可删；主工程已无 DISPLAY/MOTOR TEST 等历史诊断入口。

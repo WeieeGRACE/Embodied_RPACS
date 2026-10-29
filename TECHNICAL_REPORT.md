@@ -473,13 +473,18 @@ FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type
 - Fmax **54.996 MHz**（+10% 余量）：恢复 IMU 姿态页后逻辑/布线压力回升，但仍有安全余量；
   后续若继续加逻辑必须每次跑 `check_system_reports.ps1` 确认 0 违例和 TNS 0。
 - CLS 已用到 **84%**（余 1880）：本轮为满足题目功能恢复姿态页所致，后续扩展优先加在
-  Logic/BSRAM/FF 上，或先按 Step 4 删除 USB 事件日志（预研实测 −107 CLS）+ 评估裁剪。
-- 事件日志（审计估算 ~0.42k LUT + 2 BSRAM，预研变体实测删除后 −56 Logic、−107 CLS、−193 FF、
-  BSRAM 9→5）本轮保留用于上板取证。**用户 2026-10-29 已确认**：上板
-  3–5 次连续避障验收通过后删除 `system_event_logger`，并同时移除 `uart_tx`/`uart_rx` 端口与
+  Logic/BSRAM/FF 上，或先按 Step 4 删除 USB 事件日志（功能轮基线上复测 −236 CLS）+ 评估裁剪。
+- 事件日志（审计估算 ~0.42k LUT + 2 BSRAM）本轮保留用于上板取证。**用户 2026-10-29 已确认**：
+  上板 3–5 次连续避障验收通过后删除 `system_event_logger`，并同时移除 `uart_tx`/`uart_rx` 端口与
   `.cst` 的 V8/U8 约束（释放两个 FPGA 球），`check_system_reports.ps1` 引脚期望 44→42。
-  预研变体实测：Logic 13364/23040 (58%)、CLS 8197/11520 (72%)、Register 5497、BSRAM 9→5、
-  Fmax 61.113 MHz（即 Logic −56、CLS −107、FF −193、BSRAM −4；原 0.42k 估算偏高）；
+  加功能前的预研变体实测：Logic 13364/23040 (58%)、CLS 8197/11520 (72%)、Register 5497、
+  BSRAM 9→5、Fmax 61.113 MHz（Logic −56、CLS −107、FF −193）。
+  **功能轮基线复测（2026-10-29 22:17，`.tmp_nolog2` 临时工程）**：同法删日志+调试串口+
+  `system_motion` 调试端口，得到 Logic 15498/23040 (68%)、Register 6543、CLS 9404/11520 (82%)、
+  BSRAM 5/56、DSP 8.5/28、Fmax 57.115 MHz、0 违例、42 个受约束引脚，即相对主位流
+  **Logic −399、CLS −236、FF −193、BSRAM −4、Fmax +2.1 MHz**（证据
+  `records/resource_20261029/nolog_variant_features_{build,resources}.log`；交付位流未改动，
+  验收后需用 `verify_project.tcl` 重建并同步修改仿真 TB 的 uart 端口）。
   同步更新 `PROJECT_PLAN.md` §16.4、`PIN_ASSIGNMENT.md` 与 `records/resource_20261029/MINIMAL_PLAN.md`。
   验收前不改动。
 - 回退方法：本轮所有改动按提交拆分（基线→故障修复→资源优化→报告→编码器容错），

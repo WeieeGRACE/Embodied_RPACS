@@ -1,0 +1,24 @@
+Post-acceptance variant measurement on the feature-complete base (2026-10-29 22:17)
+Scratch project: .tmp_nolog2 (git-ignored), built with the local Gowin 1.9.12 gw_sh, same
+device/options as build.tcl. Sources = current main minus the USB event logger instance,
+the uart_tx/uart_rx top-level ports and the system_motion debug_state/debug_valid/
+event_errors ports+assembly; robot_system_top.cst drops the V8/U8 constraints.
+
+Synthesis/PnR report (impl/pnr/tmp_nolog2.rpt.txt, tmp_nolog2_tr_content.html):
+  Logic    15498/23040 (68%)   [main 15897/23040 (69%), -399]
+  Register 6543/23685  (28%)   [main 6736, -193]
+  CLS      9404/11520  (82%)   [main 9640/11520 (84%), -236]
+  BSRAM    5/56        (9%)    [main 9/56, -4]
+  DSP      8.5/28      (31%)   [main 8.5/28, unchanged]
+  Actual Fmax 57.115 MHz       [main 54.996 MHz, +2.119]
+  Setup violated endpoints 0, Hold violated endpoints 0
+  Constrained pins 42 (44 minus the freed V8/U8 debug-UART pins)
+  Variant bitstream impl/pnr/tmp_nolog2.fs: 6228172 bytes,
+  SHA256 101FC72576129FAD7CD7C0032BA901C6BCDD62EDB8F4AF0064156E7B4EC7DC41
+
+NOTE: measurement-only; the delivery bitstream and its SHA256 are untouched. The real
+post-acceptance step still needs the sim testbenches updated for the removed uart ports,
+a verify_project.tcl delivery build, check_system_reports.ps1 (44 -> 42 pins) and the
+seven-suite + fault-injection regression.
+
+Build log: records/resource_20261029/nolog_variant_features_build.log
