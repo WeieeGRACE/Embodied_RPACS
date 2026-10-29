@@ -320,3 +320,26 @@
 !/tests/orangepi_link_integration/records/
 /tests/orangepi_link_integration/records/*
 !/tests/orangepi_link_integration/records/*.md
+# Gigabit ethernet (RGMII) link test (isolated; vendor demo sources + Pi-side tooling).
+!/tests/eth_udp_link/
+/tests/eth_udp_link/*
+!/tests/eth_udp_link/*.md
+!/tests/eth_udp_link/*.tcl
+!/tests/eth_udp_link/src/
+/tests/eth_udp_link/src/*
+!/tests/eth_udp_link/src/*.v
+!/tests/eth_udp_link/src/*.cst
+!/tests/eth_udp_link/src/*.sdc
+!/tests/eth_udp_link/src/*/*.v
+!/tests/eth_udp_link/tools/
+/tests/eth_udp_link/tools/*
+!/tests/eth_udp_link/tools/*.py
+
+# Wireless-serial debug capture tooling (tolerant decoder for timestamped logs).
+!/tests/p6_uart_debug/tools/
+/tests/p6_uart_debug/tools/*
+!/tests/p6_uart_debug/tools/*.py
+!/tests/p6_uart_debug/records/
+/tests/p6_uart_debug/records/*
+!/tests/p6_uart_debug/records/*.json
+!/tests/p6_uart_debug/records/*.md
