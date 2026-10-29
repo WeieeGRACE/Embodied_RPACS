@@ -134,9 +134,12 @@ if os.path.isdir(rel):
     check("release sums P6 sha", P6_SHA in sums)
     check("release main fs matches", sha256(os.path.join(rel, "impl/pnr/Embodied_RPACS.fs")) == MAIN_SHA)
 
-# 6. git state (tracked files only; the audit log itself is untracked while writing)
+# 6. git state (tracked files only; the audit log itself is rewritten by every run
+# and is committed as evidence, so it must not count as a dirty worktree entry)
 status = subprocess.check_output(
     ["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT, text=True)
+SELF_LOG = "records/robustness_20261029/final_audit_features.log"
+status = "\n".join(line for line in status.splitlines() if SELF_LOG not in line)
 check("git worktree clean", status.strip() == "", status.strip()[:200])
 
 # report
