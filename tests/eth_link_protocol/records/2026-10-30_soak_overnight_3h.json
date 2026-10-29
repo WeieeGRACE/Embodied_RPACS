@@ -1,0 +1,59 @@
+{
+  "duration_s": 10800.2,
+  "frames": 540050,
+  "expected_frames": 540011,
+  "loss_percent": 0.0,
+  "rate_hz": 50.004,
+  "gap_ms": {
+    "max": 110.0,
+    "p99": 40.4,
+    "p50": 20.2
+  },
+  "parse_errors": {
+    "crc_err": 0,
+    "tail_err": 0,
+    "len_err": 0,
+    "sync_err": 1
+  },
+  "hb_age_ms": {
+    "min": 1,
+    "max": 170
+  },
+  "cmd_seq_seen": {
+    "first": 59,
+    "last": 46,
+    "distinct": 200
+  },
+  "fault_histogram": {
+    "0x00": 538599,
+    "0x01": 1349,
+    "0x20": 102
+  },
+  "acks": {
+    "1": {
+      "n": 192,
+      "ok": 192,
+      "other": {}
+    },
+    "5": {
+      "n": 8,
+      "ok": 8,
+      "other": {}
+    }
+  },
+  "cpu_percent": {
+    "mean": 0.8,
+    "max": 3.0
+  },
+  "parser_total": {
+    "good": 596068,
+    "sync_err": 1,
+    "len_err": 0,
+    "crc_err": 0,
+    "tail_err": 0,
+    "timeout": 0,
+    "type_err": 0
+  },
+  "healthy_fraction": 0.9973,
+  "ok": true
+}
