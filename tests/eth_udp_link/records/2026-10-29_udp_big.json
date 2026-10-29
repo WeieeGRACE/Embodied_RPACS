@@ -1,0 +1,18 @@
+{
+  "target": "192.168.0.2:5000",
+  "sent": 500,
+  "received": 500,
+  "loss_percent": 0.0,
+  "duration_s": 0.696,
+  "pps": 718.5,
+  "rtt_ms": {
+    "min": 0.087,
+    "mean": 0.101,
+    "p50": 0.101,
+    "p95": 0.111,
+    "max": 0.24
+  },
+  "out_of_order": 0,
+  "bad_payload": 0,
+  "ok": true
+}

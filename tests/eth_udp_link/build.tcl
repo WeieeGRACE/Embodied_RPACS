@@ -14,7 +14,6 @@ add_file src/gmii_rgmii_gmii/rgmii_to_gmii.v
 add_file src/gowin_pll/gowin_pll.v
 add_file src/top/eth_udp_loopback_rgmii.v
 add_file src/eth_udp_lookback_rgmii.cst
-add_file src/eth_udp_link.sdc
 set_option -top_module eth_udp_loopback_rgmii
 set_option -output_base_name eth_udp_link
 run all

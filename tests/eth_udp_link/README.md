@@ -7,37 +7,47 @@
 
 ---
 
-## 1. 现状与结论（2026-10-29 22:1x）
+## 1. 现状与结论（2026-10-29 22:3x，**已通过**）
 
 | 项 | 状态 |
 | --- | --- |
-| 物理链路 | ✅ Pi eth0 与 FPGA RJ45 已 up，**1000 Mb/s / full duplex** |
-| Pi 侧网络 | ✅ 已配置静态 `192.168.0.1/24`（NM 连接名 `ethfpga`）+ 静态 ARP |
-| 测试位流 | ⏳ 使用厂商预编译位流（见 §2），**待烧写**（当前 JTAG 下载线卡死，等重插） |
-| 测试脚本 | ✅ `tools/udp_echo_test.py`（含本机自检 PASS） |
+| 物理链路 | ✅ Pi eth0 ↔ FPGA RJ45，**1000 Mb/s / full duplex** |
+| Pi 侧网络 | ✅ 静态 `192.168.0.1/24`（NM 连接 `ethfpga`）+ 静态 ARP |
+| 测试位流 | ✅ **自建** `impl/pnr/eth_udp_link.fs`（厂商例程按 C2/I1 硅片重编） |
+| 回环测试 | ✅ 100/100 ~ 3000/3000 全回包，**0% 丢包**，RTT 中位 **0.066 ms** |
+| 吞吐 | ✅ 3692 pps（128 B ≈ 3.8 Mbps）、719 pps（1400 B ≈ 8 Mbps），均为 Pi 侧 Python 上限 |
+| 记录 | `records/2026-10-29_B2_千兆以太网链路验证.md` |
+
+**关键坑（务必记住）**：厂商预编译的 `vendor_eth_udp_loopback_rgmii.fs` 是给
+**GW5A-LV25UG324ES（ES 硅片）** 编的，PLL 参数在我们的 **C2/I1** 上非法 →
+PLL 不锁 → 全设计无时钟 → **FPGA 一个包都不发**（Pi 侧 `rx_packets` 恒为 0）。
+解决办法只有重新综合：PLL 改成 `IDIV_SEL=2 / FBDIV_SEL=2 / MDIV_SEL=7 / ODIV0_SEL=7`
+（PFD 62.5 MHz、VCO 875 MHz、CLKOUT0 125 MHz），其余 RTL 不动。详见测试记录 §2。
 
 ---
 
 ## 2. 测试位流
 
-厂商例程 `eth_udp_loopback_rgmii`（小梅哥 ACG525 例程源码）：
-把收到的 UDP 负载**原样回环**发给发送方，用来验证 PHY/RGMII/UDP 收发通路。
+把厂商例程 `eth_udp_loopback_rgmii`（收到的 UDP 负载原样回环）**按我们的器件重编**：
 
 | 项 | 值 |
 | --- | --- |
-| 文件 | `impl/pnr/vendor_eth_udp_loopback_rgmii.fs`（厂商 2023-08-18 预编译） |
-| SHA256 | `EDF446344BC540274055F56EBE42C985A5685E1037209C287776DCB50AA7E464` |
-| 资源 | Logic 1469/23040（7%）、Register 1113、CLS 1236/11520（11%） |
-| FPGA MAC | `00:0a:35:01:fe:c0` |
-| FPGA IP / 端口 | **192.168.0.2** / UDP **5000** |
-| 时钟 | 无外部时钟输入，由 PHY 的 `rgmii_rx_clk`（125 MHz）派生（例程设计如此） |
+| 位流 | `impl/pnr/eth_udp_link.fs` |
+| SHA256 | `0D11273EE652B7A1C4F9501D3667DAD0876AD159B7C8DCED3A2DB6ECC813E262` |
+| 资源 | Logic 1105/23040（5%）、Register 872、CLS 980/11520（9%） |
+| FPGA MAC / IP / 端口 | `00:0a:35:01:fe:c0` / **192.168.0.2** / UDP **5000** |
 
-⚠️ 该例程**不实现 ARP**（只处理 ETH_type 0x0800），所以 Pi 侧必须手工填静态 ARP 表。
+重建命令（本目录）：
 
-> 本目录的 `build.tcl` 保留用于将来重新综合，但**当前 Gowin EDA V1.9.12 对该例程的
-> PLL 参数报错**（`FCLKIN/IDIV_SEL` PFD 超范围 125 MHz > 87.5 MHz）。要重建需要把
-> `src/gowin_pll/gowin_pll.v` 的 `IDIV_SEL` 改成 2（PFD≈41.7 MHz）或换用 IP 向导重配。
-> 现阶段直接用厂商预编译位流即可。
+```powershell
+& 'D:/Gowin/Gowin_V1.9.12_x64/IDE/bin/gw_sh.exe' build.tcl
+# -> impl/pnr/eth_udp_link.fs
+programmer_cli --device GW5A-25A --run 2 `
+    --fsFile (Resolve-Path impl/pnr/eth_udp_link.fs) --cable "Gowin USB Cable(FT2CH)"
+```
+
+> 对照用：`impl/pnr/vendor_eth_udp_loopback_rgmii.fs`（厂商 ES 版，**在本板不可用**：
+> PLL 不锁，无任何输出）。
 
 ## 3. 接线
 
@@ -62,10 +72,10 @@ sudo ip neigh replace 192.168.0.2 lladdr 00:0a:35:01:fe:c0 dev eth0 nud permanen
 ## 5. 运行测试
 
 ```powershell
-# PC：烧厂商位流（SRAM，掉电失效）
+# PC：烧重编位流（SRAM，掉电失效；每次 FPGA 断电后都要重烧）
 cd tests\eth_udp_link
 programmer_cli --device GW5A-25A --run 2 `
-    --fsFile (Resolve-Path impl\pnr\vendor_eth_udp_loopback_rgmii.fs) `
+    --fsFile (Resolve-Path impl\pnr\eth_udp_link.fs) `
     --cable "Gowin USB Cable(FT2CH)"
 ```
 
