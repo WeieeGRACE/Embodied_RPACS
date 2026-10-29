@@ -26,9 +26,9 @@ $fs = (Resolve-Path impl/pnr/Embodied_RPACS_p6uart.fs).Path      # programmer_cl
     --device GW5A-25A --operation_index 2 --fsFile "$fs"
 ```
 
-已知构建结果（2026-10-29 21:14 重建，含 SPIN 360 / IMU ATTITUDE 与 PASS 兜底）：
-Logic 15897/23040 (69%)、CLS 9640/11520 (84%)、Register 6736、Fmax 54.996 MHz。
-Bitstream 6,443,652 字节，SHA256 `B3A0250255FEBFF622F11A247530F3AE51D6D640F937527BB6D69A7FC3146C6A`。
+已知构建结果（2026-10-29 23:30 重建，含 SPIN 360 / IMU ATTITUDE、PASS 兜底与前向 400 ms 滤波）：
+Logic 15910/23040 (70%)、CLS 9612/11520 (84%)、Register 6746、Fmax 56.049 MHz。
+Bitstream 6,443,628 字节，SHA256 `08DFDED3A43359D8E1237C03751E5D1978A97AFA958ED7C8276291FE706F399E`。
 
 ## 采集
 
@@ -40,3 +40,28 @@ Bitstream 6,443,652 字节，SHA256 `B3A0250255FEBFF622F11A247530F3AE51D6D640F93
 
 `D` 行包含 route_reason/route_state/tof_reused，`E` 行是故障事件。若出现乱码，先确认
 P6-21 与 GND 接线、COM24 是否 115200、WCH-Link 是否已配对成功。
+
+## 距离日志诊断变体（2026-10-29 新增）
+
+当 PASS/让位段仍出现 `BLOCKED reason=0x04` 时，用这个变体直接看三路距离，避免只凭
+状态码猜测。它把 `D` 行的 64 位负载换成距离：
+
+- `[15:0]` front_mm、`[31:16]` left_mm、`[47:32]` right_mm；
+- `[50:48]` tof_reused（20 mm 截断确认）、`[55:51]` route_state、`[56]` fault、
+  `[57]` auto_run、`[58]` avoid_mode。
+
+构建：`gw_sh build_distance.tcl`（复用本目录 cst/sdc/hex，仅把 `system_motion.v` 换成
+`src/system_motion_dist.v`，输出 `impl/pnr/Embodied_RPACS_p6dist.fs`）。
+已构建：6,389,916 字节，SHA256 `EE00D3753180FB199EEA2CF433128374E4F77F1E450DF80FB5BEB1CA19C4EC10`，
+Logic 15919/70%、CLS 9665/84%，`uart_tx` 在 P6-21/L12。
+
+采集与解码：
+
+```powershell
+./tools/read_serial_log.ps1 -Port COM24 -Seconds 300 -Timestamped -OutFile <绝对路径>.log
+python tools/decode_distance_log.py <日志> --changes-only
+```
+
+解码输出会给出每次状态切换时的三路距离；停止那帧的 front_mm 若持续 ≤85 说明真靠得近，
+若只是瞬跳/`----`（20 mm 截断）则是坏数据。**该变体只用于诊断，不用于交付演示。**
+
