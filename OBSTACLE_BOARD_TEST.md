@@ -5,7 +5,11 @@
 
 ## 下载文件
 
-- FPGA：交付包 `fpga/Embodied_RPACS.fs`（来源 `impl/pnr/Embodied_RPACS.fs`）。
+- FPGA：交付包 `fpga/Embodied_RPACS.fs`（来源 `impl/pnr/Embodied_RPACS.fs`，
+  SHA256 `B90071E6C58283F0471ABC5F04AC0EA643FDF9CEC84A3B502F6BFBEE98AE2A10`；
+  Logic 13420/59%、CLS 8304/73%、Fmax 58.287 MHz、0 违例）。
+- P6-21 无线串口诊断位流（可选，`tests/p6_uart_debug/`）：`EC3ACEFF…B196EDC`
+  （Logic 13420/59%、CLS 8284/72%），接法见文末“远程串口采集”。
 - ASRPRO：交付包 `asrpro/fw.bin`，为含识别模型、音频、引导和应用的完整固件。
 - 天问工程：交付包 `asrpro/asrpro.hd`。新增播放完成接口须使用项目的隔离SDK构建流程；重新生成代码后直接使用未补丁SDK链接会缺少该接口。
 - 校验：交付包 `SHA256SUMS.txt`、`manifest.json`；数字记录 `validation/`。
