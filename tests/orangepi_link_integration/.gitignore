@@ -1,0 +1,8 @@
+# 运行产物（每次测试都可能变化）
+__pycache__/
+*.pyc
+records/*.json
+records/*.csv
+records/*.npy
+out/
+!records/README.md

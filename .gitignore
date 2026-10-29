@@ -264,3 +264,27 @@
 /tests/uart_bridge/impl/pnr/*
 !/tests/uart_bridge/impl/pnr/uart_bridge.fs
 !/tests/uart_bridge/impl/pnr/uart_bridge.rpt.txt
+
+# Depth-camera host <-> FPGA link integration test (isolated test project).
+!/tests/orangepi_link_integration/
+/tests/orangepi_link_integration/*
+!/tests/orangepi_link_integration/*.md
+!/tests/orangepi_link_integration/*.json
+!/tests/orangepi_link_integration/*.sh
+!/tests/orangepi_link_integration/*.ps1
+!/tests/orangepi_link_integration/.gitignore
+!/tests/orangepi_link_integration/config/
+/tests/orangepi_link_integration/config/*
+!/tests/orangepi_link_integration/config/*.json
+!/tests/orangepi_link_integration/src/
+/tests/orangepi_link_integration/src/*
+!/tests/orangepi_link_integration/src/*.py
+!/tests/orangepi_link_integration/src/*.md
+!/tests/orangepi_link_integration/tools/
+/tests/orangepi_link_integration/tools/*
+!/tests/orangepi_link_integration/tools/*.py
+!/tests/orangepi_link_integration/tools/*.ps1
+!/tests/orangepi_link_integration/tools/*.md
+!/tests/orangepi_link_integration/records/
+/tests/orangepi_link_integration/records/*
+!/tests/orangepi_link_integration/records/*.md

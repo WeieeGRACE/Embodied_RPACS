@@ -1,0 +1,33 @@
+{
+  "_comment": "深度相机板(Orange Pi AIpro) <-> FPGA 链路联调参数。改端口/阈值只改这里。",
+  "ports": {
+    "windows": "COM14",
+    "linux": "/dev/ttyUSB0",
+    "linux_by_id_glob": "/dev/serial/by-id/*CH9102*"
+  },
+  "baud": 115200,
+  "heartbeat_hz": 10.0,
+
+  "accept": {
+    "telem_hz_min": 45.0,
+    "telem_hz_max": 60.0,
+    "max_error_frames": 0,
+    "max_hb_age_ms": 150,
+    "max_link_loss_events": 0,
+    "camera_fps_min": 6.0,
+    "camera_frames_min": 60,
+    "cpu_percent_max": 85.0
+  },
+
+  "camera": {
+    "width": 640,
+    "height": 480,
+    "fps": 8,
+    "warmup_s": 2.0
+  },
+
+  "safety": {
+    "allow_setvel_default": false,
+    "note": "链路测试位流把 PWMA/AIN1/AIN2/PWMB/BIN1/BIN2/STBY 全拉 0，电机不可能动；--allow-setvel 只是验证命令通路。"
+  }
+}
