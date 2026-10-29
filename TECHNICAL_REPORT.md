@@ -255,6 +255,9 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
    & 'D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe' `
      --device GW5A-25A --operation_index 2 --fsFile impl/pnr/Embodied_RPACS.fs
    ```
+   或使用一键脚本（推荐）：`./tools/board_obstacle_test.ps1 -Port COM14 -Seconds 180 -Program`
+   —— 自动 SRAM 烧写、只读串口抓取（不写串口，不影响 ASR 运动链路）、按心跳/`E ` 错误行
+   自动给出 PASS/FAIL 并写 `board_capture_*.log` / `board_check_*.md`；演示期间脚本保持采集。
 3. 上电/复位，等 OLED 显示 READY 与三路 ToF 距离（面板 F/L/R 四位十六进制 mm）。
 4. 架空车轮确认 K0 立即关断驱动后放到平地。
 5. K1/K2 进入 SETTINGS → VOICE ENABLE（如需语音），或直接进入 OBSTACLE AVOID 按 K2 启动。
@@ -284,11 +287,14 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   把 Logic 降到约 12.8k（56%）、CLS 约 7.8k（68%）。
 - 回退方法：本轮所有改动按提交拆分（基线→故障修复→资源优化→报告），可逐提交 `git revert`；
   位流与证据均在提交中。
-- **已知遗留（与本轮无关，未修改）**：`tools/run_legacy_regression.ps1` 中的
-  `sim/tb_speed_filter_modes.sv`（单轮独立闭环历史测试）自 2026-10-26 的测速预取流水改动后
-  未同步（该模块与 TB 在本轮均未改动，0bd1a77→当前 diff 为空），会按旧时序断言失败；
-  它不属于主工程 7 套仿真/构建/验收链路，记录在
-  `records/robustness_20261029/legacy_regression_minimal.log`，后续单独修 TB 即可。
+- **历史回归已同步为全绿**：`tools/run_legacy_regression.ps1` 中两个独立单测此前落后于流水线
+  改动——`sim/tb_speed_filter_modes.sv` 未跟上 2026-10-26 的测速预取（结果延迟一拍）、
+  `sim/tb_motion_control_and_mode_fsm.sv` 未跟上新端口与新的“反馈丢失→abort / 停稳超时→完成”
+  语义。本轮只改这两个 TB（未改被测模块），8 组历史回归（IMU/OLED/测速预取/地面/闭环/双轮/
+  右轮/motion/tb6612）现已全部 PASS，证据
+  `records/robustness_20261029/legacy_regression_all2.log`。
+- **上板辅助脚本**：新增 `tools/board_obstacle_test.ps1`，可一键 SRAM 烧写 + 只读串口抓取 +
+  心跳/错误行自动判定（不写串口，不影响 ASR 运动链路），用法见第 6 节。
 
 ## 8. 提交记录
 

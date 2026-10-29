@@ -12,14 +12,29 @@ reg [31:0] cmd_speed_l=7,cmd_speed_r=7,cmd_goal=10,cmd_timeout_ms=0;
 reg [31:0] cmd_speed_limit=100,cmd_accel_step=3,cmd_decel_step=2;
 reg signed [31:0] position_l=0,position_r=0,speed_l=0,speed_r=0,yaw_mdeg=0;
 reg speed_valid_l=1,speed_valid_r=1,yaw_valid=1;
-wire signed [31:0] target_l,target_r;
-wire drive_enable,controller_clear,busy,done,aborted,rejected;
+reg signed [31:0] target_l,target_r;
+wire drive_enable,controller_clear,busy,done,aborted,rejected,accepted;
 wire [3:0] mode,reason;wire [2:0] phase;wire [7:0] fault_code;
+wire [15:0] command_errors;wire [95:0] feedback_ages;
+reg [31:0] runtime_speed_cap=32'hffffffff;
+reg runtime_speed_valid=0;
+reg [31:0] runtime_speed=0;
 reg completed=0;
 reg terminal_seen=0; integer decel_expected_l,decel_expected_r; reg check_decel;
 integer checks=0,done_count=0,abort_count=0,reject_count=0;
 integer i,j,k,seed=71429,rnd,model_l,model_r,expect_l,expect_r,timeout_count;
-motion_control_and_mode_fsm #(.CLK_HZ(TEST_CLK_HZ),.FEEDBACK_TIMEOUT_MS(8),.STOP_TIMEOUT_MS(7)) dut(.*);
+motion_control_and_mode_fsm #(.CLK_HZ(TEST_CLK_HZ),.FEEDBACK_TIMEOUT_MS(8),.STOP_TIMEOUT_MS(7)) dut(
+ .clk(clk),.rst_n(rst_n),.enable(enable),.stop_request(stop_request),.external_fault(external_fault),
+ .clear_fault(clear_fault),.cmd_valid(cmd_valid),
+ .runtime_speed_cap(runtime_speed_cap),.runtime_speed_valid(runtime_speed_valid),.runtime_speed(runtime_speed),
+ .cmd_ready(cmd_ready),.cmd_mode(cmd_mode),.cmd_end(cmd_end),.cmd_reverse(cmd_reverse),
+ .cmd_speed_l(cmd_speed_l),.cmd_speed_r(cmd_speed_r),.cmd_goal(cmd_goal),.cmd_timeout_ms(cmd_timeout_ms),
+ .cmd_speed_limit(cmd_speed_limit),.cmd_accel_step(cmd_accel_step),.cmd_decel_step(cmd_decel_step),
+ .position_l(position_l),.position_r(position_r),.speed_l(speed_l),.speed_r(speed_r),.yaw_mdeg(yaw_mdeg),
+ .speed_valid_l(speed_valid_l),.speed_valid_r(speed_valid_r),.yaw_valid(yaw_valid),
+ .target_l(target_l),.target_r(target_r),.drive_enable(drive_enable),.controller_clear(controller_clear),
+ .busy(busy),.mode(mode),.phase(phase),.done(done),.aborted(aborted),.rejected(rejected),.accepted(accepted),
+ .reason(reason),.fault_code(fault_code),.command_errors(command_errors),.feedback_ages(feedback_ages));
 task check;input condition;input [511:0] msg;
 begin checks=checks+1;if(condition!==1'b1)begin $display("FAIL %0s t=%0t mode=%0d phase=%0d fault=%0d L=%0d R=%0d",msg,$time,mode,phase,fault_code,target_l,target_r);$fatal(1);end end endtask
 task cycle;begin @(posedge clk);#1;end endtask
@@ -35,6 +50,19 @@ task send;begin @(negedge clk);cmd_valid=1;cycle;@(negedge clk);cmd_valid=0;end 
 task wait_idle;begin timeout_count=0;while(busy && timeout_count<100*P)begin cycle;timeout_count=timeout_count+1;end check(mode==1 && !busy,"idle finish");end endtask
 task stop_wait;begin @(negedge clk);stop_request=1;cycle;@(negedge clk);stop_request=0;wait_idle;end endtask
 task wait_fault;input [7:0] code;begin timeout_count=0;while(fault_code==0 && timeout_count<30*P)begin cycle;timeout_count=timeout_count+1;end check(fault_code==code && !drive_enable && mode==9,"fault code");end endtask
+// 2026-10-29: a transient feedback gap now aborts the action (retryable)
+// instead of latching fault 2/3, and the standstill timeout completes with
+// reason 7 instead of latching fault 5.
+task wait_abort_nofault;integer seen;begin
+ seen=0;timeout_count=0;
+ while(!seen && timeout_count<40*P)begin cycle;if(aborted)seen=1;timeout_count=timeout_count+1;end
+ check(seen && fault_code==0 && mode==1 && !busy && !drive_enable,"feedback abort without fault");
+end endtask
+task wait_done_badstill;integer seen;begin
+ seen=0;timeout_count=0;
+ while(!seen && timeout_count<40*P)begin cycle;if(done||aborted)seen=1;timeout_count=timeout_count+1;end
+ check(seen && fault_code==0 && mode==1 && !busy,"standstill timeout completes without fault");
+end endtask
 always @(posedge clk) begin
 check_decel=rst_n && enable && !external_fault && fault_code==0 && dut.detected_fault==0 && dut.tick && phase==3 && !(stop_request && !dut.cancelled);
 if(check_decel) begin
@@ -86,10 +114,10 @@ for(i=0;i<12;i=i+1)begin reset_all;case(i)
 9:cmd_mode=7;10:cmd_end=1;11:begin cmd_end=1;cmd_timeout_ms=10;cmd_goal=32'h80000000;end endcase
 send;check(rejected && !busy && mode==1,"invalid command");end
 reset_all;speed_valid_l=0;speed_valid_r=0;cycles(9*P);send;check(rejected,"stale start");
-reset_all;send;speed_valid_l=0;wait_fault(2);
-reset_all;cmd_mode=6;cmd_end=3;cmd_timeout_ms=50;send;yaw_valid=0;wait_fault(3);
+reset_all;send;speed_valid_l=0;wait_abort_nofault;
+reset_all;cmd_mode=6;cmd_end=3;cmd_timeout_ms=50;send;cycles(2*P);yaw_valid=0;wait_abort_nofault;
 reset_all;cmd_end=1;cmd_goal=20;cmd_timeout_ms=2;send;wait_fault(4);
-reset_all;send;speed_l=5;speed_r=5;@(negedge clk);stop_request=1;cycle;@(negedge clk);stop_request=0;wait_fault(5);
+reset_all;send;speed_l=5;speed_r=5;@(negedge clk);stop_request=1;cycle;@(negedge clk);stop_request=0;wait_done_badstill;
 reset_all;send;cycles(3*P);@(negedge clk);external_fault=1;#1;check(target_l==0 && !drive_enable,"immediate fault gate");cycle;check(fault_code==1,"fault latch");
 @(negedge clk);external_fault=0;clear_fault=1;cycle;check(mode==9,"clear enabled denied");@(negedge clk);enable=0;cycle;check(mode==0 && fault_code==0,"clear disabled");
 @(negedge clk);clear_fault=0;enable=1;cycles(2);check(mode==1 && !busy,"clear no restart");send;cycles(2*P);@(negedge clk);enable=0;#1;check(target_l==0,"immediate disable");cycle;check(aborted,"disable event");

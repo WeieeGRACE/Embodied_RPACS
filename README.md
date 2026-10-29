@@ -110,10 +110,13 @@ ASRPRO D17/RX、D18/TX，115200/8N1；USB U8/RX、V8/TX。管脚保持既有接�
 & 'D:/Gowin/Gowin_V1.9.12_x64/IDE/bin/gw_sh.exe' build.tcl
 & 'D:/Gowin/Gowin_V1.9.12_x64/IDE/bin/gw_sh.exe' verify_project.tcl
 ./tools/check_system_reports.ps1
-./tools/run_system_sim.ps1
+./tools/run_system_sim.ps1                 # 主工程 7 套
+./tools/run_legacy_regression.ps1          # 历史 IMU/OLED/测速/闭环/双轮/右轮/motion/tb6612 回归（已同步全绿）
+./tools/board_obstacle_test.ps1 -Port COM14 -Seconds 180 -Program   # 上板：SRAM 烧写+只读串口抓取+PASS/FAIL 判定
 ./tools/export_main.ps1
 ```
 
 导出目录默认 `release/`，不含历史独立测试目录。
 数字仿真验证控制逻辑；实际转角、距离、制动余量、光学可靠性、20 mm 自愈效果和语音识别效果
-由上板测试确认（步骤见 `TECHNICAL_REPORT.md` 第 6 节）。
+由上板测试确认（步骤见 `TECHNICAL_REPORT.md` 第 6 节）。上板抓取脚本只读串口，
+不会写入 USB 调试口，也不影响 ASRPRO 运动链路。
