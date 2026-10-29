@@ -331,7 +331,18 @@
 !/tests/p6_uart_debug/records/
 /tests/p6_uart_debug/records/*
 !/tests/p6_uart_debug/records/*.json
-!/tests/p6_uart_debug/records/*.md!/tests/eth_udp_link/records/
+!/tests/p6_uart_debug/records/*.md
+!/tests/eth_udp_link/records/
 /tests/eth_udp_link/records/*
 !/tests/eth_udp_link/records/*.json
 !/tests/eth_udp_link/records/*.md
+# Link v2 over gigabit ethernet (UDP payload = one protocol frame).
+!/tests/eth_link_protocol/
+!/tests/eth_link_protocol/**
+/tests/eth_link_protocol/impl/
+# ModelSim 运行产物（不入库）
+/tests/eth_link_protocol/sim/work/
+/tests/eth_link_protocol/modelsim.ini
+/tests/eth_link_protocol/sim/transcript
+/tests/eth_link_protocol/sim/vsim.wlf
+/tests/eth_link_protocol/transcript

@@ -41,6 +41,7 @@ module uart_bridge_core #(
     output wire signed [15:0] target_v_left,
     output wire signed [15:0] target_v_right,
     output wire               setvel_strobe_out,  // one pulse per accepted SET_VEL
+    output wire               tx_done_out,        // one pulse at the end of each transmitted frame
     output wire               estop_latched_out,  // hardware E-stop latch (bit2)
     output wire               stop_latched_out,   // STOP or E-stop latch
     output wire               link_ok_out,
@@ -65,13 +66,13 @@ module uart_bridge_core #(
     localparam [7:0] T_ACK   = 8'h82;
 
     // ------------------------------------------------------------------ ticks
-    reg [15:0] ms_div;
+    reg [31:0] ms_div;   // 32-bit: 125 MHz 时 1 ms = 125000 拍，16 位会溢出
     reg        ms_tick;
     always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin ms_div <= 16'd0; ms_tick <= 1'b0; end
+        if (!rst_n) begin ms_div <= 32'd0; ms_tick <= 1'b0; end
         else begin
-            if (ms_div >= (CLK_HZ / 1000) - 1) begin ms_div <= 16'd0; ms_tick <= 1'b1; end
-            else begin ms_div <= ms_div + 16'd1; ms_tick <= 1'b0; end
+            if (ms_div >= (CLK_HZ / 1000) - 1) begin ms_div <= 32'd0; ms_tick <= 1'b1; end
+            else begin ms_div <= ms_div + 32'd1; ms_tick <= 1'b0; end
         end
     end
 
@@ -228,6 +229,7 @@ module uart_bridge_core #(
     reg        tx_is_ack;
     reg [7:0]  tx_type_i, tx_len_i;
     wire       tx_busy, tx_done;
+    assign tx_done_out = tx_done;
 
     reg [7:0] ack_byte;
     always @(*) begin
