@@ -3,7 +3,7 @@
 # vmap encoder_glitch_lib sim/work_encoder_glitch 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 13:06:18 on Oct 29,2026
+# Start time: 16:51:25 on Oct 29,2026
 # vlog -sv -work encoder_glitch_lib src/motor/dual_ab_quadrature_encoder.v sim/tb_encoder_glitch_tolerance.sv 
 # -- Compiling module dual_ab_quadrature_encoder
 # -- Compiling module dual_ab_encoder_channel
@@ -11,10 +11,10 @@
 # 
 # Top level modules:
 # 	tb_encoder_glitch_tolerance
-# End time: 13:06:18 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 16:51:25 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" encoder_glitch_lib.tb_encoder_glitch_tolerance 
-# Start time: 13:06:18 on Oct 29,2026
+# Start time: 16:51:25 on Oct 29,2026
 # ** Note: (vsim-8009) Loading existing optimized design _opt
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
@@ -40,5 +40,5 @@
 #    Time: 37574 ns  Iteration: 0  Instance: /tb_encoder_glitch_tolerance
 # Break in Module tb_encoder_glitch_tolerance at sim/tb_encoder_glitch_tolerance.sv line 76
 # Stopped at sim/tb_encoder_glitch_tolerance.sv line 76
-# End time: 13:06:19 on Oct 29,2026, Elapsed time: 0:00:01
+# End time: 16:51:26 on Oct 29,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

@@ -157,6 +157,29 @@
   atan/sqrt/divider 数据通路（实测 attitude 子系统 2593 LUT+679 ALU → 773 LUT+182 ALU），
   yaw/90° 转向、IMU 校准与 200 Hz 更新不受影响。
 
+### 3.6 20 mm 截断容错与固定里程兜底（第二轮，上板日志驱动）
+
+上板运行日志（`records/robustness_20261029/BOARD_RUN_ANALYSIS.md`）给出了最后一段根因：
+转向完成后 `WAIT_PARALLEL` 等不到“新的有效测距”，是因为障碍侧 VL53L0X 连续多次返回精确
+20 mm（量程下限截断/测距失效），而第一轮策略把 20 mm 永远丢弃并复用旧值 → `post_turn`
+永不置位 → 4 次 1000 ms barrier 重试后进入 BLOCKED/PAUSED。日志同时证明第一轮“连续
+4 次 20 mm 就 XSHUT 重初始化”的自愈动作无效：4 s 内触发数十次重初始化后通道仍持续 20 mm。
+
+本轮据此改为：
+
+- **传感器层** `obstacle_sensors.v`：连续 `CLIP_CONFIRM=2` 个精确 20 mm 视为“该通道完成了
+  本次测距，但目标过近或不可测”；它仍不参与几何距离（`distances` 保持上一次有效值），
+  但可以作为 barrier 的“新鲜测距事件”（`post_turn`/`fresh`），并通过 `reused` 输出截断
+  确认掩码。删除 `recover_req` 动作与 `tof_driver.recover_req` 端口（无证据支持其有效性，
+  去掉后通道层逻辑更简单，也消除了重初始化造成的额外抖动）。
+- **路线层** `obstacle_route.v`：新增 `clip_mask` 输入和
+  `FALLBACK_SHIFT_UM=500 mm` / `FALLBACK_PASS_UM=600 mm` 固定里程兜底。`WAIT_PARALLEL`
+  或 `WAIT_BACK` 时若障碍侧通道处于截断确认状态，不再等待侧向几何测量，直接按固定里程
+  完成“横移 500 mm → 额外 300 mm → 固定直行 600 mm → 额外 300 mm → 按实际横移回线”的
+  绕行，随后恢复巡航。侧向数据正常时仍走原有“学习箱面/边缘”的精确路线，行为不变。
+- 兜底路径仍然保留前向避障检查（`front_block`）、2 m 行程上限、10 s 动作超时和 K0 急停；
+  区别只是“侧向几何不可用”不再导致 4 s 后 PAUSED。
+
 ## 4. 验证
 
 ### 4.1 主工程 7 套仿真（最终源码）
@@ -215,16 +238,51 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 ### 4.3 构建与时序（最终）
 
 - 综合+PnR：`build.tcl` 与保存工程 `verify_project.tcl` 均成功，0 error。
-- Fmax **64.469 MHz**（目标 50 MHz，+29% 余量），Setup/Hold 违例 0，TNS 0/0。
-- 时序路径变化：基线最差路径是 IMU roll 陀螺积分 wrap 链（+1.140 ns）；删除 roll/pitch
-  后该路径消失，新最差路径为 yaw wrap / 速度换算链，仍满足 50 MHz。
+- 本轮（截断容错）post-PnR：Logic **13521/23040 (59%)**、Register 5690、CLS
+  **8318/11520 (73%)**、BSRAM 9/56、DSP 6.5/28。
+- Fmax **59.226 MHz**（目标 50 MHz，+18% 余量），Setup/Hold 违例 0，TNS 0/0。
 - 44 个受约束管脚、电气属性、10 个开漏输出、CPU/SSPI 复用、单实例检查保持
-  （`tools/check_system_reports.ps1` PASS，见 `records/robustness_20261029/report_check_minimal.log`）。
+  （`tools/check_system_reports.ps1` PASS，见
+  `records/robustness_20261029/report_check_clip_fallback_saved.log`）。
+- 交付位流：`impl/pnr/Embodied_RPACS.fs`（`verify_project.tcl` 构建）
+  - 大小 6,443,292 字节
+  - SHA256 `B69DD9A04C3BCB6F06ED60B8311C14892A8FE185E804A341D0828F4423EA1B2C`
+  - （同一份源码的 `build.tcl` 构建 SHA `FD52B20A3DF82C32B2C0481C47605A586DEA5A4EF58E6DDAFB7DDDC43E390C2C`）
 
-### 4.4 上板验证
+### 4.4 上板验证（2026-10-29）
 
-位流已按第 6 节准备就绪（SHA256 2CD51D8E…），等待用户接板后执行连续避障演示；
-串口日志与结论将补充到 `records/robustness_20261029/board_*.log` 与本报告。
+用户接板运行了连续避障演示，诊断固件（route_reason/tof_reused 已进串口与面板）抓到了
+完整证据（`records/robustness_20261029/BOARD_RUN_ANALYSIS.md`）：
+
+- 3 次运行：**1 次 PAUSED、2 次完整跑完绕障**（每次约 47–48 s：左转→横移→回线→恢复巡航）。
+- 失败那次的串口时间线：转向完成进入 `WAIT_PARALLEL(8)` 后，RIGHT 通道 `tof_reused` bit2
+  持续置位（连续精确 20 mm），4 次 1000 ms barrier 重试全部超时，16:17:26.311 进入
+  `BLOCKED`、`reason=0x85`，随后 `auto_run=0` → 面板 PAUSED。
+- 全程 0 条 `E ` 故障行：旧版“转 90° 后 FAULT、必须 K0 复位”已消除，最坏只是可恢复的 PAUSED。
+- 硬件旁证：用户发现“IMU 地线掉开时反而很稳，插回去又出现 PAUSED”。本工程 IMU 地按
+  机械接线接在 P11-3/LCD_GPIO0/T11，而 T11 是 FPGA 信号脚（`PIN_ASSIGNMENT.md` 已警示
+  “P11-2 才是专用 GND”）；该地线形成地环路/地跳动时，VL53L0X 会更容易进入量程下限截断。
+  **建议把 IMU GND 改接 P11-2 或 P6-12/P6-30 专用地，三路 ToF 与被测地星形一点接地，
+  不要经过 T11/LCD_GPIO0**；固件侧本轮已做截断容错与固定里程兜底作为双保险。
+- 交付位流已更新为截断容错版（SHA256 `B69DD9A0…`，见 4.3），等待用户重新烧写后复测
+  3–5 次连续避障。
+
+### 4.5 截断容错回归（本轮新增）
+
+| 场景 | 注入 | 修复后观察 |
+|---|---|---|
+| 0 A_FRONT | 转向后 FRONT 精确 20 mm 保持 1.2 s | 无故障、无暂停；`clip_confirm=1`，`tof_resets=0`，barrier 通过并进入 SHIFT（route_state=6） |
+| 1 A_SIDE | 转向后 RIGHT 精确 20 mm 保持 1.2 s | 无故障、无暂停；`clip_confirm=1`，经固定里程兜底进入 SHIFT_EXTRA（route_state=22） |
+| 2 B | 转向后 20 mm 永久 | 无故障、无暂停；route_state=6 继续绕行（第一轮此处 4 s 后 BLOCKED/PAUSED） |
+| 10 K_CLIP_FALLBACK（新增） | 转向后 RIGHT 持续 20 mm | 无故障、无暂停；**reached_shift=1**，确认走固定里程兜底 |
+| 其余 7 场景 | NACK/IMU/编码器/近距/第二 barrier/负向对照 | 均无故障、无暂停 |
+| 7 套主工程仿真 | 全量 | PASS（Errors 0、Warnings 0） |
+| 历史回归 | IMU/OLED/测速/电机/motion 等 | PASS |
+
+一键回归：`./tools/run_fault_injection.ps1`（11 场景）。除 `fault_seen=0`/`fault_latched=0`
+外，本轮还断言 `paused=0`、`blocked_seen=0`（PAUSED 是用户可见的失败，即使没有故障锁存），
+场景 10 额外断言 `reached_shift=1`。日志：`records/fault_injection/fixed_clip_fallback/`、
+`records/robustness_20261029/fault_injection_clip_fallback.log`。
 
 ## 5. 资源优化
 
@@ -259,6 +317,11 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | Fmax | 53.020 MHz | **64.469 MHz** | **+11.45 MHz（+29% 余量）** |
 | Setup/Hold 违例 / TNS | 0 / 0 | 0 / 0 | 保持 |
 
+本轮截断容错改动后（`verify_project.tcl` 构建）：Logic **13521/23040 (59%)**、
+CLS **8318/11520 (73%)**、Register 5690、BSRAM 9/56、DSP 6.5/28、Fmax **59.226 MHz**、
+SHA256 `B69DD9A0…`。相对上一版增加 199 Logic / 25 CLS（截断确认与兜底状态机），
+CLS 余量仍有 3202，仍在“最小演示配置”预算内。
+
 主要节省来源（综合报告逐模块）：`attitude` 2593→773 LUT（roll/pitch 自动裁剪）、
 `pages` 2422→740 LUT（诊断页删除）、`tof_page` 595→0（移出综合）、DSP 8.5→6.5；
 编码器毛刺容错新增约 65 Logic / 40 FF（漏桶计数），Fmax 反而因布局改善提升到 64.469 MHz。
@@ -267,7 +330,9 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 
 ## 6. 上板验证步骤（用户接板后执行）
 
-1. 确认 Gowin USB Cable 与板子连接，串口工具未占用调试串口（当前 PC 未检测到板子）。
+1. 确认 Gowin USB Cable 与板子连接；调试串口可能重新枚举（COM 号会变，如 CH9102 从
+   COM14 变成 COM23），用设备管理器确认；串口工具不要同时占用该端口
+   （抓取脚本报 `Access to the port ... is denied` 即为被占用）。
 2. 下载 SRAM 位流（不烧 Flash）：
    ```powershell
    & 'D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe' `
@@ -282,8 +347,10 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 6. 运行连续避障：正常应完成“遇障左绕/右绕、两段 300 mm、按横移回线、恢复巡航”，
    语音播报开始/完成。
 7. 观察并记录：
-   - 转向完成后如出现 `PAUSED`（不出现 FAULT）：说明传感器当时无法给出安全新鲜测距，
-     按 K2 可继续——这属于预期的安全暂停。
+   - 旧版“转向后 FAULT”在本轮修复后不再出现；本轮进一步把“持续精确 20 mm 的障碍侧通道”
+     视为“测距完成但不可用”，转向后直接走固定里程兜底绕行，正常情况下不应再出现 PAUSED。
+   - 若仍出现 `PAUSED`：面板第三行会显示 `R:<route_reason> S<state> V<valid> U<clip>`，
+     按 K2 可继续。把该行和串口日志一起记录（U 位表示哪几路处于 20 mm 截断确认）。
    - 若仍出现 FAULT：记录 OLED 故障行的 `F:xx S:xx M:xx I:xx` 四组码，并从 USB 调试串口
      保存事件日志（`tools/read_serial_log.ps1`）。故障码含义：
      `F`=route reason（0x84 转向后测距等待、0x85 重试耗尽、0x86 运动反复中止等），
@@ -294,8 +361,13 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 
 ## 7. 风险、限制与后续
 
-- 仿真模型不能替代真实光学/机械/电源特性：本轮的“20 mm 卡死自愈”依赖 VL53L0X 对
-  XSHUT 复位的真实响应，需上板确认；若真实板 20 mm 是目标真的过近，则仍会安全暂停。
+- 仿真模型不能替代真实光学/机械/电源特性：20 mm 量程下限截断已改为“确认后作为新鲜
+  测距事件 + 固定里程兜底”，不再依赖 XSHUT 自愈（上板日志证明重初始化无效，已删除该
+  动作）。若真实目标确实在量程下限内，兜底路径会按固定里程绕行，仍有前向避障与行程
+  上限保护。
+- **接地是当前最大的硬件风险**：IMU 地线经 P11-3/LCD_GPIO0/T11 形成地环路时，VL53L0X
+  截断概率显著升高（用户实测“地线掉开反而稳”）。建议按 4.4 节改为专用 GND 星形一点接地，
+  再复测 3–5 次连续避障。
 - 删除 DISPLAY 诊断页后无法在 OLED 上查看 System Status/IMU 姿态/编码器页面；
   故障诊断改由避障面板 F/S/M/I 码 + USB 事件日志承担。若需要恢复页面，可从 git 历史恢复
   并在有资源余量（现有 3.2k CLS）时重新加入。
@@ -324,7 +396,8 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | `67f07b7` | fixed_final 故障注入证据（10/10 无故障 + XSHUT 自愈验证）+ `REPORT.md` §7 对照 + 本技术报告定稿 |
 | `2bf8584` | 两个落后历史 TB 同步（测速预取时序、motion 新端口/abort 语义）+ `tools/board_obstacle_test.ps1`；历史回归全绿 |
 | `39d63f2` | `tools/run_fault_injection.ps1`（10 场景一键回归）+ 回归证据 + README/报告补充 |
-| 本提交 | 编码器换向毛刺容错（历史板级 IL=2/FL=1 证据驱动）+ 新单测 + 重新构建 13322/58%、CLS 72%、**Fmax 64.469 MHz**、SHA `2CD51D8E…` + 全量回归 |
+| `69d2c89` / `99a3e2f` | 编码器毛刺容错；串口新增 route_reason/tof_reused、PAUSED 面板显示 R/S/V/U；上板运行证据（1 次 PAUSED@WAIT_PARALLEL + 2 次完整绕障） |
+| 本提交 | 20 mm 截断容错（连续 2 次确认→新鲜测距事件）+ 固定里程兜底绕行 + 删除无效 XSHUT 自愈/`tof_three`；11 场景回归断言无故障且无 PAUSED；重建 **13521/59%、CLS 73%、Fmax 59.226 MHz**、SHA `B69DD9A0…` |
 
 复现命令：
 
@@ -335,7 +408,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 # 历史回归（已同步全绿）
 ./tools/run_legacy_regression.ps1
 
-# 转向后故障注入回归：10 场景，断言 0 次故障锁存
+# 转向后故障注入回归：11 场景，断言 0 次故障锁存、0 次 PAUSED，场景 10 断言进入兜底
 ./tools/run_fault_injection.ps1
 
 # 故障注入基线（用户旧版本）与修复后单场景对照

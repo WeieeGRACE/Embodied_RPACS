@@ -13,7 +13,7 @@ module system_motion #(
  input wire clk_50m,reset_n,stop_gate,stop_request,uart_rx,voice_enable,
  input wire menu_valid,input wire [7:0] menu_command,
  input wire gear_commit,input wire [1:0] gear_value,
- input wire [47:0] distances,input wire [2:0] tof_seen,tof_valid,post_turn,sample_mask,tof_reused,
+ input wire [47:0] distances,input wire [2:0] tof_seen,tof_valid,post_turn,sample_mask,tof_reused, // tof_reused = confirmed minimum-range clip mask
  input wire sensor_fault,input wire [2:0] sensor_degraded,
  output wire sensor_refresh,sensor_monitor,
  output wire avoid_mode,auto_run,waiting,show_avoid,show_root,output wire [4:0] route_state,
@@ -141,6 +141,8 @@ module system_motion #(
  .manual_action(action),.manual_submit(start),.stopping(stopping),.route_cancel(route_cancel),
  .route_press(route_press),.refresh(request_refresh),.show_avoid(show_avoid),.show_root(show_root),
  .response(response),.aux_valid(aux_valid),.aux_type(aux_type),.aux_code(aux_code),.mode_status(mode_status),.start_diag(start_diag));
+ // tof_reused doubles as the confirmed micro-range clip mask for the route
+ // barrier fallback and as the U field of the obstacle PAUSED row.
  // Registered by the USB logger; independent from ASR control traffic.
  assign debug_state={start_diag,route_reason,menu_command,ack,aux_type,aux_code,
   tof_reused,route_state,voice_enable,modules_ready,(&tof_seen && &tof_valid),fault,
@@ -178,7 +180,7 @@ module system_motion #(
  obstacle_route #(.CLK_HZ(CLK_HZ),.WINDOW_CYCLES(WINDOW_CYCLES)) route(
  .clk(clk),.rst_n(rst_n && auto_run),.press(route_press),
  .ready(modules_ready && &tof_seen && &tof_valid),.fault(fault),.distances(distances),
- .post_turn(post_turn),.sample_mask(sample_mask),.sensor_hold(sensor_hold),.position_l(um_l),.position_r(um_r),.yaw(yaw),
+ .post_turn(post_turn),.sample_mask(sample_mask),.clip_mask(tof_reused),.sensor_hold(sensor_hold),.position_l(um_l),.position_r(um_r),.yaw(yaw),
  .busy(buffer_busy),.cmd_ready(buffer_ready),.done(done),.aborted(aborted),.rejected(rejected),
  .start(route_start),.stop(route_stop),.rotate(route_rotate),.reverse(route_reverse),.end_kind(route_end),
  .goal(route_goal),.speed(route_speed),.speed_cap(route_cap),.refresh(route_refresh),.state(route_state),

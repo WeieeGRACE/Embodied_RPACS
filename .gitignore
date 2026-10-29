@@ -227,6 +227,10 @@
 /records/fault_injection/fixed_final_regression/*
 !/records/fault_injection/fixed_final_regression/*.md
 !/records/fault_injection/fixed_final_regression/*.log
+!/records/fault_injection/fixed_clip_fallback/
+/records/fault_injection/fixed_clip_fallback/*
+!/records/fault_injection/fixed_clip_fallback/*.md
+!/records/fault_injection/fixed_clip_fallback/*.log
 !/records/resource_20261029/
 /records/resource_20261029/*
 !/records/resource_20261029/*.md

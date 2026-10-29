@@ -530,3 +530,65 @@ baseline 运行不带该参数，保持旧菜单映射，因此 baseline 证据�
 - fixed 证据钉定到 2026-10-29 12:25 冻结的最终工作区 `src/`（`records/fault_injection/fixed_final/`）；
   若此后 `src/` 再改动，需按 §8.2 重新生成 fixed_final 日志并刷新 §7。baseline 证据钉定到
   `3556192`/`0bd1a77` 的冻结副本（`baseline_src/`），不受工作区改动影响。
+
+---
+
+## 9. 第二轮：20 mm 截断容错与固定里程兜底（2026-10-29，上板日志驱动）
+
+### 9.1 上板证据
+
+
+ecords/robustness_20261029/BOARD_RUN_ANALYSIS.md 记录了用户实测的 3 次连续避障
+（诊断固件：串口 D 行新增 route_reason / tof_reused，OLED PAUSED 行显示 R/S/V/U）：
+
+- 第 1 次：转向完成进入 WAIT_PARALLEL(8) 后 RIGHT 通道 	of_reused bit2 持续置位
+  （连续精确 20 mm），4 次 1000 ms barrier 重试全部超时 → BLOCKED、
+eason=0x85、
+  uto_run=0 → 面板 PAUSED。
+- 第 2、3 次：同一固件完整跑完绕障并恢复巡航（各约 47–48 s），证明失败是间歇的
+  20 mm 截断，而不是状态机死锁。
+- 全程 0 条 E  故障行：第一轮修复已消除“转 90° 后 FAULT 锁存”，剩余问题收敛为 PAUSED。
+- 同一批日志证明第一轮“连续 4 次 20 mm → XSHUT 重初始化”的自愈无效：4 s 内数十次
+  重初始化后通道仍持续 20 mm。
+
+### 9.2 修复
+
+- obstacle_sensors.v：连续 CLIP_CONFIRM=2 个精确 20 mm 视为“测距完成但目标过近/不可测”，
+  不参与几何距离（distances 保持上次有效值），但作为 post_turn/resh 新鲜事件放行；
+  
+eused 输出截断确认掩码。删除 
+ecover_req 与 	of_driver.recover_req 端口、
+  以及未使用的 	of_three 模块。
+- obstacle_route.v：新增 clip_mask 输入与 FALLBACK_SHIFT_UM=500000 /
+  FALLBACK_PASS_UM=600000。WAIT_PARALLEL/WAIT_BACK/SAMPLE_SHIFT 检测到障碍侧
+  截断确认时，不再等待侧向几何，直接按固定里程完成兜底绕行（横移 500 + 额外 300 +
+  直行 600 + 额外 300 mm + 按实际横移回线），正常侧向可用时保持原精确路线。
+- 回归脚本 	ools/run_fault_injection.ps1：11 场景（新增场景 10 K_CLIP_FALLBACK），
+  断言 ault_seen=0、ault_latched=0、paused=0、locked_seen=0，场景 10 还要
+  
+eached_shift=1。
+
+### 9.3 结果（fixed_clip_fallback）
+
+| 场景 | 结果（FIXED_RUN_OBSERVED 摘要） |
+|---|---|
+| 0 A_FRONT（FRONT 20 mm 1.2 s） | fault=0、paused=0、clip_confirm=1、tof_resets=0、route_state=6 |
+| 1 A_SIDE（RIGHT 20 mm 1.2 s） | fault=0、paused=0、clip_confirm=1、route_state=22（经兜底进入 SHIFT_EXTRA） |
+| 2 B（20 mm 永久） | fault=0、paused=0、route_state=6（旧版此处 4 s 后 BLOCKED/PAUSED） |
+| 10 K_CLIP_FALLBACK（RIGHT 持续 20 mm） | fault=0、paused=0、**reached_shift=1** |
+| 其余 7 场景 | fault=0、paused=0 |
+
+7 套主工程仿真与历史回归同步重跑通过；新位流 SHA256
+B69DD9A04C3BCB6F06ED60B8311C14892A8FE185E804A341D0828F4423EA1B2C
+（Logic 13521/59%、CLS 8318/73%、Fmax 59.226 MHz、0 违例）。
+证据：
+ecords/fault_injection/fixed_clip_fallback/*.log、
+
+ecords/robustness_20261029/fault_injection_clip_fallback.log。
+
+### 9.4 边界
+
+仿真仍只注入协议级距离，不建模真实光学/地噪声；上板日志已把“20 mm 截断”确认为真实
+物理现象（用户还观察到底线地环路会影响截断频率），因此本轮同时给出接地整改建议
+（IMU/ToF 使用专用 GND 星形一点接地，不经 T11/LCD_GPIO0）。截断容错版位流需上板
+连续避障 3–5 次复测确认。

@@ -3,7 +3,7 @@
 # vmap speed_prefetch_lib sim/work_speed_prefetch 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 16:52:08 on Oct 23,2026
+# Start time: 16:51:23 on Oct 29,2026
 # vlog -sv -work speed_prefetch_lib src/motor/speed_measurement_and_velocity_filter.v sim/tb_speed_prefetch.sv 
 # -- Compiling module speed_measurement_and_velocity_filter
 # -- Compiling module speed_prefetch_case
@@ -11,10 +11,10 @@
 # 
 # Top level modules:
 # 	tb_speed_prefetch
-# End time: 16:52:09 on Oct 23,2026, Elapsed time: 0:00:01
+# End time: 16:51:23 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" speed_prefetch_lib.tb_speed_prefetch 
-# Start time: 16:52:09 on Oct 23,2026
+# Start time: 16:51:23 on Oct 29,2026
 # ** Note: (vsim-8009) Loading existing optimized design _opt
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
@@ -44,9 +44,9 @@
 # Loading work.speed_prefetch_case(fast__5)
 # Loading work.speed_measurement_and_velocity_filter(fast__5)
 # PASS speed history prefetch: windows 1/2/4, lengths 1/3/4, both warmup modes, signed extremes/rounding and reset
-# ** Note: $finish    : sim/tb_speed_prefetch.sv(68)
+# ** Note: $finish    : sim/tb_speed_prefetch.sv(74)
 #    Time: 4080 ns  Iteration: 2  Instance: /tb_speed_prefetch
-# Break in Module tb_speed_prefetch at sim/tb_speed_prefetch.sv line 68
-# Stopped at sim/tb_speed_prefetch.sv line 68
-# End time: 16:52:09 on Oct 23,2026, Elapsed time: 0:00:00
+# Break in Module tb_speed_prefetch at sim/tb_speed_prefetch.sv line 74
+# Stopped at sim/tb_speed_prefetch.sv line 74
+# End time: 16:51:24 on Oct 29,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

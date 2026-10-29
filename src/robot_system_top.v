@@ -97,7 +97,7 @@ module robot_system_top #(
  .scl({tof_right_scl,tof_left_scl,tof_front_scl}),.sda({tof_right_sda,tof_left_sda,tof_front_sda}),
  .xshut_n({tof_right_xshut_n,tof_left_xshut_n,tof_front_xshut_n}),
  .seen(tof_seen),.valid(tof_valid),.distances(distances),.post_turn(post_turn),.event_mask(sample_mask),
- .degraded(tof_degraded),.errors(tof_errors),.statuses(tof_statuses),.reused(reused),.fault(sensor_fault),.ages(),.raw_distances(),.comm_ages(),.confirm_ages(),.pending(),.raw_event_mask(),.fault_bits());
+ .degraded(tof_degraded),.errors(tof_errors),.statuses(tof_statuses),.reused(reused),.fault(sensor_fault),.ages(),.raw_distances(),.comm_ages(),.raw_event_mask(),.fault_bits());
  // Minimal demo UI: the DISPLAY diagnostic group and its ToF page were removed,
  // so the text pipeline only serves the root menu, MANUAL, SETTINGS and the
  // OBSTACLE AVOID panel.

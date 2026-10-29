@@ -3,7 +3,7 @@
 # vmap attitude_lib sim/work_imu_attitude 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 16:52:05 on Oct 23,2026
+# Start time: 16:51:19 on Oct 29,2026
 # vlog -sv -work attitude_lib src/imu/imu_attitude_fixed.v src/imu/attitude_angle_to_digits.v sim/tb_imu_attitude_fixed.sv 
 # -- Compiling module imu_attitude_fixed
 # -- Compiling module imu_attitude_bias_divider
@@ -11,14 +11,16 @@
 # -- Compiling module imu_attitude_sqrt
 # -- Compiling module imu_attitude_divider
 # -- Compiling module attitude_angle_to_digits
+# -- Compiling module attitude_angle_to_digits_pipeline
 # -- Compiling module tb_imu_attitude_fixed
 # 
 # Top level modules:
+# 	attitude_angle_to_digits_pipeline
 # 	tb_imu_attitude_fixed
-# End time: 16:52:05 on Oct 23,2026, Elapsed time: 0:00:00
+# End time: 16:51:19 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" attitude_lib.tb_imu_attitude_fixed 
-# Start time: 16:52:05 on Oct 23,2026
+# Start time: 16:51:19 on Oct 29,2026
 # ** Note: (vsim-8009) Loading existing optimized design _opt
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
@@ -46,5 +48,5 @@
 #    Time: 1373420 ns  Iteration: 1  Instance: /tb_imu_attitude_fixed
 # Break in Module tb_imu_attitude_fixed at sim/tb_imu_attitude_fixed.sv line 114
 # Stopped at sim/tb_imu_attitude_fixed.sv line 114
-# End time: 16:52:05 on Oct 23,2026, Elapsed time: 0:00:00
+# End time: 16:51:20 on Oct 29,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

@@ -5,9 +5,12 @@ module obstacle_route #(
  parameter integer CLK_HZ=50000000,WINDOW_CYCLES=CLK_HZ/100,
  EXTRA_UM=300000,PASS_LIMIT_UM=2000000,
  SLOW_MM=600,STOP_MM=130,AVOID_MM=85,SIDE_MM=300,HYST_MM=50,EDGE_MM=600,EDGE_RISE_MM=300,STABLE_MM=50,
- STEP_TIMEOUT_MS=10000,BARRIER_TIMEOUT_MS=1000
+ STEP_TIMEOUT_MS=10000,BARRIER_TIMEOUT_MS=1000,
+ // Blind-detour backstop used when the obstacle-side lane keeps reporting the
+ // VL53L0X minimum-range clamp instead of a usable face distance.
+ FALLBACK_SHIFT_UM=500000,FALLBACK_PASS_UM=600000
 )(input wire clk,rst_n,press,ready,fault,input wire [47:0] distances,
- input wire [2:0] post_turn,input wire [2:0] sample_mask,input wire sensor_hold,
+ input wire [2:0] post_turn,input wire [2:0] sample_mask,input wire [2:0] clip_mask,input wire sensor_hold,
  input wire signed [31:0] position_l,position_r,yaw,
  input wire busy,cmd_ready,done,aborted,rejected,
  output wire start,stop,rotate,reverse,output wire [1:0] end_kind,
@@ -21,6 +24,7 @@ module obstacle_route #(
  localparam integer LOW=(64'd50000*WINDOW_CYCLES)/CLK_HZ;
  reg issued,left_side,slow_mode,box_seen,edge_seen,pass_clear_seen;
  reg [2:0] retry_count;
+ reg fallback_shift,fallback_pass;
  reg [1:0] clear_count,front_count,stable_count;
  reg [15:0] box_distance;
  reg signed [31:0] home,shift_l,shift_r,pass_l,pass_r,leg_l,leg_r;
@@ -58,6 +62,10 @@ module obstacle_route #(
  wire pass_limit=traveled_l>=PASS_LIMIT_UM || traveled_r>=PASS_LIMIT_UM;
  wire signed [31:0] shifted_l=position_l-shift_l,shifted_r=position_r-shift_r;
  wire shift_limit=shifted_l>=PASS_LIMIT_UM || shifted_r>=PASS_LIMIT_UM;
+ wire [2:0] clip_lane=left_side ? 2:1;
+ wire side_clip=clip_mask[clip_lane];
+ wire signed [31:0] shift_traveled=((position_l-shift_l)>>>1)+((position_r-shift_r)>>>1);
+ wire signed [31:0] pass_traveled=((position_l-pass_l)>>>1)+((position_r-pass_r)>>>1);
  wire stable_side={1'b0,side_mm}+STABLE_MM>={1'b0,box_distance} &&
                   {1'b0,side_mm}<={1'b0,box_distance}+STABLE_MM;
  wire cleared_side={1'b0,side_mm}>={1'b0,box_distance}+EDGE_RISE_MM;
@@ -99,6 +107,7 @@ module obstacle_route #(
  if(!rst_n)begin
  state<=IDLE;reason<=0;route_fault<=0;refresh<=0;issued<=0;left_side<=1;home<=0;pass_clear_seen<=0;
  shift_l<=0;shift_r<=0;pass_l<=0;pass_r<=0;actual_shift<=0;slow_mode<=0;retry_count<=0;
+ fallback_shift<=0;fallback_pass<=0;
  ticks<=0;elapsed<=0;box_seen<=0;edge_seen<=0;clear_count<=0;front_count<=0;stable_count<=0;box_distance<=0;leg_l<=0;leg_r<=0;
  end else begin
  refresh<=0;
@@ -136,6 +145,7 @@ module obstacle_route #(
  end else case(state)
  IDLE,BLOCKED,USER_STOP:if(press && ready && !busy)begin
  home<=yaw;box_seen<=0;edge_seen<=0;pass_clear_seen<=0;clear_count<=0;reason<=0;
+ fallback_shift<=0;fallback_pass<=0;
  if(front>STOP_MM)begin slow_mode<=front<=SLOW_MM;advance(CRUISE_START);end
  else if(front>AVOID_MM)begin reason<=2;advance(BRAKE_SELECT);end
  else begin reason<=2;advance(BLOCKED);end
@@ -157,12 +167,21 @@ module obstacle_route #(
  end
  WAIT_PARALLEL:if(!refresh && barrier_fresh)begin
  if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
- else begin box_distance<=side_mm;stable_count<=0;box_seen<=0;clear_count<=0;
- shift_l<=position_l;shift_r<=position_r;advance(SAMPLE_SHIFT);end
+ else if(side_clip)begin
+ // The obstacle-side lane only reports the minimum-range clamp, so there is no
+ // usable face distance to learn. Keep the obstacle distance conservative and
+ // open the detour on fixed mileage instead of waiting for the barrier forever.
+ box_distance<=AVOID_MM;fallback_shift<=1;shift_l<=position_l;shift_r<=position_r;
+ advance(SHIFT);
+ end else begin box_distance<=side_mm;stable_count<=0;box_seen<=0;clear_count<=0;
+ fallback_shift<=0;shift_l<=position_l;shift_r<=position_r;advance(SAMPLE_SHIFT);end
  end
  // Learn the obstacle face while stationary. Only accepted new samples from
  // the near-box lane count; no event is manufactured for discarded20.
  SAMPLE_SHIFT:if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
+ else if(side_clip)begin
+ box_distance<=AVOID_MM;fallback_shift<=1;shift_l<=position_l;shift_r<=position_r;advance(SHIFT);
+ end
  else if(side_sample)begin
  // A narrow box may already be clear after the pivot. Require three normal
  // clear results; the pre-turn front observation established the obstacle.
@@ -177,6 +196,7 @@ module obstacle_route #(
  end
  SHIFT:begin
  if(front_block || shift_limit)begin advance(BLOCKED);reason<=front_block ? 4:5;end
+ else if(fallback_shift && shift_traveled>=FALLBACK_SHIFT_UM)advance(BRAKE_SHIFT);
  else if(side_sample)begin
  if(cleared_side)begin
  if(clear_count==2)advance(BRAKE_SHIFT);else clear_count<=clear_count+1'b1;
@@ -195,10 +215,14 @@ module obstacle_route #(
  end
  WAIT_BACK:if(!refresh && barrier_fresh)begin
  if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
- else begin pass_l<=position_l;pass_r<=position_r;box_seen<=0;pass_clear_seen<=side_mm>=EDGE_MM;stable_count<=0;clear_count<=0;advance(PASS);end
+ else begin pass_l<=position_l;pass_r<=position_r;box_seen<=0;stable_count<=0;clear_count<=0;
+ if(side_clip)begin box_distance<=AVOID_MM;fallback_pass<=1;pass_clear_seen<=1;end
+ else begin fallback_pass<=0;pass_clear_seen<=side_mm>=EDGE_MM;end
+ advance(PASS);end
  end
  PASS:begin
  if(front_block || pass_limit)begin advance(BLOCKED);reason<=front_block ? 4:5;end
+ else if(fallback_pass && pass_traveled>=FALLBACK_PASS_UM)advance(BRAKE_EDGE);
  else if(side_sample)begin
  if(!pass_clear_seen)begin
  if(side_mm>=EDGE_MM)pass_clear_seen<=1;

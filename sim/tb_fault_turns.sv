@@ -40,6 +40,7 @@ module tb_fault_turns;
  localparam integer SC_G_NEAR  = 7;
  localparam integer SC_H_TURN2 = 8;
  localparam integer SC_I_HOLD  = 9;
+ localparam integer SC_K_CLIP  = 10;
 
  reg clk=0; always #10 clk=~clk;
  reg k0=1,k1=1,k2=1,rx=1,miso=0;
@@ -48,6 +49,7 @@ module tb_fault_turns;
  wire a,a1,a2,b,b1,b2,st,tx,sck,mosi,cs_n,ready_led,run_led,fault_led,voice_led;
  wire usb,oscl;tri1 osda;tri1 [2:0] scl,sda,xshut;
  reg completed=0,model_on=0,freeze_l=0,freeze_r=0;
+ reg route_started=0,pause_seen=0,blocked_seen=0;
  reg inject_enc_l=0,inject_enc_r=0;
  reg [7:0] model_id=8'h24,model_error=0;
  reg signed [15:0] gyro_model=17;
@@ -60,6 +62,7 @@ module tb_fault_turns;
                                 //   root item0=MANUAL(2), item1=SETTINGS(4), item2=OBSTACLE(5)
  integer cyc=0;                 // free-running clock-cycle counter
  integer mark_cyc=0;            // cycle of the last injection marker
+ integer reach_shift=0;         // scenario K: fallback detour entered
  reg mark_valid=0;
 
  // first-fault snapshot (filled by the monitor below)
@@ -74,19 +77,21 @@ module tb_fault_turns;
  // Fixed-RTL only probes (compiled with +define+FIXED_RTL in the fixed runner):
  // count channel glitch-recovery requests vs the driver actually accepting
  // them, to check the intended "4 consecutive exact-20 mm -> XSHUT re-init".
+ // Count confirmed minimum-range clips per channel (fixed RTL) and bus-error
+ // re-inits (driver recover), to prove the clip path no longer churns XSHUT.
  integer req_cnt0=0,req_cnt1=0,req_cnt2=0,rec_cnt0=0,rec_cnt1=0,rec_cnt2=0;
 `ifdef FIXED_RTL
  reg req_q0=0,req_q1=0,req_q2=0,rec_q0=0,rec_q1=0,rec_q2=0;
  always @(posedge clk)begin
-  req_q0<=dut.sensors.channels[0].recover_req;
-  req_q1<=dut.sensors.channels[1].recover_req;
-  req_q2<=dut.sensors.channels[2].recover_req;
+  req_q0<=dut.sensors.channels[0].confirmed;
+  req_q1<=dut.sensors.channels[1].confirmed;
+  req_q2<=dut.sensors.channels[2].confirmed;
   rec_q0<=dut.sensors.channels[0].driver.recover;
   rec_q1<=dut.sensors.channels[1].driver.recover;
   rec_q2<=dut.sensors.channels[2].driver.recover;
-  if(dut.sensors.channels[0].recover_req && !req_q0)req_cnt0<=req_cnt0+1;
-  if(dut.sensors.channels[1].recover_req && !req_q1)req_cnt1<=req_cnt1+1;
-  if(dut.sensors.channels[2].recover_req && !req_q2)req_cnt2<=req_cnt2+1;
+  if(dut.sensors.channels[0].confirmed && !req_q0)req_cnt0<=req_cnt0+1;
+  if(dut.sensors.channels[1].confirmed && !req_q1)req_cnt1<=req_cnt1+1;
+  if(dut.sensors.channels[2].confirmed && !req_q2)req_cnt2<=req_cnt2+1;
   if(dut.sensors.channels[0].driver.recover && !rec_q0)rec_cnt0<=rec_cnt0+1;
   if(dut.sensors.channels[1].driver.recover && !rec_q1)rec_cnt1<=rec_cnt1+1;
   if(dut.sensors.channels[2].driver.recover && !rec_q2)rec_cnt2<=rec_cnt2+1;
@@ -379,15 +384,13 @@ module tb_fault_turns;
    f_enc_r<=dut.control.enc_fault_r;
    f_txovf<=dut.control.tx_overflow;
    f_auto<=dut.control.auto_run;
-   $display("EVIDENCE FAULT_T0 dt_from_mark_ms=%0d dut_ms=%0d time_ns=%0t ctrl.fault=%b fault_latched=%b sensor_fault=%b fault_bits=%04h ch0_faults=%02h ch1_faults=%02h ch2_faults=%02h route_state=%0d route_fault=%b route_reason=%02h route_elapsed_ms=%0d motion_fault=%02h motion_phase=%0d motion_fault_code=%02h motion_stop_elapsed=%0d imu_bad=%b imu_error=%02h sensor_error=%02h enc_fault=%b/%b tx_overflow=%b post_turn=%b fresh=%b%b%b ambiguous=%b%b%b reused=%b%b%b auto_run=%b avoid_mode=%b fault_led=%b status=%02h distances=%04h/%04h/%04h tof_raw_age=%0d/%0d/%0d tof_comm_age=%0d/%0d/%0d tof_error=%02h/%02h/%02h fault_events=%0d",
+   $display("EVIDENCE FAULT_T0 dt_from_mark_ms=%0d dut_ms=%0d time_ns=%0t ctrl.fault=%b fault_latched=%b sensor_fault=%b fault_bits=%04h ch0_faults=%02h ch1_faults=%02h ch2_faults=%02h route_state=%0d route_fault=%b route_reason=%02h route_elapsed_ms=%0d motion_fault=%02h motion_phase=%0d motion_fault_code=%02h motion_stop_elapsed=%0d imu_bad=%b imu_error=%02h sensor_error=%02h enc_fault=%b/%b tx_overflow=%b post_turn=%b fresh=%b%b%b auto_run=%b avoid_mode=%b fault_led=%b status=%02h distances=%04h/%04h/%04h tof_raw_age=%0d/%0d/%0d tof_comm_age=%0d/%0d/%0d tof_error=%02h/%02h/%02h fault_events=%0d",
     dt_ms,cyc/DUT_MS,$time,dut.control.fault,dut.control.fault_latched,dut.control.sensor_fault,
     dut.sensors.fault_bits,dut.sensors.channels[0].faults,dut.sensors.channels[1].faults,dut.sensors.channels[2].faults,
     dut.control.route.state,dut.control.route.route_fault,dut.control.route.reason,dut.control.route.elapsed,
     dut.control.motion_fault,dut.control.motion.phase,dut.control.motion.fault_code,dut.control.motion.stop_elapsed,
     dut.control.imu_bad,dut.control.imu_error,dut.control.sensor_error,dut.control.enc_fault_l,dut.control.enc_fault_r,
     dut.control.tx_overflow,dut.post_turn,dut.sensors.channels[0].fresh,dut.sensors.channels[1].fresh,dut.sensors.channels[2].fresh,
-    dut.sensors.channels[0].ambiguous,dut.sensors.channels[1].ambiguous,dut.sensors.channels[2].ambiguous,
-    dut.sensors.channels[0].hold20,dut.sensors.channels[1].hold20,dut.sensors.channels[2].hold20,
     dut.control.auto_run,dut.avoid_mode,dut.led_fault,dut.control.status,dut.distances[15:0],dut.distances[31:16],dut.distances[47:32],
     dut.sensors.channels[0].age,dut.sensors.channels[1].age,dut.sensors.channels[2].age,
     dut.sensors.channels[0].comm_age,dut.sensors.channels[1].comm_age,dut.sensors.channels[2].comm_age,
@@ -400,6 +403,8 @@ module tb_fault_turns;
    $display("EVIDENCE ROUTE_FAULT state=%0d reason=%02h route_fault=%b barrier_state_elapsed_ms=%0d dut_ms=%0d",
     dut.control.route.state,dut.control.route.reason,dut.control.route.route_fault,dut.control.route.elapsed,cyc/DUT_MS);
   end
+  if(route_started && dut.avoid_mode && !dut.auto_run && !dut.control.fault)pause_seen<=1;
+  if(dut.route_state==17)blocked_seen<=1;
   if(auto_q && !dut.control.auto_run)
    $display("EVIDENCE AUTO_DROP dut_ms=%0d ctrl.fault=%b fault_latched=%b sensor_fault=%b route_fault=%b motion_fault=%02h imu_bad=%b fault_led=%b",
     cyc/DUT_MS,dut.control.fault,dut.control.fault_latched,dut.control.sensor_fault,dut.control.route.route_fault,
@@ -502,9 +507,9 @@ module tb_fault_turns;
    @(posedge clk);n=n+1;
    if(dut.sensors.channels[2].error==0 && dut.sensors.channels[2].fresh==1)begin r=1;n=400*DUT_MS;end
   end
-  $display("EVIDENCE CHANNEL_RECOVERY ch=2 recovered=%0d error=%02h comm_age=%0d fresh=%b good=%b hold20=%b faults=%02h dut_ms=%0d",
+  $display("EVIDENCE CHANNEL_RECOVERY ch=2 recovered=%0d error=%02h comm_age=%0d fresh=%b good=%b faults=%02h dut_ms=%0d",
    r,dut.sensors.channels[2].error,dut.sensors.channels[2].comm_age,dut.sensors.channels[2].fresh,
-   dut.sensors.channels[2].good,dut.sensors.channels[2].hold20,dut.sensors.channels[2].faults,cyc/DUT_MS);
+   dut.sensors.channels[2].good,dut.sensors.channels[2].faults,cyc/DUT_MS);
  end endtask
 
  // D: IMU health-error burst during the rotation.
@@ -559,15 +564,15 @@ module tb_fault_turns;
   limit=hold_ms*DUT_MS;n=0;
   while(n<limit && f_cyc<0)begin @(posedge clk);n=n+1;end
   cycles(3*DUT_MS);
-  $display("EVIDENCE HOLD20_AT_FAULT ch=0 hold20=%b fresh=%b post_turn=%b ambiguous=%b accepted=%0d age=%0d comm_age=%0d error=%02h faults=%02h dt_ms=%0d",
-   dut.sensors.channels[0].hold20,dut.sensors.channels[0].fresh,dut.post_turn[0],
-   dut.sensors.channels[0].ambiguous,dut.sensors.channels[0].accepted,dut.sensors.channels[0].age,
+  $display("EVIDENCE CLIP_AT_FAULT ch=0 fresh=%b post_turn=%b accepted=%0d age=%0d comm_age=%0d error=%02h faults=%02h dt_ms=%0d",
+   dut.sensors.channels[0].fresh,dut.post_turn[0],
+   dut.sensors.channels[0].accepted,dut.sensors.channels[0].age,
    dut.sensors.channels[0].comm_age,dut.sensors.channels[0].error,dut.sensors.channels[0].faults,
    (f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS);
   cycles(post_ms*DUT_MS);
-  $display("EVIDENCE HOLD20_TOTAL ch=0 total_hold_ms=%0d hold20=%b fresh=%b post_turn=%b ambiguous=%b accepted=%0d age=%0d comm_age=%0d error=%02h faults=%02h fault=%b latch=%b dut_ms=%0d",
-   hold_ms+post_ms,dut.sensors.channels[0].hold20,dut.sensors.channels[0].fresh,dut.post_turn[0],
-   dut.sensors.channels[0].ambiguous,dut.sensors.channels[0].accepted,dut.sensors.channels[0].age,
+  $display("EVIDENCE CLIP_TOTAL ch=0 total_hold_ms=%0d fresh=%b post_turn=%b accepted=%0d age=%0d comm_age=%0d error=%02h faults=%02h fault=%b latch=%b dut_ms=%0d",
+   hold_ms+post_ms,dut.sensors.channels[0].fresh,dut.post_turn[0],
+   dut.sensors.channels[0].accepted,dut.sensors.channels[0].age,
    dut.sensors.channels[0].comm_age,dut.sensors.channels[0].error,dut.sensors.channels[0].faults,
    dut.control.fault,dut.control.fault_latched,cyc/DUT_MS);
   ranges[15:0]=16'd2000;
@@ -647,6 +652,7 @@ module tb_fault_turns;
   choose(5,0);keypress(2);cycles(100);wait(dut.auto_run);wait(run_led);
   $display("EVENT ROUTE_STARTED auto_run=%b avoid_mode=%b route_state=%0d dut_ms=%0d time_ns=%0t",
    dut.auto_run,dut.avoid_mode,dut.route_state,cyc/DUT_MS,$time);
+  route_started=1;
   if(dut.control.fault)$fatal(1,"fault present before injection");
 
   drive_to_first_turn(ok_drv);
@@ -781,6 +787,36 @@ module tb_fault_turns;
     else
      $display("FAIL scenario H_TURN2: expected route 0x84 latch at second barrier, observed route_reason=%02h route_fault=%b sensor_fault=%b",f_reason,f_rfault,f_sfault);
    end
+   SC_K_CLIP:begin
+    // Obstacle-side (RIGHT) lane permanently clamped at 20 mm right after the
+    // first rotation. Old RTL: 4x1000 ms barrier timeouts -> BLOCKED/PAUSED.
+    // Fixed RTL: the confirmed clip is a fresh shot, so the route opens the
+    // fixed-mileage detour immediately.
+    wait_turn_done(ok_turn);
+    mark_valid=1;mark_cyc=cyc;
+    $display("EVENT INJECT_CLIP_FALLBACK ch=2 mm=20 route_state=%0d dut_ms=%0d time_ns=%0t",
+     dut.route_state,cyc/DUT_MS,$time);
+    ranges[47:32]=16'd20;
+    if(fixed_mode)begin
+     wait_route(6,2000*DUT_MS,w_ok);
+     if(!w_ok)wait_route(21,2000*DUT_MS,w_ok);
+     reach_shift=w_ok;
+    end else begin
+     n=0;limit=5000*DUT_MS;
+     while(n<limit && f_cyc<0)begin @(posedge clk);n=n+1;end
+    end
+    cycles(5*DUT_MS);
+    ranges[47:32]=16'd2000;
+    cycles(5*DUT_MS);
+    print_snapshot();
+    $display("EVIDENCE CLIP_FALLBACK reached_shift=%0d fixed=%0d route_state=%0d paused=%b blocked_seen=%b dut_ms=%0d",
+     reach_shift,fixed_mode,dut.route_state,pause_seen,blocked_seen,cyc/DUT_MS);
+    check_ok=(!fixed_mode)&&(f_cyc>=0)&&(f_rfault==1)&&(f_reason==8'h84)&&(f_bits==15'h0000)&&(f_sfault==0);
+    if(check_ok)
+     $display("PASS scenario K: baseline latched 0x84 on a permanent side clip after turn");
+    else if(!fixed_mode)
+     $display("FAIL scenario K: expected baseline 0x84 latch, observed route_reason=%02h route_fault=%b",f_reason,f_rfault);
+   end
    default:$fatal(1,"unknown scenario id %0d",scenario);
   endcase
 
@@ -788,7 +824,7 @@ module tb_fault_turns;
    // Observation-only run of the fixed RTL: allow the route to continue or the
    // fault to self-clear, then publish the authoritative fixed-version result.
    cycles(300*DUT_MS);
-   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d glitch_recover_req=%0d/%0d/%0d driver_recover=%0d/%0d/%0d dut_ms=%0d",
+   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d clip_confirm=%0d/%0d/%0d driver_recover=%0d/%0d/%0d paused=%b blocked_seen=%b reached_shift=%0d dut_ms=%0d",
     scenario,(f_cyc>=0),dut.control.fault_latched,(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS,dut.route_state,
     dut.control.auto_run,dut.avoid_mode,dut.control.sensor_fault,dut.sensors.fault_bits,
     dut.sensors.channels[0].faults,dut.sensors.channels[1].faults,dut.sensors.channels[2].faults,
@@ -798,7 +834,8 @@ module tb_fault_turns;
     dut.control.route.route_fault,dut.control.route.reason,fault_events,dut.control.status,dut.led_fault,
     dut.post_turn,dut.distances[15:0],dut.distances[31:16],dut.distances[47:32],
     resets[0],resets[1],resets[2],shots[0],shots[1],shots[2],
-    req_cnt0,req_cnt1,req_cnt2,rec_cnt0,rec_cnt1,rec_cnt2,cyc/DUT_MS);
+    req_cnt0,req_cnt1,req_cnt2,rec_cnt0,rec_cnt1,rec_cnt2,
+    pause_seen,blocked_seen,reach_shift,cyc/DUT_MS);
    completed=1;
   end else if(check_ok)begin
    $display("RESULT scenario=%0d PASS fault_seen=%b fault_dt_ms=%0d",scenario,(f_cyc>=0),(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS);

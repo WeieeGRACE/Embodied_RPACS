@@ -2,16 +2,18 @@
 #
 # Runs the fault-injection testbench against the CURRENT src/ tree (fixed
 # version, +FIXED=1 +NEWMENU=1) for the requested scenarios and asserts that
-# every run reports fault_seen=0 / fault_latched=0 in its FIXED_RUN_OBSERVED
-# line. The frozen baseline comparison stays reproducible with
-# sim/run_fault_turns*.do (see records/fault_injection/REPORT.md).
+# every run reports fault_seen=0 / fault_latched=0, plus paused=0 /
+# blocked_seen=0 in its FIXED_RUN_OBSERVED line (a paused route is the
+# user-visible failure even when no fault latches). Scenario 10 additionally
+# requires reached_shift=1: a permanently clipped obstacle-side lane must open
+# the fixed-mileage fallback detour instead of stalling WAIT_PARALLEL.
 #
 # Usage:
-#   ./tools/run_fault_injection.ps1                 # all 10 scenarios (~6 min)
-#   ./tools/run_fault_injection.ps1 -Scenarios 0,3,7
+#   ./tools/run_fault_injection.ps1                 # all 11 scenarios
+#   ./tools/run_fault_injection.ps1 -Scenarios 0,3,7,10
 #   ./tools/run_fault_injection.ps1 -Vsim D:/app/modesilm/win64/vsim.exe
 param(
-    [int[]]$Scenarios = @(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+    [int[]]$Scenarios = @(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
     [string]$Vsim = 'D:/app/modesilm/win64/vsim.exe',
     [string]$OutDir = 'records/fault_injection/fixed_final_regression'
 )
@@ -24,6 +26,7 @@ try {
         0 = 'a_front'; 1 = 'a_side'; 2 = 'b_permanent20'; 3 = 'c_i2c_nack'
         4 = 'd_imu_burst'; 5 = 'e_encoder_jitter'; 6 = 'ctrl_100ms20'
         7 = 'g_near_60mm'; 8 = 'h_turn2'; 9 = 'i_hold20'
+        10 = 'k_clip_fallback'
     }
     $failures = @()
     foreach ($scenario in $Scenarios) {
@@ -37,7 +40,9 @@ try {
         $text = Get-Content -LiteralPath $log -Raw
         $observed = [regex]::Matches($text, 'FIXED_RUN_OBSERVED scenario=[^\r\n]*')
         $line = if ($observed.Count) { $observed[$observed.Count - 1].Value } else { '' }
-        $clean = $code -eq 0 -and $line -match 'fault_seen=0' -and $line -match 'fault_latched=0'
+        $clean = $code -eq 0 -and $line -match 'fault_seen=0' -and $line -match 'fault_latched=0' -and
+            $line -match 'paused=0' -and $line -match 'blocked_seen=0'
+        if ($scenario -eq 10) { $clean = $clean -and $line -match 'reached_shift=1' }
         if ($clean) { Write-Host "  PASS $line" } else {
             Write-Host "  FAIL exit=$code $line"
             $failures += "scenario $scenario ($name): exit=$code"
@@ -48,7 +53,7 @@ try {
         $failures | ForEach-Object { Write-Host "FAIL $_" -ForegroundColor Red }
         throw ("fault-injection regression failed: " + ($failures -join '; '))
     }
-    Write-Host "PASS fault-injection regression: $($Scenarios.Count) scenarios, no fault latch (logs in $OutDir)"
+    Write-Host "PASS fault-injection regression: $($Scenarios.Count) scenarios, no fault latch, no PAUSED (logs in $OutDir)"
 }
 finally {
     Remove-Item Env:FAULT_SCENARIO -ErrorAction SilentlyContinue
