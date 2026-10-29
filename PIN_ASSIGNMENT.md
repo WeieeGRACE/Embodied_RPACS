@@ -7,7 +7,7 @@
 | --- | --- | --- |
 | 50 MHz / K0 / K1 / K2 | clk_50m / reset_n / key_enable_n / key_estop_n | T9 / B16 / A15 / C15 |
 | ASRPRO 接收 / 发送 | asr_rx / asr_tx | D17 / D18，P6-5 / P6-6 |
-| USB 接收预留 / 事件发送 | uart_rx / uart_tx | U8 / V8，不要求心跳 |
+| ~~USB 接收预留 / 事件发送~~ | ~~uart_rx / uart_tx~~ | 2026-10-30 验收后删除，V8/U8 已释放 |
 | 左 / 右编码器 A、B | encoder_a_l,b_l / encoder_a_r,b_r | C17、C18 / F14、G14 |
 | 左电机 PWM、IN1、IN2 | PWMA / AIN1 / AIN2 | U17 / M16 / M14 |
 | 右电机 PWM、IN1、IN2 | PWMB / BIN1 / BIN2 | T17 / N15 / H12 |
@@ -38,7 +38,7 @@ ToF SCL/SDA/XSHUT 均只驱动 0 或释放，无内部上下拉；GPIO1 仅作�
 | --- | --- | --- | --- |
 | `asr_uart_rx` | D17 | GPIO4／P6-5 | ASRPRO TX → FPGA；输入、内部上拉、DRIVE=OFF |
 | `asr_uart_tx` | D18 | GPIO5／P6-6 | FPGA → ASRPRO RX；输出、无上下拉、8 mA、空闲高 |
-| `uart_tx`／`uart_rx` | V8／U8 | 板载 USB 串口 | 电脑调试；TX 无上下拉、8 mA；RX 上拉、DRIVE=OFF |
+| ~~`uart_tx`／`uart_rx`~~ | ~~V8／U8~~ | ~~板载 USB 串口~~ | 2026-10-30 验收后删除，引脚已释放 |
 | `clk_50m`／`reset_n` | T9／B16 | 板载时钟／KEY0 | 输入、无上下拉、DRIVE=OFF；50 MHz／低有效复位 |
 | `key_step_n`／`key_fault_n` | A15／C15 | KEY1／KEY2 | 输入、内部上拉、DRIVE=OFF；消抖后的状态推进／故障注入 |
 | `led_ready`／`led_busy`／`led_error`／`led_rx` | D14／C14／B9／A9 | LED0／LED1／LED2／LED3 | 输出、无上下拉、8 mA；就绪／忙碌／错误／有效收帧指示 |
@@ -46,8 +46,8 @@ ToF SCL/SDA/XSHUT 均只驱动 0 或释放，无内部上下拉；GPIO1 仅作�
 
 所有上述信号均为 LVCMOS33、BANK_VCCIO=3.3，串口统一 115200 baud、8N1、无流控。P6-5/6 为底板原理图第 5 页 P6 的 GPIO4/5，不是 P11 的 LCD_GPIO4/5。D17/D18 到 GPIO4/5 的映射沿用计划书和板卡引脚表。
 
-> **调试串口与事件日志计划（2026-10-29 用户确认）**：上板 3–5 次连续避障验收期间仍保留
-> `system_event_logger` 与 V8/U8 调试串口；验收通过后删除事件日志，并**同步移除 `uart_tx`/`uart_rx`
+> **调试串口与事件日志（2026-10-30 已执行）**：上板验收期间保留
+> `system_event_logger` 与 V8/U8 调试串口作为证据；验收通过后已删除事件日志，并**同步移除 `uart_tx`/`uart_rx`
 > 顶层端口与 `src/robot_system_top.cst` 中的 V8/U8 约束，释放这两个 FPGA 球**；
 > `tools/check_system_reports.ps1` 的受约束引脚期望由 44 调整为 42（预研变体已确认 IOB 104→102，
 > 即释放 V8/U8 两个球；资源实测 Logic 13364/58%、CLS 8197/72%、BSRAM 9→5、Fmax 61.113 MHz）。
@@ -93,7 +93,7 @@ IMU 供电使用 P11 的 **VCC3P3**。SPI 由 FPGA 作为主机，INT1/INT2 作�
 | `imu_cs_n` | T18 | 输出 | NONE | 8 | IMU 低有效片选 |
 | `imu_int1` | N14 | 输入 | DOWN | OFF | IMU INT1，内部下拉 |
 | `imu_int2` | N16 | 输入 | DOWN | OFF | IMU INT2，内部下拉 |
-| `uart_tx` | V8 | 输出 | NONE | 8 | 串口遥测发送 |
+| ~~`uart_tx`~~ | ~~V8~~ | — | — | — | 2026-10-30 验收后删除 |
 | `led_ready` | D14 | 输出 | NONE | 8 | IMU 就绪状态 |
 | `led_error` | C14 | 输出 | NONE | 8 | IMU 错误状态 |
 | `led_int1` | B9 | 输出 | NONE | 8 | INT1 同步状态 |
@@ -156,7 +156,7 @@ VIN、GND 使用专用电源接线，不分配 P6/P11 针脚：VIN=3.3 V，GND �
 - 按六孔 V2 实物丝印接线；GPIO1/XSHUT 与附带原理图连接器编号的顺序不同，不按原理图编号数孔。
 - VIN 统一 3.3 V，不接 5 V。SCL/SDA 带 MOS 电平转换和上拉；SCL/SDA/XSHUT 仅输出 0/Z，无内部上下拉。XSHUT/GPIO1 直接连接模块内部 VDD，禁止推挽驱动 3.3 V；GPIO1 为同步输入，DRIVE=OFF，需实测确认输入高电平门限。
 - `tests/vl53l0x_three/` 主动驱动本表信号；`tests/asrpro_uart/` 同名信号同步迁移并保持高阻保护，GPIO1 无上下拉输入。两套新版位流适配同一接线，主工程尚未集成。
-- OLED 保持 R3/T3，调试 UART TX 保持 V8；七路电机控制输出固定低，T11 保持输入、无上下拉、DRIVE=OFF。
+- OLED 保持 R3/T3；调试 UART 已删除（V8/U8 释放）；七路电机控制输出固定低，T11 保持输入、无上下拉、DRIVE=OFF。
 - 12 个信号的 P6 针脚、GPIO 网络及封装管脚各不重复，与 IMU、电机、编码器、ASRPRO、OLED、串口及按键的已记录分配无冲突。检查脚本只允许两套工程中明确的同名测距信号复用，拒绝其他用途占用。
 - P6 编号至 GPIO 网络依据开发板底板原理图第 5 页，GPIO6～17 至封装管脚依据引脚信息表 Sheet1；资料位置见本文“核对依据”。模块依据工程上两级 `GY-VL53L0X资料/` 的六孔 V2 照片与 `53l0x_SCH.jpg`。
 - P6 初次迁移验证结果分别见两套工程 `records/2026-10-23_P6_VALIDATION.md`。测距工程后续 I²C 时序修复与实测见 [I²C 修复记录](tests/vl53l0x_three/records/2026-10-23_I2C_FIX_VALIDATION.md)：修复 SDA 保持时间并纠正右侧接线后，三路均已读到 ID 与原始结果，重新下载启动后各 10/10 次成功，管脚分配不变。2026-10-20 的旧 P11 记录仅作为历史，不代表 P6 验证结果。驱动严格沿用附带 Arduino 诊断流程，缺少完整初始化/校准，实际距离准确度仍待核验。
@@ -187,7 +187,7 @@ P11 接线表中的 IMU 和电机信号使用的针脚、板上网络和 FPGA �
 主工程唯一顶层 `robot_system_top`，仅引用 `src/robot_system_top.cst` 和同名 SDC。
 前文旧映射描述仍适用于独立测试工程；主工程已使用本文新映射：AIN1=M16、BIN1=N15、IMU MISO=U18、CS=T18。
 
-- 时钟 T9、复位 B16、KEY1/A15、KEY2/C15、UART TX/V8、RX/U8。
+- 时钟 T9、复位 B16、KEY1/A15、KEY2/C15；42 个受约束引脚（V8/U8 已释放）。
 - LED：`led_ready`/D14 为模块就绪且无系统故障，`led_run`/C14 为运行，`led_fault`/B9 为故障，`led_heartbeat`/A9 为复位后收到过有效心跳；后者不代表当前心跳仍正常。
 - T11 显式分配为 `imu_gnd_reserved` 输入，`PULL_MODE=NONE`、`DRIVE=OFF`，状态随 IMU 样本保留。该点不驱动输出，避免 Gowin 对未用管脚默认启用上拉。
 - 所有 28 个端口为 LVCMOS33、3.3 V bank；编码器和 IMU 中断输入下拉，按键和 UART RX 上拉，其余无上下拉。

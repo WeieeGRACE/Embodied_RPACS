@@ -131,7 +131,7 @@
 | L113 `.tof_text(tof_snapshot)` | pages 端口仍在 | 若删 tof 相关，则改 `.tof_text({672{1'b0}})`（Minimal-A 端口保留）；Clean-B 直接删端口 |
 | 其它 pages 连接 | `roll_mdeg/pitch_mdeg/yaw_mdeg/pos_*/speed_*` | 可保留（自动裁剪）；若首轮实测裁剪不足 → 改为常量（`.roll_mdeg(32'sd0)` 等）强制裁剪，见 Step 2b |
 
-**不动的文件（重要）**：`build.tcl`、`Embodied_RPACS.gprj`、`src/robot_system_top.cst/.sdc`、`verify_project.tcl`、`tools/*.ps1`、`sim/compile_system.do`。**引脚/时钟/器件/顶层设置全部不变**，`tools/check_system_reports.ps1` 的 44 引脚与单 owner 检查应原样通过。
+**不动的文件（重要）**：`build.tcl`、`Embodied_RPACS.gprj`、`src/robot_system_top.cst/.sdc`、`verify_project.tcl`、`tools/*.ps1`、`sim/compile_system.do`。**引脚/时钟/器件/顶层设置全部不变**，`tools/check_system_reports.ps1` 的 42 引脚与单 owner 检查应原样通过。
 
 ### 3.3 Step 3（条件触发）—— 若自动裁剪不足，显式 yaw-only
 
@@ -145,10 +145,10 @@
 - **3C（不推荐）**：删实例 + 删 `roll_mdeg/pitch_mdeg` 端口 + 改 `system_motion`/top + 重写/删除 attitude 相关 TB（`sim/tb_imu_attitude_fixed.sv`、`sim/tb_attitude_pipeline.sv`、`run_attitude_pipeline.do`、`tools/run_system_sim.ps1` 的套件列表）。收益仅比 3B 多 0.1–0.3k，风险与工作量明显更高。
 
 #> **2026-10-29 题目要求变更**：恢复 IMU 姿态页（ROLL/PITCH/YAW）+ MANUAL SPIN 360 后，
-> post-PnR 实测 Logic 15910/23040 (70%)、CLS 9614/11520 (84%)、Fmax 56.049 MHz。
+> post-PnR 实测 Logic 15445/23040 (68%)、CLS 9407/11520 (84%)、Fmax 55.050 MHz。
 > 资源预算按“满足题目要求后的最小演示配置”更新；PASS 中途截断兜底（场景 11）另计。
 
-## 3.4 Step 4（可选，上板验证通过后）—— 删 USB 事件日志
+## 3.4 Step 4（2026-10-30 已执行）—— 删 USB 事件日志
 
 - `src/robot_system_top.v`：删 `system_event_logger` 实例（L86-89）与 `debug_state/debug_valid/event_errors` 连线；按用户确认采用**删端口+约束**方案：删 `uart_tx`/`uart_rx` 顶层端口、`src/robot_system_top.cst` 的 `IO_LOC "uart_tx" V8` 与 `IO_LOC "uart_rx" U8`、`tools/check_system_reports.ps1` 的引脚期望（44→42）。
 - `src/asr/system_motion.v`：删 `debug_state/debug_valid/event_errors` 端口与组装（L128-131、L286-289）。
@@ -157,7 +157,7 @@
 - **功能轮基线复测（2026-10-29 22:17，`.tmp_nolog2` 临时工程，同一 build.tcl 参数）**：把“删日志 +
   删调试串口 + 删 `system_motion` 调试端口”应用到当前功能版源码，实测 **Logic 15498/23040 (68%)、
   Register 6543、CLS 9404/11520 (82%)、BSRAM 5/56、DSP 8.5/28、Fmax 57.115 MHz、0 违例、
-  42 个受约束引脚**；相对主位流（15910/70%、6746、9614/84%、9、56.049 MHz）即 **Logic −399、
+  42 个受约束引脚**；相对主位流（15445/68%、6553、9407/84%、9、55.050 MHz）即 **Logic −399、
   CLS −236、FF −193、BSRAM −4、Fmax +2.1 MHz**，CLS 余量从 1880 提升到约 2116。交付位流未改动；
   验收后仍需按 `verify_project.tcl` 重建并同步改仿真 TB 的 uart 端口。
   证据：`records/resource_20261029/nolog_variant_features_{build,resources}.log`。
@@ -253,7 +253,7 @@
 
 | 步骤 | 内容 | 额外收益（估算） | 之后 Logic | 之后 CLS | BSRAM |
 | --- | --- | --- | --- | --- | --- |
-| Step 4 | 删 USB 事件日志 | 实测 −56 Logic、−107 CLS、−193 FF、BSRAM −4 | 13364（58%） | 8197（72%） | 9→5 |
+| Step 4（已执行） | 删 USB 事件日志/调试串口 | 实测相对功能版 −465 Logic、−207 CLS、−193 FF、BSRAM 9→5 | 15445（68%） | 9407（82%） | 9→5 |
 | Step 5（不建议） | 删 MANUAL 组 | −0.08～0.15k | ≈13.6–14.5k | ≈7.5–8.0k | 5 |
 
 > 若后续还要合入 `tests/uart_bridge` 完整链路（实测 1174 Logic / 881 CLS）：Minimal-A 后 CLS 约 8.0–8.4k + 881 ≈ **8.9–9.3k（77–81%）**，空间充足；而**当前基线（86%）直接合会到 93%**，故“先裁剪、后合入”的顺序不可颠倒。
@@ -292,7 +292,7 @@
 ### 每步统一验收门槛（全部满足才进入下一步）
 - `./tools/run_system_sim.ps1`：7 套日志尾行 `Errors: 0, Warnings: 0`；
 - `& 'D:/Gowin/Gowin_V1.9.12_x64/IDE/bin/gw_sh.exe' build.tcl`：0 error、无新增 swept/black-box/未用关键告警；
-- `./tools/check_system_reports.ps1`：PASS（44 引脚、单 owner、open-drain、0 时序违例、位流新鲜）；
+- `./tools/check_system_reports.ps1`：PASS（42 引脚、单 owner、open-drain、0 时序违例、位流新鲜）；
 - `impl/pnr/Embodied_RPACS_tr_content.html`：Setup/Hold 违例 0、TNS 0、**Actual Fmax ≥ 50 MHz**（建议 ≥52 MHz 留余量）；
 - 资源：记录 `rpt.txt`/`_syn_rsc.xml` 的实测 Δ，与本文件估算对比（**以实测为准**）。
 
@@ -370,3 +370,8 @@ Select-String -Path sim/tb_robot_system.sv -Pattern 'menu_index|group_id!='
 ---
 
 *本计划由 resource-auditor 于 2026-10-29 完成，全程只读、未改代码、未跑构建。执行前请以 Lead 故障修复后的新基线重取数字；执行后请用新的 `Embodied_RPACS.rpt.txt` / `_syn_rsc.xml` 核对本文件全部估算。*
+
+> **2026-10-30 验收后已执行**：交付位流 6,228,180 字节、SHA256
+> `901D7394146E472AF386E5BAB4092C5FD94B62245CF8666C471EDA38F7EAB14B`，42 个受约束引脚，
+> Logic 15445/23040（68%）、CLS 9407/11520（82%）、Register 6553、BSRAM 5/56、Fmax 55.050 MHz、
+> 0 违例；7 套仿真与 13/13 故障注入全绿。

@@ -30,8 +30,8 @@ module system_motion #(
  output reg [1:0] gear,output reg [7:0] status,
  output wire [7:0] motion_fault,
  output wire command_valid,output wire [7:0] command,
- output wire [7:0] response,output wire [11:0] event_errors,
- output wire [7:0] start_diag,output wire [63:0] debug_state,output wire debug_valid
+ output wire [7:0] response,
+ output wire [7:0] start_diag
 );
  wire clk=clk_50m;
  (* ASYNC_REG="TRUE" *) reg [1:0] reset_pipe;
@@ -143,11 +143,6 @@ module system_motion #(
  .response(response),.aux_valid(aux_valid),.aux_type(aux_type),.aux_code(aux_code),.mode_status(mode_status),.start_diag(start_diag));
  // tof_reused doubles as the confirmed micro-range clip mask for the route
  // barrier fallback and as the U field of the obstacle PAUSED row.
- // Registered by the USB logger; independent from ASR control traffic.
- assign debug_state={start_diag,route_reason,menu_command,ack,aux_type,aux_code,
-  tof_reused,route_state,voice_enable,modules_ready,(&tof_seen && &tof_valid),fault,
-  busy,waiting,auto_run,avoid_mode};
- assign debug_valid=menu_valid || command_valid || ack_valid || aux_valid;
  wire spin360=action==8'h14;
  wire rotate=action==8'h12 || action==8'h13 || spin360;
  wire reverse=action==8'h11 || action==8'h13 || spin360;
@@ -305,10 +300,6 @@ module system_motion #(
  asr_packet_tx #(.CLK_HZ(CLK_HZ),.BAUD(BAUD)) packets(
  .clk(clk),.rst_n(rst_n),.pair_valid(pair_q),.response(response_q),.pair_status(status_q),
  .event_valid(event_q),.event_status(event_status_q),.aux_valid(aux_q),.aux_type(aux_type_q),.aux_code(aux_code_q),.tx(uart_tx),.overflow(tx_overflow));
- assign event_errors={fault,enc_fault_r,enc_fault_l,1'b0,
- (imu_error!=0 && imu_error!=4 && imu_error!=5 && imu_error!=6 && imu_error!=7),
- (imu_ready && sample_age>=IMU_TIMEOUT-1),(ready_seen && !imu_ready),
- (sensor_error!=0),(imu_error==7),(imu_error==6),(imu_error==5),(imu_error==4)};
  assign led_ready=modules_ready;
  assign led_run=busy;
  assign led_fault=fault;

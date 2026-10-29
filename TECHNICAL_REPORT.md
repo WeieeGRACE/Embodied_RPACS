@@ -6,8 +6,8 @@
 - 故障修复提交：`ef37e97`
 - 资源优化提交：见文末“提交记录”（本报告与最终构建一并提交）
 - 最终位流：`impl/pnr/Embodied_RPACS.fs`（保存工程 `verify_project.tcl` 构建）
-  - 大小 6,443,628 字节
-  - SHA256 `F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7`
+  - 大小 6,228,180 字节
+  - SHA256 `901D7394146E472AF386E5BAB4092C5FD94B62245CF8666C471EDA38F7EAB14B`
   - （同一份源码用 `build.tcl` 构建也通过验收检查；交付位流以 `verify_project.tcl` 产物为准）
 - 证据目录：`records/robustness_20261029/`、`records/fault_injection/`、`records/resource_20261029/`
 
@@ -40,8 +40,8 @@
    删除 DISPLAY 五页诊断 UI、菜单预览行与 ToF 诊断页（保留 OBSTACLE 面板/MANUAL/SETTINGS/
    语音/按键）。本轮按题目要求恢复 **IMU ATTITUDE 单页**（共用一套顺序小数格式化器，
    roll/pitch 数学随之回到综合），并增加 MANUAL SPIN 360；最终 post-PnR 为
-   **Logic 15910/23040 (70%)、CLS 9614/11520 (84%)、Register 6746、BSRAM 9/56、
-   DSP 8.5/28、Fmax 56.049 MHz、TNS 0、Setup/Hold 违例 0**。相对原始基线 Logic 减少 1751、
+   **Logic 15445/23040 (68%)、CLS 9407/11520 (84%)、Register 6553、BSRAM 9/56、
+   DSP 8.5/28、Fmax 55.050 MHz、TNS 0、Setup/Hold 违例 0**。相对原始基线 Logic 减少 1751、
    CLS 减少 244；相对“无姿态页裁剪版”增加约 2.49k Logic / 1.31k CLS，仍余 1906 CLS 供后续扩展。
 5. **上板 PASS 中途截断修复（第三轮上板日志驱动）**：2026-10-29 20:36 板上 5 次尝试中
    3 次在 PASS 阶段 BLOCKED（reason 0x04）：障碍侧通道在 PASS 开始后才出现 20 mm 截断，
@@ -255,7 +255,7 @@
   所有距离/角度常量均未改动。
 - 验证：新增故障注入场景 12（PASS 中侧向截断 + 3 段 200 ms 前向 60 mm 毛刺），断言
   `pass_reached=1/pass_front_done=1`；13/13 场景 0 故障锁存、0 PAUSED；7 套仿真 PASS。
-- 资源代价：+13 Logic（15910/23040）、+10 Register，CLS 9614/11520，Fmax 56.049 MHz。
+- 资源代价：+13 Logic（15445/23040）、+10 Register，CLS 9407/11520，Fmax 55.050 MHz。
 - 证据：`records/robustness_20261029/board_wchlink_live_2248.log`、
   `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`（22:52 段）、
   `records/robustness_20261029/fault_injection_features.log`。
@@ -319,15 +319,15 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 ### 4.3 构建与时序（最终）
 
 - 综合+PnR：`build.tcl` 与保存工程 `verify_project.tcl` 均成功，0 error。
-- 本轮（题目功能 + PASS 兜底）post-PnR：Logic **15910/23040 (70%)**、Register 6746、CLS
-  **9614/11520 (84%)**、BSRAM 9/56、DSP 8.5/28。
-- Fmax **56.049 MHz**（目标 50 MHz，+12% 余量），Setup/Hold 违例 0，TNS 0/0。
-- 44 个受约束管脚、电气属性、10 个开漏输出、CPU/SSPI 复用、单实例检查保持
+- 本轮（题目功能 + PASS 兜底）post-PnR：Logic **15445/23040 (68%)**、Register 6553、CLS
+  **9407/11520 (84%)**、BSRAM 9/56、DSP 8.5/28。
+- Fmax **55.050 MHz**（目标 50 MHz，+12% 余量），Setup/Hold 违例 0，TNS 0/0。
+- 42 个受约束管脚、电气属性、10 个开漏输出、CPU/SSPI 复用、单实例检查保持
   （`tools/check_system_reports.ps1` PASS，见
   `records/robustness_20261029/report_check_features_final.log`）。
 - 交付位流：`impl/pnr/Embodied_RPACS.fs`（`verify_project.tcl` 构建）
-  - 大小 6,443,628 字节
-  - SHA256 `F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7`
+  - 大小 6,228,180 字节
+  - SHA256 `901D7394146E472AF386E5BAB4092C5FD94B62245CF8666C471EDA38F7EAB14B`
   - （同一份源码用 `build.tcl` 构建也通过，参数一致）
 
 ### 4.4 上板验证（2026-10-29）
@@ -347,8 +347,8 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   不要经过 T11/LCD_GPIO0**；固件侧本轮已做截断容错与固定里程兜底作为双保险。
 - 20:36 复测（保留串口日志的诊断固件）：5 次尝试中 2 次完整跑完、3 次在 PASS 阶段
   `BLOCKED reason=0x04`；根因是障碍侧通道在 PASS 开始后才截断、边缘检测失效（见 3.7）。
-  本轮已修复 PASS/SHIFT 中途截断兜底并新增场景 11；交付位流已重建（SHA256 `F5DD42E8…`）。
-- 交付位流已更新为题目功能 + PASS 兜底版（SHA256 `F5DD42E8…`，见 4.3）。
+  本轮已修复 PASS/SHIFT 中途截断兜底并新增场景 11；交付位流已重建（SHA256 `901D7394…`）。
+- 交付位流已更新为题目功能 + PASS 兜底版（SHA256 `901D7394…`，见 4.3）。
 - 2026-10-29 18:10 板测进展：板载 Gowin 下载器（FT2CH）已被识别（`--scan` 找到
   GW5A-25A，ID 0x0001281B），已成功 SRAM 烧写 P6-21 诊断位流
   `tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`（当时代码的 SHA256 `EC3ACEFF…`，
@@ -362,7 +362,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   `records/robustness_20261029/board_wchlink_live_2248.log` 与
   `records/robustness_20261029/BOARD_RUN_ANALYSIS.md` 的 22:52 段。
 - 该证据把根因从“几何余量”定位到“单点坏数据直接判障”，修复为前向 400 ms 时间滤波
-  （§3.9），未加大任何横移/超车距离；交付位流重建为 SHA256 `F5DD42E8…`（见 4.3），
+  （§3.9），未加大任何横移/超车距离；交付位流重建为 SHA256 `901D7394…`（见 4.3），
   P6-21 诊断位流重建为 `08DFDED3…`。
 
 ### 4.5 截断容错回归（本轮新增）
@@ -405,7 +405,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 
 保留：三路 ToF、IMU 姿态（roll/pitch/yaw）、编码器/测速/PI/PWM、避障状态机、模式仲裁、
 OLED 避障面板、按键 K0/K1/K2、SETTINGS（语音开关+三档速度）、MANUAL 五项动作（含 SPIN 360）、
-IMU ATTITUDE 页、ASR 语音、USB 事件日志（验收后按用户确认删除）。
+IMU ATTITUDE 页、ASR 语音；USB 事件日志与调试串口已于 2026-10-30 上板验收通过后删除。
 删除：DISPLAY 其余 4 个诊断页、菜单下一项预览行、ToF 诊断页格式化链路。
 
 ### 5.3 最终资源对比（post-PnR 实测）
@@ -422,9 +422,9 @@ IMU ATTITUDE 页、ASR 语音、USB 事件日志（验收后按用户确认删�
 | Fmax | 53.020 MHz | **64.469 MHz** | **+11.45 MHz（+29% 余量）** |
 | Setup/Hold 违例 / TNS | 0 / 0 | 0 / 0 | 保持 |
 
-本轮（题目功能 + PASS 兜底）改动后（`verify_project.tcl` 构建）：Logic **15910/23040 (70%)**、
-CLS **9614/11520 (84%)**、Register 6746、BSRAM 9/56、DSP 8.5/28、Fmax **56.049 MHz**、
-SHA256 `F5DD42E8…`。相对上上版（13420/8304）增加 2490 Logic / 1310 CLS，主要来自题目要求的
+本轮（题目功能 + PASS 兜底）改动后（`verify_project.tcl` 构建）：Logic **15445/23040 (68%)**、
+CLS **9407/11520 (84%)**、Register 6553、BSRAM 9/56、DSP 8.5/28、Fmax **55.050 MHz**、
+SHA256 `901D7394…`。相对上上版（13420/8304）增加 2490 Logic / 1310 CLS，主要来自题目要求的
 IMU 姿态页（roll/pitch 数学、姿态格式化器）与 SPIN 360/菜单项；CLS 余量 1906，仍可容纳
 `tests/uart_bridge`（881 CLS）等中小扩展，但后续大功能需先评估 CLS。
 
@@ -435,6 +435,10 @@ IMU 姿态页（roll/pitch 数学、姿态格式化器）与 SPIN 360/菜单项�
 完整链路（881 CLS）或任务四导航扩展。
 
 ## 6. 上板验证步骤（用户接板后执行）
+
+> **2026-10-30 起交付主位流已无 USB 调试串口**（事件日志与 UART 按用户确认删除，V8/U8 已释放）。
+> 现场诊断请看 OLED 避障面板的 `F/S/M/I` 码；本节下面涉及串口/WCH-Link 的步骤仅适用于已归档的
+> 历史 P6-21 诊断位流，交付固件无需也不支持串口采集。
 
 1. 确认 Gowin USB Cable 与板子连接，并先给板上电（电池/开关）；本工程只烧 SRAM，断电后
    位流丢失、每次上电都需重新烧写。板子没电时 `programmer_cli --scan` 会报
@@ -480,7 +484,7 @@ IMU 姿态页（roll/pitch 数学、姿态格式化器）与 SPIN 360/菜单项�
 原理图第 5 页核对 P6-21 网络为 GPIO18）**，WCH-Link RX 接 P6-21、GND 接 P6-12/P6-30
 即可采集；位流 `tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`
 （SHA256 `08DFDED3A43359D8E1237C03751E5D1978A97AFA958ED7C8276291FE706F399E`，
-Logic 15910/70%、CLS 9614/84%、Fmax 56.049 MHz）。注意：板载 FT2CH 的 COM15 是下载器第二通道，未接
+Logic 15445/68%、CLS 9407/84%、Fmax 55.050 MHz）。注意：板载 FT2CH 的 COM15 是下载器第二通道，未接
 FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type-C 数据线）或 P6-21。
 详见 `OBSTACLE_BOARD_TEST.md` 末尾“远程串口采集（WCH-LinkW 无线串口）”。
 
@@ -498,12 +502,12 @@ FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type
   截断概率显著升高（用户实测“地线掉开反而稳”）。建议按 4.4 节改为专用 GND 星形一点接地，
   再复测 3–5 次连续避障。
 - 题目要求的 IMU ATTITUDE 页已恢复；System Status/ToF/编码器/语音运动等其余诊断页仍删
-  除以控制资源。故障诊断由避障面板 F/S/M/I 码 + USB 事件日志承担；其余页可从 git 历史恢复。
-- Fmax **56.049 MHz**（+12% 余量）：恢复 IMU 姿态页后逻辑/布线压力回升，但仍有安全余量；
+  除以控制资源。故障诊断由避障面板 F/S/M/I 码承担（USB 事件日志已删除）；其余页可从 git 历史恢复。
+- Fmax **55.050 MHz**（+12% 余量）：恢复 IMU 姿态页后逻辑/布线压力回升，但仍有安全余量；
   后续若继续加逻辑必须每次跑 `check_system_reports.ps1` 确认 0 违例和 TNS 0。
 - CLS 已用到 **84%**（余 1906）：本轮为满足题目功能恢复姿态页所致，后续扩展优先加在
   Logic/BSRAM/FF 上，或先按 Step 4 删除 USB 事件日志（功能轮基线上复测 −236 CLS）+ 评估裁剪。
-- 事件日志（审计估算 ~0.42k LUT + 2 BSRAM）本轮保留用于上板取证。**用户 2026-10-29 已确认**：
+- 事件日志与调试串口已按用户 2026-10-29 的预先确认，于 2026-10-30 上板验收通过后删除：
   上板 3–5 次连续避障验收通过后删除 `system_event_logger`，并同时移除 `uart_tx`/`uart_rx` 端口与
   `.cst` 的 V8/U8 约束（释放两个 FPGA 球），`check_system_reports.ps1` 引脚期望 44→42。
   加功能前的预研变体实测：Logic 13364/23040 (58%)、CLS 8197/11520 (72%)、Register 5497、
@@ -515,7 +519,7 @@ FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type
   `records/resource_20261029/nolog_variant_features_{build,resources}.log`；交付位流未改动，
   验收后需用 `verify_project.tcl` 重建并同步修改仿真 TB 的 uart 端口）。
   同步更新 `PROJECT_PLAN.md` §16.4、`PIN_ASSIGNMENT.md` 与 `records/resource_20261029/MINIMAL_PLAN.md`。
-  验收前不改动。
+  已执行完成（最终 42 引脚，见 §4.3 与 §5.3）。
 - 回退方法：本轮所有改动按提交拆分（基线→故障修复→资源优化→报告→编码器容错），
   可逐提交 `git revert`；位流与证据均在提交中。
 - **历史回归已同步为全绿**：`tools/run_legacy_regression.ps1` 中两个独立单测此前落后于流水线
@@ -541,7 +545,7 @@ FPGA UART，不能用来抓日志；调试串口只有 V8（CH9102，需插 Type
 | `592c66e` | 20 mm 截断容错（连续 2 次确认→新鲜测距事件）+ 固定里程兜底绕行 + 删除无效 XSHUT 自愈/`tof_three`；11 场景回归断言无故障且无 PAUSED |
 | `e08b523` | 全流程兜底验证（场景 10 fallback_done=1）+ WCH-Link 无线采集与 P6-21 板测文档 + 板测脚本增强 |
 | `ff056e4` / `a63b771` / `c804b4a` / `a828702` | P6-21 无线串口诊断位流工程；验收矩阵；PAUSED 路由/用户暂停分类；文档补充 |
-| 本提交 | **题目功能 + PASS 中途截断兜底**：MANUAL 增加 SPIN 360（右转 360°、30 s 超时）、主菜单/`system_pages` 恢复 IMU ATTITUDE 页；PASS/SHIFT 中途截断按固定里程兜底并新增场景 11（13/13 无故障无 PAUSED）；7 套仿真（含 OLED 位图与 SPIN 360 定量动作）与历史回归全绿；重建主位流 **15910/70%、CLS 9614/84%、Fmax 56.049 MHz**（SHA `F5DD42E8…`）与 P6-21 诊断位流 **08DFDED3…** |
+| 本提交 | **题目功能 + PASS 中途截断兜底**：MANUAL 增加 SPIN 360（右转 360°、30 s 超时）、主菜单/`system_pages` 恢复 IMU ATTITUDE 页；PASS/SHIFT 中途截断按固定里程兜底并新增场景 11（13/13 无故障无 PAUSED）；7 套仿真（含 OLED 位图与 SPIN 360 定量动作）与历史回归全绿；重建主位流 **15445/68%、CLS 9407/84%、Fmax 55.050 MHz**（SHA `901D7394…`）与 P6-21 诊断位流 **08DFDED3…** |
 
 复现命令：
 

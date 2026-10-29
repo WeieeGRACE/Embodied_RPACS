@@ -28,7 +28,6 @@
     <File path="src/imu/imu660ra_spi_master.v" type="file.verilog" enable="1" />
     <File path="src/imu/imu660ra_config_rom.v" type="file.verilog" enable="1" />
     <File path="src/uart/uart_tx.v" type="file.verilog" enable="1" />
-    <File path="src/uart/system_event_logger.v" type="file.verilog" enable="1" />
     <File path="src/imu/imu660ra_config.hex" type="file.data" enable="1" />
     <File path="src/ui/oled_font.hex" type="file.data" enable="1" />
     <File path="src/robot_system_top.cst" type="file.cst" enable="1" />

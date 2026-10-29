@@ -27,7 +27,6 @@ add_file src/imu/imu660ra_driver.v
 add_file src/imu/imu660ra_spi_master.v
 add_file src/imu/imu660ra_config_rom.v
 add_file src/uart/uart_tx.v
-add_file src/uart/system_event_logger.v
 add_file src/imu/imu660ra_config.hex
 add_file src/ui/oled_font.hex
 add_file src/robot_system_top.cst

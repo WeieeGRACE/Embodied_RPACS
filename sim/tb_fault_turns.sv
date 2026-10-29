@@ -54,7 +54,7 @@ module tb_fault_turns;
  wire rst=dut.rst_n;
  reg [1:0] abl=0,abr=0;
  wire a,a1,a2,b,b1,b2,st,tx,sck,mosi,cs_n,ready_led,run_led,fault_led,voice_led;
- wire usb,oscl;tri1 osda;tri1 [2:0] scl,sda,xshut;
+ wire oscl;tri1 osda;tri1 [2:0] scl,sda,xshut;
  reg completed=0,model_on=0,freeze_l=0,freeze_r=0;
  reg route_started=0,pause_seen=0,blocked_seen=0;
  reg inject_enc_l=0,inject_enc_r=0;
@@ -117,11 +117,11 @@ module tb_fault_turns;
  .OLED_I2C_HZ(100000),.OLED_POWERUP_CYCLES(3),.OLED_FRAME_WAIT_CYCLES(100),
  .TOF_I2C_HZ(50000),.TOF_RESET_CYCLES(10),.TOF_BOOT_CYCLES(30),
  .TOF_POLL_CYCLES(30),.TOF_MAX_POLLS(3),.TOF_TIMEOUT_CYCLES(300),.TOF_ROUND_CYCLES(50000)) dut(
- .clk_50m(clk),.reset_n(k0),.key_enable_n(k1),.key_estop_n(k2),.uart_rx(1'b1),.asr_rx(rx),
+ .clk_50m(clk),.reset_n(k0),.key_enable_n(k1),.key_estop_n(k2),.asr_rx(rx),
  .encoder_a_l(abl[1]),.encoder_b_l(abl[0]),.encoder_a_r(abr[1]),.encoder_b_r(abr[0]),
  .imu_spi_miso(miso),.imu_int1(1'b0),.imu_int2(1'b0),.imu_gnd_reserved(1'b0),
  .imu_spi_sck(sck),.imu_spi_mosi(mosi),.imu_cs_n(cs_n),
- .PWMA(a),.AIN1(a1),.AIN2(a2),.PWMB(b),.BIN1(b1),.BIN2(b2),.STBY(st),.asr_tx(tx),.uart_tx(usb),
+ .PWMA(a),.AIN1(a1),.AIN2(a2),.PWMB(b),.BIN1(b1),.BIN2(b2),.STBY(st),.asr_tx(tx),
  .oled_scl(oscl),.oled_sda(osda),
  .tof_front_gpio1(1'b1),.tof_left_gpio1(1'b0),.tof_right_gpio1(1'b1),
  .tof_front_scl(scl[0]),.tof_front_sda(sda[0]),.tof_front_xshut_n(xshut[0]),

@@ -28,18 +28,20 @@ ACG525 / GW5A-LV25UG324C2/I1，50 MHz，Gowin 1.9.12。主工程、构建与仿�
 3. **资源优化**：主菜单精简后为 4 项（MANUAL / SETTINGS / OBSTACLE AVOID / IMU ATTITUDE，
    末项为题目要求的姿态显示），删除 DISPLAY 其余诊断 UI、菜单预览行与 ToF 诊断页；本轮把
    IMU 姿态页恢复为单页（共用一套顺序小数格式化器），roll/pitch 数学随之回到综合。post-PnR：
-   **Logic 15910/23040（70%）**（原 17661/77%）、**CLS 9614/11520（84%）**（原 86%）、
-   Register 6746、BSRAM 9/56、DSP 8.5/28、Fmax **56.049 MHz**、Setup/Hold 违例 0、TNS 0。
+   **Logic 15445/23040（70%）**（原 17661/77%）、**CLS 9407/11520（84%）**（原 86%）、
+   Register 6553、BSRAM 9/56、DSP 8.5/28、Fmax **55.050 MHz**、Setup/Hold 违例 0、TNS 0。
 4. **题目新增功能**：MANUAL 增加 **SPIN 360**（用右转动作原地旋转 360°，30 s 动作超时）；
    主菜单增加 **IMU ATTITUDE** 页，显示 ROLL / PITCH / YAW（±DDD.d°），IMU 校准中显示
    CALIBRATING。两项均已进仿真与 OLED 位图回归。
 5. **验证**：7 套主工程仿真全部 PASS、历史回归全绿、**13 个**转向后故障注入场景
    （0 次故障锁存、0 次 PAUSED；场景 10 全程截断兜底、场景 11 PASS 中途截断兜底、场景 12 PASS 前向毛刺滤波）。
-   位流：`impl/pnr/Embodied_RPACS.fs`（6,443,628 字节），
-   SHA256 `F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7`。
+   位流：`impl/pnr/Embodied_RPACS.fs`（6,228,180 字节），
+   SHA256 `901D7394146E472AF386E5BAB4092C5FD94B62245CF8666C471EDA38F7EAB14B`。
+   2026-10-30 上板验收通过后已删除 USB 事件日志与调试串口，本版为最终交付
+   （42 个受约束引脚、Fmax 55.050 MHz）。
    配套语音固件 `asrpro/release/yaoyao_asrpro_2m_20261025_obstacle/fw.bin` 本轮未改动。
-   上板实测记录见 `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`；本轮新增功能与
-   PASS 兜底修复已重建，等待用户重新烧写测试（步骤见技术报告第 6 节）。
+   上板验收与逐段距离日志见 `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`
+   与 `records/robustness_20261029/board_run_20261030_0003_analysis.md`。
 
 > 硬件提示：真实板上“IMU 地线掉开时避障反而稳定、插回又 PAUSED”指向地环路——本工程机械
 > 接线把 IMU 地接在 P11-3/LCD_GPIO0/T11（T11 是 FPGA 信号脚，`P11-2` 才是专用 GND）。
@@ -69,7 +71,8 @@ K0 始终立即关断驱动。避障期间 K0 退出模式并返回主菜单，�
   - **S** = ToF 故障字（bit0/1/2 三通道坏样本；bit3/4/5 通信丢失；bit6/7/8 数据过期）
   - **M** = 运动故障码（2 测速反馈、3 偏航反馈、4 动作超时、5 非法状态、6 状态机异常）
   - **I** = IMU 错误码
-  同时 USB 调试串口（115200/8N1）仍输出事件日志，可用 `tools/read_serial_log.ps1` 保存。
+  验收后已按用户确认删除 USB 事件日志与调试串口（释放 V8/U8 两个球）；现场诊断依靠避障面板的
+  `F/S/M/I` 码，需要串口日志时使用已归档的历史 P6-21 诊断位流（不再随主工程维护）。
 - **瞬时异常不再报 FAULT**：ToF 单次 NACK/短暂无数据、IMU 短暂错误、编码器停稳抖动等，
   会先安全停车并自动重试或恢复；转向后若障碍侧通道持续精确 20 mm（量程下限截断），
   按“测距完成但不可用”处理并改走固定里程兜底，不再等满重试后 PAUSED。
@@ -131,7 +134,8 @@ K0 始终立即关断驱动。避障期间 K0 退出模式并返回主菜单，�
 
 ## 接口与构建
 
-ASRPRO D17/RX、D18/TX，115200/8N1；USB U8/RX、V8/TX。管脚保持既有接线，见 PIN_ASSIGNMENT.md。
+ASRPRO D17/RX、D18/TX，115200/8N1；USB 调试口 U8/V8 已按验收结论删除并释放，主位流为
+**42 个受约束引脚**，见 PIN_ASSIGNMENT.md。
 协议与 ASRPRO 资源生成说明见 `asrpro/README.md`。USB 仅输出事件诊断，不需要控制心跳。
 
 ```powershell
@@ -148,4 +152,4 @@ ASRPRO D17/RX、D18/TX，115200/8N1；USB U8/RX、V8/TX。管脚保持既有接�
 导出目录默认 `release/`，不含历史独立测试目录。
 数字仿真验证控制逻辑；实际转角、距离、制动余量、光学可靠性、20 mm 自愈效果和语音识别效果
 由上板测试确认（步骤见 `TECHNICAL_REPORT.md` 第 6 节）。上板抓取脚本只读串口，
-不会写入 USB 调试口，也不影响 ASRPRO 运动链路。
+不影响 ASRPRO 运动链路。

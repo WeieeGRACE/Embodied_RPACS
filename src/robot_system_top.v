@@ -15,7 +15,7 @@ module robot_system_top #(
  TOF_MAX_POLLS=100,TOF_TIMEOUT_CYCLES=CLK_HZ/100,TOF_ROUND_CYCLES=CLK_HZ,
  parameter CONFIG_HEX_FILE="src/imu/imu660ra_config.hex"
 )(
- input wire clk_50m,reset_n,key_enable_n,key_estop_n,uart_rx,asr_rx,
+ input wire clk_50m,reset_n,key_enable_n,key_estop_n,asr_rx,
  input wire encoder_a_l,encoder_b_l,encoder_a_r,encoder_b_r,
  input wire imu_spi_miso,imu_int1,imu_int2,imu_gnd_reserved,
  input wire tof_front_gpio1,tof_left_gpio1,tof_right_gpio1,
@@ -24,7 +24,7 @@ module robot_system_top #(
  inout wire tof_right_scl,tof_right_sda,tof_right_xshut_n,
  output wire imu_spi_sck,imu_spi_mosi,imu_cs_n,
  output wire oled_scl,inout wire oled_sda,
- output wire PWMA,AIN1,AIN2,PWMB,BIN1,BIN2,STBY,uart_tx,asr_tx,
+ output wire PWMA,AIN1,AIN2,PWMB,BIN1,BIN2,STBY,asr_tx,
  output wire led_ready,led_run,led_fault,led_heartbeat
 );
  // Gowin synthesizes register initialization into configuration INIT values.
@@ -56,8 +56,8 @@ module robot_system_top #(
  wire imu_ready,calibrating,attitude_valid;
  wire signed [31:0] roll_mdeg,pitch_mdeg,yaw_wrapped,pos_l,pos_r,speed_l,speed_r;
  wire [7:0] status,imu_error,sensor_error,motion_fault,command,response;
- wire command_valid;wire [11:0] event_errors;
- wire [7:0] start_diag;wire [63:0] debug_state;wire debug_valid;
+ wire command_valid;
+ wire [7:0] start_diag;
  system_motion #(.CLK_HZ(CLK_HZ),.BAUD(UART_BAUD),.PWM_HZ(PWM_HZ),
  .WINDOW_CYCLES(WINDOW_CYCLES),.ENC_FILTER(ENC_FILTER),.DIR_DEADTIME(DIR_DEADTIME),
  .IMU_POWERUP(IMU_POWERUP_CYCLES),.IMU_WAIT(IMU_CONFIG_WAIT_CYCLES),
@@ -81,13 +81,9 @@ module robot_system_top #(
  .roll_mdeg(roll_mdeg),.pitch_mdeg(pitch_mdeg),.yaw_wrapped(yaw_wrapped),
  .pos_l(pos_l),.pos_r(pos_r),.speed_l(speed_l),.speed_r(speed_r),
  .imu_error(imu_error),.sensor_error(sensor_error),.gear(gear),.status(status),
- .motion_fault(motion_fault),.command_valid(command_valid),.command(command),.response(response),.event_errors(event_errors),
- .start_diag(start_diag),.debug_state(debug_state),.debug_valid(debug_valid));
+ .motion_fault(motion_fault),.command_valid(command_valid),.command(command),.response(response),
+ .start_diag(start_diag));
  assign led_heartbeat=voice_enable;
- system_event_logger #(.CLK_HZ(CLK_HZ),.BAUD(UART_BAUD),.WATCHDOG_PRESENT(0)) logger(
- .clk(clk_50m),.rst_n(rst_n),.imu_started(imu_ready),.imu_failed(led_fault),
- .imu_error(imu_error),.errors(event_errors),.tx(uart_tx),.debug_state(debug_state),
- .debug_valid(debug_valid));
  wire [23:0] tof_errors;wire [11:0] tof_statuses;
  obstacle_sensors #(.CLK_HZ(CLK_HZ),.I2C_HZ(TOF_I2C_HZ),.RESET_CYCLES(TOF_RESET_CYCLES),
  .BOOT_CYCLES(TOF_BOOT_CYCLES),.POLL_CYCLES(TOF_POLL_CYCLES),.MAX_POLLS(TOF_MAX_POLLS),

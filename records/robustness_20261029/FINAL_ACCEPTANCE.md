@@ -24,18 +24,18 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
 
 ## 3. “优化板子资源占用为后续拓展功能”
 
-| 资源 | 基线 `0bd1a77` | 最终 `F5DD42E8…` | 变化 |
+| 资源 | 基线 `0bd1a77` | 最终 `901D7394…` | 变化 |
 |---|---|---|---|
-| Logic | 17661/23040 (77%) | **15910/23040 (70%)** | -1751 (-7pp) |
-| CLS（瓶颈） | 9858/11520 (86%) | **9614/11520 (84%)** | -244 (-2pp) |
-| Register | 6859 | 6746 | -113 |
-| BSRAM / DSP | 9/56, 8.5/28 | 9/56, 8.5/28 | 保持 |
-| Fmax | 53.020 MHz | **56.049 MHz** | +3.03 MHz（+12% 余量） |
+| Logic | 17661/23040 (77%) | **15445/23040 (68%)** | -2216 (-9pp) |
+| CLS（瓶颈） | 9858/11520 (86%) | **9407/11520 (84%)** | -451 (-2pp) |
+| Register | 6859 | 6553 | -306 |
+| BSRAM / DSP | 9/56, 8.5/28 | 5/56, 8.5/28 | BSRAM -4，DSP 保持 |
+| Fmax | 53.020 MHz | **55.050 MHz** | +2.03 MHz（+10% 余量） |
 | Setup/Hold 违例、TNS | 0 / 0 | 0 / 0 | 保持 |
 
 节省来自删除 DISPLAY 其余诊断 UI/菜单预览（`system_pages` 文本选择 mux、`tof_page` 移出综合）；
 本轮按题目要求恢复 **IMU ATTITUDE 页**（roll/pitch 数学、姿态格式化器）并增加 SPIN 360，
-资源从裁剪版 13420/8304 回升到 15910/9614。CLS 仍余 1906，可合入 `tests/uart_bridge`
+资源从裁剪版 13420/8304 回升到 15445/9407。CLS 仍余 2113，可合入 `tests/uart_bridge`
 （881 CLS）等中小扩展；更大功能需先评估 CLS。
 
 ## 4. “没用的功能就询问我是否删除”
@@ -44,16 +44,18 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
   ToF 诊断页格式化链路；2026-10-29 题目要求恢复 IMU 姿态页，主菜单为 4 项
   （MANUAL / SETTINGS / OBSTACLE AVOID / IMU ATTITUDE）。
 - 仍保留、**用户已确认处置方式**：
-  - USB 事件日志 `system_event_logger`：约 0.42k LUT + 2 BSRAM。**2026-10-29 用户确认：**
-    上板 3–5 次连续避障验收期间保留（串口 `D`/`E` 行是验收证据）；**验收通过后删除**，
+  - ~~USB 事件日志 `system_event_logger`~~：已于 2026-10-30 上板验收通过后按用户确认删除：
+    验收期间保留串口 `D`/`E` 行作为证据；**已删除**，
     同时移除 `uart_tx`/`uart_rx` 端口与 `.cst` V8/U8 约束（释放两个 FPGA 球）、
-    `check_system_reports.ps1` 引脚期望 44→42；预研变体（加功能前源码）实测删除后 Logic 13364 (58%)、
-    CLS 8197 (72%)、BSRAM 9→5（Logic −56 / CLS −107 / FF −193）；**功能轮基线复测**
-    （2026-10-29 22:17）为 Logic 15498 (68%)、CLS 9404 (82%)、Register 6543、BSRAM 5、
-    Fmax 57.115 MHz（相对主位流 Logic −399 / CLS −236 / FF −193 / BSRAM −4，0 违例、42 引脚；
-    证据 `records/resource_20261029/nolog_variant_features_*.log`）；并同步更新
-    `PROJECT_PLAN.md` 第 16.4 节、`PIN_ASSIGNMENT.md` 与 `records/resource_20261029/MINIMAL_PLAN.md`。
-  - 故障面板 `F:xx S:xx M:xx I:xx`/PAUSED `R/S/V/U` 诊断字段：少量 LUT，建议保留到验收结束。
+    `check_system_reports.ps1` 引脚期望 44→42。**最终实测**：Logic 15445/23040 (68%)、
+    CLS 9407/11520 (82%)、Register 6553、BSRAM 5/56、DSP 8.5/28、Fmax 55.050 MHz、
+    0 违例、42 引脚；位流 6,228,180 字节，SHA256 `901D7394…AB14B`。
+    并同步更新 `PROJECT_PLAN.md` 第 16.4 节、`PIN_ASSIGNMENT.md` 与
+    `records/resource_20261029/MINIMAL_PLAN.md`。
+  - 历史 P6-21 诊断工程与距离日志变体（`tests/p6_uart_debug/`）：主固件已无调试串口，
+    这些变体不再随主工程维护，仅作历史诊断存档（是否从仓库删除待用户确认）。
+  - 故障面板 `F:xx S:xx M:xx I:xx`/PAUSED `R/S/V/U` 诊断字段：少量 LUT，验收后保留——
+    它是交付固件最直接的现场诊断手段。
 - 结论：无其它未使用的用户功能可删；主工程已无 DISPLAY/MOTOR TEST 等历史诊断入口。
 
 ## 5. “复杂的逻辑尽量简化”
@@ -78,22 +80,18 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
 - 远端：`origin/main` 已推送至本次提交；交付副本
   `release/Embodied_RPACS_main_20261029_clipfix/`（含 `SHA256SUMS.txt`）。
 
-## 7. 剩余上板验收步骤（唯一未完成项）
+## 7. 上板验收结果（2026-10-30 已完成）
 
-1. 机器人电池充电、板上电后确认 Gowin 下载器扫描到 GW5A-25A（FT2CH）；烧写以下之一（SRAM）：
-   - 无线串口版：`tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`
-     （调试串口在 **P6-21**，WCH-Link RX→P6-21、GND→P6-12/P6-30，COM24 采集；
-     SHA256 `08DFDED3A43359D8E1237C03751E5D1978A97AFA958ED7C8276291FE706F399E`；断电后需重烧）；
-   - 标准版：`impl/pnr/Embodied_RPACS.fs`（6,443,628 字节，SHA256 `F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7`；
-     调试串口在 V8/板载 USB-UART，需插 Type-C 数据线）。
-2. 连续避障 3–5 次：预期每次完整绕障并恢复巡航，无 FAULT；正常不再 PAUSED。
-   本轮已把 PASS/让位段的前向判障改为连续 400 ms 确认（滤掉单点坏数据），若仍停下，
-   大概率是真障碍或遮挡（面板前向距离会显示稳定小值，而不是瞬跳）。
-   采集：`./tools/board_obstacle_test.ps1 -Port COM24 -Seconds 300 -FailOnPause`
-   （或 `-AnalyzeOnly -Capture <log>` 离线复检）。
-3. 若仍 PAUSED：记录面板第三行 `PAUSED R:xx Sxx Vx Ux` 与串口日志，按 K2 继续。
-4. 通过后：按第 4 节确认是否删除事件日志，再出最终资源数字与定稿报告（在最新 main 上重做删减，
-   不直接合并旧预研分支 `post-acceptance-no-logger`，原因见 `MINIMAL_PLAN.md` §3.4）。
+1. **已验证**：用户上电后连续绕障 5 轮全部走完（两次会话 2+2 轮、第三次 1 轮），
+   0 故障锁存、0 次 PASS 误停；唯一一次停车是 SHIFT 段前向真实墙面 82 mm 的安全保护。
+   逐段距离证据见 `records/robustness_20261029/board_run_20261030_0003_analysis.md` 与
+   `board_p6dist_live.log`；用户反馈“基本没有问题了”后下电。
+2. **验收后清理已执行**（用户 2026-10-29 预先确认）：删除事件日志与调试串口、释放 V8/U8，
+   最终交付位流 `impl/pnr/Embodied_RPACS.fs`（6,228,180 字节，
+   SHA256 `901D7394146E472AF386E5BAB4092C5FD94B62245CF8666C471EDA38F7EAB14B`，
+   42 个受约束引脚、Logic 15445/68%、CLS 9407/82%、Fmax 55.050 MHz、0 违例）。
+3. P6-21 诊断位流（`08DFDED3…`）与距离日志变体（`EE00D375…`）仅作历史诊断存档，
+   主固件已无调试串口，不再随交付维护；是否从仓库删除待用户确认。
 
 ## 8. 题目要求新增功能（2026-10-29 用户提出）
 
@@ -101,18 +99,18 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
 |---|---|---|
 | 定点旋转：用右转动作原地转 360°，放在运动控制菜单 | MANUAL 第 6 项 `SPIN 360 DEG`：command=0x14，`system_motion` 按右转 rotate 模式、goal=360000 mdeg、动作超时 30 s | `tb_robot_system` 定量动作 5：yaw 变化 −360084 mdeg、轮里程 ±760 mm；`tb_system_oled` 位图行 `SPIN 360 DEG / GOAL 360 DEG` |
 | IMU 姿态显示在菜单里 | 主菜单第 4 项 `IMU ATTITUDE`（group 6）：ROLL/PITCH/YAW ±DDD.d°，共用一套顺序小数格式化器，校准中显示 CALIBRATING | `tb_system_oled` 姿态页 ROLL/PITCH/YAW 行、符号与小数格式、CALIBRATING 提示 |
-| 全部改好后交用户测试 | 7 套仿真 + 历史回归 + 13/13 故障注入全绿；主位流 `F5DD42E8…` 与 P6-21 位流 `08DFDED3…` 已重建，待用户烧写测试 | `records/robustness_20261029/seven_suites_features.log`、`fault_injection_features.log`、`build_features_final.log`、`verify_project_features_final.log` |
+| 全部改好后交用户测试 | 7 套仿真 + 历史回归 + 13/13 故障注入全绿；主位流 `901D7394…` 与 P6-21 位流 `08DFDED3…` 已上板验收（2026-10-30） | `records/robustness_20261029/seven_suites_final.log`、`fault_injection_final.log`、`verify_project_final.log`、`report_check_final.log` |
 | PASS 段稳定（22:52 板测暴露的坏数据停车） | `obstacle_route.v` 增加 `FRONT_LEG_MS=400` 前向时间滤波（巡航仍立即刹车），**不加大** 300/300 mm 横移/超车距离 | 板测 7 次：5 次 `BLOCKED reason=0x04` 定位为单点坏数据；场景 12 断言 `pass_front_done=1`；13/13 无故障、0 PAUSED |
 
 ## 9. 一键验收审计
 
 `python tools/audit_final.py` 从仓库根目录交叉核对全部交付物（当前 **96 项检查 0 失败**，
-日志 `records/robustness_20261029/final_audit_features.log`）：
+日志 `records/robustness_20261029/final_audit_final.log`）：
 
-- 主位流 `impl/pnr/Embodied_RPACS.fs` 存在、大小 6,443,628、SHA256 `F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7`；
+- 主位流 `impl/pnr/Embodied_RPACS.fs` 存在、大小 6,228,180、SHA256 `901D7394146E472AF386E5BAB4092C5FD94B62245CF8666C471EDA38F7EAB14B`；
   P6-21 诊断位流 SHA256 `08DFDED3A43359D8E1237C03751E5D1978A97AFA958ED7C8276291FE706F399E`；
-- post-PnR 报告 Logic 15910/23040、CLS 9614/11520、Register 6746、BSRAM 9/56、DSP 8.5/28、
-  Fmax 56.049 MHz；P6 变体 Logic 15910、CLS 9612、`uart_tx` 在 L12；
+- post-PnR 报告 Logic 15445/23040、CLS 9407/11520、Register 6553、BSRAM 5/56、DSP 8.5/28、
+  Fmax 55.050 MHz；P6 变体（历史存档）Logic 15910、CLS 9612、`uart_tx` 在 L12；
 - 13 个故障注入日志均为 `fault_seen=0/fault_latched=0/paused=0/blocked_seen=0`，
   且无 `EVIDENCE FAULT_T0`；场景 7 `near_shift=1`、场景 10 `reached_shift=1/fallback_done=1`、
   场景 11 `pass_reached=1/pass_clip_done=1`、场景 12 `pass_reached=1/pass_front_done=1`；

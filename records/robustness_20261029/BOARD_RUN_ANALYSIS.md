@@ -124,8 +124,8 @@ route_state：1 IDLE / 1 CRUISE_START / 2 CRUISE / 3 BRAKE_SELECT / 4 TURN_OUT /
 - 修复：`obstacle_route.v` 增加 `FRONT_LEG_MS=400` 时间滤波——让位/超车各腿与 WAIT_* 屏障
   的前向判定必须连续 400 ms 低于 85 mm 才生效；巡航段仍 130 mm 立即刹车。新增故障注入
   场景 12（PASS 中 3 段 200 ms 前向 60 mm 毛刺）覆盖，13/13 场景 0 故障 0 PAUSED。
-- 重建：主位流 SHA256 `F5DD42E8…`（6,443,628 字节，Logic 15910/70%、CLS 9614/84%、
-  Fmax 56.049 MHz），P6-21 诊断位流 SHA256 `08DFDED3…`；等待下一次上板复测。
+- 重建：主位流 SHA256 `901D7394…`（6,228,180 字节，Logic 15445/68%、CLS 9407/84%、
+  Fmax 55.050 MHz），P6-21 诊断位流 SHA256 `08DFDED3…`；等待下一次上板复测。
 
 ## 2026-10-30 00:03–00:10 距离日志验证（PASS 前向滤波）
 

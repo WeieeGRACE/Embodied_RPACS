@@ -42,13 +42,13 @@ def read(path):
         return data.decode("utf-8", errors="replace")
 
 
-MAIN_SHA = "F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7"
+MAIN_SHA = "901D7394146E472AF386E5BAB4092C5FD94B62245CF8666C471EDA38F7EAB14B"
 P6_SHA = "08DFDED3A43359D8E1237C03751E5D1978A97AFA958ED7C8276291FE706F399E"
 
 # 1. bitstreams
 check("main bitstream exists", os.path.isfile(MAIN_FS))
 if os.path.isfile(MAIN_FS):
-    check("main bitstream size", os.path.getsize(MAIN_FS) == 6443628, str(os.path.getsize(MAIN_FS)))
+    check("main bitstream size", os.path.getsize(MAIN_FS) == 6228180, str(os.path.getsize(MAIN_FS)))
     got = sha256(MAIN_FS)
     check("main bitstream sha256", got == MAIN_SHA, got)
 check("P6-21 bitstream exists", os.path.isfile(P6_FS))
@@ -59,15 +59,15 @@ if os.path.isfile(P6_FS):
 # 2. post-PnR resource report
 rpt = read(os.path.join(ROOT, "impl/pnr/Embodied_RPACS.rpt.txt"))
 for label, needle in [
-    ("Logic", "15910/23040"),
-    ("Register", "6746/23685"),
-    ("CLS", "9614/11520"),
-    ("BSRAM", "9/56"),
+    ("Logic", "15445/23040"),
+    ("Register", "6553/23685"),
+    ("CLS", "9407/11520"),
+    ("BSRAM", "5/56"),
     ("DSP", "8.5/28"),
 ]:
     check("main report %s" % label, needle in rpt, needle)
 tr = read(os.path.join(ROOT, "impl/pnr/Embodied_RPACS_tr_content.html"))
-check("main report Fmax 56.049", "56.049(MHz)" in tr)
+check("main report Fmax 55.050", "55.050(MHz)" in tr)
 
 p6rpt_path = os.path.join(ROOT, "tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.rpt.txt")
 if os.path.isfile(p6rpt_path):
@@ -107,9 +107,9 @@ if pass_front:
     check("scenario 12 front-graze filter",
           "pass_reached=1" in t and "pass_front_done=1" in t)
 
-summary = read(os.path.join(ROOT, "records/robustness_20261029/fault_injection_features.log"))
+summary = read(os.path.join(ROOT, "records/robustness_20261029/fault_injection_final.log"))
 check("regression summary 13 scenarios", "PASS fault-injection regression: 13 scenarios" in summary)
-seven = read(os.path.join(ROOT, "records/robustness_20261029/seven_suites_features.log"))
+seven = read(os.path.join(ROOT, "records/robustness_20261029/seven_suites_final.log"))
 check("seven suites PASS", "PASS all seven" in seven)
 check("seven suites no errors", "Errors: 0, Warnings: 0" in seven)
 
@@ -127,7 +127,7 @@ check("TECH full main sha", MAIN_SHA in docs["TECHNICAL_REPORT.md"])
 for name in ("TECHNICAL_REPORT.md", "OBSTACLE_BOARD_TEST.md"):
     check("%s has P6 sha" % name, P6_SHA[:16] in docs[name])
 for name, text in docs.items():
-    check("%s has Logic 15910" % name, "15910" in text)
+    check("%s has Logic 15445" % name, "15445" in text)
 for stale in ("13521", "2E4FBB05", "AF7FC649", "59.226", "13518", "8328"):
     bad = [n for n, t in docs.items() if stale in t]
     check("no stale %s in main docs" % stale, not bad, ",".join(bad))
@@ -144,7 +144,7 @@ if os.path.isdir(rel):
 # and is committed as evidence, so it must not count as a dirty worktree entry)
 status = subprocess.check_output(
     ["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT, text=True)
-SELF_LOG = "records/robustness_20261029/final_audit_features.log"
+SELF_LOG = "records/robustness_20261029/final_audit_final.log"
 status = "\n".join(line for line in status.splitlines() if SELF_LOG not in line)
 check("git worktree clean", status.strip() == "", status.strip()[:200])
 
