@@ -53,13 +53,16 @@ try {
 
         if ($Program) {
             if (!(Test-Path -LiteralPath $FsFile)) { throw "Bitstream not found: $FsFile" }
+            # programmer_cli resolves --fsFile against its own working directory,
+            # so always pass an absolute path.
+            $fsPath = (Resolve-Path -LiteralPath $FsFile).Path
             $programmer = 'D:/Gowin/Gowin_V1.9.12_x64/Programmer/bin/programmer_cli.exe'
             if (!(Test-Path -LiteralPath $programmer)) { throw "programmer_cli.exe not found: $programmer" }
             $programLog = Join-Path $OutDir "board_program_$stamp.log"
-            $hash = (Get-FileHash -LiteralPath $FsFile -Algorithm SHA256).Hash
-            Write-Host "Programming SRAM with $FsFile"
+            $hash = (Get-FileHash -LiteralPath $fsPath -Algorithm SHA256).Hash
+            Write-Host "Programming SRAM with $fsPath"
             Write-Host "  SHA256 $hash"
-            & $programmer --device $Device --operation_index 2 --fsFile $FsFile *> $programLog
+            & $programmer --device $Device --operation_index 2 --fsFile "$fsPath" *> $programLog
             if ($LASTEXITCODE -ne 0) { throw "SRAM programming failed (Gowin downloader connected?), see $programLog" }
             $programText = Get-Content -LiteralPath $programLog -Raw
             if ($programText -notmatch 'Finished|Succeed|success|Status Code') {
