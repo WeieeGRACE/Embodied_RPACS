@@ -9,6 +9,7 @@ module system_pages(
  input wire [7:0] start_diag,route_reason,
  input wire [2:0] group_id,input wire [3:0] item,input wire page,
  input wire avoid_mode,auto_run,waiting,input wire [4:0] route_state,input wire [47:0] distances,input wire [2:0] tof_valid,
+ input wire [2:0] tof_reused,
  input wire voice_enable,voice_candidate,input wire [1:0] gear,gear_candidate,
  input wire ready,busy,fault,
  input wire [7:0] imu_error,sensor_error,motion_fault,command,response,
@@ -81,12 +82,17 @@ module system_pages(
  !ready ? "WAIT IMU / CHASSIS   ":!(&tof_valid) ? "TOF NOT READY        ":
  busy ? "WAIT MOTION STOP     ":start_diag==7 ? "AUDIO TIMEOUT RETRY  ":
  start_diag==8 ? "TOF LOST RETRY       ":start_diag==1 ? "VOICE OFF K2 START   ":
- avoid_mode ? "PAUSED               ":"READY TO START       ";
- if(auto_run || (!waiting && ready && &tof_valid && !fault && start_diag==0))r1[39:0]=gear==0 ? " LOW ":gear==1 ? " MID ":" HIGH";
+ // Paused is the normal safe-retry endpoint: show the route reason, state and
+ // the ToF lane masks (V=valid, U=reusing an old distance after exact-20) so a
+ // field failure gives us the exact cause without a serial cable.
+ avoid_mode ? {"PAUSED R:",hexchar(route_reason[7:4]),hexchar(route_reason[3:0]),
+ " S",hexchar({1'b0,route_state[4]}),hexchar(route_state[3:0]),
+ " V",hexchar({1'b0,tof_valid})," U",hexchar({1'b0,tof_reused})}:"READY TO START       ";
+ if(auto_run || (!waiting && ready && &tof_valid && !fault && start_diag==0 && !avoid_mode))r1[39:0]=gear==0 ? " LOW ":gear==1 ? " MID ":" HIGH";
  r2={"F:",(tof_valid[0] ? {hexchar(distances[15:12]),hexchar(distances[11:8]),hexchar(distances[7:4]),hexchar(distances[3:0])}:32'h2d2d2d2d),
  " L:",(tof_valid[1] ? {hexchar(distances[31:28]),hexchar(distances[27:24]),hexchar(distances[23:20]),hexchar(distances[19:16])}:32'h2d2d2d2d),
  " R:",(tof_valid[2] ? {hexchar(distances[47:44]),hexchar(distances[43:40]),hexchar(distances[39:36]),hexchar(distances[35:32])}:32'h2d2d2d2d)," "};
- r3=auto_run ? "K0 EXIT K2 PAUSE     ":"K0 EXIT K2 START     ";
+ r3=auto_run ? "K0 EXIT K2 PAUSE     ":(avoid_mode ? "K0 EXIT K2 RETRY     ":"K0 EXIT K2 START     ");
  end
  default:begin end
  endcase

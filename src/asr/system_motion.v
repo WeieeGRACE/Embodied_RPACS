@@ -13,7 +13,7 @@ module system_motion #(
  input wire clk_50m,reset_n,stop_gate,stop_request,uart_rx,voice_enable,
  input wire menu_valid,input wire [7:0] menu_command,
  input wire gear_commit,input wire [1:0] gear_value,
- input wire [47:0] distances,input wire [2:0] tof_seen,tof_valid,post_turn,sample_mask,
+ input wire [47:0] distances,input wire [2:0] tof_seen,tof_valid,post_turn,sample_mask,tof_reused,
  input wire sensor_fault,input wire [2:0] sensor_degraded,
  output wire sensor_refresh,sensor_monitor,
  output wire avoid_mode,auto_run,waiting,show_avoid,show_root,output wire [4:0] route_state,
@@ -142,8 +142,8 @@ module system_motion #(
  .route_press(route_press),.refresh(request_refresh),.show_avoid(show_avoid),.show_root(show_root),
  .response(response),.aux_valid(aux_valid),.aux_type(aux_type),.aux_code(aux_code),.mode_status(mode_status),.start_diag(start_diag));
  // Registered by the USB logger; independent from ASR control traffic.
- assign debug_state={start_diag,command,menu_command,ack,aux_type,aux_code,
-  3'd0,route_state,voice_enable,modules_ready,(&tof_seen && &tof_valid),fault,
+ assign debug_state={start_diag,route_reason,menu_command,ack,aux_type,aux_code,
+  tof_reused,route_state,voice_enable,modules_ready,(&tof_seen && &tof_valid),fault,
   busy,waiting,auto_run,avoid_mode};
  assign debug_valid=menu_valid || command_valid || ack_valid || aux_valid;
  wire rotate=action==8'h12 || action==8'h13;

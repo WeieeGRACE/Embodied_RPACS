@@ -1,0 +1,63 @@
+# do sim/compile_system.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap system_lib sim/work_system_menu 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 13:35:54 on Oct 29,2026
+# vlog -sv -work system_lib src/obstacle/obstacle_route.v src/obstacle/obstacle_sensors.v src/obstacle/obstacle_command.v src/obstacle/system_dispatch.v src/robot_system_top.v src/asr/system_motion.v src/asr/asr_uart_rx.v src/asr/asr_packet_tx.v src/asr/asr_feedback.v src/ui/system_keys.v src/ui/system_menu.v src/ui/system_pages.v src/ui/system_oled_text.v src/tof/tof_driver.v src/tof/tof_i2c.v src/tof/tof_page.v src/motor/motion_control_and_mode_fsm.v src/motor/dual_ab_quadrature_encoder.v src/motor/speed_measurement_and_velocity_filter.v src/motor/dual_speed_pi_pid_controller.v src/motor/pwm_and_startup_ramp.v src/motor/tb6612_driver_interface.v src/imu/imu_attitude_fixed.v src/imu/attitude_angle_to_digits.v src/imu/oled_i2c_write_byte.v src/imu/imu660ra_driver.v src/imu/imu660ra_spi_master.v src/imu/imu660ra_config_rom.v src/uart/uart_tx.v src/uart/system_event_logger.v 
+# -- Compiling module obstacle_route
+# -- Compiling module obstacle_sensors
+# -- Compiling module obstacle_command_buffer
+# -- Compiling module obstacle_turn_trace
+# -- Compiling module obstacle_command_trace
+# -- Compiling module system_dispatch
+# -- Compiling module robot_system_top
+# -- Compiling module system_motion
+# -- Compiling module asr_uart_rx
+# -- Compiling module asr_packet_tx
+# -- Compiling module asr_distance
+# -- Compiling module asr_yaw_unwrap
+# -- Compiling module system_keys
+# -- Compiling module system_menu
+# -- Compiling module system_pages
+# -- Compiling module system_oled_text
+# -- Compiling module tof_driver
+# -- Compiling module tof_three
+# -- Compiling module tof_i2c_bits
+# -- Compiling module tof_i2c_reg
+# -- Compiling module tof_page
+# -- Compiling module motion_control_and_mode_fsm
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module imu_attitude_fixed
+# -- Compiling module imu_attitude_bias_divider
+# -- Compiling module imu_attitude_atan2
+# -- Compiling module imu_attitude_sqrt
+# -- Compiling module imu_attitude_divider
+# -- Compiling module attitude_angle_to_digits
+# -- Compiling module attitude_angle_to_digits_pipeline
+# -- Compiling module oled_i2c_write_byte
+# -- Compiling module imu660ra_driver
+# -- Compiling module imu660ra_spi_master
+# -- Compiling module imu660ra_config_rom
+# -- Compiling module uart_tx
+# -- Compiling module system_event_logger
+# 
+# Top level modules:
+# 	obstacle_turn_trace
+# 	obstacle_command_trace
+# 	robot_system_top
+# 	tof_three
+# 	tof_page
+# 	attitude_angle_to_digits
+# 	attitude_angle_to_digits_pipeline
+# End time: 13:35:55 on Oct 29,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+#  quit -code 0

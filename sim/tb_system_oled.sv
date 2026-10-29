@@ -12,7 +12,7 @@ module tb_system_oled;
  reg completed=0;reg av=0,ar=0,aw=0,ve=0;reg [4:0] rs=0;
  system_pages pages(.clk(clk),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page_on),
  .start_diag(8'd0),.route_reason(8'd0),
- .avoid_mode(av),.auto_run(ar),.waiting(aw),.route_state(rs),.distances(distances),.tof_valid(valid),
+ .avoid_mode(av),.auto_run(ar),.waiting(aw),.route_state(rs),.distances(distances),.tof_valid(valid),.tof_reused(3'd0),
  .voice_enable(ve),.voice_candidate(1'b1),.gear(2'd1),.gear_candidate(2'd2),
  .ready(1'b1),.busy(1'b0),.fault(1'b0),
  .imu_error(8'd0),.sensor_error(8'd0),.motion_fault(8'd0),.command(8'h10),.response(8'd0),
@@ -120,7 +120,7 @@ module tb_system_oled;
  ve=1;av=1;aw=1;valid=7;distances={16'd2000,16'd2000,16'd2000};settle_frame();
  check_row(1,"SPEAKING PLEASE WAIT");check_row(2,"F:07D0 L:07D0 R:07D0");
  aw=0;ar=1;rs=2;settle_frame();check_row(1,"CRUISE           MID");check_row(3,"K0 EXIT K2 PAUSE");
- ar=0;settle_frame();check_row(1,"PAUSED           MID");check_row(3,"K0 EXIT K2 START");
+ ar=0;settle_frame();check_row(1,"PAUSED R:00 S02 V7 U0");check_row(3,"K0 EXIT K2 RETRY");
  $display("PASS obstacle OLED entry, voice-off prompt, waiting, cruise, paused, ranges and keys");
  completed=1;$finish;
  end
