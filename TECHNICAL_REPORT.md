@@ -284,6 +284,11 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   把 Logic 降到约 12.8k（56%）、CLS 约 7.8k（68%）。
 - 回退方法：本轮所有改动按提交拆分（基线→故障修复→资源优化→报告），可逐提交 `git revert`；
   位流与证据均在提交中。
+- **已知遗留（与本轮无关，未修改）**：`tools/run_legacy_regression.ps1` 中的
+  `sim/tb_speed_filter_modes.sv`（单轮独立闭环历史测试）自 2026-10-26 的测速预取流水改动后
+  未同步（该模块与 TB 在本轮均未改动，0bd1a77→当前 diff 为空），会按旧时序断言失败；
+  它不属于主工程 7 套仿真/构建/验收链路，记录在
+  `records/robustness_20261029/legacy_regression_minimal.log`，后续单独修 TB 即可。
 
 ## 8. 提交记录
 
