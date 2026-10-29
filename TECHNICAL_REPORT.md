@@ -6,10 +6,10 @@
 - 故障修复提交：`ef37e97`
 - 资源优化提交：见文末“提交记录”（本报告与最终构建一并提交）
 - 最终位流：`impl/pnr/Embodied_RPACS.fs`（保存工程 `verify_project.tcl` 构建）
-  - 大小 6,389,412 字节
-  - SHA256 `D3E910465561F096BF32A0B40357AE054553521DA5C7822350B2C7AB7BEED76F`
-  - （`build.tcl` 构建同一份源码得到 13257/58% 相同资源，位流 SHA 为
-    `A46B70FA7B371BAA45F415ECE5F0A1DD5D1222DAB687FA2F1D43DEF3D9E84B6D`，两者均通过验收检查）
+  - 大小 6,443,316 字节
+  - SHA256 `2CD51D8E7A40BC326DD940EAB62983E41E294A132B68916D403AE691518A5652`
+  - （同一份源码的 `build.tcl` 构建为 Logic 13322/58%、SHA
+    `2EDC31B5C4A6F0F659DA162B70BE6156F85AB6CE3CBB61836D16BACAE2BA26E8`，两者均通过验收检查）
 - 证据目录：`records/robustness_20261029/`、`records/fault_injection/`、`records/resource_20261029/`
 
 ## 1. 摘要
@@ -32,10 +32,10 @@
    （综合把整条 OLED 文本链裁掉），不能作为余量依据；真实基线是 **17661/23040 (77%)，
    CLS 9858/11520 (86%)**，真正的瓶颈是 CLS。按用户“用最少资源满足避障演示”的要求，
    删除 DISPLAY 五页诊断 UI 与菜单预览行（保留 OBSTACLE 面板/MANUAL/SETTINGS/语音/按键），
-   复用了综合自动裁剪：最终 **Logic 13257/23040 (58%)、CLS 8168/11520 (71%)、
-   Register 5653、BSRAM 9/56、DSP 6.5/28、Fmax 51.742 MHz、TNS 0、Setup/Hold 违例 0**。
-   Logic 减少 4404（-19 个百分点），CLS 减少 1690（-15 个百分点），为后续 uart_bridge/
-   任务四等功能留出约 3.3k CLS。
+   复用了综合自动裁剪：最终 **Logic 13322/23040 (58%)、CLS 8293/11520 (72%)、
+   Register 5693、BSRAM 9/56、DSP 6.5/28、Fmax 64.469 MHz、TNS 0、Setup/Hold 违例 0**。
+   Logic 减少 4339（-19 个百分点），CLS 减少 1565（-14 个百分点），为后续 uart_bridge/
+   任务四等功能留出约 3.2k CLS。
 
 最终 7 套主工程仿真套件全部通过（`Errors: 0, Warnings: 0`）。上板验证需用户接板后执行
 第 6 节步骤（本报告写作时板子尚未连接）。
@@ -129,7 +129,15 @@
 - **IMU 故障持久化**：`imu_bad` 连续 `IMU_FAULT_MS=2000` 才进入系统故障（覆盖 IMU 一次
   自动重初始化所需时间）；瞬时 SPI 抖动不再锁存。IMU 不可用时仍立即停车（modules_ready
   失效 → 运动 abort）。
-- 保留：编码器非法跳变、急停 K0、10 s 动作超时、非法状态、ASR 发送溢出等硬故障锁存。
+- **编码器毛刺容错（补充修复，由历史板级记录驱动）**：2026-10-14 的双轮反转上板记录里
+  出现过 `IL=2 IR=2 FL=1 FR=1`——两个编码器同时记录 2 次非法跳变并锁存故障。电机换向
+  瞬间的 EMI 可以在 A/B 线上产生这种短毛刺。`dual_ab_quadrature_encoder` 新增
+  `ILLEGAL_TOLERANCE`/`CLEAN_DECAY` 参数：主工程使用容忍 5 次、每 256 个合法计数泄漏
+  1 次（漏桶），即单次换向毛刺不再杀演示，而持续异常（>5 次且无合法计数稀释）仍锁存；
+  该参数默认 0，历史独立测试工程保持“首次非法跳变立即锁存”的原有行为。
+  新单测 `sim/tb_encoder_glitch_tolerance.sv` 验证：孤立毛刺不报错、连续 5 次才锁存、
+  合法计数可衰减、复位/清零正确。
+- 保留：持续编码器异常、急停 K0、10 s 动作超时、非法状态、ASR 发送溢出等硬故障锁存。
 
 ### 3.4 诊断与可观测性
 
@@ -162,6 +170,15 @@
 | live_speed | 实时升降速、斜坡步长、限速优先/解除、目标与里程不重置、暂停不运动 | PASS |
 | system_obstacle | 左右两条完整绕行路线、两段 300 mm、按实际横移回线、事件播报、语音隔离、K0 | PASS |
 | attitude_pipeline | 姿态显示流水格式化（独立套件，文件保留） | PASS |
+
+补充（本轮第 3 轮新增，保证“修复到完美”不留红项）：
+
+- `sim/tb_encoder_glitch_tolerance.sv`（加入 `tools/run_legacy_regression.ps1`）：孤立编码器
+  非法跳变被容忍、连续 5 次才锁存、合法计数可衰减、清零/复位正确；历史默认参数仍立即锁存。
+- `tools/run_legacy_regression.ps1` 的 IMU/OLED/测速预取/编码器毛刺/地面/闭环/双轮/右轮/
+  motion/tb6612 历史回归全部 PASS（`records/robustness_20261029/legacy_regression_encoder.log`）。
+- `tools/run_fault_injection.ps1` 在最终源码上 10/10 场景 0 次故障锁存
+  （`records/robustness_20261029/fault_injection_encoder.log`）。
 
 日志：`records/robustness_20261029/*_minimal.log`、`records/obstacle_20261025/system*.log`；
 全部以 `Errors: 0, Warnings: 0` 结束。
@@ -198,7 +215,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 ### 4.3 构建与时序（最终）
 
 - 综合+PnR：`build.tcl` 与保存工程 `verify_project.tcl` 均成功，0 error。
-- Fmax **51.742 MHz**（目标 50 MHz，+3.5% 余量），Setup/Hold 违例 0，TNS 0/0。
+- Fmax **64.469 MHz**（目标 50 MHz，+29% 余量），Setup/Hold 违例 0，TNS 0/0。
 - 时序路径变化：基线最差路径是 IMU roll 陀螺积分 wrap 链（+1.140 ns）；删除 roll/pitch
   后该路径消失，新最差路径为 yaw wrap / 速度换算链，仍满足 50 MHz。
 - 44 个受约束管脚、电气属性、10 个开漏输出、CPU/SSPI 复用、单实例检查保持
@@ -206,7 +223,7 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 
 ### 4.4 上板验证
 
-位流已按第 6 节准备就绪（SHA256 D3E91046…），等待用户接板后执行连续避障演示；
+位流已按第 6 节准备就绪（SHA256 2CD51D8E…），等待用户接板后执行连续避障演示；
 串口日志与结论将补充到 `records/robustness_20261029/board_*.log` 与本报告。
 
 ## 5. 资源优化
@@ -230,21 +247,22 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 
 ### 5.3 最终资源对比（post-PnR 实测）
 
-| 资源 | 基线 `0bd1a77` | 最终 `D3E91046…` | 变化 |
+| 资源 | 基线 `0bd1a77` | 最终 `2CD51D8E…` | 变化 |
 |---|---|---|---|
-| Logic | 17661/23040 (77%) | **13257/23040 (58%)** | **-4404 (-19pp)** |
-| — LUT | 14866 | 10997 | -3869 |
+| Logic | 17661/23040 (77%) | **13322/23040 (58%)** | **-4339 (-19pp)** |
+| — LUT | 14866 | 11062 | -3804 |
 | — ALU | 2795 | 2260 | -535 |
-| Register | 6859 (29%) | 5653 (24%) | -1206 |
-| **CLS（真正瓶颈）** | 9858/11520 (**86%**) | **8168/11520 (71%)** | **-1690 (-15pp)** |
+| Register | 6859 (29%) | 5693 (25%) | -1166 |
+| **CLS（真正瓶颈）** | 9858/11520 (**86%**) | **8293/11520 (72%)** | **-1565 (-14pp)** |
 | BSRAM | 9/56 | 9/56 | 0 |
 | DSP | 8.5/28 | 6.5/28 | -2 |
-| Fmax | 53.020 MHz | 51.742 MHz | -1.28 MHz（仍 +3.5% 余量） |
+| Fmax | 53.020 MHz | **64.469 MHz** | **+11.45 MHz（+29% 余量）** |
 | Setup/Hold 违例 / TNS | 0 / 0 | 0 / 0 | 保持 |
 
 主要节省来源（综合报告逐模块）：`attitude` 2593→773 LUT（roll/pitch 自动裁剪）、
-`pages` 2422→740 LUT（诊断页删除）、`tof_page` 595→0（移出综合）、DSP 8.5→6.5。
-代价：CLS 余量从 1662 提升到 3352（+1690），可较从容地合入 `tests/uart_bridge` 的
+`pages` 2422→740 LUT（诊断页删除）、`tof_page` 595→0（移出综合）、DSP 8.5→6.5；
+编码器毛刺容错新增约 65 Logic / 40 FF（漏桶计数），Fmax 反而因布局改善提升到 64.469 MHz。
+代价：CLS 余量从 1662 提升到 3227（+1565），可较从容地合入 `tests/uart_bridge` 的
 完整链路（881 CLS）或任务四导航扩展。
 
 ## 6. 上板验证步骤（用户接板后执行）
@@ -280,19 +298,19 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
   XSHUT 复位的真实响应，需上板确认；若真实板 20 mm 是目标真的过近，则仍会安全暂停。
 - 删除 DISPLAY 诊断页后无法在 OLED 上查看 System Status/IMU 姿态/编码器页面；
   故障诊断改由避障面板 F/S/M/I 码 + USB 事件日志承担。若需要恢复页面，可从 git 历史恢复
-  并在有资源余量（现有 3.3k CLS）时重新加入。
-- Fmax 从 53.02 降到 51.742 MHz（仍满足 50 MHz），后续若继续加逻辑需每次跑
+  并在有资源余量（现有 3.2k CLS）时重新加入。
+- Fmax 从 53.02 提升到 **64.469 MHz**（+29% 余量），后续若继续加逻辑仍需每次跑
   `check_system_reports.ps1` 确认 0 违例和 TNS 0。
 - 事件日志（~0.42k LUT + 2 BSRAM）本轮保留用于上板取证；演示验收通过后可再删，
-  把 Logic 降到约 12.8k（56%）、CLS 约 7.8k（68%）。
-- 回退方法：本轮所有改动按提交拆分（基线→故障修复→资源优化→报告），可逐提交 `git revert`；
-  位流与证据均在提交中。
+  把 Logic 降到约 12.9k（56%）、CLS 约 7.9k（69%）。
+- 回退方法：本轮所有改动按提交拆分（基线→故障修复→资源优化→报告→编码器容错），
+  可逐提交 `git revert`；位流与证据均在提交中。
 - **历史回归已同步为全绿**：`tools/run_legacy_regression.ps1` 中两个独立单测此前落后于流水线
   改动——`sim/tb_speed_filter_modes.sv` 未跟上 2026-10-26 的测速预取（结果延迟一拍）、
   `sim/tb_motion_control_and_mode_fsm.sv` 未跟上新端口与新的“反馈丢失→abort / 停稳超时→完成”
-  语义。本轮只改这两个 TB（未改被测模块），8 组历史回归（IMU/OLED/测速预取/地面/闭环/双轮/
-  右轮/motion/tb6612）现已全部 PASS，证据
-  `records/robustness_20261029/legacy_regression_all2.log`。
+  语义。本轮只改这两个 TB（未改被测模块），并新增编码器毛刺容错单测；IMU/OLED/测速预取/
+  编码器毛刺/地面/闭环/双轮/右轮/motion/tb6612 现已全部 PASS，证据
+  `records/robustness_20261029/legacy_regression_encoder.log`。
 - **上板辅助脚本**：新增 `tools/board_obstacle_test.ps1`，可一键 SRAM 烧写 + 只读串口抓取 +
   心跳/错误行自动判定（不写串口，不影响 ASR 运动链路），用法见第 6 节。
 
@@ -305,7 +323,8 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | `b14fba6` | 资源优化（最小演示配置 13257/58%、CLS 71%、Fmax 51.742 MHz）+ `recover_req` 时序修正 + README/板测文档初版 |
 | `67f07b7` | fixed_final 故障注入证据（10/10 无故障 + XSHUT 自愈验证）+ `REPORT.md` §7 对照 + 本技术报告定稿 |
 | `2bf8584` | 两个落后历史 TB 同步（测速预取时序、motion 新端口/abort 语义）+ `tools/board_obstacle_test.ps1`；历史回归全绿 |
-| 本提交 | `tools/run_fault_injection.ps1`（10 场景一键回归）+ 回归证据 + README/报告补充 |
+| `39d63f2` | `tools/run_fault_injection.ps1`（10 场景一键回归）+ 回归证据 + README/报告补充 |
+| 本提交 | 编码器换向毛刺容错（历史板级 IL=2/FL=1 证据驱动）+ 新单测 + 重新构建 13322/58%、CLS 72%、**Fmax 64.469 MHz**、SHA `2CD51D8E…` + 全量回归 |
 
 复现命令：
 

@@ -84,7 +84,8 @@ module system_motion #(
  wire signed [1:0] delta_l,delta_r;
  wire valid_l,valid_r,enc_fault_l,enc_fault_r;
  wire [31:0] illegal_l,illegal_r;
- dual_ab_quadrature_encoder #(.FILTER_CYCLES(ENC_FILTER),.INVERT_L(1),.INVERT_R(0)) enc(
+ dual_ab_quadrature_encoder #(.FILTER_CYCLES(ENC_FILTER),.INVERT_L(1),.INVERT_R(0),
+ .ILLEGAL_TOLERANCE(5),.CLEAN_DECAY(256)) enc(
  .clk(clk),.rst_n(rst_n),.encoder_a_l(encoder_a_l),.encoder_b_l(encoder_b_l),
  .encoder_a_r(encoder_a_r),.encoder_b_r(encoder_b_r),.clear_fault_l(1'b0),.clear_fault_r(1'b0),
  .position_l(pos_l),.position_r(pos_r),.delta_count_l(delta_l),.delta_count_r(delta_r),

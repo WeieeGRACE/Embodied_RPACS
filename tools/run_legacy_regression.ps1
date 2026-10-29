@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $projectRoot
 try {
-    foreach ($suite in @('imu_attitude','imu_attitude_oled','speed_prefetch')) {
+    foreach ($suite in @('imu_attitude','imu_attitude_oled','speed_prefetch','encoder_glitch_tolerance')) {
         & $Vsim -c -l "records/main_20261023/regression_$suite.log" -do "sim/run_$suite.do"
         if ($LASTEXITCODE -ne 0) { throw "Regression failed: $suite" }
     }

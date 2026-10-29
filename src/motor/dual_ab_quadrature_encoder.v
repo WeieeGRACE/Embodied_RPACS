@@ -3,7 +3,14 @@
 module dual_ab_quadrature_encoder #(
     parameter integer FILTER_CYCLES = 1,
     parameter integer INVERT_L = 0,
-    parameter integer INVERT_R = 0
+    parameter integer INVERT_R = 0,
+    // 0 keeps the historical behaviour (any illegal quadrature jump latches a
+    // fault immediately). A positive value tolerates that many isolated glitch
+    // jumps, one hit leaking away per CLEAN_DECAY accepted steps, so motor EMI
+    // at a direction reversal cannot kill a whole demo while a genuinely
+    // broken encoder still latches quickly.
+    parameter integer ILLEGAL_TOLERANCE = 0,
+    parameter integer CLEAN_DECAY = 256
 )(
     input wire clk, rst_n,
     input wire encoder_a_l, encoder_b_l, encoder_a_r, encoder_b_r,
@@ -14,11 +21,13 @@ module dual_ab_quadrature_encoder #(
     output wire [31:0] illegal_transition_l, illegal_transition_r,
     output wire encoder_fault_l, encoder_fault_r
 );
-    dual_ab_encoder_channel #(.FILTER_CYCLES(FILTER_CYCLES), .INVERT(INVERT_L)) left_channel (
+    dual_ab_encoder_channel #(.FILTER_CYCLES(FILTER_CYCLES), .INVERT(INVERT_L),
+        .ILLEGAL_TOLERANCE(ILLEGAL_TOLERANCE), .CLEAN_DECAY(CLEAN_DECAY)) left_channel (
         .clk(clk), .rst_n(rst_n), .a(encoder_a_l), .b(encoder_b_l),
         .clear_fault(clear_fault_l), .position(position_l), .delta_count(delta_count_l),
         .direction(direction_l), .illegal_transition(illegal_transition_l), .encoder_fault(encoder_fault_l));
-    dual_ab_encoder_channel #(.FILTER_CYCLES(FILTER_CYCLES), .INVERT(INVERT_R)) right_channel (
+    dual_ab_encoder_channel #(.FILTER_CYCLES(FILTER_CYCLES), .INVERT(INVERT_R),
+        .ILLEGAL_TOLERANCE(ILLEGAL_TOLERANCE), .CLEAN_DECAY(CLEAN_DECAY)) right_channel (
         .clk(clk), .rst_n(rst_n), .a(encoder_a_r), .b(encoder_b_r),
         .clear_fault(clear_fault_r), .position(position_r), .delta_count(delta_count_r),
         .direction(direction_r), .illegal_transition(illegal_transition_r), .encoder_fault(encoder_fault_r));
@@ -26,7 +35,9 @@ endmodule
 
 module dual_ab_encoder_channel #(
     parameter integer FILTER_CYCLES = 1,
-    parameter integer INVERT = 0
+    parameter integer INVERT = 0,
+    parameter integer ILLEGAL_TOLERANCE = 0,
+    parameter integer CLEAN_DECAY = 256
 )(
     input wire clk, rst_n, a, b, clear_fault,
     // Preserve readable counters even in event-only builds without telemetry.
@@ -79,14 +90,17 @@ module dual_ab_encoder_channel #(
             sync_valid <= {sync_valid[0],1'b1};
         end
     end
+    reg [3:0] illegal_hits;
+    reg [15:0] clean_streak;
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             candidate <= 0; previous <= 0; stable_count <= 0; initialized <= 0;
             position <= 0; delta_count <= 0; direction <= 0;
             illegal_transition <= 0; encoder_fault <= 0;
+            illegal_hits <= 0; clean_streak <= 0;
         end else begin
             delta_count <= 0;
-            if (clear_fault) begin illegal_transition <= 0; encoder_fault <= 0; end
+            if (clear_fault) begin illegal_transition <= 0; encoder_fault <= 0; illegal_hits <= 0; clean_streak <= 0; end
             if (sync_valid[1]) begin
                 if (ab_sync != candidate) begin
                     candidate <= ab_sync;
@@ -102,8 +116,23 @@ module dual_ab_encoder_channel #(
                         position <= position + {{30{step[1]}},step};
                         delta_count <= step;
                         direction <= !step[1];
+                        // A clean quadrature step slowly leaks one tolerated hit.
+                        if (ILLEGAL_TOLERANCE != 0) begin
+                            if (clean_streak >= CLEAN_DECAY-1) begin
+                                clean_streak <= 0;
+                                if (illegal_hits != 0) illegal_hits <= illegal_hits - 1'b1;
+                            end else clean_streak <= clean_streak + 1'b1;
+                        end
                     end else if ((previous ^ ab_sync) == 2'b11) begin
-                        encoder_fault <= 1;
+                        // Both lines jumped at once. With tolerance 0 this latches
+                        // immediately (historical behaviour); otherwise isolated
+                        // EMI glitches are tolerated up to ILLEGAL_TOLERANCE.
+                        if (ILLEGAL_TOLERANCE == 0 || illegal_hits >= ILLEGAL_TOLERANCE-1) begin
+                            encoder_fault <= 1;
+                        end else begin
+                            illegal_hits <= illegal_hits + 1'b1;
+                            clean_streak <= 0;
+                        end
                         if (clear_fault) illegal_transition <= 1;
                         else if (illegal_transition != 32'hffffffff)
                             illegal_transition <= illegal_transition + 1'b1;
