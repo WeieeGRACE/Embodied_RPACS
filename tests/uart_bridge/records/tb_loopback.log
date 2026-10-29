@@ -7,7 +7,7 @@
 # vmap uart_lib sim/work 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 03:04:05 on Oct 29,2026
+# Start time: 23:22:14 on Oct 29,2026
 # vlog -sv -work uart_lib src/uart_rx_8n1.v src/crc16_ccitt.v src/host_frame_rx.v src/host_cmd_decode.v src/host_link_watchdog.v src/telem_builder.v src/frame_tx_engine.v src/uart_bridge_core.v ../../src/uart/uart_tx.v sim/tb_loopback.sv 
 # -- Compiling module uart_rx_8n1
 # -- Compiling module crc16_ccitt
@@ -22,13 +22,14 @@
 # 
 # Top level modules:
 # 	tb_loopback
-# End time: 03:04:05 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 23:22:14 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" uart_lib.tb_loopback 
-# Start time: 03:04:05 on Oct 29,2026
+# Start time: 23:22:14 on Oct 29,2026
 # ** Note: (vsim-3812) Design is being optimized...
-# ** Warning: sim/tb_loopback.sv(64): (vopt-2685) [TFMPC] - Too few port connections for 'u_core'.  Expected 36, found 34.
+# ** Warning: sim/tb_loopback.sv(64): (vopt-2685) [TFMPC] - Too few port connections for 'u_core'.  Expected 37, found 34.
 # ** Warning: sim/tb_loopback.sv(64): (vopt-2718) [TFMPC] - Missing connection for port 'estop_latched_out'.
+# ** Warning: sim/tb_loopback.sv(64): (vopt-2718) [TFMPC] - Missing connection for port 'tx_done_out'.
 # ** Warning: sim/tb_loopback.sv(64): (vopt-2718) [TFMPC] - Missing connection for port 'setvel_strobe_out'.
 # ** Note: (vopt-143) Recognized 1 FSM in module "host_frame_rx(fast)".
 # ** Note: (vopt-143) Recognized 1 FSM in module "frame_tx_engine(fast)".
@@ -86,5 +87,5 @@
 #    Time: 43248910 ns  Iteration: 1  Instance: /tb_loopback
 # Break in Module tb_loopback at sim/tb_loopback.sv line 270
 # Stopped at sim/tb_loopback.sv line 270
-# End time: 03:04:07 on Oct 29,2026, Elapsed time: 0:00:02
-# Errors: 0, Warnings: 3
+# End time: 23:22:17 on Oct 29,2026, Elapsed time: 0:00:03
+# Errors: 0, Warnings: 4

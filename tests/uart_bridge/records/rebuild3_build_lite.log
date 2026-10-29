@@ -1,0 +1,106 @@
+﻿*** GOWIN Tcl Command Line Console  *** 
+current device: GW5A-25A  GW5A-LV25UG324C2/I1
+add new file: "src/uart_rx_8n1.v"
+add new file: "src/crc16_ccitt.v"
+add new file: "src/host_frame_rx.v"
+add new file: "src/host_cmd_decode.v"
+add new file: "src/host_link_watchdog.v"
+add new file: "src/telem_builder.v"
+add new file: "src/frame_tx_engine.v"
+add new file: "src/uart_bridge_core.v"
+add new file: "src/uart_bridge_top.v"
+add new file: "src/uart_bridge_lite_top.v"
+add new file: "../../src/uart/uart_tx.v"
+add new file: "src/uart_bridge_top.cst"
+add new file: "src/uart_bridge_top.sdc"
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_rx_8n1.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\crc16_ccitt.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_frame_rx.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_cmd_decode.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_link_watchdog.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\telem_builder.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\frame_tx_engine.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v'
+Compiling module 'uart_bridge_lite_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":12)
+WARN  (EX3073) : Port 'setvel_strobe_out' remains unconnected for this instance("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_top.v":203)
+Compiling module 'uart_bridge_top(CNT_W=8,ENABLE_ACK=0)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_top.v":8)
+Compiling module 'uart_rx_8n1'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_rx_8n1.v":4)
+Compiling module 'uart_tx'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\uart\uart_tx.v":3)
+Compiling module 'uart_bridge_core(CNT_W=8,ENABLE_ACK=0)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v":11)
+Compiling module 'host_frame_rx(CNT_W=8)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_frame_rx.v":10)
+Compiling module 'crc16_ccitt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\crc16_ccitt.v":5)
+WARN  (EX3670) : Actual bit length 16 differs from formal bit length 8 for port 'good_cnt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v":93)
+WARN  (EX3670) : Actual bit length 16 differs from formal bit length 8 for port 'crc_err_cnt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v":93)
+WARN  (EX3670) : Actual bit length 16 differs from formal bit length 8 for port 'len_err_cnt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v":93)
+WARN  (EX3670) : Actual bit length 16 differs from formal bit length 8 for port 'tail_err_cnt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v":94)
+WARN  (EX3670) : Actual bit length 16 differs from formal bit length 8 for port 'sync_err_cnt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v":94)
+WARN  (EX3670) : Actual bit length 16 differs from formal bit length 8 for port 'timeout_cnt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v":95)
+Compiling module 'host_cmd_decode'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_cmd_decode.v":13)
+Compiling module 'host_link_watchdog(TIMEOUT_MS=300)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_link_watchdog.v":7)
+Compiling module 'telem_builder'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\telem_builder.v":6)
+Compiling module 'frame_tx_engine'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\frame_tx_engine.v":7)
+NOTE  (EX0101) : Current top module is "uart_bridge_lite_top"
+[5%] Running netlist conversion ...
+WARN  (CV0016) : Input imu_gnd_reserved is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":37)
+WARN  (CV0016) : Input imu_spi_sck is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":38)
+WARN  (CV0016) : Input imu_spi_mosi is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":39)
+WARN  (CV0016) : Input imu_spi_miso is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":40)
+WARN  (CV0016) : Input imu_cs_n is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":41)
+WARN  (CV0016) : Input imu_int1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":42)
+WARN  (CV0016) : Input imu_int2 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":43)
+WARN  (CV0016) : Input tof_front_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":45)
+WARN  (CV0016) : Input tof_left_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":45)
+WARN  (CV0016) : Input tof_right_gpio1 is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":45)
+WARN  (CV0016) : Input asr_rx is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_lite_top.v":50)
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+[95%] Generate netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\gwsynthesis\uart_bridge_lite.vg" completed
+[100%] Generate report file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\gwsynthesis\uart_bridge_lite_syn.rpt.html" completed
+GowinSynthesis finish
+Reading netlist file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\gwsynthesis\uart_bridge_lite.vg"
+Parsing netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\gwsynthesis\uart_bridge_lite.vg" completed
+Processing netlist completed
+Reading constraint file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_top.cst"
+Physical Constraint parsed completed
+Running placement......
+[10%] Placement Phase 0 completed
+[20%] Placement Phase 1 completed
+[30%] Placement Phase 2 completed
+[50%] Placement Phase 3 completed
+Running routing......
+[60%] Routing Phase 0 completed
+[70%] Routing Phase 1 completed
+[80%] Routing Phase 2 completed
+[90%] Routing Phase 3 completed
+Running timing analysis......
+[95%] Timing analysis completed
+Placement and routing completed
+Bitstream generation in progress......
+Bitstream generation completed
+Running power analysis......
+[100%] Power analysis completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\pnr\uart_bridge_lite.power.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\pnr\uart_bridge_lite.pin.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\pnr\uart_bridge_lite.rpt.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\pnr\uart_bridge_lite.rpt.txt" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\impl\pnr\uart_bridge_lite.tr.html" completed
+Thu Oct 29 23:23:01 2026
+
