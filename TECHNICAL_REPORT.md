@@ -170,16 +170,29 @@
 
 同一 TB、同一注入、同一 DUT 参数：
 
-| 场景 | 基线（3556192） | 修复后（最终源码） |
+| 场景 | 基线（3556192） | 修复后（最终源码 fixed_final） |
 |---|---|---|
-| A_FRONT / A_SIDE / B / I_HOLD / H_TURN2（20 mm 卡住） | 0x84 故障 +999 ms，需 K0 | 无故障；barrier 重试 / XSHUT 自愈后继续；永久 20 mm 约 4 s 转 BLOCKED 暂停（非故障） |
-| C（20 ms I2C NACK） | `faults[0]` +1 ms 永久锁存 | 无故障；通道自恢复，路线继续 |
-| D（IMU 150 ms 错误） | `imu_bad` +2 ms 永久锁存 | 无故障；IMU 重初始化后继续（≥2 s 持续错误才会锁存） |
-| E（WAIT_STILL 编码器计数） | `motion_fault=5` +1000 ms | 无故障；3 s 后以 reason=7 完成动作，路线继续 |
-| G_NEAR（侧向有效 60 mm） | `faults[4]` +1 ms 永久锁存 | 无故障；正常通过 barrier 继续 |
-| CTRL（100 ms 20 mm） | 无故障 | 无故障（行为保持） |
+| A_FRONT / A_SIDE（20 mm 保持 1.2 s 后恢复） | 0x84 故障 +999 ms，需 K0 | 无故障；注入期间 barrier 重试，恢复 2000 后 **+6 DUT-ms** 通过 barrier 并继续（A_FRONT→SHIFT，A_SIDE→SHIFT_EXTRA） |
+| I_HOLD（20 mm 保持 2 s+ 后恢复） | 0x84 故障 +999 ms | 无故障；恢复后 **+14 DUT-ms** 通过 barrier 并继续 |
+| H_TURN2（左转+横移+右转后第二 barrier 对侧 20 mm） | 0x84 故障 +999 ms | 无故障；barrier 只要求 front+相关侧向，**+17 DUT-ms** 进入 PASS |
+| B（永久 20 mm） | 0x84 故障 +999 ms，永不恢复 | 无故障；4 次 barrier 重试后 **+3999 ms** 进入 BLOCKED/reason=0x85 暂停（auto_run=0、status=20、fault_led=0），按 K2 可继续 |
+| C（20 ms I2C NACK） | `faults[0]` +1 ms 永久锁存 | 无故障；通道自恢复（error 路径 XSHUT 64 次），路线继续到 SHIFT |
+| D（IMU 150 ms 错误） | `imu_bad` +2 ms 永久锁存 | 无故障；IMU 重初始化后 imu_error 回 00，转动继续（≥2 s 持续错误才锁存） |
+| E（WAIT_STILL 编码器持续计数） | `motion_fault=5` +1000 ms | 无故障；新 `STOP_TIMEOUT_MS=3000` 生效，以 motion reason=7 完成动作后路线继续 |
+| G_NEAR（侧向有效 60 mm） | `faults[4]` +1 ms 永久锁存 | 无故障、`fault_bits=0000`；barrier 正常放行继续 |
+| CTRL（100 ms 20 mm 负向对照） | 无故障 | 无故障（行为保持） |
 
-最终源码的 fixed 复跑日志：`records/fault_injection/fixed_final/`；对照表见
+**XSHUT 自愈验证**：所有 20 mm 注入通道满足
+`glitch_recover_req == driver_recover == tof_resets > 0`（A_FRONT/A_SIDE 33/33/33、
+I_HOLD 82/82/82、B 124/124/124、H_TURN2 左通道 33、CTRL 3/3/3），即每次自愈请求都被
+driver 接受并实际产生 XSHUT 复位；瞬时 20 mm 结束后 barrier 在 6–17 DUT-ms 内通过。
+修复提交 `ef37e97` 早期缺陷（请求 33 次、接受 0 次）的证据保留在
+`records/fault_injection/fixed/` 作历史对照。
+
+结论：基线 5 类“转向后 FAULT 锁存路径”（barrier 0x84 / faults[0] / imu_bad /
+motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存**，0 条
+`EVIDENCE FAULT_T0`；只有真正无法安全通过的几何/持续异常才进入 BLOCKED 暂停。
+日志：`records/fault_injection/fixed_final/`；完整对照表见
 `records/fault_injection/REPORT.md` §7。
 
 ### 4.3 构建与时序（最终）
@@ -193,7 +206,8 @@
 
 ### 4.4 上板验证
 
-见第 6 节；位流与串口日志会补充到 `records/robustness_20261029/board_*.log`。
+位流已按第 6 节准备就绪（SHA256 D3E91046…），等待用户接板后执行连续避障演示；
+串口日志与结论将补充到 `records/robustness_20261029/board_*.log` 与本报告。
 
 ## 5. 资源优化
 
@@ -276,9 +290,9 @@
 | 提交 | 内容 |
 |---|---|
 | `0bd1a77` | 改动前基线：构建 17661/77%、CLS 86%、位流 SHA、日志归档 |
-| `ef37e97` | 故障容错修复 + 面板诊断码 + 故障注入 TB/证据 + 7 套仿真更新 |
-| 待填（资源优化） | 删除 DISPLAY 诊断组/预览行、tof_page 移出构建、TB 更新、最终构建证据 |
-| 待填（报告） | 本技术报告 + README/板测文档更新 |
+| `ef37e97` | 故障容错修复 + 面板诊断码 + 故障注入 TB/基线证据 + 7 套仿真更新 |
+| `b14fba6` | 资源优化（最小演示配置 13257/58%、CLS 71%、Fmax 51.742 MHz）+ `recover_req` 时序修正 + README/板测文档初版 |
+| 本提交 | fixed_final 故障注入证据（10/10 无故障 + XSHUT 自愈验证）+ `REPORT.md` §7 对照 + 本技术报告定稿 |
 
 复现命令：
 

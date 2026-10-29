@@ -30,6 +30,14 @@
    不会自动恢复，与本轮“瞬时故障可恢复、真实故障才安全停车”的目标直接冲突。
 3. 负向对照证明：同样的 20 mm 只持续 100 ms（< barrier 1000 ms）时**不产生任何故障**，路线在 barrier 通过后
    继续（state 8→23）。所以机制 2 是“等超时判故障”，不是 20 mm 本身触发传感器故障。
+4. **修复版本对照（最终冻结源码，10/10 场景）**：在同样的注入下**没有出现任何 fault**
+   （`records/fault_injection/fixed_final/` 中 0 条 `EVIDENCE FAULT_T0`）：20 mm 场景改为 barrier 重试/暂停
+   （B 场景约 4 s 后进入 BLOCKED 暂停，`auto_run=0`、`fault_led=0`，属设计预期）；C 通道自恢复后路线继续；
+   D/E 瞬态不再锁存；G_NEAR 不再产生近距离故障；H 只用“前向 + 相关侧向”lane 判 barrier，未被要求的对侧 lane
+   的 20 mm 不再阻塞。**XSHUT glitch 自愈已修复并验证生效**：注入 20 mm 的通道
+   `glitch_recover_req == driver_recover == tof_resets > 0`（A_FRONT 33/33/33、A_SIDE 33/33/33、I_HOLD 82/82/82、
+   B 124/124/124、H_TURN2 左通道 33、CTRL 3/3/3），且注入结束（恢复 2000）后 **6–17 DUT-ms** 内 barrier 即通过、
+   路线继续。详见 §7。
 
 ---
 
@@ -73,7 +81,7 @@
 
 ---
 
-## 2. 结果总表
+## 2. baseline 结果总表（冻结的改动前 RTL，即用户实际运行的版本）
 
 | 场景 | 注入条件 | 注入时刻<br>(DUT ms) | 首次故障<br>(DUT ms) | Δ | 首个故障源（锁存位） | route state / reason | 电机 | 能否自动恢复 | 日志（行号） |
 |---|---|---|---|---|---|---|---|---|---|
@@ -103,7 +111,7 @@
 
 ---
 
-## 3. 每个场景的证明日志（原文摘录）
+## 3. baseline 每个场景的证明日志（原文摘录）
 
 ### A_FRONT（精确 20 mm / 前向 / 1.2 s → barrier 0x84）
 
@@ -361,23 +369,74 @@ motion_control_and_mode_fsm.v:
    `motion_fault` 快照到 K0 前可读的寄存器/调试帧（现在 `auto_run` 掉落后 reason 立即丢失，
    板上无法区分 0x84/0x80/…）。这样上板一次就能确认到底命中哪条路径。
 6. **可恢复路径**：故障解除后允许自动恢复（或 K2 重试），满足“90° 转向后路线可重试继续”。
+7. **XSHUT glitch 自愈的时序（最终冻结源码已修复并验证，见 §7.3）**：历史上 `obstacle_sensors` 的
+   `recover_req` 只脉冲 1 拍，而 `tof_driver` 只在 `IDLE: if(trigger)` 里采样，而 `trigger` 下一拍才寄存，
+   请求 100% 丢失（修复提交 `ef37e97` 快照证据：`glitch_recover_req=33` 但 `driver_recover=0`、`tof_resets=0`）。
+   最终冻结源码已把 driver 改为 `IDLE: if(trigger || recover_req)`；本报告 §7.3 用
+   `glitch_recover_req == driver_recover == tof_resets > 0` 验证其已生效。
 
 ---
 
-## 7. 复跑 fixed 版本（待 RTL 修复落地后补充）
+## 7. fixed 版本对照（最终冻结源码）
 
-计划：RTL 修复完成并编译通过后，用**同一组 10 个场景**对 fixed 源码复跑，预期证据：
+### 7.1 方法
 
-| 场景 | fixed 版本预期 |
-|---|---|
-| A_FRONT / A_SIDE / B / I_HOLD / H_TURN2 | 不再 `fault_latched`；20 mm 只导致暂停/重试或 barrier 降级放行，路线可继续 |
-| G_NEAR | 侧向 60 mm 不再锁存 fault；交给几何/暂停逻辑处理 |
-| C | NACK 后通道自恢复，fault 熄灭并自动继续（无需 K0） |
-| D | IMU 错误持续 150 ms 内不锁存或恢复后熄灭并继续 |
-| E | 停稳超时按“暂停/重试”处理而非锁存 FAULT（若保留 1000 ms 阈值） |
-| CTRL | 保持无故障、路线继续（回归对照） |
+- 编译对象：**最终冻结的当前工作区 `src/`**（2026-10-29 12:25 最后一次修改后冻结；不是 git HEAD；
+  baseline 的 `fault_lib` 与 `baseline_src/` 保持不动）。使用 `sim/run_fault_turns_fixed_compile.do`
+  把最终 src 编到独立库 `fault_fixed_lib`（`sim/work_fault_fixed/`），不覆盖 baseline 库。
+- TB 用 `+FIXED=1` 进入“观察模式”，最终判定行是 `FIXED_RUN_OBSERVED`；另用 `+NEWMENU=1` 适配最终菜单
+  （DISPLAY 组删除：root item0=MANUAL(2)、item1=SETTINGS(4)、item2=OBSTACLE(5)）。
+- 最终 fixed 日志在 **`records/fault_injection/fixed_final/`**（10 个场景，日志中 **0 条 `EVIDENCE FAULT_T0`**）；
+  修复提交 `ef37e97` 的早期 fixed 日志保留在 `records/fault_injection/fixed/` 作历史对照。
+- 场景注入与 baseline 完全相同（E 场景把编码器注入延长到 3.5 s，以覆盖新 `STOP_TIMEOUT_MS=3000`）。
+- fixed 探针（编译宏 `FIXED_RTL`）：统计每通道 `glitch_recover_req`（obstacle_sensors 的恢复请求）、
+  `driver_recover`（tof_driver 接受次数）、`tof_resets`（VL53L0X 模型观测到的 XSHUT 复位次数）。
 
-（待 Lead 通知 src/ 可编译后执行并回填本表。）
+### 7.2 baseline vs fixed_final 汇总表
+
+| 场景 | baseline 首个故障源（Δ） | fixed_final 结果（`FIXED_RUN_OBSERVED`） | XSHUT 自愈<br>`req/driver_recover/tof_resets` | fixed 证明行 |
+|---|---|---|---|---|
+| **A_FRONT** | route 0x84（+999 ms） | `fault_seen=0`、`fault_latched=0`、`fault_bits=0000`；20 mm 期间 barrier 重试；恢复 2000 后 **+6 DUT-ms** barrier 通过（4913 restore→4919 到 23），路线继续到 **state=6(SHIFT)**，`auto_run=1` | ch0 **33/33/33** | `fixed_final_a_front.log:162`（:157,:160） |
+| **A_SIDE** | route 0x84（+999 ms） | `fault_seen=0`；恢复 2000 后 **+6 DUT-ms** barrier 通过，路线继续到 **state=22(SHIFT_EXTRA)**，`auto_run=1` | ch2 **33/33/33** | `fixed_final_a_side.log:163` |
+| **B**（永久 20 mm） | route 0x84（+999 ms） | `fault_seen=0`、`fault_latched=0`；4 次 barrier 重试后约 **+3999 ms** 进入 **BLOCKED(17) reason=0x85**、`auto_run=0`、route 复位（暂停，非故障），`status=20`、`fault_led=0`、`fault_events=0` | ch0 **124/124/124**（持续 20 mm 反复重初始化，仍按设计暂停） | `fixed_final_b.log:163`（:156 进入 BLOCKED） |
+| **C**（NACK 20 ms） | sensor `faults[0]`（+1 ms） | `fault_seen=0`、`sensor_fault=0`；通道自恢复（`error=0`），路线继续到 **state=6(SHIFT)**，`auto_run=1` | 0/0/**64**（error 路径，非 glitch 路径） | `fixed_final_c.log:163` |
+| **D**（IMU 150 ms） | `imu_bad`（+2 ms） | `fault_seen=0`；IMU 重初始化后恢复（观察点 `imu_error=00`），转动继续，`auto_run=1` | 0/0/0 | `fixed_final_d.log:159` |
+| **E**（编码器抖动） | `motion_fault=5`（+1000 ms） | `fault_seen=0`；新 `STOP_TIMEOUT_MS=3000` 到点后 motion 以 **reason=7** 完成（WAIT_STILL 进入 3661→route=8 于 6661，恰好 +3000 ms），转向动作结束、路线继续到 23→6，`auto_run=1` | 0/0/0 | `fixed_final_e.log:161`（:153-156 为 3000 ms 证据） |
+| **CTRL** | 无故障 | 无故障，路线继续到 state=6（回归对照保持） | ch0 **3/3/3** | `fixed_final_ctrl.log:164` |
+| **G_NEAR**（侧向 60 mm） | sensor `faults[4]`（+1 ms） | `fault_seen=0`、`sensor_fault=0`、`fault_bits=0000`；60 mm 作为普通几何数据，barrier 正常放行（路线到 23/SAMPLE_SHIFT，`auto_run=1`） | 0/0/0（60 mm 不是 glitch） | `fixed_final_g_near.log:161` |
+| **H_TURN2**（第二转向后左侧 20 mm） | route 0x84（+999 ms） | `fault_seen=0`；barrier 只要求 front+相关侧向 fresh，未用到的左侧 lane 20 mm 不再阻塞，注入后 **+17 DUT-ms** 即从 WAIT_BACK(13) 进入 **PASS(9)** | ch1 **33/33/33**（对侧 lane 自愈，不阻塞路线） | `fixed_final_h_turn2.log:170`（:167 进入 9） |
+| **I_HOLD**（20 mm 2 s） | route 0x84（+999 ms） | `fault_seen=0`；3 s 内 `hold20=1 / fresh=0 / post_turn=0`（`accepted=2000, age=3011`）；恢复 2000 后 **+14 DUT-ms** barrier 通过（→23），路线继续到 **state=6(SHIFT)** | ch0 **82/82/82** | `fixed_final_i_hold.log:162`（:157,:160） |
+
+结论：**最终冻结源码 10/10 场景均不再锁存 fault**；仅 B（持续 20 mm 超过 4 次 barrier 重试）按设计预期进入
+BLOCKED 暂停（`auto_run=0`，需要 K2 重试继续），不是故障。
+
+### 7.3 XSHUT glitch 自愈：从缺陷到修复验证
+
+设计意图：`obstacle_sensors` 连续 4 个精确 20 mm 后请求 `tof_driver` 做一次 XSHUT 重新初始化，使持续 20 mm
+的通道能自愈，避免它长期卡住转向后的 barrier。
+
+1) **缺陷（修复提交 `ef37e97` 快照，12:12 编译）**：`recover_req` 只脉冲 1 拍，而 `tof_driver` 只在
+   `IDLE: if(trigger)` 分支采样，`trigger` 下一拍才寄存 → 请求 100% 丢失。历史日志
+   `records/fault_injection/fixed/fixed_a_front.log:163` 证据：
+   `glitch_recover_req=33/0/0  driver_recover=0/0/0  tof_resets=0/0/0`（作为对照，C 场景 error 路径
+   `tof_resets=0/0/64`，说明 resets 观测链正常）。
+2) **修复（最终冻结源码）**：`tof_driver` 改为 `IDLE: if(trigger || recover_req) begin`（2026-10-29 12:21），
+   `recover_req` 不再依赖 `trigger` 同拍出现。
+3) **验证（`fixed_final/`，全部 20 mm 注入场景）**：
+   - A_FRONT：ch0 `33/33/33`；A_SIDE：ch2 `33/33/33`；I_HOLD：ch0 `82/82/82`；
+     B（4.5 s 持续 20 mm）：ch0 `124/124/124`；H_TURN2（对侧左 lane）：ch1 `33/33/33`；CTRL：ch0 `3/3/3`。
+     即 **每一次 `recover_req` 都被 driver 接受并实际产生了 XSHUT 复位**（三个计数逐场景完全相等）。
+   - 自愈后路线可继续：A_FRONT/A_SIDE 在注入结束（恢复 2000）后 **+6 DUT-ms** barrier 通过，
+     I_HOLD **+14 DUT-ms** 通过，随后路线继续到 SAMPLE_SHIFT/SHIFT；H_TURN2 因 barrier 不需要对侧 lane，
+     注入后 **+17 DUT-ms** 直接进入 PASS。
+   - B（永久 20 mm）属设计预期：XSHUT 重初始化后传感器仍读到 20 mm，`fresh` 仍无法建立 → barrier 4 次重试后
+     BLOCKED 暂停（`reason=0x85`、`auto_run=0`、`fault_led=0`），**不是 FAULT**，需要 K2 重试。
+   - CTRL（100 ms 20 mm，≤4 个样本量级）也触发 3 次 XSHUT 复位，且未恢复 2000 时 barrier 仍通过；
+     A/B/I 等在注入结束后立即恢复，证明“短 glitch 自愈 + barrier 重试”组合满足“90° 转向后路线可重试继续”。
+
+**结论：XSHUT glitch 自愈机制在最终冻结源码中已生效**：`glitch_recover_req>0` 时 `driver_recover>0` 且
+`tof_resets>0`；瞬时 20 mm 结束后 barrier 在 ≤1 s（实测 6–17 DUT-ms）内通过并继续，永久 20 mm 以 BLOCKED
+暂停收场而非 FAULT。
 
 ---
 
@@ -399,11 +458,17 @@ motion_control_and_mode_fsm.v:
 | `sim/run_fault_turns_h_turn2.do` | 场景 H_TURN2 |
 | `sim/run_fault_turns_i_hold.do` | 场景 I_HOLD（Lead 追加要求） |
 | `sim/run_fault_turns_baseline.do` | 编译冻结 baseline 源码到独立库 `fault_lib`（`sim/work_fault_baseline/`） |
+| `sim/run_fault_turns_fixed_compile.do` | 编译当前工作区 `src/`（fixed）到独立库 `fault_fixed_lib`（`sim/work_fault_fixed/`），不覆盖 baseline 库 |
+| `sim/run_fault_turns_fixed.do` | fixed 观察模式；`FAULT_SCENARIO` 环境变量选场景，TB 以 `+FIXED=1 +NEWMENU=1` 运行 |
 | `records/fault_injection/baseline_src/` | `git archive HEAD src` 冻结副本（与 3556192 的 src 相同，只读） |
-| `records/fault_injection/scenario_*.log` | 每个场景的 ModelSim 日志（含 EVIDENCE/PASS 行） |
+| `records/fault_injection/scenario_*.log` | baseline 每个场景的 ModelSim 日志（含 EVIDENCE/PASS 行） |
+| `records/fault_injection/fixed_final/fixed_final_*.log` | **最终冻结源码** 10 个场景日志（含 `FIXED_RUN_OBSERVED` 行，§7 引用） |
+| `records/fault_injection/fixed/fixed_*.log` | 修复提交 `ef37e97` 的早期 fixed 日志（历史对照，§7.3 缺陷证据） |
 | `records/fault_injection/REPORT.md` | 本报告 |
 
 ### 8.2 复现全部场景（PowerShell 片段）
+
+#### baseline（冻结的改动前源码）
 
 ```powershell
 $runs = @(
@@ -423,8 +488,37 @@ foreach($j in $runs){
 }
 ```
 
-单场景耗时约 16–20 s，H_TURN2（完整绕障到第二个转向）约 80 s；全部 10 个场景合计约 3.5 min（wall clock）。
-所有场景结束为 `Errors: 0, Warnings: 0`，`RESULT scenario=<n> PASS`。
+单场景耗时约 16–20 s，H_TURN2（完整绕障到第二个转向）约 80–95 s；baseline 全部 10 个场景合计约 4 min（wall clock），
+fixed 全部 10 个场景合计约 4 min（实测 241 s）。所有场景结束为 `Errors: 0, Warnings: 0`；
+baseline 日志以 `RESULT scenario=<n> PASS` 结束，fixed 日志以 `FIXED_RUN_OBSERVED ...` 结束。
+
+#### fixed（最终冻结源码，观察模式）
+
+```powershell
+New-Item -ItemType Directory -Force -Path records/fault_injection/fixed_final | Out-Null
+$runs = @(
+ @{n=0; log='fixed_final_a_front.log'},
+ @{n=1; log='fixed_final_a_side.log'},
+ @{n=2; log='fixed_final_b.log'},
+ @{n=3; log='fixed_final_c.log'},
+ @{n=4; log='fixed_final_d.log'},
+ @{n=5; log='fixed_final_e.log'},
+ @{n=6; log='fixed_final_ctrl.log'},
+ @{n=7; log='fixed_final_g_near.log'},
+ @{n=8; log='fixed_final_h_turn2.log'},
+ @{n=9; log='fixed_final_i_hold.log'}
+)
+foreach($r in $runs){
+  $env:FAULT_SCENARIO = "$($r.n)"
+  & 'D:/app/modesilm/win64/vsim.exe' -c -l ('records/fault_injection/fixed_final/' + $r.log) -do sim/run_fault_turns_fixed.do
+}
+```
+
+单场景作用：`sim/run_fault_turns_fixed.do` 会先执行 `sim/run_fault_turns_fixed_compile.do`（编译当前 `src/`
+到 `fault_fixed_lib`），再以 `+SCENARIO=<n> +FIXED=1 +NEWMENU=1` 运行 TB。fixed 日志中 `FAIL scenario ...`
+行是“基线预期未再出现”的意思（观察模式有意保留基线判定文字），以 `FIXED_RUN_OBSERVED` 行为准。
+`+NEWMENU=1` 用于最终菜单（DISPLAY 组已删除：root item0=MANUAL(2)、item1=SETTINGS(4)、item2=OBSTACLE(5)）；
+baseline 运行不带该参数，保持旧菜单映射，因此 baseline 证据仍可原样复现。
 
 ### 8.3 结论边界
 
@@ -433,3 +527,6 @@ foreach($j in $runs){
   而不是“板上一定是哪个”。真实原因需要按 §5 的上板区分方法确认。
 - 本 TB 的 20 mm 场景按设计中的 `GLITCH_MM=20` 精确注入；近距场景按路线代码中的
   `SIDE_NEAR_MM=85` 边界注入 60 mm。两者都来自设计代码本身的常量，不是任意假设。
+- fixed 证据钉定到 2026-10-29 12:25 冻结的最终工作区 `src/`（`records/fault_injection/fixed_final/`）；
+  若此后 `src/` 再改动，需按 §8.2 重新生成 fixed_final 日志并刷新 §7。baseline 证据钉定到
+  `3556192`/`0bd1a77` 的冻结副本（`baseline_src/`），不受工作区改动影响。

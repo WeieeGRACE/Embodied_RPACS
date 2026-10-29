@@ -56,6 +56,8 @@ module tb_fault_turns;
 
  integer scenario=0;
  integer fixed_mode=0;           // +FIXED=1: observation-only run of the fixed RTL
+ integer menu_new=0;            // +NEWMENU=1: post-fix menu (DISPLAY group removed):
+                                //   root item0=MANUAL(2), item1=SETTINGS(4), item2=OBSTACLE(5)
  integer cyc=0;                 // free-running clock-cycle counter
  integer mark_cyc=0;            // cycle of the last injection marker
  reg mark_valid=0;
@@ -68,6 +70,28 @@ module tb_fault_turns;
  reg f_rfault=0,f_imubad=0,f_sfault=0,f_flatch=0,f_auto=0,f_latch_seen=0;
  reg [4:0] f_rstate=0;
  reg f_enc_l=0,f_enc_r=0,f_txovf=0;
+
+ // Fixed-RTL only probes (compiled with +define+FIXED_RTL in the fixed runner):
+ // count channel glitch-recovery requests vs the driver actually accepting
+ // them, to check the intended "4 consecutive exact-20 mm -> XSHUT re-init".
+ integer req_cnt0=0,req_cnt1=0,req_cnt2=0,rec_cnt0=0,rec_cnt1=0,rec_cnt2=0;
+`ifdef FIXED_RTL
+ reg req_q0=0,req_q1=0,req_q2=0,rec_q0=0,rec_q1=0,rec_q2=0;
+ always @(posedge clk)begin
+  req_q0<=dut.sensors.channels[0].recover_req;
+  req_q1<=dut.sensors.channels[1].recover_req;
+  req_q2<=dut.sensors.channels[2].recover_req;
+  rec_q0<=dut.sensors.channels[0].driver.recover;
+  rec_q1<=dut.sensors.channels[1].driver.recover;
+  rec_q2<=dut.sensors.channels[2].driver.recover;
+  if(dut.sensors.channels[0].recover_req && !req_q0)req_cnt0<=req_cnt0+1;
+  if(dut.sensors.channels[1].recover_req && !req_q1)req_cnt1<=req_cnt1+1;
+  if(dut.sensors.channels[2].recover_req && !req_q2)req_cnt2<=req_cnt2+1;
+  if(dut.sensors.channels[0].driver.recover && !rec_q0)rec_cnt0<=rec_cnt0+1;
+  if(dut.sensors.channels[1].driver.recover && !rec_q1)rec_cnt1<=rec_cnt1+1;
+  if(dut.sensors.channels[2].driver.recover && !rec_q2)rec_cnt2<=rec_cnt2+1;
+ end
+`endif
 
  robot_system_top #(.CLK_HZ(1000000),.UART_BAUD(100000),.PWM_HZ(1000),
  .ENC_FILTER(2),.DIR_DEADTIME(10),.POR_CYCLES(8),.DEBOUNCE_CYCLES(4),
@@ -111,7 +135,14 @@ module tb_fault_turns;
  if(dut.group_id!=0 || dut.page)$fatal(1,"root navigation");
  end endtask
  function automatic integer menu_index(input integer gr);
-  case(gr)2:menu_index=1;4:menu_index=2;5:menu_index=3;default:menu_index=0;endcase
+  // Baseline menu has the DISPLAY group: root item1=MANUAL(2), item2=SETTINGS(4),
+  // item3=OBSTACLE(5). The frozen final menu removed DISPLAY, so the same groups
+  // sit at root items 0/1/2 (select with +NEWMENU=1).
+  if(menu_new) begin
+   case(gr)2:menu_index=0;4:menu_index=1;5:menu_index=2;default:menu_index=0;endcase
+  end else begin
+   case(gr)2:menu_index=1;4:menu_index=2;5:menu_index=3;default:menu_index=0;endcase
+  end
  endfunction
  task choose(input integer gr,input integer it);begin
  root();$display("CHOOSE group=%0d item=%0d page=%b target=%0d",dut.group_id,dut.item,dut.page,gr);
@@ -596,8 +627,10 @@ module tb_fault_turns;
  initial begin
   if(!$value$plusargs("SCENARIO=%d",scenario))scenario=SC_A_FRONT;
   if(!$value$plusargs("FIXED=%d",fixed_mode))fixed_mode=0;
+  if(!$value$plusargs("NEWMENU=%d",menu_new))menu_new=0;
   $display("SCENARIO id=%0d",scenario);
   $display("FIXED_MODE=%0d",fixed_mode);
+  $display("NEWMENU=%0d",menu_new);
   if(fixed_mode)
    $display("NOTE: FIXED_MODE is observation-only. Scenario PASS/FAIL lines still state the BASELINE expectation (PASS = the old design would latch a fault); the authoritative result is the final FIXED_RUN_OBSERVED line.");
 
@@ -755,7 +788,7 @@ module tb_fault_turns;
    // Observation-only run of the fixed RTL: allow the route to continue or the
    // fault to self-clear, then publish the authoritative fixed-version result.
    cycles(300*DUT_MS);
-   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d dut_ms=%0d",
+   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d glitch_recover_req=%0d/%0d/%0d driver_recover=%0d/%0d/%0d dut_ms=%0d",
     scenario,(f_cyc>=0),dut.control.fault_latched,(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS,dut.route_state,
     dut.control.auto_run,dut.avoid_mode,dut.control.sensor_fault,dut.sensors.fault_bits,
     dut.sensors.channels[0].faults,dut.sensors.channels[1].faults,dut.sensors.channels[2].faults,
@@ -764,7 +797,8 @@ module tb_fault_turns;
     dut.control.imu_bad,dut.control.imu_error,
     dut.control.route.route_fault,dut.control.route.reason,fault_events,dut.control.status,dut.led_fault,
     dut.post_turn,dut.distances[15:0],dut.distances[31:16],dut.distances[47:32],
-    resets[0],resets[1],resets[2],shots[0],shots[1],shots[2],cyc/DUT_MS);
+    resets[0],resets[1],resets[2],shots[0],shots[1],shots[2],
+    req_cnt0,req_cnt1,req_cnt2,rec_cnt0,rec_cnt1,rec_cnt2,cyc/DUT_MS);
    completed=1;
   end else if(check_ok)begin
    $display("RESULT scenario=%0d PASS fault_seen=%b fault_dt_ms=%0d",scenario,(f_cyc>=0),(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS);
