@@ -1,0 +1,75 @@
+{
+  "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5757024820-if00",
+  "baud": 115200,
+  "checks": [
+    {
+      "name": "P1_port_exists",
+      "ok": true,
+      "detail": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5757024820-if00"
+    },
+    {
+      "name": "P2_port_open",
+      "ok": true,
+      "detail": "uart:/dev/serial/by-id/usb-1a86_USB_Single_Serial_5757024820-if00@115200"
+    },
+    {
+      "name": "P3_telemetry_received",
+      "ok": true,
+      "detail": "n=151 / 3.0s（预热 0.5s 不计）"
+    },
+    {
+      "name": "P4_rate_in_range",
+      "ok": true,
+      "detail": "50.02 Hz (期望 45.0~60.0)"
+    },
+    {
+      "name": "P5_no_parse_errors",
+      "ok": true,
+      "detail": "errors=0"
+    },
+    {
+      "name": "P6_heartbeat_fresh",
+      "ok": true,
+      "detail": "hb_age=100 ms, link_lost=False"
+    },
+    {
+      "name": "P7_fault_byte_readable",
+      "ok": true,
+      "detail": "fault=0x20[CMD_TIMEOUT]"
+    }
+  ],
+  "ok": true,
+  "analysis": {
+    "frames": 151,
+    "hz": 50.02,
+    "errors": 0,
+    "hb_age_ms": 100,
+    "link_lost": false,
+    "p4_rate_ok": true,
+    "p5_errors_ok": true,
+    "p6_hb_ok": true
+  },
+  "parser": {
+    "good": 152,
+    "sync_err": 0,
+    "len_err": 0,
+    "crc_err": 0,
+    "tail_err": 0,
+    "timeout": 0,
+    "type_err": 0
+  },
+  "last_sample": {
+    "enc": [
+      0,
+      0
+    ],
+    "yaw_deg": 5.59,
+    "pitch_deg": -1.58,
+    "roll_deg": -1.54,
+    "fault": 32,
+    "fault_names": [
+      "CMD_TIMEOUT"
+    ],
+    "cmd_seq": 0
+  }
+}

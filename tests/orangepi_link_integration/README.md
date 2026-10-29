@@ -131,49 +131,39 @@ tests/orangepi_link_integration/
 
 ---
 
-## 8. 当前状态（2026-10-29 12:0x，尚未接线）
+## 8. 当前状态（2026-10-29 13:23，**已实测通过**）
 
 | 项 | 状态 |
 | --- | --- |
-| 工程搭建 | ✅ 7 个脚本 + 配置 + 文档（见 §7） |
-| 离线自检 | ✅ **7/7 PASS**（`python tools/offline_selftest.py`，不需要任何硬件） |
-| 部署链路 | ✅ `deploy_to_pi.ps1` 实跑通过：文件已同步到 `~/rpacs_link_integration`，远端环境检查正常 |
-| Pi 环境 | ✅ 可达（`orangepiaipro`）、pyserial 3.5 已装入相机 venv、pyorbbecsdk 可用（需 `install/lib` 在 PYTHONPATH） |
-| Pi 串口权限 | ✅ `HwHiAiUser` 已加入 `dialout` 组 |
-| 空跑验证 | ✅ 板上 `run_all.sh` 已跑通流程：预检/链路/soak 各自给出明确 FAIL 原因，报告照常生成 |
-| FPGA 串口 | ❌ 不在线（PC 无 COM14、Pi 无 `ttyUSB`）——**线还没插** |
-| 深度相机 | ❌ Pi 的 `lsusb` 无 Orbbec——**相机未插/未枚举** |
-| 板上实测 | ⏳ 等接线（下面三步） |
+| 工程搭建 | ✅ 7 个脚本 + 配置 + 文档 |
+| 离线自检 | ✅ **8/8 PASS**（`python tools/offline_selftest.py`，无需硬件） |
+| 硬件接线 | ✅ FPGA 板载 USB 串口(CH9102) → Pi `/dev/ttyACM0`；Orbbec 深度相机 → Pi USB3 |
+| FPGA 位流 | ✅ `uart_bridge_imu.fs`（SRAM；断电后需重烧） |
+| 预检 | ✅ **7/7 PASS**（50.00 Hz、0 解析错误、心跳年龄 95 ms） |
+| 链路采集 30 s | ✅ 1500 帧零丢失，帧间隔 20.000 ms（抖动 ≤0.1 ms），yaw 漂移 0.01 °/s |
+| 相机+链路并发 120 s | ✅ **9/9 PASS**：相机 8.01 fps / 963 帧，链路 50.0 Hz（最低 49.0），CPU 30.8% |
+| 完整记录 | `records/2026-10-29_B1_深度相机与链路并发测试.md` |
 
-### 接线后的三步
-
-**第 1 步（PC，烧位流到 FPGA SRAM）** —— 只需一次，板子断电后要重来：
+### 复现命令
 
 ```powershell
+# 1) PC：烧链路位流到 FPGA SRAM（板子断电后必须重做）
 cd tests\uart_bridge
-.\run_build.ps1 -Download
-# 想同时看真实 IMU 姿态，用 IMU 版：
-#   gw_sh build_imu.tcl
-#   programmer_cli --device GW5A-25A --run 2 --fsFile impl\pnr\uart_bridge_imu.fs --cable "Gowin USB Cable(FT2CH)"
-```
+gw_sh build_imu.tcl
+programmer_cli --device GW5A-25A --run 2 --fsFile impl\pnr\uart_bridge_imu.fs --cable "Gowin USB Cable(FT2CH)"
 
-**第 2 步（接线）**
-
-- FPGA 板载 USB 串口（CH9102，就是原来接电脑 COM14 那根线）→ 插到 Orange Pi 的 USB 口；
-- 深度相机插到 Pi 的 USB3 口；
-- FPGA 保持上电（JTAG 下载线可以继续留在 PC 上，两者互不影响）。
-
-**第 3 步（PC → Pi 部署 + 预检，然后板上跑全套）**
-
-```powershell
+# 2) PC → Pi 同步
 cd tests\orangepi_link_integration
-.\tools\deploy_to_pi.ps1                 # 同步代码 + 板上 7 项预检
-ssh aipro "cd ~/rpacs_link_integration && bash run_all.sh 120"
-# 结果在 Pi 的 ~/rpacs_link_integration/records/report_<时间>.md
-scp aipro:~/rpacs_link_integration/records/report_*.md .\records\
+.\tools\deploy_to_pi.ps1 -SkipPreflight
 ```
 
-预期结果：预检 7 项全 PASS → 链路 50 Hz、0 错误 → 相机 8 fps + 链路并发 120 s 不掉速 → 报告 PASS。
+```bash
+# 3) Pi：全套（预检 → 链路 30 s → 相机并发 120 s → 报告）
+cd ~/rpacs_link_integration
+PYTHONPATH=$HOME/rpacs_phase0/pyorbbecsdk-main/install/lib bash run_all.sh 120
+```
+
+结果在 Pi 的 `~/rpacs_link_integration/records/`，可用 `scp` 拉回。
 
 ---
 

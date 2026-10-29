@@ -56,6 +56,34 @@ def build_stream(n: int, period_s: float = 0.02) -> tuple[bytes, int]:
     return bytes(out), n
 
 
+class PacedTransport(T.Transport):
+    """按真实字节率回放（默认 ≈ 50 帧/s × 30 B），用于验证长时间采集逻辑。"""
+
+    name = "paced-replay"
+
+    def __init__(self, data: bytes, bytes_per_s: float = 1540.0) -> None:
+        self._data = data
+        self._pos = 0
+        self._t0 = time.time()
+        self._bps = bytes_per_s
+
+    def read(self, timeout: float = 0.0) -> bytes:
+        time.sleep(min(max(timeout, 0.0), 0.01))
+        allow = int((time.time() - self._t0) * self._bps) - self._pos
+        if allow <= 0:
+            return b""
+        end = min(len(self._data), self._pos + allow)
+        out = self._data[self._pos:end]
+        self._pos = end
+        return out
+
+    def send(self, data: bytes) -> None:      # 心跳写进黑洞即可
+        return None
+
+    def close(self) -> None:
+        return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="offline self-test (no hardware)")
     ap.add_argument("--frames", type=int, default=100)
@@ -99,23 +127,27 @@ def main() -> int:
     check("S3_good_frames_intact", stats["good"] == n_valid,
           "good=%d" % stats["good"])
 
-    # ---- S4: link_client.collect() 走 FileTransport
+    # ---- S4: link_client.collect() 走"按真实字节率回放"的传输
+    # （collect() 在 0.3s 预热后会清空 deque，一次性回放会全部落在预热里，
+    #   所以这里用 paced 传输模拟真实 50 Hz 数据流）
     csv_path = tmp / "link.csv"
-    cfg_path = TESTS / "orangepi_link_integration" / "config" / "link.json"
-    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
     old_transport = T.UartTransport
-    T.UartTransport = lambda port, baud: T.FileTransport(path=str(raw_path))  # type: ignore
+    T.UartTransport = lambda port, baud: PacedTransport(stream)  # type: ignore
     try:
-        res = LC.collect("file", 115200, 0.3, 10.0, str(csv_path), None, False)
+        res = LC.collect("paced", 115200, 1.0, 10.0, str(csv_path), None, False)
     finally:
         T.UartTransport = old_transport  # type: ignore
-    check("S4_collect_via_file_transport", res["telem"]["n"] == n_valid,
-          "遥测 %d 帧, 平均 %.1f Hz" % (res["telem"]["n"], res["telem"]["hz_mean"]))
+    n_rec = res["telem"]["n"]
+    good = res["parser"]["good"]
+    check("S4_collect_paced_transport", 40 <= n_rec <= 60,
+          "遥测 %d 帧, 平均 %.1f Hz（预热后 1.0s）" % (n_rec, res["telem"]["hz_mean"]))
     rows = 0
     if csv_path.exists():
         with open(csv_path, "r", encoding="utf-8") as f:
             rows = sum(1 for _ in f) - 1
-    check("S4_csv_written", rows == n_valid, "%d 行" % rows)
+    check("S4_csv_written", rows == n_rec, "%d 行" % rows)
+    check("S4_no_long_run_cap", 0 < n_rec <= good,
+          "parser.good=%d ≥ recorded=%d（无 2000 帧截断）" % (good, n_rec))
 
     # ---- S5: report 渲染
     pj = tmp / "preflight.json"

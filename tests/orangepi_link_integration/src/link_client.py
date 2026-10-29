@@ -37,10 +37,16 @@ except ImportError as exc:                                  # pragma: no cover
 
 
 def default_port(cfg: dict) -> str:
-    if os.name == "nt":
-        return cfg["ports"]["windows"]
-    cand = sorted(glob.glob(cfg["ports"].get("linux_by_id_glob", "")))
-    return cand[0] if cand else cfg["ports"]["linux"]
+    try:
+        import preflight as _pf
+        return _pf.resolve_port(cfg, None)
+    except Exception:  # noqa: BLE001 - 单独使用时退回简单规则
+        if os.name == "nt":
+            return cfg["ports"]["windows"]
+        for dev in cfg["ports"].get("linux_candidates", []):
+            if os.path.exists(dev):
+                return dev
+        return cfg["ports"]["linux"]
 
 
 def load_config(path: str) -> dict:
@@ -114,33 +120,43 @@ def collect(port: str, baud: int, duration: float, heartbeat_hz: float,
     link = Link(tp, heartbeat_hz=heartbeat_hz)
     t0 = time.time()
     rec = Recorder(csv_path, t0)
-    seen = 0
     link.start()
+
+    def drain() -> None:
+        """把 RX 线程刚收到的帧搬到 CSV/统计里（deque 是 maxlen=2000，不能按索引取）。"""
+        while link.telemetry:
+            t = link.telemetry.popleft()
+            ts = link.telemetry_times.popleft()
+            rec.add(t, ts)
+
     try:
+        time.sleep(0.3)                  # 预热：丢掉"打开时从半帧开始"的启动噪声
+        link.telemetry.clear()
+        link.telemetry_times.clear()
+        stats_base = link.parser.stats.as_dict()
         # 先做一次可选的解锁/命令，然后全程统计（不要把 settle 时间算进 duration）
         if clear_fault:
             link.clear_fault()
         if setvel:
             link.set_vel(setvel[0], setvel[1])
-        while time.time() - t0 < duration:
+        t_meas = time.time()
+        while time.time() - t_meas < duration:
             time.sleep(0.01)
-            while len(link.telemetry) > seen:
-                rec.add(link.telemetry[seen], link.telemetry_times[seen])
-                seen += 1
-        # 收尾：把最后 sleep 期间到达的帧也计入
-        while len(link.telemetry) > seen:
-            rec.add(link.telemetry[seen], link.telemetry_times[seen])
-            seen += 1
+            drain()
+        drain()                          # 收尾：把最后 sleep 期间到达的帧也计入
     finally:
         rec.close()
         link.stop()
 
     stats = rate_stats(rec.times)
+    raw = link.parser.stats.as_dict()
+    delta = {k: raw.get(k, 0) - stats_base.get(k, 0) for k in raw}
     res = {
         "port": port, "baud": baud, "duration_s": round(time.time() - t0, 2),
         "heartbeat_hz": heartbeat_hz,
         "telem": stats,
-        "parser": link.parser.stats.as_dict(),
+        "parser": delta,          # 预热之后的增量（判定用这个）
+        "parser_raw": raw,        # 含开串口瞬间的启动噪声（仅供参考）
         "fault_histogram": {("0x%02X" % k): v for k, v in rec.fault_seen.items()},
         "first_sample": (
             {"enc": [rec.first.enc_l, rec.first.enc_r],

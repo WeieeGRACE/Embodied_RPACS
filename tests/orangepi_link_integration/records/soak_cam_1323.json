@@ -1,0 +1,91 @@
+{
+  "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5757024820-if00",
+  "baud": 115200,
+  "duration_s": 120.75,
+  "camera": {
+    "mode": "camera",
+    "frames": 963,
+    "fps_mean": 8.01,
+    "fps_min": 8,
+    "fps_max": 8,
+    "saved": 0,
+    "error": null
+  },
+  "camera_expected": true,
+  "link": {
+    "port": "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5757024820-if00",
+    "baud": 115200,
+    "duration_s": 120.32,
+    "heartbeat_hz": 10.0,
+    "telem": {
+      "hz_mean": 50.0,
+      "hz_min": 49.0,
+      "hz_max": 50.0,
+      "n": 6001
+    },
+    "parser": {
+      "good": 6002,
+      "sync_err": 0,
+      "len_err": 0,
+      "crc_err": 0,
+      "tail_err": 0,
+      "timeout": 0,
+      "type_err": 0
+    },
+    "parser_raw": {
+      "good": 6017,
+      "sync_err": 14,
+      "len_err": 0,
+      "crc_err": 0,
+      "tail_err": 0,
+      "timeout": 0,
+      "type_err": 0
+    },
+    "fault_histogram": {
+      "0x20": 6001
+    },
+    "first_sample": {
+      "enc": [
+        0,
+        0
+      ],
+      "yaw_deg": 5.89,
+      "pitch_deg": -1.59,
+      "roll_deg": -1.55
+    },
+    "last_sample": {
+      "enc": [
+        0,
+        0
+      ],
+      "yaw_deg": 7.27,
+      "pitch_deg": -1.59,
+      "roll_deg": -1.54,
+      "fault": 32,
+      "fault_names": [
+        "CMD_TIMEOUT"
+      ],
+      "hb_age_ms": 87
+    },
+    "csv": null
+  },
+  "link_error": null,
+  "cpu": {
+    "n": 119,
+    "mean_percent": 30.8,
+    "max_percent": 32.1
+  },
+  "checks": {
+    "link_ok": true,
+    "link_rate_ok": true,
+    "link_errors_ok": true,
+    "link_no_loss": true,
+    "link_hb_age_ok": true,
+    "camera_opened": true,
+    "camera_frames_ok": true,
+    "camera_fps_ok": true,
+    "cpu_ok": true
+  },
+  "ok": true,
+  "started": "2026-10-29T13:26:18"
+}

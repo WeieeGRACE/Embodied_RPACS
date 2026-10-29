@@ -46,12 +46,24 @@ def load_config(path: str) -> dict:
 
 
 def resolve_port(cfg: dict, explicit: str | None) -> str:
+    """显式指定 > by-id 匹配(CH9102/CH340/FTDI) > 常见设备名。"""
     if explicit:
         return explicit
     if os.name == "nt":
         return cfg["ports"]["windows"]
-    cand = sorted(glob.glob(cfg["ports"].get("linux_by_id_glob", "")))
-    return cand[0] if cand else cfg["ports"]["linux"]
+    for pat in cfg["ports"].get("linux_by_id_globs", []):
+        cand = sorted(glob.glob("/dev/serial/by-id/" + pat))
+        if cand:
+            return cand[0]
+    for dev in cfg["ports"].get("linux_candidates", []):
+        if os.path.exists(dev):
+            return dev
+    return cfg["ports"]["linux"]
+
+
+def stats_delta(after: dict, before: dict) -> dict:
+    """两个 parser stats 快照的差值（用于"预热后统计"）。"""
+    return {k: int(after.get(k, 0)) - int(before.get(k, 0)) for k in after}
 
 
 def port_exists(port: str) -> bool:
@@ -110,19 +122,24 @@ def run(port: str, baud: int, cfg: dict, probe_s: float = 3.0) -> dict:
     link = Link(tp, heartbeat_hz=cfg["heartbeat_hz"])
     got: list[tuple[float, P.Telemetry]] = []
     t_start = time.time()
+    warmup = float(accept.get("warmup_s", 0.5))
     link.start()
     try:
-        time.sleep(0.2)
+        # 预热：打开串口那一刻可能从半帧开始，由此产生的 sync_err 不计入判定
+        time.sleep(warmup)
         link.clear_fault()               # 解除上电锁存的 LINK_LOST（否则速度命令会被拒）
-        while time.time() - t_start < probe_s:
+        base = link.parser.stats.as_dict()
+        n_base = len(link.telemetry)
+        t_probe = time.time()
+        while time.time() - t_probe < probe_s:
             time.sleep(0.01)
-        got = list(zip(link.telemetry_times, link.telemetry))
-        stats = link.parser.stats.as_dict()
+        got = list(zip(link.telemetry_times, link.telemetry))[n_base:]
+        stats = stats_delta(link.parser.stats.as_dict(), base)
     finally:
         link.stop()
 
     add("P3_telemetry_received", len(got) > 0,
-        "n=%d / %.1fs" % (len(got), probe_s))
+        "n=%d / %.1fs（预热 %.1fs 不计）" % (len(got), probe_s, warmup))
     a = analyze(got, stats, accept)
     add("P4_rate_in_range", a["p4_rate_ok"],
         "%.2f Hz (期望 %s~%s)" % (a["hz"], accept["telem_hz_min"], accept["telem_hz_max"]))
