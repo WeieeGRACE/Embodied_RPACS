@@ -303,7 +303,9 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 | `0bd1a77` | 改动前基线：构建 17661/77%、CLS 86%、位流 SHA、日志归档 |
 | `ef37e97` | 故障容错修复 + 面板诊断码 + 故障注入 TB/基线证据 + 7 套仿真更新 |
 | `b14fba6` | 资源优化（最小演示配置 13257/58%、CLS 71%、Fmax 51.742 MHz）+ `recover_req` 时序修正 + README/板测文档初版 |
-| 本提交 | fixed_final 故障注入证据（10/10 无故障 + XSHUT 自愈验证）+ `REPORT.md` §7 对照 + 本技术报告定稿 |
+| `67f07b7` | fixed_final 故障注入证据（10/10 无故障 + XSHUT 自愈验证）+ `REPORT.md` §7 对照 + 本技术报告定稿 |
+| `2bf8584` | 两个落后历史 TB 同步（测速预取时序、motion 新端口/abort 语义）+ `tools/board_obstacle_test.ps1`；历史回归全绿 |
+| 本提交 | `tools/run_fault_injection.ps1`（10 场景一键回归）+ 回归证据 + README/报告补充 |
 
 复现命令：
 
@@ -311,8 +313,15 @@ motion fault 5 / faults[4]）在最终源码下 **10/10 场景全部不再锁存
 # 主工程仿真（7 套）
 ./tools/run_system_sim.ps1
 
-# 故障注入基线（用户旧版本）与修复后对照
+# 历史回归（已同步全绿）
+./tools/run_legacy_regression.ps1
+
+# 转向后故障注入回归：10 场景，断言 0 次故障锁存
+./tools/run_fault_injection.ps1
+
+# 故障注入基线（用户旧版本）与修复后单场景对照
 & 'D:/app/modesilm/win64/vsim.exe' -c -l records/fault_injection/scenario_a_front.log -do sim/run_fault_turns.do
+$env:FAULT_SCENARIO='0'
 & 'D:/app/modesilm/win64/vsim.exe' -c -l records/fault_injection/fixed_final/fixed_a_front.log -do sim/run_fault_turns_fixed.do
 
 # 构建与时序/管脚检查
