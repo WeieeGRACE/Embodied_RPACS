@@ -146,10 +146,14 @@
 
 ### 3.4 Step 4（可选，上板验证通过后）—— 删 USB 事件日志
 
-- `src/robot_system_top.v`：删 `system_event_logger` 实例（L86-89）与 `debug_state/debug_valid/event_errors` 连线；`uart_tx` 顶层输出改常量 1（保持引脚约束）或同步删端口 + `src/robot_system_top.cst` 的 `uart_tx=V8` + `tools/check_system_reports.ps1` 期望。
+- `src/robot_system_top.v`：删 `system_event_logger` 实例（L86-89）与 `debug_state/debug_valid/event_errors` 连线；按用户确认采用**删端口+约束**方案：删 `uart_tx`/`uart_rx` 顶层端口、`src/robot_system_top.cst` 的 `IO_LOC "uart_tx" V8` 与 `IO_LOC "uart_rx" U8`、`tools/check_system_reports.ps1` 的引脚期望（44→42）。
 - `src/asr/system_motion.v`：删 `debug_state/debug_valid/event_errors` 端口与组装（L128-131、L286-289）。
 - 收益：**−0.42～0.45k Logic、−198 FF、BSRAM 9→5（删掉 4 个 SDPB）**。
-- **本轮不建议做**：README 的板级验收与 `records/obstacle_20261025/board_smoke_final.log` 依赖 USB 心跳/事件行；验证通过后再删。
+- **执行时机（2026-10-29 用户确认）**：上板 3–5 次连续避障验收通过后执行。README 的板级验收与
+  `records/obstacle_20261025/board_smoke_final.log` 依赖 USB 心跳/事件行，验收前删会失去串口取证能力。
+  执行时采用“删端口+约束”方案：移除 `uart_tx`/`uart_rx` 顶层端口与 `src/robot_system_top.cst`
+  的 V8/U8 约束，释放两个 FPGA 球；`tools/check_system_reports.ps1` 引脚期望 44→42；
+  同步更新 `PIN_ASSIGNMENT.md`、`PROJECT_PLAN.md` §16.4 与 `TECHNICAL_REPORT.md`。
 
 ### 3.5 Step 5（不建议）—— 删 MANUAL 组
 

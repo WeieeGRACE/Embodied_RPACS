@@ -42,9 +42,12 @@ CLS 仍余 3216，可合入 `tests/uart_bridge`（881 CLS）或任务四扩展�
 
 - 已按用户“用最少资源满足演示要求”删除：DISPLAY 组 5 个诊断页、菜单“下一项预览”行、
   ToF 诊断页格式化链路；主菜单 4→3 项。用户已在 2026-10-29 确认保留范围。
-- 仍保留（**待用户最终确认是否删除**，删除可再省资源）：
-  - USB 事件日志 `system_event_logger`：约 0.42k LUT + 2 BSRAM；删除后 Logic ≈ 56%、CLS ≈ 69%，
-    但会失去上板串口取证能力（本轮排障依赖它）。
+- 仍保留、**用户已确认处置方式**：
+  - USB 事件日志 `system_event_logger`：约 0.42k LUT + 2 BSRAM。**2026-10-29 用户确认：**
+    上板 3–5 次连续避障验收期间保留（串口 `D`/`E` 行是验收证据）；**验收通过后删除**，
+    同时移除 `uart_tx`/`uart_rx` 端口与 `.cst` V8/U8 约束（释放两个 FPGA 球）、
+    `check_system_reports.ps1` 引脚期望 44→42，重建后 Logic≈56%、CLS≈69%；并同步更新
+    `PROJECT_PLAN.md` 第 16.4 节、`PIN_ASSIGNMENT.md` 与 `records/resource_20261029/MINIMAL_PLAN.md`。
   - 故障面板 `F:xx S:xx M:xx I:xx`/PAUSED `R/S/V/U` 诊断字段：少量 LUT，建议保留到验收结束。
 - 结论：无其它未使用的用户功能可删；主工程已无 DISPLAY/MOTOR TEST 等历史诊断入口。
 
