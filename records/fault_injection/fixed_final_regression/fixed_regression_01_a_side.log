@@ -4,7 +4,7 @@
 # vmap fault_fixed_lib sim/work_fault_fixed 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 21:47:56 on Oct 29,2026
+# Start time: 23:24:09 on Oct 29,2026
 # vlog -sv -work fault_fixed_lib src/obstacle/obstacle_route.v src/obstacle/obstacle_sensors.v src/obstacle/obstacle_command.v src/obstacle/system_dispatch.v src/robot_system_top.v src/asr/system_motion.v src/asr/asr_uart_rx.v src/asr/asr_packet_tx.v src/asr/asr_feedback.v src/ui/system_keys.v src/ui/system_menu.v src/ui/system_pages.v src/ui/system_oled_text.v src/tof/tof_driver.v src/tof/tof_i2c.v src/tof/tof_page.v src/motor/motion_control_and_mode_fsm.v src/motor/dual_ab_quadrature_encoder.v src/motor/speed_measurement_and_velocity_filter.v src/motor/dual_speed_pi_pid_controller.v src/motor/pwm_and_startup_ramp.v src/motor/tb6612_driver_interface.v src/imu/imu_attitude_fixed.v src/imu/attitude_angle_to_digits.v src/imu/oled_i2c_write_byte.v src/imu/imu660ra_driver.v src/imu/imu660ra_spi_master.v src/imu/imu660ra_config_rom.v src/uart/uart_tx.v src/uart/system_event_logger.v 
 # -- Compiling module obstacle_route
 # -- Compiling module obstacle_sensors
@@ -56,20 +56,20 @@
 # 	robot_system_top
 # 	tof_page
 # 	attitude_angle_to_digits
-# End time: 21:47:57 on Oct 29,2026, Elapsed time: 0:00:01
+# End time: 23:24:09 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 21:47:57 on Oct 29,2026
+# Start time: 23:24:09 on Oct 29,2026
 # vlog -sv "+define+FIXED_RTL" -work fault_fixed_lib sim/models/vl53l0x_model.sv sim/tb_fault_turns.sv 
 # -- Compiling module vl53l0x_model
 # -- Compiling module tb_fault_turns
 # 
 # Top level modules:
 # 	tb_fault_turns
-# End time: 21:47:57 on Oct 29,2026, Elapsed time: 0:00:00
+# End time: 23:24:09 on Oct 29,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" fault_fixed_lib.tb_fault_turns "+SCENARIO=1" "+FIXED=1" "+NEWMENU=1" 
-# Start time: 21:47:57 on Oct 29,2026
+# Start time: 23:24:09 on Oct 29,2026
 # ** Note: (vsim-8009) Loading existing optimized design _opt1
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
@@ -158,10 +158,10 @@
 # FAIL scenario A_SIDE: expected route 0x84 barrier-timeout latch, observed route_reason=00 route_fault=0 sensor_fault=0 ch_faults=00/00/00
 # MAIN route=21 auto=1 waiting=0 reason=02 dut_ms=4936 time_ns=98726730000
 # MAIN route=22 auto=1 waiting=0 reason=02 dut_ms=4980 time_ns=99600910000
-# FIXED_RUN_OBSERVED scenario=1 fault_seen=0 fault_latched=0 fault_dt_ms=-1 route_state=22 auto_run=1 avoid_mode=1 sensor_fault=0 fault_bits=0000 ch0=00 ch1=00 ch2=00 motion_fault=00 motion_fault_code=00 motion_reason=0 motion_done=0 motion_aborted=0 imu_bad=0 imu_error=00 route_fault=0 route_reason=02 fault_events=0 status=23 fault_led=0 post_turn=111 distances=07d0/07d0/07d0 tof_resets=0/0/0 tof_shots=575/575/575 clip_confirm=0/0/1 driver_recover=0/0/0 paused=0 blocked_seen=0 reached_shift=0 fallback_done=0 near_shift=0 pass_reached=0 pass_clip_done=0 dut_ms=5215
-# ** Note: $finish    : sim/tb_fault_turns.sv(927)
+# FIXED_RUN_OBSERVED scenario=1 fault_seen=0 fault_latched=0 fault_dt_ms=-1 route_state=22 auto_run=1 avoid_mode=1 sensor_fault=0 fault_bits=0000 ch0=00 ch1=00 ch2=00 motion_fault=00 motion_fault_code=00 motion_reason=0 motion_done=0 motion_aborted=0 imu_bad=0 imu_error=00 route_fault=0 route_reason=02 fault_events=0 status=23 fault_led=0 post_turn=111 distances=07d0/07d0/07d0 tof_resets=0/0/0 tof_shots=575/575/575 clip_confirm=0/0/1 driver_recover=0/0/0 paused=0 blocked_seen=0 reached_shift=0 fallback_done=0 near_shift=0 pass_reached=0 pass_clip_done=0 pass_front_done=0 dut_ms=5215
+# ** Note: $finish    : sim/tb_fault_turns.sv(971)
 #    Time: 104320931 ns  Iteration: 0  Instance: /tb_fault_turns
-# Break in Module tb_fault_turns at sim/tb_fault_turns.sv line 927
-# Stopped at sim/tb_fault_turns.sv line 927
-# End time: 21:48:12 on Oct 29,2026, Elapsed time: 0:00:15
+# Break in Module tb_fault_turns at sim/tb_fault_turns.sv line 971
+# Stopped at sim/tb_fault_turns.sv line 971
+# End time: 23:24:24 on Oct 29,2026, Elapsed time: 0:00:15
 # Errors: 0, Warnings: 0

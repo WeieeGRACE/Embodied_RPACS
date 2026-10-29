@@ -5,7 +5,7 @@ module obstacle_route #(
  parameter integer CLK_HZ=50000000,WINDOW_CYCLES=CLK_HZ/100,
  EXTRA_UM=300000,PASS_LIMIT_UM=2000000,
  SLOW_MM=600,STOP_MM=130,AVOID_MM=85,SIDE_MM=300,HYST_MM=50,EDGE_MM=600,EDGE_RISE_MM=300,STABLE_MM=50,
- STEP_TIMEOUT_MS=10000,BARRIER_TIMEOUT_MS=1000,
+ STEP_TIMEOUT_MS=10000,BARRIER_TIMEOUT_MS=1000,FRONT_LEG_MS=400,
  // Blind-detour backstop used when the obstacle-side lane keeps reporting the
  // VL53L0X minimum-range clamp instead of a usable face distance.
  FALLBACK_SHIFT_UM=500000,FALLBACK_PASS_UM=600000
@@ -30,6 +30,7 @@ module obstacle_route #(
  reg signed [31:0] home,shift_l,shift_r,pass_l,pass_r,leg_l,leg_r;
  reg [31:0] actual_shift;
  reg [31:0] ticks,elapsed;
+ reg [9:0] front_low_ms;
  wire ms=ticks==CLK_HZ/1000-1;
  wire [15:0] front=distances[15:0],left_mm=distances[31:16],right_mm=distances[47:32];
  wire [15:0] side_mm=left_side ? right_mm:left_mm;
@@ -73,7 +74,12 @@ module obstacle_route #(
                   {1'b0,side_mm}<={1'b0,box_distance}+STABLE_MM;
  wire cleared_side={1'b0,side_mm}>={1'b0,box_distance}+EDGE_RISE_MM;
  wire cruise_state=state==CRUISE || state==CRUISE_START;
- wire front_block=front<=(cruise_state ? STOP_MM:AVOID_MM);
+ // A short graze of the box corner through the front lane's field of view must
+ // not abort a detour leg. Braking inside cruise stays immediate; the detour
+ // legs need FRONT_LEG_MS of continuous close readings before they treat the
+ // front lane as blocked.
+ wire front_close_ok=front_low_ms>=FRONT_LEG_MS;
+ wire front_block=cruise_state ? (front<=STOP_MM):((front<=AVOID_MM) && front_close_ok);
  // A degraded ToF channel stops the current drive and the same state is
  // retried once the channel is healthy again. Turning in place does not need
  // ToF data, so a sweep glitch never aborts a rotation.
@@ -110,10 +116,12 @@ module obstacle_route #(
  if(!rst_n)begin
  state<=IDLE;reason<=0;route_fault<=0;refresh<=0;issued<=0;left_side<=1;home<=0;pass_clear_seen<=0;
  shift_l<=0;shift_r<=0;pass_l<=0;pass_r<=0;actual_shift<=0;slow_mode<=0;retry_count<=0;
- fallback_shift<=0;fallback_pass<=0;
+ fallback_shift<=0;fallback_pass<=0;front_low_ms<=0;
  ticks<=0;elapsed<=0;box_seen<=0;edge_seen<=0;clear_count<=0;front_count<=0;stable_count<=0;box_distance<=0;leg_l<=0;leg_r<=0;
  end else begin
  refresh<=0;
+ if(front<=AVOID_MM)begin if(ms && front_low_ms<FRONT_LEG_MS)front_low_ms<=front_low_ms+1'b1;end
+ else front_low_ms<=0;
  if(ms)begin ticks<=0;if(elapsed<32'hffffffff)elapsed<=elapsed+1'b1;end else ticks<=ticks+1'b1;
  if(sample_mask[0])begin
  if(front<=SLOW_MM)begin slow_mode<=1;front_count<=0;end
@@ -169,7 +177,7 @@ module obstacle_route #(
  refresh<=1;advance(WAIT_PARALLEL);
  end
  WAIT_PARALLEL:if(!refresh && barrier_fresh)begin
- if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
+ if(front_block)begin advance(BLOCKED);reason<=4;end
  else if(side_unusable)begin
  // The obstacle-side lane has no usable face distance (min-range clamp or a
  // real reading closer than the usable face distance), so there is no
@@ -182,7 +190,7 @@ module obstacle_route #(
  end
  // Learn the obstacle face while stationary. Only accepted new samples from
  // the near-box lane count; no event is manufactured for discarded20.
- SAMPLE_SHIFT:if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
+ SAMPLE_SHIFT:if(front_block)begin advance(BLOCKED);reason<=4;end
  else if(side_unusable)begin
  box_distance<=AVOID_MM;fallback_shift<=1;shift_l<=position_l;shift_r<=position_r;advance(SHIFT);
  end
@@ -221,7 +229,7 @@ module obstacle_route #(
  refresh<=1;advance(WAIT_BACK);
  end
  WAIT_BACK:if(!refresh && barrier_fresh)begin
- if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
+ if(front_block)begin advance(BLOCKED);reason<=4;end
  else begin pass_l<=position_l;pass_r<=position_r;box_seen<=0;stable_count<=0;clear_count<=0;
  if(side_unusable)begin box_distance<=AVOID_MM;fallback_pass<=1;pass_clear_seen<=1;end
  else begin fallback_pass<=0;pass_clear_seen<=side_mm>=EDGE_MM;end
@@ -255,7 +263,7 @@ module obstacle_route #(
  else if(issued && done)begin if(leg_traveled<EXTRA_UM)issued<=0;else advance(TURN_BACK);end
  TURN_BACK:if((issued && done) || (!issued && abs_yaw<=1000 && !busy))begin refresh<=1;advance(WAIT_HOME);end
  WAIT_HOME:if(!refresh && barrier_fresh)begin
- if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end else begin leg_l<=position_l;leg_r<=position_r;advance(RETURN);end
+ if(front_block)begin advance(BLOCKED);reason<=4;end else begin leg_l<=position_l;leg_r<=position_r;advance(RETURN);end
  end
  RETURN:if(front_block)begin advance(BLOCKED);reason<=4;end
  else if(issued && done)begin if(leg_traveled<actual_shift)issued<=0;else advance(TURN_HOME);end

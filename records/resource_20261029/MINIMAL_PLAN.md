@@ -145,7 +145,7 @@
 - **3C（不推荐）**：删实例 + 删 `roll_mdeg/pitch_mdeg` 端口 + 改 `system_motion`/top + 重写/删除 attitude 相关 TB（`sim/tb_imu_attitude_fixed.sv`、`sim/tb_attitude_pipeline.sv`、`run_attitude_pipeline.do`、`tools/run_system_sim.ps1` 的套件列表）。收益仅比 3B 多 0.1–0.3k，风险与工作量明显更高。
 
 #> **2026-10-29 题目要求变更**：恢复 IMU 姿态页（ROLL/PITCH/YAW）+ MANUAL SPIN 360 后，
-> post-PnR 实测 Logic 15897/23040 (69%)、CLS 9640/11520 (84%)、Fmax 54.996 MHz。
+> post-PnR 实测 Logic 15910/23040 (70%)、CLS 9614/11520 (84%)、Fmax 56.049 MHz。
 > 资源预算按“满足题目要求后的最小演示配置”更新；PASS 中途截断兜底（场景 11）另计。
 
 ## 3.4 Step 4（可选，上板验证通过后）—— 删 USB 事件日志
@@ -157,7 +157,7 @@
 - **功能轮基线复测（2026-10-29 22:17，`.tmp_nolog2` 临时工程，同一 build.tcl 参数）**：把“删日志 +
   删调试串口 + 删 `system_motion` 调试端口”应用到当前功能版源码，实测 **Logic 15498/23040 (68%)、
   Register 6543、CLS 9404/11520 (82%)、BSRAM 5/56、DSP 8.5/28、Fmax 57.115 MHz、0 违例、
-  42 个受约束引脚**；相对主位流（15897/69%、6736、9640/84%、9、54.996 MHz）即 **Logic −399、
+  42 个受约束引脚**；相对主位流（15910/70%、6746、9614/84%、9、56.049 MHz）即 **Logic −399、
   CLS −236、FF −193、BSRAM −4、Fmax +2.1 MHz**，CLS 余量从 1880 提升到约 2116。交付位流未改动；
   验收后仍需按 `verify_project.tcl` 重建并同步改仿真 TB 的 uart 端口。
   证据：`records/resource_20261029/nolog_variant_features_{build,resources}.log`。

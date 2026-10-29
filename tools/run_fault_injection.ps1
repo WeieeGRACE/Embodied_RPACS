@@ -12,13 +12,17 @@
 # Scenario 11 (clip appears only after PASS started, seen on the board as
 # BLOCKED reason 0x04) requires pass_reached=1 and pass_clip_done=1: the pass
 # must finish on fixed mileage and resume CRUISE.
+# Scenario 12 (box corner grazes the front lane for a few samples while PASS
+# drives past it, also seen on the board as BLOCKED reason 0x04) requires
+# pass_reached=1 and pass_front_done=1: the leg front threshold is debounced by
+# FRONT_LEG_MS, so a short graze must not abort the pass.
 #
 # Usage:
-#   ./tools/run_fault_injection.ps1                 # all 12 scenarios
+#   ./tools/run_fault_injection.ps1                 # all 13 scenarios
 #   ./tools/run_fault_injection.ps1 -Scenarios 0,3,7,10
 #   ./tools/run_fault_injection.ps1 -Vsim D:/app/modesilm/win64/vsim.exe
 param(
-    [int[]]$Scenarios = @(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+    [int[]]$Scenarios = @(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
     [string]$Vsim = 'D:/app/modesilm/win64/vsim.exe',
     [string]$OutDir = 'records/fault_injection/fixed_final_regression'
 )
@@ -31,7 +35,7 @@ try {
         0 = 'a_front'; 1 = 'a_side'; 2 = 'b_permanent20'; 3 = 'c_i2c_nack'
         4 = 'd_imu_burst'; 5 = 'e_encoder_jitter'; 6 = 'ctrl_100ms20'
         7 = 'g_near_60mm'; 8 = 'h_turn2'; 9 = 'i_hold20'
-        10 = 'k_clip_fallback'; 11 = 'l_pass_clip'
+        10 = 'k_clip_fallback'; 11 = 'l_pass_clip'; 12 = 'm_pass_front_graze'
     }
     $failures = @()
     foreach ($scenario in $Scenarios) {
@@ -50,6 +54,7 @@ try {
         if ($scenario -eq 10) { $clean = $clean -and $line -match 'reached_shift=1' -and $line -match 'fallback_done=1' }
         if ($scenario -eq 7) { $clean = $clean -and $line -match 'near_shift=1' }
         if ($scenario -eq 11) { $clean = $clean -and $line -match 'pass_reached=1' -and $line -match 'pass_clip_done=1' }
+        if ($scenario -eq 12) { $clean = $clean -and $line -match 'pass_reached=1' -and $line -match 'pass_front_done=1' }
         if ($clean) { Write-Host "  PASS $line" } else {
             Write-Host "  FAIL exit=$code $line"
             $failures += "scenario $scenario ($name): exit=$code"

@@ -42,13 +42,13 @@ def read(path):
         return data.decode("utf-8", errors="replace")
 
 
-MAIN_SHA = "C1AF9B0729B4CE9FFB957A22CD34A0F4CEDBCDD7D73CC7C52674DB477EB709AE"
-P6_SHA = "B3A0250255FEBFF622F11A247530F3AE51D6D640F937527BB6D69A7FC3146C6A"
+MAIN_SHA = "F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7"
+P6_SHA = "08DFDED3A43359D8E1237C03751E5D1978A97AFA958ED7C8276291FE706F399E"
 
 # 1. bitstreams
 check("main bitstream exists", os.path.isfile(MAIN_FS))
 if os.path.isfile(MAIN_FS):
-    check("main bitstream size", os.path.getsize(MAIN_FS) == 6443652, str(os.path.getsize(MAIN_FS)))
+    check("main bitstream size", os.path.getsize(MAIN_FS) == 6443628, str(os.path.getsize(MAIN_FS)))
     got = sha256(MAIN_FS)
     check("main bitstream sha256", got == MAIN_SHA, got)
 check("P6-21 bitstream exists", os.path.isfile(P6_FS))
@@ -59,27 +59,27 @@ if os.path.isfile(P6_FS):
 # 2. post-PnR resource report
 rpt = read(os.path.join(ROOT, "impl/pnr/Embodied_RPACS.rpt.txt"))
 for label, needle in [
-    ("Logic", "15897/23040"),
-    ("Register", "6736/23685"),
-    ("CLS", "9640/11520"),
+    ("Logic", "15910/23040"),
+    ("Register", "6746/23685"),
+    ("CLS", "9614/11520"),
     ("BSRAM", "9/56"),
     ("DSP", "8.5/28"),
 ]:
     check("main report %s" % label, needle in rpt, needle)
 tr = read(os.path.join(ROOT, "impl/pnr/Embodied_RPACS_tr_content.html"))
-check("main report Fmax 54.996", "54.996(MHz)" in tr)
+check("main report Fmax 56.049", "56.049(MHz)" in tr)
 
 p6rpt_path = os.path.join(ROOT, "tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.rpt.txt")
 if os.path.isfile(p6rpt_path):
     p6rpt = read(p6rpt_path)
-    check("P6 report Logic", "15897/23040" in p6rpt)
-    check("P6 report CLS", "9640/11520" in p6rpt)
+    check("P6 report Logic", "15910/23040" in p6rpt)
+    check("P6 report CLS", "9612/11520" in p6rpt)
     check("P6 report uart_tx on L12",
           "L12" in read(os.path.join(ROOT, "tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.pin.html")))
 
 # 3. fault-injection evidence
 logs = sorted(glob.glob(os.path.join(ROOT, "records/fault_injection/fixed_final_regression/fixed_regression_*.log")))
-check("12 fault-injection logs", len(logs) == 12, str(len(logs)))
+check("13 fault-injection logs", len(logs) == 13, str(len(logs)))
 for log in logs:
     text = read(log)
     base = os.path.basename(log)
@@ -101,8 +101,14 @@ if pass_clip:
     check("scenario 11 pass-clip fallback",
           "pass_reached=1" in t and "pass_clip_done=1" in t)
 
+pass_front = [l for l in logs if "m_pass_front_graze" in l]
+if pass_front:
+    t = read(pass_front[0])
+    check("scenario 12 front-graze filter",
+          "pass_reached=1" in t and "pass_front_done=1" in t)
+
 summary = read(os.path.join(ROOT, "records/robustness_20261029/fault_injection_features.log"))
-check("regression summary 12 scenarios", "PASS fault-injection regression: 12 scenarios" in summary)
+check("regression summary 13 scenarios", "PASS fault-injection regression: 13 scenarios" in summary)
 seven = read(os.path.join(ROOT, "records/robustness_20261029/seven_suites_features.log"))
 check("seven suites PASS", "PASS all seven" in seven)
 check("seven suites no errors", "Errors: 0, Warnings: 0" in seven)
@@ -121,7 +127,7 @@ check("TECH full main sha", MAIN_SHA in docs["TECHNICAL_REPORT.md"])
 for name in ("TECHNICAL_REPORT.md", "OBSTACLE_BOARD_TEST.md"):
     check("%s has P6 sha" % name, P6_SHA[:16] in docs[name])
 for name, text in docs.items():
-    check("%s has Logic 15897" % name, "15897" in text)
+    check("%s has Logic 15910" % name, "15910" in text)
 for stale in ("13521", "2E4FBB05", "AF7FC649", "59.226", "13518", "8328"):
     bad = [n for n, t in docs.items() if stale in t]
     check("no stale %s in main docs" % stale, not bad, ",".join(bad))

@@ -6,10 +6,12 @@
 ## 下载文件
 
 - FPGA：交付包 `fpga/Embodied_RPACS.fs`（来源 `impl/pnr/Embodied_RPACS.fs`，
-  SHA256 `C1AF9B0729B4CE9FFB957A22CD34A0F4CEDBCDD7D73CC7C52674DB477EB709AE`；
-  6,443,652 字节，Logic 15897/69%、CLS 9640/84%、Fmax 54.996 MHz、0 违例）。
-- P6-21 无线串口诊断位流（可选，`tests/p6_uart_debug/`）：`B3A02502…3146C6A`
-  （6,443,652 字节，Logic 15897/69%、CLS 9640/84%、Fmax 54.996 MHz），接法见文末“远程串口采集”。
+  SHA256 `F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7`；
+  6,443,628 字节，Logic 15910/70%、CLS 9614/84%、Fmax 56.049 MHz、0 违例）。
+- P6-21 无线串口诊断位流（可选，`tests/p6_uart_debug/`）：`08DFDED3…F399E`
+  （6,443,628 字节，Logic 15910/70%、CLS 9614/84%、Fmax 56.049 MHz），接法见文末“远程串口采集”。
+- 本轮（22:59 之后）固件把让位/超车段的前向判障改为**连续 400 ms** 确认（滤掉箱角扫视场的
+  单点坏数据），巡航仍按 130 mm 立即刹车；横移/超车距离与角度常量保持参考工程 300/300 mm。
 - ASRPRO：交付包 `asrpro/fw.bin`，为含识别模型、音频、引导和应用的完整固件。
 - 天问工程：交付包 `asrpro/asrpro.hd`。新增播放完成接口须使用项目的隔离SDK构建流程；重新生成代码后直接使用未补丁SDK链接会缺少该接口。
 - 校验：交付包 `SHA256SUMS.txt`、`manifest.json`；数字记录 `validation/`。
@@ -118,8 +120,8 @@ FPGA 调试串口无线转回电脑：
    `impl/pnr/Embodied_RPACS_p6uart.fs`：逻辑与主固件相同，仅把调试串口 TX 挪到
    **P6-21（GPIO18，FPGA 球 L12）**；接法为 **WCH-Link RX → P6-21**、
    **GND → P6-12 或 P6-30**，其余接线不变。当前位流 SHA256
-   `B3A0250255FEBFF622F11A247530F3AE51D6D640F937527BB6D69A7FC3146C6A`
-   （Logic 15897/69%、CLS 9640/84%，2026-10-29 21:14 随 PASS 兜底 + SPIN 360/姿态页
+   `08DFDED3A43359D8E1237C03751E5D1978A97AFA958ED7C8276291FE706F399E`
+   （Logic 15910/70%、CLS 9614/84%，2026-10-29 21:14 随 PASS 兜底 + SPIN 360/姿态页
    功能重建）；P6-21 网络已按底板原理图第 5 页核对（NLGPIO18）。
    注意：板载 FT2CH 下载器的 COM15 未接 FPGA UART，不能用来抓日志。
    2026-10-29 18:15 已用板载 Gowin 下载器成功烧写过一次；功能更新后需重新烧写

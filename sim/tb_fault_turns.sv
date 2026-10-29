@@ -47,6 +47,7 @@ module tb_fault_turns;
  localparam integer SC_I_HOLD  = 9;
  localparam integer SC_K_CLIP  = 10;
  localparam integer SC_PASS_CLIP = 11;
+ localparam integer SC_PASS_FRONT = 12;
 
  reg clk=0; always #10 clk=~clk;
  reg k0=1,k1=1,k2=1,rx=1,miso=0;
@@ -73,6 +74,7 @@ module tb_fault_turns;
  integer near_shift=0;          // scenario G_NEAR: near-side fallback entered
  integer pass_reached=0;        // scenario PASS_CLIP: PASS state entered
  integer pass_clip_done=0;      // scenario PASS_CLIP: fallback pass finished, CRUISE resumed
+ integer pass_front_done=0;     // scenario PASS_FRONT: transient front graze tolerated, CRUISE resumed
  reg mark_valid=0;
 
  // first-fault snapshot (filled by the monitor below)
@@ -897,6 +899,48 @@ module tb_fault_turns;
       $display("FAIL scenario PASS_CLIP(fixed): pass_reached=%0d done=%0d paused=%b blocked=%b fault=%b",pass_reached,pass_clip_done,pause_seen,blocked_seen,dut.control.fault);
     end
    end
+   SC_PASS_FRONT:begin
+    // Board evidence (2026-10-29 22:52-22:59): while PASS drove past the box the
+    // front lane saw the box corner for a few hundred ms at a time; the old RTL
+    // turned that graze into BLOCKED reason 0x04. The fixed RTL only blocks when
+    // the front lane stays below AVOID_MM for FRONT_LEG_MS, so the pass finishes.
+    drive_to_second_turn(ok_done);
+    if(!ok_done)begin $display("FAIL scenario PASS_FRONT: harness could not reach WAIT_BACK");$finish;end
+    wait_route(9,10000*DUT_MS,w_ok);
+    pass_reached=w_ok;
+    if(fixed_mode && w_ok)begin
+     $display("EVENT INJECT_PASS_FRONT_GRAZE route_state=9 dut_ms=%0d",cyc/DUT_MS);
+     // Same blind-pass condition as scenario 11 (side lane clips once PASS is
+     // running) so the pass finishes on fixed mileage, plus short front grazes
+     // that must be filtered by FRONT_LEG_MS instead of blocking the leg.
+     ranges[47:32]=16'd20;
+     ranges[15:0]=16'd60;cycles(200*DUT_MS);
+     ranges[15:0]=16'd2000;cycles(200*DUT_MS);
+     ranges[15:0]=16'd60;cycles(200*DUT_MS);
+     ranges[15:0]=16'd2000;cycles(200*DUT_MS);
+     ranges[15:0]=16'd60;cycles(200*DUT_MS);
+     ranges[15:0]=16'd2000;cycles(200*DUT_MS);
+     wait_route(2,80000*DUT_MS,w_ok);
+     pass_front_done=w_ok;
+    end else begin
+     n=0;limit=5000*DUT_MS;
+     while(n<limit && f_cyc<0)begin @(posedge clk);n=n+1;end
+    end
+    cycles(5*DUT_MS);
+    ranges[15:0]=16'd2000;
+    ranges[47:32]=16'd2000;
+    cycles(5*DUT_MS);
+    print_snapshot();
+    $display("EVIDENCE PASS_FRONT pass_reached=%0d pass_front_done=%0d fixed=%0d route_state=%0d paused=%b blocked_seen=%b fault=%b dut_ms=%0d",
+     pass_reached,pass_front_done,fixed_mode,dut.route_state,pause_seen,blocked_seen,dut.control.fault,cyc/DUT_MS);
+    if(fixed_mode)begin
+     check_ok=(pass_reached==1)&&(pass_front_done==1)&&(pause_seen==0)&&(blocked_seen==0)&&(dut.control.fault==0);
+     if(check_ok)
+      $display("PASS scenario PASS_FRONT_GRAZE(fixed): 3x200ms front-lane graze during PASS -> pass finished and CRUISE resumed (route_state=%0d)",dut.route_state);
+     else
+      $display("FAIL scenario PASS_FRONT_GRAZE(fixed): pass_reached=%0d done=%0d paused=%b blocked=%b fault=%b",pass_reached,pass_front_done,pause_seen,blocked_seen,dut.control.fault);
+    end
+   end
    default:$fatal(1,"unknown scenario id %0d",scenario);
   endcase
 
@@ -904,7 +948,7 @@ module tb_fault_turns;
    // Observation-only run of the fixed RTL: allow the route to continue or the
    // fault to self-clear, then publish the authoritative fixed-version result.
    cycles(300*DUT_MS);
-   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d clip_confirm=%0d/%0d/%0d driver_recover=%0d/%0d/%0d paused=%b blocked_seen=%b reached_shift=%0d fallback_done=%0d near_shift=%0d pass_reached=%0d pass_clip_done=%0d dut_ms=%0d",
+   $display("FIXED_RUN_OBSERVED scenario=%0d fault_seen=%b fault_latched=%b fault_dt_ms=%0d route_state=%0d auto_run=%b avoid_mode=%b sensor_fault=%b fault_bits=%04h ch0=%02h ch1=%02h ch2=%02h motion_fault=%02h motion_fault_code=%02h motion_reason=%0d motion_done=%b motion_aborted=%b imu_bad=%b imu_error=%02h route_fault=%b route_reason=%02h fault_events=%0d status=%02h fault_led=%b post_turn=%b distances=%04h/%04h/%04h tof_resets=%0d/%0d/%0d tof_shots=%0d/%0d/%0d clip_confirm=%0d/%0d/%0d driver_recover=%0d/%0d/%0d paused=%b blocked_seen=%b reached_shift=%0d fallback_done=%0d near_shift=%0d pass_reached=%0d pass_clip_done=%0d pass_front_done=%0d dut_ms=%0d",
     scenario,(f_cyc>=0),dut.control.fault_latched,(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS,dut.route_state,
     dut.control.auto_run,dut.avoid_mode,dut.control.sensor_fault,dut.sensors.fault_bits,
     dut.sensors.channels[0].faults,dut.sensors.channels[1].faults,dut.sensors.channels[2].faults,
@@ -915,7 +959,7 @@ module tb_fault_turns;
     dut.post_turn,dut.distances[15:0],dut.distances[31:16],dut.distances[47:32],
     resets[0],resets[1],resets[2],shots[0],shots[1],shots[2],
     req_cnt0,req_cnt1,req_cnt2,rec_cnt0,rec_cnt1,rec_cnt2,
-    pause_seen,blocked_seen,reach_shift,fallback_done,near_shift,pass_reached,pass_clip_done,cyc/DUT_MS);
+    pause_seen,blocked_seen,reach_shift,fallback_done,near_shift,pass_reached,pass_clip_done,pass_front_done,cyc/DUT_MS);
    completed=1;
   end else if(check_ok)begin
    $display("RESULT scenario=%0d PASS fault_seen=%b fault_dt_ms=%0d",scenario,(f_cyc>=0),(f_cyc<0)?-1:(f_cyc-mark_cyc)/DUT_MS);

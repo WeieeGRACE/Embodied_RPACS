@@ -17,26 +17,26 @@ ACG525 / GW5A-LV25UG324C2/I1，50 MHz，Gowin 1.9.12。主工程、构建与仿�
    而旧策略把它永远丢弃 → 永远等不到“转向后新鲜样本”。现改为：连续 2 次 20 mm 视为
    “测距完成但目标过近/不可测”，作为 barrier 的新鲜事件放行（仍不参与几何距离），并让
    路线改走**固定里程兜底**（横移 500 + 额外 300 + 直行 600 + 额外 300 mm + 回线）；
-   删除上板证明无效的“连续 4 次 20 mm 就 XSHUT 重初始化”。11 个故障注入场景现在同时断言
+   删除上板证明无效的“连续 4 次 20 mm 就 XSHUT 重初始化”。13 个故障注入场景现在同时断言
    `fault=0` 且 `paused=0`，其中场景 10 断言进入兜底（`reached_shift=1`）、场景 7 断言
    近距兜底（`near_shift=1`）。第三轮又删除了 `valid` 里“距离必须 >85 mm”的就绪掩码：
    真实近距不再被判未就绪（否则整条路线 `ready=0`、运动指令被拦后 PAUSED），近距与
    20 mm 截断统一走固定里程兜底。**PASS 中途截断兜底（上板日志驱动）**：2026-10-29 20:36
    板上 5 次尝试中 3 次在 PASS 阶段 BLOCKED（reason 0x04）——障碍侧通道在 PASS 开始后才出现
    20 mm 截断，边缘检测失效后一路开到前向阈值；现已把“运行中途转为截断”也纳入固定里程兜底
-   （PASS/SHIFT），并新增故障注入场景 11 覆盖。
+   （PASS/SHIFT），并新增故障注入场景 11 覆盖。**PASS 前向坏数据时间滤波（上板日志驱动）**：2026-10-29 22:52–22:59 的 7 次板测里 5 次在 PASS 段因“前向 ToF 单次读到 ≤85 mm”直接安全停车（reason 0x04）——箱角扫过前视场等单点坏数据被当成真障碍。现让位/超车各腿的前向判定需要**连续 400 ms** 低于 85 mm 才生效（巡航段仍立即刹车），并新增故障注入场景 12 覆盖；横移/超车距离与角度常量全部保持参考工程的 300/300 mm 不变。
 3. **资源优化**：主菜单精简后为 4 项（MANUAL / SETTINGS / OBSTACLE AVOID / IMU ATTITUDE，
    末项为题目要求的姿态显示），删除 DISPLAY 其余诊断 UI、菜单预览行与 ToF 诊断页；本轮把
    IMU 姿态页恢复为单页（共用一套顺序小数格式化器），roll/pitch 数学随之回到综合。post-PnR：
-   **Logic 15897/23040（69%）**（原 17661/77%）、**CLS 9640/11520（84%）**（原 86%）、
-   Register 6736、BSRAM 9/56、DSP 8.5/28、Fmax **54.996 MHz**、Setup/Hold 违例 0、TNS 0。
+   **Logic 15910/23040（70%）**（原 17661/77%）、**CLS 9614/11520（84%）**（原 86%）、
+   Register 6746、BSRAM 9/56、DSP 8.5/28、Fmax **56.049 MHz**、Setup/Hold 违例 0、TNS 0。
 4. **题目新增功能**：MANUAL 增加 **SPIN 360**（用右转动作原地旋转 360°，30 s 动作超时）；
    主菜单增加 **IMU ATTITUDE** 页，显示 ROLL / PITCH / YAW（±DDD.d°），IMU 校准中显示
    CALIBRATING。两项均已进仿真与 OLED 位图回归。
-5. **验证**：7 套主工程仿真全部 PASS、历史回归全绿、**12 个**转向后故障注入场景
-   （0 次故障锁存、0 次 PAUSED；场景 10 全程截断兜底、场景 11 PASS 中途截断兜底）。
-   位流：`impl/pnr/Embodied_RPACS.fs`（6,443,652 字节），
-   SHA256 `C1AF9B0729B4CE9FFB957A22CD34A0F4CEDBCDD7D73CC7C52674DB477EB709AE`。
+5. **验证**：7 套主工程仿真全部 PASS、历史回归全绿、**13 个**转向后故障注入场景
+   （0 次故障锁存、0 次 PAUSED；场景 10 全程截断兜底、场景 11 PASS 中途截断兜底、场景 12 PASS 前向毛刺滤波）。
+   位流：`impl/pnr/Embodied_RPACS.fs`（6,443,628 字节），
+   SHA256 `F5DD42E8C06F28056A7F8F6EE86B846F791398201495D0E9EC1B77B88F906FB7`。
    配套语音固件 `asrpro/release/yaoyao_asrpro_2m_20261025_obstacle/fw.bin` 本轮未改动。
    上板实测记录见 `records/robustness_20261029/BOARD_RUN_ANALYSIS.md`；本轮新增功能与
    PASS 兜底修复已重建，等待用户重新烧写测试（步骤见技术报告第 6 节）。
@@ -140,7 +140,7 @@ ASRPRO D17/RX、D18/TX，115200/8N1；USB U8/RX、V8/TX。管脚保持既有接�
 ./tools/check_system_reports.ps1
 ./tools/run_system_sim.ps1                 # 主工程 7 套
 ./tools/run_legacy_regression.ps1          # 历史 IMU/OLED/测速/闭环/双轮/右轮/motion/tb6612 回归（已同步全绿）
-./tools/run_fault_injection.ps1            # 11 个转向后故障注入场景，断言 0 次故障锁存、0 次 PAUSED（约 4 分钟）
+./tools/run_fault_injection.ps1            # 13 个转向后故障注入场景，断言 0 次故障锁存、0 次 PAUSED（约 4 分钟）
 ./tools/board_obstacle_test.ps1 -Port COM14 -Seconds 180 -Program   # 上板：SRAM 烧写+只读串口抓取+PASS/FAIL 判定
 ./tools/export_main.ps1
 ```
