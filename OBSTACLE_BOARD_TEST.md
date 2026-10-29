@@ -114,3 +114,7 @@ FPGA 调试串口无线转回电脑：
    WCH-Link 做调试/下载；烧写 FPGA 仍用 Gowin USB Cable（WCH-Link 不能烧 Gowin 器件）。
    无线链路可能丢少量字节，日志按整行解析（`tools/decode_debug_log.ps1` 可解码 `D` 行）；
    若出现乱码先确认波特率与共地。
+6. **日志判定**：`./tools/board_obstacle_test.ps1 -Port COM24 -Seconds 300 -FailOnPause`
+   （加 `-Program` 会先烧写）自动把 PAUSED 分为两类：`state=17/reason=0x8x` 记为**路由暂停**
+   （演示失败），巡航中 K2 手动暂停单独统计；已抓好的日志可离线复核：
+   `-AnalyzeOnly -Capture <log>`。
