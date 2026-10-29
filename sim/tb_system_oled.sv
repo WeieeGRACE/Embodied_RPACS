@@ -1,20 +1,22 @@
 `timescale 1ns/1ps
+// Minimal-demo OLED page suite: root 3-item menu (no next-item preview row),
+// MANUAL, SETTINGS and the OBSTACLE AVOID panel. The DISPLAY diagnostic pages
+// and the ToF diagnostic page were removed from the design in this round.
 module tb_system_oled;
  reg clk=0; always #10 clk=~clk;
  reg rst_n=0; reg [2:0] seen=0,valid=0;
- reg [47:0] distances=0; reg [23:0] errors=0; reg [11:0] statuses=0;
- wire [671:0] text,tof_text;
+ reg [47:0] distances=0;
+ wire [671:0] text;
  reg [2:0] group_id=0;reg [3:0] item=0;reg page_on=0; wire scl,frame_done; tri1 sda; reg ack_low=0;
  assign sda=ack_low?1'b0:1'bz;
  reg completed=0;reg av=0,ar=0,aw=0,ve=0;reg [4:0] rs=0;
- tof_page page(.seen(seen),.valid(valid),.distances(distances),.errors(errors),.statuses(statuses),.text(tof_text));
- system_pages pages(.start_diag(8'd0),.route_reason(8'd0),.clk(clk),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page_on),
+ system_pages pages(.clk(clk),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page_on),
+ .start_diag(8'd0),.route_reason(8'd0),
  .avoid_mode(av),.auto_run(ar),.waiting(aw),.route_state(rs),.distances(distances),.tof_valid(valid),
  .voice_enable(ve),.voice_candidate(1'b1),.gear(2'd1),.gear_candidate(2'd2),
- .ready(1'b1),.busy(1'b0),.fault(1'b0),.imu_ready(1'b1),.calibrating(1'b0),.attitude_valid(1'b1),
- .status(8'h11),.imu_error(8'd0),.sensor_error(8'd0),.motion_fault(8'd0),.command(8'h10),.response(8'd0),
- .roll_mdeg(32'sd12345),.pitch_mdeg(-32'sd12345),.yaw_mdeg(32'sd90000),
- .pos_l(32'sd1456),.pos_r(-32'sd1456),.speed_l(32'sd7),.speed_r(-32'sd7),.tof_text(tof_text),.text(text));
+ .ready(1'b1),.busy(1'b0),.fault(1'b0),
+ .imu_error(8'd0),.sensor_error(8'd0),.motion_fault(8'd0),.command(8'h10),.response(8'd0),
+ .text(text));
  system_oled_text #(.CLK_HZ(10000),.I2C_HZ(1000),.POWERUP_CYCLES(3),.FRAME_WAIT_CYCLES(20)) dut(
   .clk(clk),.rst_n(rst_n),.text(text),.frame_done(frame_done),.scl(scl),.sda(sda));
  reg active=0; integer bit_count=0,byte_count=0,transactions=0;
@@ -87,7 +89,6 @@ module tb_system_oled;
  task automatic next_frame;
   begin @(posedge frame_done); #1; frames++; end
  endtask
-
  task settle_frame;
  begin wait(dut.display_text===text);next_frame();end
  endtask
@@ -97,9 +98,13 @@ module tb_system_oled;
  endtask
  initial begin
  repeat(5)@(negedge clk);rst_n=1;next_frame();
- check_row(0,"RPACS MENU");check_row(1,">DISPLAY");check_row(2,"MANUAL");check_row(3,"K0 RST K1 NEXT K2 OK");
+ // Root menu: 3 entries, current selection only, no next-item preview row.
+ check_row(0,"RPACS MENU");check_row(1,">MANUAL");check_row(2,"");check_row(3,"K0 RST K1 NEXT K2 OK");
  dump("records/main_20261023/system_menu_root.hex");
- $display("PASS main OLED root menu complete bitmap and key legend");
+ item=1;settle_frame();check_row(1,">SETTINGS");check_row(2,"");
+ item=2;settle_frame();check_row(1,">OBSTACLE AVOID");check_row(2,"");
+ item=0;
+ $display("PASS main OLED root 3-item menu bitmap, no preview row and key legend");
  // The page changes mid-frame. Old frame must remain a complete snapshot.
  wait(dut.page==1 && dut.column>20);@(negedge clk);group_id=2;item=3;page_on=1;
  next_frame();check_row(0,"RPACS MENU");settle_frame();
@@ -109,14 +114,8 @@ module tb_system_oled;
  check_row(0,"VOICE ENABLE");check_row(1,"CURRENT OFF");check_row(2,"SELECT ON");check_row(3,"K0 BACK K1 SEL K2 SET");
  dump("records/main_20261023/system_menu_voice.hex");
  item=1;settle_frame();check_row(1,"CURRENT MID");check_row(2,"SELECT HIGH 0.15 M/S");
- group_id=1;item=1;settle_frame();check_row(1,"ROLL  +012.3 DEG");check_row(2,"PITCH -012.3 DEG");check_row(3,"YAW   +090.0 DEG");
- item=3;settle_frame();check_row(1,"L:000005B0 V:+00007");check_row(2,"R:FFFFFA50 V:-00007");
- item=2;seen=7;valid=7;distances={16'd3456,16'd2345,16'd1234};statuses=12'h753;settle_frame();
- check_row(0,"TOF DIAG");check_row(1,"FRONT:01234mm S:03");
- valid=5;errors=24'h000200;settle_frame();check_row(2,"LEFT :-----  E:02");
- dump("records/main_20261023/system_menu_tof.hex");
- $display("PASS settings, attitude signs/units, encoder count/speed, ToF bitmap and stale data masking");
- group_id=0;item=3;page_on=0;settle_frame();check_row(1,">OBSTACLE AVOID");
+ $display("PASS settings voice/gear page bitmap");
+ group_id=0;item=2;page_on=0;settle_frame();check_row(1,">OBSTACLE AVOID");
  group_id=5;item=0;page_on=1;settle_frame();check_row(0,"OBSTACLE AVOID");check_row(1,"TOF NOT READY");
  ve=1;av=1;aw=1;valid=7;distances={16'd2000,16'd2000,16'd2000};settle_frame();
  check_row(1,"SPEAKING PLEASE WAIT");check_row(2,"F:07D0 L:07D0 R:07D0");

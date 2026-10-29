@@ -130,7 +130,7 @@ module tb_system_50mhz;
  initial begin
  wait(rst);wait(ready_led);
  // Enable voice from the physical menu using the same key pulses as the board.
- repeat(2)begin @(negedge clk);k1=0;cycles(12);k1=1;cycles(12);end
+ @(negedge clk);k1=0;cycles(12);k1=1;cycles(12); // MANUAL -> SETTINGS
  @(negedge clk);k2=0;cycles(12);k2=1;cycles(12); // settings
  @(negedge clk);k2=0;cycles(12);k2=1;cycles(12); // voice page
  @(negedge clk);k1=0;cycles(12);k1=1;cycles(12); // ON candidate
@@ -145,3 +145,4 @@ module tb_system_50mhz;
  completed=1;$finish;
  end
 endmodule
+

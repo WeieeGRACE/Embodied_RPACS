@@ -58,7 +58,7 @@ module tof_driver #(
      if(recover) begin recover<=0; state<=ISSUE; end
      else begin busy<=0; state<=IDLE; end
     end else timer<=timer+1'b1;
-    IDLE: if(trigger) begin
+    IDLE: if(trigger || recover_req) begin
      busy<=1; phase<=0; polls<=0; poll_timeout<=0; read_mask<=0; raw_result<=0;
      revision<=0; model_id<=0; pre_period<=0; final_period<=0; diagnostic<=0;
      if(error!=0 || recover_req) begin recover<=1; pull_reset<=1; timer<=0; state<=RESET; end

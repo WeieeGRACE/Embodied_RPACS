@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <Project>
   <Template>FPGA</Template>
   <Version>5</Version>
@@ -15,7 +15,6 @@
     <File path="src/ui/system_oled_text.v" type="file.verilog" enable="1" />
     <File path="src/tof/tof_driver.v" type="file.verilog" enable="1" />
     <File path="src/tof/tof_i2c.v" type="file.verilog" enable="1" />
-    <File path="src/tof/tof_page.v" type="file.verilog" enable="1" />
     <File path="src/motor/motion_control_and_mode_fsm.v" type="file.verilog" enable="1" />
     <File path="src/motor/dual_ab_quadrature_encoder.v" type="file.verilog" enable="1" />
     <File path="src/motor/speed_measurement_and_velocity_filter.v" type="file.verilog" enable="1" />

@@ -48,7 +48,7 @@ module tb_system_obstacle;
  if(dut.group_id!=0 || dut.page)$fatal(1,"root navigation");
  end endtask
  function automatic integer menu_index(input integer gr);
-  case(gr)2:menu_index=1;4:menu_index=2;5:menu_index=3;default:menu_index=0;endcase
+  case(gr)2:menu_index=0;4:menu_index=1;5:menu_index=2;default:menu_index=0;endcase
  endfunction
  task choose(input integer gr,input integer it);begin
  root();$display("CHOOSE group=%0d item=%0d page=%b target=%0d",dut.group_id,dut.item,dut.page,gr);

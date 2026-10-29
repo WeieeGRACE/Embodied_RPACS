@@ -2,6 +2,7 @@
 /*
 !/.gitignore
 !/README.md
+!/TECHNICAL_REPORT.md
 !/THIRD_PARTY_NOTICES.md
 !/PIN_ASSIGNMENT.md
 !/Embodied_RPACS.gprj
@@ -218,6 +219,10 @@
 /records/fault_injection/fixed/*
 !/records/fault_injection/fixed/*.md
 !/records/fault_injection/fixed/*.log
+!/records/fault_injection/fixed_final/
+/records/fault_injection/fixed_final/*
+!/records/fault_injection/fixed_final/*.md
+!/records/fault_injection/fixed_final/*.log
 !/records/resource_20261029/
 /records/resource_20261029/*
 !/records/resource_20261029/*.md

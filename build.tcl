@@ -14,7 +14,6 @@ add_file src/ui/system_pages.v
 add_file src/ui/system_oled_text.v
 add_file src/tof/tof_driver.v
 add_file src/tof/tof_i2c.v
-add_file src/tof/tof_page.v
 add_file src/motor/motion_control_and_mode_fsm.v
 add_file src/motor/dual_ab_quadrature_encoder.v
 add_file src/motor/speed_measurement_and_velocity_filter.v
@@ -40,3 +39,4 @@ add_file src/obstacle/obstacle_sensors.v
 add_file src/obstacle/obstacle_command.v
 add_file src/obstacle/system_dispatch.v
 run all
+

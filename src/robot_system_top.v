@@ -98,20 +98,17 @@ module robot_system_top #(
  .xshut_n({tof_right_xshut_n,tof_left_xshut_n,tof_front_xshut_n}),
  .seen(tof_seen),.valid(tof_valid),.distances(distances),.post_turn(post_turn),.event_mask(sample_mask),
  .degraded(tof_degraded),.errors(tof_errors),.statuses(tof_statuses),.reused(reused),.fault(sensor_fault),.ages(),.raw_distances(),.comm_ages(),.confirm_ages(),.pending(),.raw_event_mask(),.fault_bits());
- wire [671:0] tof_text,text;
- reg [671:0] tof_snapshot;
- always @(posedge clk_50m or negedge rst_n)
- if(!rst_n)tof_snapshot<={84{8'h20}};else tof_snapshot<=tof_text;
- tof_page tof_display(.seen(tof_seen),.valid(tof_valid),.distances(distances),
- .errors(tof_errors),.statuses(tof_statuses),.text(tof_text));
+ // Minimal demo UI: the DISPLAY diagnostic group and its ToF page were removed,
+ // so the text pipeline only serves the root menu, MANUAL, SETTINGS and the
+ // OBSTACLE AVOID panel.
+ wire [671:0] text;
  system_pages pages(.clk(clk_50m),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page),
  .start_diag(start_diag),.route_reason(route_reason),
  .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.route_state(route_state),.distances(distances),.tof_valid(tof_valid),
  .voice_enable(voice_enable),.voice_candidate(voice_candidate),.gear(gear),.gear_candidate(gear_candidate),
- .ready(led_ready),.busy(led_run),.fault(led_fault),.imu_ready(imu_ready),.calibrating(calibrating),.attitude_valid(attitude_valid),
- .status(status),.imu_error(imu_error),.sensor_error(sensor_error),.motion_fault(motion_fault),.command(command),.response(response),
- .roll_mdeg(roll_mdeg),.pitch_mdeg(pitch_mdeg),.yaw_mdeg(-yaw_wrapped),
- .pos_l(pos_l),.pos_r(pos_r),.speed_l(speed_l),.speed_r(speed_r),.tof_text(tof_snapshot),.text(text));
+ .ready(led_ready),.busy(led_run),.fault(led_fault),
+ .imu_error(imu_error),.sensor_error(sensor_error),.motion_fault(motion_fault),.command(command),.response(response),
+ .text(text));
  system_oled_text #(.CLK_HZ(CLK_HZ),.I2C_HZ(OLED_I2C_HZ),.POWERUP_CYCLES(OLED_POWERUP_CYCLES),
  .FRAME_WAIT_CYCLES(OLED_FRAME_WAIT_CYCLES)) display(
  .clk(clk_50m),.rst_n(rst_n),.text(text),.frame_done(),.scl(oled_scl),.sda(oled_sda));

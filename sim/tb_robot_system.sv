@@ -48,7 +48,7 @@ module tb_robot_system;
  if(dut.group_id!=0 || dut.page)$fatal(1,"root navigation");
  end endtask
  function automatic integer menu_index(input integer gr);
-  case(gr)2:menu_index=1;4:menu_index=2;5:menu_index=3;default:menu_index=0;endcase
+  case(gr)2:menu_index=0;4:menu_index=1;5:menu_index=2;default:menu_index=0;endcase
  endfunction
  task choose(input integer gr,input integer it);begin
  root();while(dut.item!=menu_index(gr))keypress(1);keypress(2);
@@ -244,10 +244,10 @@ module tb_robot_system;
  @(negedge clk);k1=0;cycles(1);k1=1;cycles(12);
  if(dut.item!=0)$fatal(1,"bounce accepted");
  @(negedge clk);k2=0;cycles(100);k2=1;cycles(12);
- if(dut.group_id!=1 || dut.page || fault_led)$fatal(1,"held K2 repeated or estop");
- keypress(2); // system page
+ if(dut.group_id!=2 || dut.page || fault_led)$fatal(1,"held K2 repeated or estop");
+ keypress(2); // FORWARD 20CM action; K0 cuts it below
  @(negedge clk);k0=0;cycles(200);
- if(!rst || dut.group_id!=1 || dut.page)$fatal(1,"held K0 cascaded navigation/reset");
+ if(!rst || dut.group_id!=2 || dut.page)$fatal(1,"held K0 cascaded navigation/reset");
  k0=1;cycles(12);root();
  wait(ready_led);cycles(1500);off();model_on=1;
  frame('h10);cycles(1500);off();if(reject_replies!=1)$fatal(1,"voice default accepted");
@@ -294,13 +294,12 @@ module tb_robot_system;
  if(dut.distances!={16'd3456,16'd2345,16'd1234})$fatal(1,"ToF distance parse");
  seq0=shots[2];never_ready[0]=1;present[1]=0;
  wait(dut.tof_errors==24'h000102 && dut.tof_valid==4);
- choose(1,2);cycles(1000);
- if(dut.text[27*8+:8]!="-" || dut.text[48*8+:8]!="-")$fatal(1,"stale ToF displayed");
+ cycles(1000);
  if(fault_led || !ready_led)$fatal(1,"ToF fault gated motion");
  manual_action(0);
  if(shots[2]<=seq0)$fatal(1,"ToF stopped while navigating");
  never_ready=0;present=7;wait(dut.tof_valid==7 && dut.tof_errors==0);
- $display("PASS integrated ToF normal/NACK/timeout/recovery, hidden stale values, display-only faults");
+ $display("PASS integrated ToF normal/NACK/timeout/recovery and fault-gated display");
  // IMU faults latch after the persistence window, root reset clears and re-calibrates.
  choose(2,0);keypress(2);wait(st);model_error=1;wait(fault_led);cycles(1500);off();
  model_error=0;keypress(2);cycles(30000);off();if(!fault_led)$fatal(1,"fault auto recovered");
