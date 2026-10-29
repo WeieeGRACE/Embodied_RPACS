@@ -1,0 +1,46 @@
+{
+  "duration_s": 90.0,
+  "frames": 4346,
+  "expected_frames": 4500,
+  "loss_percent": 3.441,
+  "rate_hz": 48.279,
+  "gap_ms": {
+    "max": 3118.0,
+    "p99": 20.3,
+    "p50": 20.2
+  },
+  "parse_errors": {
+    "crc_err": 0,
+    "tail_err": 0,
+    "len_err": 0,
+    "sync_err": 1
+  },
+  "hb_age_ms": {
+    "min": 64630,
+    "max": 65535
+  },
+  "cmd_seq_seen": {
+    "first": 13,
+    "last": 13,
+    "distinct": 1
+  },
+  "fault_histogram": {
+    "0x22": 4346
+  },
+  "acks": {},
+  "cpu_percent": {
+    "mean": 1.0,
+    "max": 1.6
+  },
+  "parser_total": {
+    "good": 4450,
+    "sync_err": 1,
+    "len_err": 0,
+    "crc_err": 0,
+    "tail_err": 0,
+    "timeout": 0,
+    "type_err": 0
+  },
+  "healthy_fraction": 0.0,
+  "ok": false
+}

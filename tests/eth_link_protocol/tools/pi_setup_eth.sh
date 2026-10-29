@@ -43,7 +43,11 @@ fi
 ip -4 addr show ${IF} | grep -q "inet ${HOST_IP}" && echo "   IP ${HOST_IP}/24 已配置" \
     || echo "   !! IP 未配置，检查 nmcli"
 
-echo "== 3) 静态 ARP =="
+echo "== 3) 静态 ARP（含掉线自动恢复钩子）=="
+HOOK=/etc/NetworkManager/dispatcher.d/90-fpga-static-arp
+if [ -f "$(dirname "$0")/90-fpga-static-arp" ] && [ ! -f "$HOOK" ]; then
+    install -m 755 "$(dirname "$0")/90-fpga-static-arp" "$HOOK" && echo "   已安装 NM 掉线恢复钩子 $HOOK"
+fi
 ip neigh replace ${FPGA_IP} lladdr ${FPGA_MAC} dev ${IF} nud permanent
 ip neigh show dev ${IF} | grep ${FPGA_IP} || echo "   !! ARP 写入失败"
 

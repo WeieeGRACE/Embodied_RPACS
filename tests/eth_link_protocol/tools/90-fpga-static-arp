@@ -1,0 +1,22 @@
+#!/bin/bash
+# NetworkManager dispatcher: 每次 eth0 起来时恢复 FPGA 的静态 ARP。
+#
+# 背景：FPGA 侧没有 ARP 应答器，主机必须静态 ARP；而 `nmcli con down/up` 或插拔网线
+# 会清掉邻居表，导致命令发不出去（遥测仍然能收到，因为 FPGA 回包是广播）。
+#
+# 安装：sudo install -m 755 90-fpga-static-arp /etc/NetworkManager/dispatcher.d/
+set -u
+IFACE="$1"
+ACTION="$2"
+FPGA_IP=192.168.0.2
+FPGA_MAC=00:0a:35:01:fe:c0
+
+[ "$IFACE" = "eth0" ] || exit 0
+case "$ACTION" in
+    up|reapply|dhcp4-change|connectivity-change)
+        /usr/sbin/ip neigh replace "$FPGA_IP" lladdr "$FPGA_MAC" dev eth0 nud permanent 2>/dev/null \
+            || ip neigh replace "$FPGA_IP" lladdr "$FPGA_MAC" dev eth0 nud permanent
+        logger -t fpga-arp "eth0 $ACTION: static ARP for $FPGA_IP restored"
+        ;;
+esac
+exit 0

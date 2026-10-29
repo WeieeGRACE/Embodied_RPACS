@@ -78,7 +78,11 @@ def main() -> int:
         return t.fault if t else None
 
     try:
-        # 基线：健康
+        # 基线：健康。注意 CMD_TIMEOUT 是"500 ms 内没有命令"的正常语义，
+        # 心跳不刷新它，所以基线要先补一条命令再判定。
+        link.set_vel(0, 0, 5)
+        link.wait_ack(1.0, P.MSG_SET_VEL)
+        time.sleep(0.15)
         t = last_telem(1.0)
         check("F0_baseline_healthy", t is not None and t.fault == 0,
               "fault=0x%02X" % (t.fault if t else 0xFF))
