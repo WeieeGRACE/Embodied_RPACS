@@ -105,7 +105,12 @@ FPGA 调试串口无线转回电脑：
    # 或一键烧写+采集+自动判定（已有串口时加 -Port COM24）：
    ./tools/board_obstacle_test.ps1 -Port COM24 -Seconds 300
    ```
-4. **注意**：手册注明“调试功能和串口助手不能同时使用”——跑演示/采日志时不要再让
+4. **P6-21 无线串口位流（本仓库已备）**：主固件的调试串口在 V8（只连板载 CH9102F，
+   P6/P11 排针未引出）。若不用板载 USB 口，可烧 `tests/p6_uart_debug/` 工程的位流
+   `impl/pnr/Embodied_RPACS_p6uart.fs`：逻辑与主固件相同，仅把调试串口 TX 挪到
+   **P6-21（GPIO18，FPGA 球 L12）**；接法为 **WCH-Link RX → P6-21**、
+   **GND → P6-12 或 P6-30**，其余接线不变。
+5. **注意**：手册注明“调试功能和串口助手不能同时使用”——跑演示/采日志时不要再让
    WCH-Link 做调试/下载；烧写 FPGA 仍用 Gowin USB Cable（WCH-Link 不能烧 Gowin 器件）。
    无线链路可能丢少量字节，日志按整行解析（`tools/decode_debug_log.ps1` 可解码 `D` 行）；
    若出现乱码先确认波特率与共地。

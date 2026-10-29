@@ -373,6 +373,10 @@ CLS 余量仍有 3202，仍在“最小演示配置”预算内。
 用 `./tools/read_serial_log.ps1 -Port COM24 -Seconds 300 -Timestamped -OutFile ...` 或
 `./tools/board_obstacle_test.ps1 -Port COM24 -Seconds 300` 只读采集，两端固定 115200。
 注意手册要求“调试功能和串口助手不能同时使用”；FPGA 烧写仍走 Gowin USB Cable。
+若连板载 USB 口也不方便使用，本仓库另有 **P6-21 诊断位流工程** `tests/p6_uart_debug/`：
+逻辑与主固件相同，只把调试串口 TX 从 V8 挪到 **P6-21（GPIO18，FPGA 球 L12）**，
+WCH-Link RX 接 P6-21、GND 接 P6-12/P6-30 即可无线采集；位流
+`tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.fs`（SHA256 `AF7FC649…`）。
 详见 `OBSTACLE_BOARD_TEST.md` 末尾“远程串口采集（WCH-LinkW 无线串口）”。
 
 ## 7. 风险、限制与后续
