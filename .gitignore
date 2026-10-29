@@ -205,6 +205,24 @@
 !/records/obstacle_20261025/*.json
 !/records/obstacle_20261025/*.log
 
+# Robustness round evidence (baseline, fault injection, resource audit, final).
+!/records/baseline_20261029/
+/records/baseline_20261029/*
+!/records/baseline_20261029/*.md
+!/records/baseline_20261029/*.log
+!/records/fault_injection/
+/records/fault_injection/*
+!/records/fault_injection/*.md
+!/records/fault_injection/*.log
+!/records/resource_20261029/
+/records/resource_20261029/*
+!/records/resource_20261029/*.md
+!/records/resource_20261029/*.log
+!/records/robustness_20261029/
+/records/robustness_20261029/*
+!/records/robustness_20261029/*.md
+!/records/robustness_20261029/*.log
+
 # Independent UART bridge protocol test (host link v1) + board-ready bitstream.
 !/tests/uart_bridge/
 /tests/uart_bridge/*
