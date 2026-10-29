@@ -240,6 +240,21 @@
 !/records/robustness_20261029/*.md
 !/records/robustness_20261029/*.log
 
+# P6-21 wireless-serial diagnostic variant of the main project.
+!/tests/p6_uart_debug/
+/tests/p6_uart_debug/*
+!/tests/p6_uart_debug/*.md
+!/tests/p6_uart_debug/*.tcl
+!/tests/p6_uart_debug/src/
+/tests/p6_uart_debug/src/*
+!/tests/p6_uart_debug/src/*.v
+!/tests/p6_uart_debug/src/*.cst
+!/tests/p6_uart_debug/src/*.sdc
+!/tests/p6_uart_debug/src/imu/
+!/tests/p6_uart_debug/src/imu/*.hex
+!/tests/p6_uart_debug/src/ui/
+!/tests/p6_uart_debug/src/ui/*.hex
+
 # Independent UART bridge protocol test (host link v1) + board-ready bitstream.
 !/tests/uart_bridge/
 /tests/uart_bridge/*

@@ -207,8 +207,9 @@
   非法跳变被容忍、连续 5 次才锁存、合法计数可衰减、清零/复位正确；历史默认参数仍立即锁存。
 - `tools/run_legacy_regression.ps1` 的 IMU/OLED/测速预取/编码器毛刺/地面/闭环/双轮/右轮/
   motion/tb6612 历史回归全部 PASS（`records/robustness_20261029/legacy_regression_encoder.log`）。
-- `tools/run_fault_injection.ps1` 在最终源码上 10/10 场景 0 次故障锁存
-  （`records/robustness_20261029/fault_injection_encoder.log`）。
+- `tools/run_fault_injection.ps1` 在最终源码上 11/11 场景 0 次故障锁存、0 次 PAUSED
+  （`records/robustness_20261029/fault_injection_clip_fallback.log`；第一轮 10 场景证据见
+  `fault_injection_encoder.log`）。
 
 日志：`records/robustness_20261029/*_minimal.log`、`records/obstacle_20261025/system*.log`；
 全部以 `Errors: 0, Warnings: 0` 结束。

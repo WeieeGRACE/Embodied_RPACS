@@ -130,7 +130,7 @@ ASRPRO D17/RX、D18/TX，115200/8N1；USB U8/RX、V8/TX。管脚保持既有接�
 ./tools/check_system_reports.ps1
 ./tools/run_system_sim.ps1                 # 主工程 7 套
 ./tools/run_legacy_regression.ps1          # 历史 IMU/OLED/测速/闭环/双轮/右轮/motion/tb6612 回归（已同步全绿）
-./tools/run_fault_injection.ps1            # 10 个转向后故障注入场景，断言 0 次故障锁存（约 2-3 分钟）
+./tools/run_fault_injection.ps1            # 11 个转向后故障注入场景，断言 0 次故障锁存、0 次 PAUSED（约 4 分钟）
 ./tools/board_obstacle_test.ps1 -Port COM14 -Seconds 180 -Program   # 上板：SRAM 烧写+只读串口抓取+PASS/FAIL 判定
 ./tools/export_main.ps1
 ```
