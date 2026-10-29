@@ -8,7 +8,7 @@ module tb_system_oled;
  assign sda=ack_low?1'b0:1'bz;
  reg completed=0;reg av=0,ar=0,aw=0,ve=0;reg [4:0] rs=0;
  tof_page page(.seen(seen),.valid(valid),.distances(distances),.errors(errors),.statuses(statuses),.text(tof_text));
- system_pages pages(.start_diag(8'd0),.clk(clk),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page_on),
+ system_pages pages(.start_diag(8'd0),.route_reason(8'd0),.clk(clk),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page_on),
  .avoid_mode(av),.auto_run(ar),.waiting(aw),.route_state(rs),.distances(distances),.tof_valid(valid),
  .voice_enable(ve),.voice_candidate(1'b1),.gear(2'd1),.gear_candidate(2'd2),
  .ready(1'b1),.busy(1'b0),.fault(1'b0),.imu_ready(1'b1),.calibrating(1'b0),.attitude_valid(1'b1),

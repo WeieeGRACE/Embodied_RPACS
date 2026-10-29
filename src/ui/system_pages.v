@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module system_pages(
  input wire clk,rst_n,
- input wire [7:0] start_diag,
+ input wire [7:0] start_diag,route_reason,
  input wire [2:0] group_id,input wire [3:0] item,input wire page,
  input wire avoid_mode,auto_run,waiting,input wire [4:0] route_state,input wire [47:0] distances,input wire [2:0] tof_valid,
  input wire voice_enable,voice_candidate,input wire [1:0] gear,gear_candidate,
@@ -146,7 +146,13 @@ module system_pages(
  default:begin end
  endcase
  5:begin
- r1=fault ? "FAULT RESET REQUIRED ":waiting ? "SPEAKING PLEASE WAIT ":auto_run ? (route_state==1 || route_state==2 ? "CRUISE               ":"AVOIDING             "):
+ // On a fault the panel shows the four diagnostic bytes directly: route
+ // reason, ToF sensor fault word, motion fault code and IMU error code.
+ r1=fault ? {"F:",hexchar(route_reason[7:4]),hexchar(route_reason[3:0]),
+ " S:",hexchar(sensor_error[7:4]),hexchar(sensor_error[3:0]),
+ " M:",hexchar(motion_fault[7:4]),hexchar(motion_fault[3:0]),
+ " I:",hexchar(imu_error[7:4]),hexchar(imu_error[3:0]),"  "} :
+ waiting ? "SPEAKING PLEASE WAIT ":auto_run ? (route_state==1 || route_state==2 ? "CRUISE               ":"AVOIDING             "):
  !ready ? "WAIT IMU / CHASSIS   ":!(&tof_valid) ? "TOF NOT READY        ":
  busy ? "WAIT MOTION STOP     ":start_diag==7 ? "AUDIO TIMEOUT RETRY  ":
  start_diag==8 ? "TOF LOST RETRY       ":start_diag==1 ? "VOICE OFF K2 START   ":

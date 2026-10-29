@@ -14,8 +14,10 @@ module system_motion #(
  input wire menu_valid,input wire [7:0] menu_command,
  input wire gear_commit,input wire [1:0] gear_value,
  input wire [47:0] distances,input wire [2:0] tof_seen,tof_valid,post_turn,sample_mask,
- input wire sensor_fault,output wire sensor_refresh,sensor_monitor,
+ input wire sensor_fault,input wire [2:0] sensor_degraded,
+ output wire sensor_refresh,sensor_monitor,
  output wire avoid_mode,auto_run,waiting,show_avoid,show_root,output wire [4:0] route_state,
+ output wire [7:0] route_reason,
  input wire encoder_a_l,encoder_b_l,encoder_a_r,encoder_b_r,
  input wire imu_spi_miso,imu_int1,imu_int2,imu_gnd_reserved,
  output wire imu_spi_sck,imu_spi_mosi,imu_cs_n,
@@ -64,6 +66,20 @@ module system_motion #(
  wire imu_bad=imu_error!=0 || sensor_error!=0 || (ready_seen && !imu_ready) ||
  (imu_ready && !sample_valid && sample_age>=IMU_TIMEOUT-1) ||
  (yaw_seen && !yaw_valid && yaw_age>=IMU_TIMEOUT-1);
+ // A brief IMU/SPI glitch must not latch the whole demo. The raw condition
+ // still shows in the event log, but the system fault requires it to persist
+ // for IMU_FAULT_MS and the motion FSM has its own feedback-abort path.
+ localparam integer IMU_FAULT_MS=2000;
+ reg [15:0] ms_ticks,imu_bad_ms;
+ wire ms_tick=ms_ticks==CLK_HZ/1000-1;
+ wire imu_bad_q=imu_bad && imu_bad_ms>=IMU_FAULT_MS-1;
+ always @(posedge clk or negedge rst_n)
+ if(!rst_n)begin ms_ticks<=0;imu_bad_ms<=0;end
+ else begin
+ if(ms_tick)ms_ticks<=0;else ms_ticks<=ms_ticks+1'b1;
+ if(!imu_bad)imu_bad_ms<=0;
+ else if(ms_tick && imu_bad_ms!=16'hffff)imu_bad_ms<=imu_bad_ms+1'b1;
+ end
  wire signed [31:0] um_l,um_r,raw_l,raw_r;
  wire signed [1:0] delta_l,delta_r;
  wire valid_l,valid_r,enc_fault_l,enc_fault_r;
@@ -97,7 +113,7 @@ module system_motion #(
  reg fault_latched;
  wire tx_overflow;
  wire route_fault;
- wire fault_now=sensor_fault || route_fault || imu_bad || enc_fault_l || enc_fault_r || tx_overflow || motion_fault!=0;
+ wire fault_now=sensor_fault || route_fault || imu_bad_q || enc_fault_l || enc_fault_r || tx_overflow || motion_fault!=0;
  always @(posedge clk or negedge rst_n)
  if(!rst_n)fault_latched<=0;else if(fault_now)fault_latched<=1;
  wire fault=fault_now || fault_latched;
@@ -154,13 +170,14 @@ module system_motion #(
  end
  wire route_start,route_stop,route_rotate,route_reverse,route_refresh;
  wire [1:0] route_end;wire [31:0] route_goal,route_speed,route_cap;
- wire [7:0] route_reason;wire signed [31:0] route_heading;
+ wire signed [31:0] route_heading;
+ wire sensor_hold=|sensor_degraded;
  wire command_submit,buffer_busy,buffer_ready;
  wire [230:0] payload;wire [132:0] context_out;
  obstacle_route #(.CLK_HZ(CLK_HZ),.WINDOW_CYCLES(WINDOW_CYCLES)) route(
  .clk(clk),.rst_n(rst_n && auto_run),.press(route_press),
  .ready(modules_ready && &tof_seen && &tof_valid),.fault(fault),.distances(distances),
- .post_turn(post_turn),.sample_mask(sample_mask),.position_l(um_l),.position_r(um_r),.yaw(yaw),
+ .post_turn(post_turn),.sample_mask(sample_mask),.sensor_hold(sensor_hold),.position_l(um_l),.position_r(um_r),.yaw(yaw),
  .busy(buffer_busy),.cmd_ready(buffer_ready),.done(done),.aborted(aborted),.rejected(rejected),
  .start(route_start),.stop(route_stop),.rotate(route_rotate),.reverse(route_reverse),.end_kind(route_end),
  .goal(route_goal),.speed(route_speed),.speed_cap(route_cap),.refresh(route_refresh),.state(route_state),
@@ -196,7 +213,7 @@ module system_motion #(
  {requested_mode,requested_end,reverse,requested_l,requested_r,goal,
  MANUAL_TIMEOUT,manual_limit,ACCEL_STEP,DECEL_STEP};
  end
- motion_control_and_mode_fsm #(.CLK_HZ(CLK_HZ),.STILL_THRESHOLD(0),.ALLOW_SINGLE_TIMED(1)) motion(
+ motion_control_and_mode_fsm #(.CLK_HZ(CLK_HZ),.STILL_THRESHOLD(0),.ALLOW_SINGLE_TIMED(1),.STOP_TIMEOUT_MS(3000)) motion(
  .clk(clk),.rst_n(rst_n),.enable(modules_ready),.stop_request(stopping || (auto_run && route_stop)),
  .external_fault(fault_now || fault_latched),.clear_fault(1'b0),.cmd_valid(issue_valid),.cmd_ready(cmd_ready),
  .runtime_speed_cap(auto_run ? auto_speed:32'h7fffffff),

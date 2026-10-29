@@ -44,8 +44,8 @@ module robot_system_top #(
  else if(reset_count!=0)reset_count<=reset_count-1'b1;
  wire rst_n=por_n && reset_count==0;
  wire avoid_mode,auto_run,waiting,show_avoid,show_root,sensor_refresh,sensor_monitor,sensor_fault;
- wire [4:0] route_state;
- wire [2:0] post_turn,sample_mask,tof_seen,tof_valid,reused;wire [47:0] distances;
+ wire [4:0] route_state;wire [7:0] route_reason;
+ wire [2:0] tof_seen,tof_valid,post_turn,sample_mask,tof_degraded,reused;wire [47:0] distances;
  wire voice_enable,voice_candidate,menu_valid,gear_commit,menu_stop;
  wire [7:0] menu_command;wire [1:0] gear,gear_candidate,gear_value;
  system_menu menu(.clk(clk_50m),.rst_n(rst_n),.pressed(pressed),.gear(gear),.show_avoid(show_avoid),.show_root(show_root),.avoid_mode(avoid_mode),
@@ -69,8 +69,9 @@ module robot_system_top #(
  .uart_rx(asr_rx),.voice_enable(voice_enable),.menu_valid(menu_valid),.menu_command(menu_command),
  .gear_commit(gear_commit),.gear_value(gear_value),
  .distances(distances),.tof_seen(tof_seen),.tof_valid(tof_valid),.post_turn(post_turn),.sample_mask(sample_mask),
- .sensor_fault(sensor_fault),.sensor_refresh(sensor_refresh),.sensor_monitor(sensor_monitor),
+ .sensor_fault(sensor_fault),.sensor_degraded(tof_degraded),.sensor_refresh(sensor_refresh),.sensor_monitor(sensor_monitor),
  .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.show_avoid(show_avoid),.show_root(show_root),.route_state(route_state),
+ .route_reason(route_reason),
  .encoder_a_l(encoder_a_l),.encoder_b_l(encoder_b_l),.encoder_a_r(encoder_a_r),.encoder_b_r(encoder_b_r),
  .imu_spi_miso(imu_spi_miso),.imu_int1(imu_int1),.imu_int2(imu_int2),.imu_gnd_reserved(imu_gnd_reserved),
  .imu_spi_sck(imu_spi_sck),.imu_spi_mosi(imu_spi_mosi),.imu_cs_n(imu_cs_n),
@@ -96,7 +97,7 @@ module robot_system_top #(
  .scl({tof_right_scl,tof_left_scl,tof_front_scl}),.sda({tof_right_sda,tof_left_sda,tof_front_sda}),
  .xshut_n({tof_right_xshut_n,tof_left_xshut_n,tof_front_xshut_n}),
  .seen(tof_seen),.valid(tof_valid),.distances(distances),.post_turn(post_turn),.event_mask(sample_mask),
- .errors(tof_errors),.statuses(tof_statuses),.reused(reused),.fault(sensor_fault),.ages(),.raw_distances(),.comm_ages(),.confirm_ages(),.pending(),.raw_event_mask(),.fault_bits());
+ .degraded(tof_degraded),.errors(tof_errors),.statuses(tof_statuses),.reused(reused),.fault(sensor_fault),.ages(),.raw_distances(),.comm_ages(),.confirm_ages(),.pending(),.raw_event_mask(),.fault_bits());
  wire [671:0] tof_text,text;
  reg [671:0] tof_snapshot;
  always @(posedge clk_50m or negedge rst_n)
@@ -104,7 +105,7 @@ module robot_system_top #(
  tof_page tof_display(.seen(tof_seen),.valid(tof_valid),.distances(distances),
  .errors(tof_errors),.statuses(tof_statuses),.text(tof_text));
  system_pages pages(.clk(clk_50m),.rst_n(rst_n),.group_id(group_id),.item(item),.page(page),
- .start_diag(start_diag),
+ .start_diag(start_diag),.route_reason(route_reason),
  .avoid_mode(avoid_mode),.auto_run(auto_run),.waiting(waiting),.route_state(route_state),.distances(distances),.tof_valid(tof_valid),
  .voice_enable(voice_enable),.voice_candidate(voice_candidate),.gear(gear),.gear_candidate(gear_candidate),
  .ready(led_ready),.busy(led_run),.fault(led_fault),.imu_ready(imu_ready),.calibrating(calibrating),.attitude_valid(attitude_valid),

@@ -7,7 +7,7 @@ module obstacle_route #(
  SLOW_MM=600,STOP_MM=130,AVOID_MM=85,SIDE_MM=300,HYST_MM=50,EDGE_MM=600,EDGE_RISE_MM=300,STABLE_MM=50,
  STEP_TIMEOUT_MS=10000,BARRIER_TIMEOUT_MS=1000
 )(input wire clk,rst_n,press,ready,fault,input wire [47:0] distances,
- input wire [2:0] post_turn,input wire [2:0] sample_mask,
+ input wire [2:0] post_turn,input wire [2:0] sample_mask,input wire sensor_hold,
  input wire signed [31:0] position_l,position_r,yaw,
  input wire busy,cmd_ready,done,aborted,rejected,
  output wire start,stop,rotate,reverse,output wire [1:0] end_kind,
@@ -20,6 +20,7 @@ module obstacle_route #(
  BRAKE_SHIFT=21,SHIFT_EXTRA=22,SAMPLE_SHIFT=23;
  localparam integer LOW=(64'd50000*WINDOW_CYCLES)/CLK_HZ;
  reg issued,left_side,slow_mode,box_seen,edge_seen,pass_clear_seen;
+ reg [2:0] retry_count;
  reg [1:0] clear_count,front_count,stable_count;
  reg [15:0] box_distance;
  reg signed [31:0] home,shift_l,shift_r,pass_l,pass_r,leg_l,leg_r;
@@ -62,15 +63,26 @@ module obstacle_route #(
  wire cleared_side={1'b0,side_mm}>={1'b0,box_distance}+EDGE_RISE_MM;
  wire cruise_state=state==CRUISE || state==CRUISE_START;
  wire front_block=front<=(cruise_state ? STOP_MM:AVOID_MM);
+ // A degraded ToF channel stops the current drive and the same state is
+ // retried once the channel is healthy again. Turning in place does not need
+ // ToF data, so a sweep glitch never aborts a rotation.
+ wire drive_hold=sensor_hold && !turn_state && (drive_state || state==CRUISE);
+ // Only the lanes a state actually reads must be fresh after a rotation. The
+ // unused opposite-side lane may legitimately keep reporting exact-20 while a
+ // close wall fills its field of view; waiting for it stalled every turn.
+ wire front_fresh=post_turn[0];
+ wire side_fresh=post_turn[left_side ? 2:1];
+ wire barrier_fresh=(state==WAIT_OUT) ? side_fresh:(front_fresh && side_fresh);
  assign rotate=turn_state;
  assign reverse=turn_state && yaw_error<0;
  assign end_kind=turn_state ? 3:(translation ? 2:0);
  assign speed=state==CRUISE_START ? 2*LOW:LOW;
  assign speed_cap=(state==CRUISE || state==CRUISE_START) && !slow_mode ? 2*LOW:LOW;
- assign start=drive_state && !issued && cmd_ready && ready && !fault &&
-              (!turn_state || (abs_yaw>1000 && turn_space_ok)) && !front_block && (!press);
+ assign start=((drive_state || state==CRUISE) && !issued && cmd_ready && ready && !fault &&
+              (!turn_state || (abs_yaw>1000 && turn_space_ok)) && !front_block && (!press) && !drive_hold);
  assign stop=braking || (press && state!=IDLE && state!=BLOCKED && state!=USER_STOP) ||
- ((state==CRUISE || (drive_state && !turn_state)) && front_block && (state!=CRUISE_START || issued));
+ ((state==CRUISE || (drive_state && !turn_state)) && front_block && (state!=CRUISE_START || issued)) ||
+ (drive_hold && (state==CRUISE || (drive_state && !turn_state)));
  always @* begin
  goal=0;
  if(turn_state)goal=abs_yaw;
@@ -81,12 +93,12 @@ module obstacle_route #(
  end
  task advance;
  input [4:0] next_state;
- begin state<=next_state;issued<=0;elapsed<=0;end
+ begin state<=next_state;issued<=0;elapsed<=0;retry_count<=0;end
  endtask
  always @(posedge clk or negedge rst_n)
  if(!rst_n)begin
  state<=IDLE;reason<=0;route_fault<=0;refresh<=0;issued<=0;left_side<=1;home<=0;pass_clear_seen<=0;
- shift_l<=0;shift_r<=0;pass_l<=0;pass_r<=0;actual_shift<=0;slow_mode<=0;
+ shift_l<=0;shift_r<=0;pass_l<=0;pass_r<=0;actual_shift<=0;slow_mode<=0;retry_count<=0;
  ticks<=0;elapsed<=0;box_seen<=0;edge_seen<=0;clear_count<=0;front_count<=0;stable_count<=0;box_distance<=0;leg_l<=0;leg_r<=0;
  end else begin
  refresh<=0;
@@ -99,8 +111,24 @@ module obstacle_route #(
  end
  if(start)issued<=1;
  if(fault)begin advance(FAULT);reason<=8'h80;end
- else if(rejected || (drive_state && elapsed>=(translation ? 30000:(state==PASS || state==SHIFT) ? 60000:STEP_TIMEOUT_MS)) || (barrier && elapsed>=BARRIER_TIMEOUT_MS))begin
- advance(FAULT);route_fault<=1;reason<=rejected ? 8'h83:barrier ? 8'h84:8'h81;
+ else if(rejected)begin
+  // A command validation miss is retried from the same route state.
+  if(retry_count==3'd3)begin advance(BLOCKED);reason<=8'h83;end
+  else begin retry_count<=retry_count+1'b1;issued<=0;elapsed<=0;refresh<=1;end
+ end else if(aborted && (drive_state || state==CRUISE))begin
+  // Lost feedback or a safety stop cancelled the action; retry it. Only
+  // repeated failures pause the mode - a transient never latches a fault.
+  issued<=0;elapsed<=0;
+  if(retry_count==3'd3)begin advance(BLOCKED);reason<=8'h86;end
+  else retry_count<=retry_count+1'b1;
+ end else if(drive_state && elapsed>=(translation ? 30000:(state==PASS || state==SHIFT) ? 60000:STEP_TIMEOUT_MS))begin
+  if(retry_count==3'd3)begin advance(BLOCKED);reason<=8'h81;end
+  else begin retry_count<=retry_count+1'b1;issued<=0;elapsed<=0;end
+ end else if(barrier && elapsed>=BARRIER_TIMEOUT_MS)begin
+  // A post-rotation fresh sample did not arrive in time. Refresh and wait
+  // again; a persistent problem pauses the mode instead of latching a fault.
+  if(retry_count==3'd3)begin advance(BLOCKED);reason<=8'h85;end
+  else begin retry_count<=retry_count+1'b1;elapsed<=0;refresh<=1;end
  end else if(press && state!=IDLE && state!=BLOCKED && state!=USER_STOP)begin
  advance(USER_STOP);reason<=1;
  end else if(turn_state && !issued && abs_yaw>1000 && !turn_space_ok)begin
@@ -120,14 +148,14 @@ module obstacle_route #(
  end else begin advance(BLOCKED);reason<=3;end
  end
  // WAIT_OUT first refreshes the stationary side choice before the first rotation.
- WAIT_OUT:if(!refresh && &post_turn)begin
+ WAIT_OUT:if(!refresh && barrier_fresh)begin
  if((left_side ? left_mm:right_mm)<=SIDE_MM)begin advance(BLOCKED);reason<=3;end
  else advance(TURN_OUT);
  end
  TURN_OUT:if((issued && done) || (!issued && abs_yaw<=1000 && !busy))begin
  refresh<=1;advance(WAIT_PARALLEL);
  end
- WAIT_PARALLEL:if(!refresh && &post_turn)begin
+ WAIT_PARALLEL:if(!refresh && barrier_fresh)begin
  if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
  else begin box_distance<=side_mm;stable_count<=0;box_seen<=0;clear_count<=0;
  shift_l<=position_l;shift_r<=position_r;advance(SAMPLE_SHIFT);end
@@ -165,7 +193,7 @@ module obstacle_route #(
  TURN_PARALLEL:if((issued && done) || (!issued && abs_yaw<=1000 && !busy))begin
  refresh<=1;advance(WAIT_BACK);
  end
- WAIT_BACK:if(!refresh && &post_turn)begin
+ WAIT_BACK:if(!refresh && barrier_fresh)begin
  if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end
  else begin pass_l<=position_l;pass_r<=position_r;box_seen<=0;pass_clear_seen<=side_mm>=EDGE_MM;stable_count<=0;clear_count<=0;advance(PASS);end
  end
@@ -192,13 +220,13 @@ module obstacle_route #(
  EXTRA:if(front_block)begin advance(BLOCKED);reason<=4;end
  else if(issued && done)begin if(leg_traveled<EXTRA_UM)issued<=0;else advance(TURN_BACK);end
  TURN_BACK:if((issued && done) || (!issued && abs_yaw<=1000 && !busy))begin refresh<=1;advance(WAIT_HOME);end
- WAIT_HOME:if(!refresh && &post_turn)begin
+ WAIT_HOME:if(!refresh && barrier_fresh)begin
  if(front<=AVOID_MM)begin advance(BLOCKED);reason<=4;end else begin leg_l<=position_l;leg_r<=position_r;advance(RETURN);end
  end
  RETURN:if(front_block)begin advance(BLOCKED);reason<=4;end
  else if(issued && done)begin if(leg_traveled<actual_shift)issued<=0;else advance(TURN_HOME);end
  TURN_HOME:if((issued && done) || (!issued && abs_yaw<=1000 && !busy))begin refresh<=1;advance(20);end
- 20:if(!refresh && &post_turn)begin
+ 20:if(!refresh && barrier_fresh)begin
  if(front<=STOP_MM)begin advance(BLOCKED);reason<=4;end else advance(CRUISE_START);
  end
  FAULT:begin end
@@ -206,3 +234,4 @@ module obstacle_route #(
  endcase
  end
 endmodule
+

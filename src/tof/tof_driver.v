@@ -6,7 +6,7 @@ module tof_driver #(
  parameter integer RESET_CYCLES=CLK_HZ/1000,BOOT_CYCLES=CLK_HZ/50,
  parameter integer POLL_CYCLES=CLK_HZ/100,MAX_POLLS=100,
  parameter integer TIMEOUT_CYCLES=CLK_HZ/100
-)(input wire clk,rst_n,trigger,input wire gpio1,
+)(input wire clk,rst_n,trigger,recover_req,input wire gpio1,
  inout wire scl,sda,xshut_n,output wire gpio_sync,
  output reg busy,done,sample_valid,output reg [7:0] error,
  output reg [15:0] distance_mm,ambient,signal_count,
@@ -61,7 +61,7 @@ module tof_driver #(
     IDLE: if(trigger) begin
      busy<=1; phase<=0; polls<=0; poll_timeout<=0; read_mask<=0; raw_result<=0;
      revision<=0; model_id<=0; pre_period<=0; final_period<=0; diagnostic<=0;
-     if(error!=0) begin recover<=1; pull_reset<=1; timer<=0; state<=RESET; end
+     if(error!=0 || recover_req) begin recover<=1; pull_reset<=1; timer<=0; state<=RESET; end
      else state<=ISSUE;
     end
     ISSUE: begin io_start<=1; state<=WAIT_IO; end
@@ -125,7 +125,7 @@ module tof_three #(
   tof_driver #(.CLK_HZ(CLK_HZ),.I2C_HZ(I2C_HZ),.RESET_CYCLES(RESET_CYCLES),
    .BOOT_CYCLES(BOOT_CYCLES),.POLL_CYCLES(POLL_CYCLES),.MAX_POLLS(MAX_POLLS),
    .TIMEOUT_CYCLES(TIMEOUT_CYCLES)) driver(
-   .clk(clk),.rst_n(rst_n),.trigger(trigger[g]),.gpio1(gpio1[g]),
+   .clk(clk),.rst_n(rst_n),.trigger(trigger[g]),.recover_req(1'b0),.gpio1(gpio1[g]),
    .scl(scl[g]),.sda(sda[g]),.xshut_n(xshut_n[g]),.gpio_sync(gpio_sync[g]),
    .busy(busy[g]),.done(done[g]),.sample_valid(sample_valid[g]),
    .error(raw_error[g*8+:8]),.distance_mm(raw_distance[g*16+:16]),

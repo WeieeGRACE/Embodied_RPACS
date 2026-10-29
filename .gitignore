@@ -214,6 +214,10 @@
 /records/fault_injection/*
 !/records/fault_injection/*.md
 !/records/fault_injection/*.log
+!/records/fault_injection/fixed/
+/records/fault_injection/fixed/*
+!/records/fault_injection/fixed/*.md
+!/records/fault_injection/fixed/*.log
 !/records/resource_20261029/
 /records/resource_20261029/*
 !/records/resource_20261029/*.md

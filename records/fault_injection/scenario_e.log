@@ -1,0 +1,165 @@
+# do sim/run_fault_turns_e.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap fault_lib sim/work_fault_baseline 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 12:04:01 on Oct 29,2026
+# vlog -sv -work fault_lib records/fault_injection/baseline_src/src/obstacle/obstacle_route.v records/fault_injection/baseline_src/src/obstacle/obstacle_sensors.v records/fault_injection/baseline_src/src/obstacle/obstacle_command.v records/fault_injection/baseline_src/src/obstacle/system_dispatch.v records/fault_injection/baseline_src/src/robot_system_top.v records/fault_injection/baseline_src/src/asr/system_motion.v records/fault_injection/baseline_src/src/asr/asr_uart_rx.v records/fault_injection/baseline_src/src/asr/asr_packet_tx.v records/fault_injection/baseline_src/src/asr/asr_feedback.v records/fault_injection/baseline_src/src/ui/system_keys.v records/fault_injection/baseline_src/src/ui/system_menu.v records/fault_injection/baseline_src/src/ui/system_pages.v records/fault_injection/baseline_src/src/ui/system_oled_text.v records/fault_injection/baseline_src/src/tof/tof_driver.v records/fault_injection/baseline_src/src/tof/tof_i2c.v records/fault_injection/baseline_src/src/tof/tof_page.v records/fault_injection/baseline_src/src/motor/motion_control_and_mode_fsm.v records/fault_injection/baseline_src/src/motor/dual_ab_quadrature_encoder.v records/fault_injection/baseline_src/src/motor/speed_measurement_and_velocity_filter.v records/fault_injection/baseline_src/src/motor/dual_speed_pi_pid_controller.v records/fault_injection/baseline_src/src/motor/pwm_and_startup_ramp.v records/fault_injection/baseline_src/src/motor/tb6612_driver_interface.v records/fault_injection/baseline_src/src/imu/imu_attitude_fixed.v records/fault_injection/baseline_src/src/imu/attitude_angle_to_digits.v records/fault_injection/baseline_src/src/imu/oled_i2c_write_byte.v records/fault_injection/baseline_src/src/imu/imu660ra_driver.v records/fault_injection/baseline_src/src/imu/imu660ra_spi_master.v records/fault_injection/baseline_src/src/imu/imu660ra_config_rom.v records/fault_injection/baseline_src/src/uart/uart_tx.v records/fault_injection/baseline_src/src/uart/system_event_logger.v 
+# -- Compiling module obstacle_route
+# -- Compiling module obstacle_sensors
+# -- Compiling module obstacle_command_buffer
+# -- Compiling module obstacle_turn_trace
+# -- Compiling module obstacle_command_trace
+# -- Compiling module system_dispatch
+# -- Compiling module robot_system_top
+# -- Compiling module system_motion
+# -- Compiling module asr_uart_rx
+# -- Compiling module asr_packet_tx
+# -- Compiling module asr_distance
+# -- Compiling module asr_yaw_unwrap
+# -- Compiling module system_keys
+# -- Compiling module system_menu
+# -- Compiling module system_pages
+# -- Compiling module system_oled_text
+# -- Compiling module tof_driver
+# -- Compiling module tof_three
+# -- Compiling module tof_i2c_bits
+# -- Compiling module tof_i2c_reg
+# -- Compiling module tof_page
+# -- Compiling module motion_control_and_mode_fsm
+# -- Compiling module dual_ab_quadrature_encoder
+# -- Compiling module dual_ab_encoder_channel
+# -- Compiling module speed_measurement_and_velocity_filter
+# -- Compiling module dual_speed_pi_pid_controller
+# -- Compiling module speed_pi_pid_channel
+# -- Compiling module pwm_and_startup_ramp
+# -- Compiling module pwm_startup_ramp_channel
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module imu_attitude_fixed
+# -- Compiling module imu_attitude_bias_divider
+# -- Compiling module imu_attitude_atan2
+# -- Compiling module imu_attitude_sqrt
+# -- Compiling module imu_attitude_divider
+# -- Compiling module attitude_angle_to_digits
+# -- Compiling module attitude_angle_to_digits_pipeline
+# -- Compiling module oled_i2c_write_byte
+# -- Compiling module imu660ra_driver
+# -- Compiling module imu660ra_spi_master
+# -- Compiling module imu660ra_config_rom
+# -- Compiling module uart_tx
+# -- Compiling module system_event_logger
+# 
+# Top level modules:
+# 	obstacle_turn_trace
+# 	obstacle_command_trace
+# 	robot_system_top
+# 	tof_three
+# 	attitude_angle_to_digits
+# End time: 12:04:01 on Oct 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 12:04:01 on Oct 29,2026
+# vlog -sv -work fault_lib sim/models/vl53l0x_model.sv sim/tb_fault_turns.sv 
+# -- Compiling module vl53l0x_model
+# -- Compiling module tb_fault_turns
+# 
+# Top level modules:
+# 	tb_fault_turns
+# End time: 12:04:01 on Oct 29,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" fault_lib.tb_fault_turns "+SCENARIO=5" 
+# Start time: 12:04:01 on Oct 29,2026
+# ** Note: (vsim-8009) Loading existing optimized design _opt1
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_fault_turns(fast)
+# Loading work.robot_system_top(fast)
+# Loading work.system_keys(fast)
+# Loading work.system_menu(fast)
+# Loading work.system_motion(fast)
+# Loading work.imu660ra_driver(fast)
+# Loading work.imu660ra_spi_master(fast)
+# Loading work.imu660ra_config_rom(fast)
+# Loading work.imu_attitude_fixed(fast)
+# Loading work.imu_attitude_bias_divider(fast)
+# Loading work.imu_attitude_atan2(fast)
+# Loading work.imu_attitude_sqrt(fast)
+# Loading work.imu_attitude_divider(fast)
+# Loading work.asr_yaw_unwrap(fast)
+# Loading work.dual_ab_quadrature_encoder(fast)
+# Loading work.dual_ab_encoder_channel(fast)
+# Loading work.dual_ab_encoder_channel(fast__1)
+# Loading work.asr_distance(fast)
+# Loading work.speed_measurement_and_velocity_filter(fast)
+# Loading work.asr_uart_rx(fast)
+# Loading work.system_dispatch(fast)
+# Loading work.obstacle_route(fast)
+# Loading work.obstacle_command_buffer(fast)
+# Loading work.motion_control_and_mode_fsm(fast)
+# Loading work.dual_speed_pi_pid_controller(fast)
+# Loading work.speed_pi_pid_channel(fast)
+# Loading work.pwm_and_startup_ramp(fast)
+# Loading work.pwm_startup_ramp_channel(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# Loading work.asr_packet_tx(fast)
+# Loading work.uart_tx(fast)
+# Loading work.system_event_logger(fast)
+# Loading work.uart_tx(fast__1)
+# Loading work.obstacle_sensors(fast)
+# Loading work.tof_driver(fast)
+# Loading work.tof_i2c_reg(fast)
+# Loading work.tof_i2c_bits(fast)
+# Loading work.tof_page(fast)
+# Loading work.system_pages(fast)
+# Loading work.attitude_angle_to_digits_pipeline(fast)
+# Loading work.system_oled_text(fast)
+# Loading work.oled_i2c_write_byte(fast)
+# Loading work.vl53l0x_model(fast)
+# SCENARIO id=5
+# MAIN route=0 auto=0 waiting=0 reason=00 dut_ms=0 time_ns=0
+# EVENT BOOT_READY dut_ms=256 tof_valid=111 voice=0 time_ns=5124512000
+# CHOOSE group=0 item=0 page=0 target=4
+# EVENT VOICE_ENABLED dut_ms=256
+# CHOOSE group=0 item=3 page=0 target=5
+# MAIN route=1 auto=1 waiting=0 reason=00 dut_ms=272 time_ns=5446030000
+# MAIN route=2 auto=1 waiting=0 reason=00 dut_ms=272 time_ns=5446050000
+# EVENT ROUTE_STARTED auto_run=1 avoid_mode=1 route_state=2 dut_ms=272 time_ns=5446090000
+# EVENT wait_route target=2 ok=1 now=2 dut_ms=272
+# MAIN route=3 auto=1 waiting=0 reason=02 dut_ms=281 time_ns=5627490000
+# EVENT wait_route target=3 ok=1 now=3 dut_ms=281
+# MAIN route=5 auto=1 waiting=0 reason=02 dut_ms=310 time_ns=6200910000
+# MAIN route=4 auto=1 waiting=0 reason=02 dut_ms=326 time_ns=6534890000
+# EVENT wait_route target=4 ok=1 now=4 dut_ms=326
+# EVENT TURN_OUT_ENTERED dut_ms=326 motion_mode=1 time_ns=6534910000
+# EVENT wait_route target=4 ok=1 now=4 dut_ms=326
+# EVENT INJECT_ENCODER phase=4 mode=8 stop_elapsed=0 route_state=4 dut_ms=3661 time_ns=73234990000
+# EVIDENCE FAULT_T0 dt_from_mark_ms=1000 dut_ms=4661 time_ns=93234990000 ctrl.fault=1 fault_latched=0 sensor_fault=0 fault_bits=0000 ch0_faults=00 ch1_faults=00 ch2_faults=00 route_state=4 route_fault=0 route_reason=02 route_elapsed_ms=4335 motion_fault=05 motion_phase=0 motion_fault_code=05 motion_stop_elapsed=1000 imu_bad=0 imu_error=00 sensor_error=00 enc_fault=0/0 tx_overflow=0 post_turn=111 fresh=111 ambiguous=000 reused=000 auto_run=1 avoid_mode=1 fault_led=1 status=23 distances=07d0/07d0/0190 tof_raw_age=6/6/6 tof_comm_age=6/6/6 tof_error=00/00/00 fault_events=0
+# MAIN route=19 auto=0 waiting=0 reason=80 dut_ms=4661 time_ns=93234990000
+# MAIN route=0 auto=0 waiting=0 reason=00 dut_ms=4661 time_ns=93234990000
+# EVIDENCE AUTO_DROP dut_ms=4661 ctrl.fault=1 fault_latched=1 sensor_fault=0 route_fault=0 motion_fault=05 imu_bad=0 fault_led=1
+# EVIDENCE LATCH ctrl.fault_latched=1 dut_ms=4661 source_summary sensor_fault=0 route_fault=0 motion_fault=05 imu_bad=0 enc=0/0 txovf=0
+# EVENT ENCODER_RESTORE motion_fault=05 motion_stop_elapsed=1000 motion_phase=0 dut_ms=4664
+# SNAPSHOT ctrl.fault=1 fault_latched=1 sensor_fault=0 fault_bits=0000 ch0_faults=00 ch1_faults=00 ch2_faults=00 route_state=0 route_fault=0 route_reason=00 motion_fault=05 imu_bad=0 imu_error=00 sensor_error=00 enc_fault=0/0 tx_overflow=0 post_turn=111 fresh=111 auto_run=0 avoid_mode=1 fault_led=1 status=06 fault_events=1 dut_ms=4664
+# EVIDENCE MOTOR_AFTER_FAULT pwm_a=0 a1=0 a2=0 pwm_b=0 b1=0 b2=0 stby=0 off=1 dut_ms=4664
+# PASS scenario E: sustained encoder counts during post-turn WAIT_STILL -> motion fault 5 (stop timeout) latched at +1000 ms
+# RESULT scenario=5 PASS fault_seen=1 fault_dt_ms=1000
+# ** Note: $finish    : sim/tb_fault_turns.sv(748)
+#    Time: 93315011 ns  Iteration: 0  Instance: /tb_fault_turns
+# Break in Module tb_fault_turns at sim/tb_fault_turns.sv line 748
+# Stopped at sim/tb_fault_turns.sv line 748
+# End time: 12:04:20 on Oct 29,2026, Elapsed time: 0:00:19
+# Errors: 0, Warnings: 0

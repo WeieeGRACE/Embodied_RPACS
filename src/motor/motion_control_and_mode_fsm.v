@@ -138,14 +138,14 @@ module motion_control_and_mode_fsm #(
  (active && !(mode>=FORWARD && mode<=BRAKE)) ||
  (!active && !(mode==DISABLED || mode==IDLE || mode==FAULT)));
  reg [7:0] detected_fault;
+ reg [7:0] detected_abort;
  always @* begin
- detected_fault=0;
+ detected_fault=0;detected_abort=0;
  if(external_fault) detected_fault=1;
  else if(bad_state) detected_fault=6;
- else if(active && (!fresh_l || !fresh_r)) detected_fault=2;
- else if(active && end_kind==3 && !fresh_y) detected_fault=3;
  else if(active && timeout_ms!=0 && elapsed>=timeout_ms) detected_fault=4;
- else if(phase==WAIT_STILL && stop_elapsed>=STOP_TIMEOUT_MS) detected_fault=5;
+ else if(active && (!fresh_l || !fresh_r)) detected_abort=2;
+ else if(active && end_kind==3 && !fresh_y) detected_abort=3;
  end
  always @(posedge clk or negedge rst_n) begin
  if(!rst_n) begin
@@ -172,6 +172,11 @@ module motion_control_and_mode_fsm #(
  if(clear_fault && !enable && !external_fault && fault_code!=0) begin
  fault_code<=0; mode<=DISABLED; reason<=0;
  end
+ end else if(detected_abort!=0 && active) begin
+ // Feedback freshness was lost mid-action. Stop the drive and report an
+ // abort so the caller can retry once the feedback returns; a transient
+ // encoder/yaw gap must not permanently latch the system.
+ mode<=IDLE; phase<=NONE; mag_l<=0; mag_r<=0; aborted<=1; reason<=4;
  end else if(!enable) begin
  if(active) begin aborted<=1; reason<=3; end
  mode<=DISABLED; phase<=NONE; mag_l<=0; mag_r<=0;
@@ -213,7 +218,13 @@ module motion_control_and_mode_fsm #(
  if(!is_still(speed_r)) still_r<=0;
  else if(still_r<STILL_SAMPLES) still_r<=still_r+1'b1;
  end
- if(still_l>=STILL_SAMPLES && still_r>=STILL_SAMPLES &&
+ if(stop_elapsed>=STOP_TIMEOUT_MS) begin
+ // Drive is already disabled in WAIT_STILL; encoder jitter must not latch a
+ // permanent fault. Finish the action with a diagnostic reason instead.
+ phase<=NONE; mode<=IDLE;
+ if(cancelled) begin aborted<=1; reason<=7; end
+ else begin done<=1; reason<=7; end
+ end else if(still_l>=STILL_SAMPLES && still_r>=STILL_SAMPLES &&
  (!speed_valid_l || is_still(speed_l)) && (!speed_valid_r || is_still(speed_r))) begin
  phase<=NONE; mode<=IDLE;
  if(cancelled) begin aborted<=1; reason<=2; end

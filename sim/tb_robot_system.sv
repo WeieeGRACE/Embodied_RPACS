@@ -301,19 +301,22 @@ module tb_robot_system;
  if(shots[2]<=seq0)$fatal(1,"ToF stopped while navigating");
  never_ready=0;present=7;wait(dut.tof_valid==7 && dut.tof_errors==0);
  $display("PASS integrated ToF normal/NACK/timeout/recovery, hidden stale values, display-only faults");
- // IMU and feedback faults latch, root reset clears and re-calibrates.
+ // IMU faults latch after the persistence window, root reset clears and re-calibrates.
  choose(2,0);keypress(2);wait(st);model_error=1;wait(fault_led);cycles(1500);off();
  model_error=0;keypress(2);cycles(30000);off();if(!fault_led)$fatal(1,"fault auto recovered");
  boot();choose(2,0);keypress(2);wait(st);force dut.control.sample_valid=0;
  wait(fault_led);cycles(1500);off();release dut.control.sample_valid;
+ // A transient speed-feedback gap aborts the action but must not latch a fault.
  boot();choose(2,0);keypress(2);wait(st);force dut.control.valid_l=0;
- wait(fault_led);cycles(1500);off();release dut.control.valid_l;
- if(dut.motion_fault!=2)$fatal(1,"speed freshness");
+ wait(dut.control.aborted);cycles(1500);off();release dut.control.valid_l;
+ if(fault_led)$fatal(1,"transient speed feedback gap latched a fault");
  boot();choose(2,0);keypress(2);wait(st);model_on=0;
  wait(fault_led);cycles(1500);off();if(dut.motion_fault!=4)$fatal(1,"10s action timeout");
+ // Encoder jitter while confirming standstill completes the action without a fault.
  boot();choose(2,0);keypress(2);wait(st);keypress(0);wait(dut.control.phase==4);
- force dut.control.raw_l=1;wait(fault_led);cycles(1500);off();release dut.control.raw_l;
- if(dut.motion_fault!=5)$fatal(1,"stop timeout");
+ force dut.control.raw_l=1;wait(dut.control.aborted);cycles(1500);off();release dut.control.raw_l;
+ if(fault_led)$fatal(1,"standstill timeout latched a fault");
+ if(dut.motion_fault!=0)$fatal(1,"standstill timeout fault code");
  boot();choose(2,0);keypress(2);wait(st);repeat(80)frame(3);
  if(!fault_led || !dut.control.tx_overflow)$fatal(1,"feedback overflow");off();
  boot();if(voice_led || run_led || dut.group_id!=0)$fatal(1,"final reset defaults");
