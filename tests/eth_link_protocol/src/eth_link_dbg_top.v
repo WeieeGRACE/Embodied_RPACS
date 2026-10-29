@@ -90,6 +90,10 @@ module eth_link_dbg_top #(
     wire        bridge_tx_start;
     wire [15:0] bridge_tx_len;
     wire [7:0]  bridge_tx_dat;
+    wire [15:0] hb_age_ms;      // 必须在 bridge 例化之前声明
+    wire [7:0]  hb_seq;
+    wire [7:0]  cmd_seq;
+    wire [15:0] telem_cnt;
 
     // 主时钟：clk125m（UDP RX 模块输出，PHY rxclk 派生）
     eth_link_bridge #(
@@ -106,20 +110,17 @@ module eth_link_dbg_top #(
         .fault_bits(fault_bits), .frames_in(frames_in), .frames_out(frames_out),
         .rx_overflow(rx_overflow), .tx_overflow(tx_overflow),
         .link_ok(link_ok), .stop_latched(stop_latched),
-        .hb_age_ms_out(hb_age_ms), .cmd_seq_out(cmd_seq),
+        .hb_age_ms_out(hb_age_ms), .cmd_seq_out(cmd_seq), .hb_seq_out(hb_seq),
         .telem_sent_cnt_out(telem_cnt)
     );
 
     // ------------------------------------------- 无线串口调试文本（P6-21=L12）
-    wire [15:0] hb_age_ms;
-    wire [7:0]  cmd_seq;
-    wire [15:0] telem_cnt;
     debug_text_logger #(
         .CLK_HZ(125_000_000), .BAUD(115200), .PERIOD_MS(100)
     ) u_dbg (
         .clk(clk125m), .rst_n(reset_n),
         .fault_bits(fault_bits),
-        .hb_age_lsb(hb_age_ms[7:0]),
+        .link_seq_lsb(hb_seq),
         .cmd_seq(cmd_seq),
         .frames_in_lsb(frames_in[7:0]),
         .frames_out_lsb(frames_out[7:0]),

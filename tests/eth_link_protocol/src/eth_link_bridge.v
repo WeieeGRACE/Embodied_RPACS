@@ -42,6 +42,7 @@ module eth_link_bridge #(
     // 诊断输出（给调试文本日志用）
     output wire [15:0] hb_age_ms_out,
     output wire [7:0]  cmd_seq_out,
+    output wire [7:0]  hb_seq_out,
     output wire [15:0] telem_sent_cnt_out
 );
     // ------------------------------------------------------------ 接收 FIFO
@@ -208,6 +209,7 @@ module eth_link_bridge #(
 
     assign hb_age_ms_out     = hb_age;
     assign cmd_seq_out       = cmd_seq;
+    assign hb_seq_out        = hb_seq;
     assign telem_sent_cnt_out = telem_cnt;
     assign target_v_left  = tgt_l;
     assign target_v_right = tgt_r;

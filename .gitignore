@@ -354,3 +354,4 @@
 /tests/eth_motion_test/sim/work/
 /tests/eth_motion_test/transcript
 /tests/eth_motion_test/modelsim.ini
+/tests/eth_link_protocol/sim/work_dbg/

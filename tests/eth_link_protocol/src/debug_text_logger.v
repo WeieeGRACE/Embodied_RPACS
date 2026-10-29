@@ -3,8 +3,8 @@
 // 用途：验证无线串口（WCH-Link，P6-21 = L12）通路；本模块不涉及任何电机输出。
 //
 // 64 位内容（字段名借用主工程解码器）：
-//   [63:56] fault_bits   [55:48] hb_age 低 8 位   [47:40] cmd_seq
-//   [39:32] 收帧数低 8 位 [31:24] 发帧数低 8 位    [23:0] 0
+//   [63:56] fault_bits   [55:48] link(hb)_seq 低 8 位  [47:40] cmd_seq
+//   [39:32] 收帧数低 8 位 [31:24] 发帧数低 8 位         [23:0] 0
 module debug_text_logger #(
     parameter integer CLK_HZ    = 125_000_000,
     parameter integer BAUD      = 115200,
@@ -13,7 +13,7 @@ module debug_text_logger #(
     input  wire        clk,
     input  wire        rst_n,
     input  wire [7:0]  fault_bits,
-    input  wire [7:0]  hb_age_lsb,
+    input  wire [7:0]  link_seq_lsb,
     input  wire [7:0]  cmd_seq,
     input  wire [7:0]  frames_in_lsb,
     input  wire [7:0]  frames_out_lsb,
@@ -46,13 +46,9 @@ module debug_text_logger #(
         end
     end
 
-    // ------------------------------------------------------ 快照（打一拍）
-    reg [63:0] value_r;
-    always @(posedge clk) begin
-        if (snapshot_req)
-            value_r <= {fault_bits, hb_age_lsb, cmd_seq,
-                        frames_in_lsb, frames_out_lsb, 24'd0};
-    end
+    // 快照值直接由输入组成（不引入额外一级寄存器，避免与 value_s 同拍竞争）
+    wire [63:0] snapshot_value = {fault_bits, link_seq_lsb, cmd_seq,
+                                  frames_in_lsb, frames_out_lsb, 24'd0};
 
     // ---------------------------------------------------------- 串口发送 8N1
     reg [15:0] baud_cnt;
@@ -105,7 +101,7 @@ module debug_text_logger #(
             case (state)
                 S_IDLE: begin
                     if (snapshot_req) begin
-                        value_s <= value_r;
+                        value_s <= snapshot_value;
                         ch_idx  <= 5'd0;
                         state   <= S_PREP;
                     end

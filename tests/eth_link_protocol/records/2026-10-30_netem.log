@@ -1,0 +1,23 @@
+[sudo] password for HwHiAiUser: == 基线（无 netem）==
+
+=== N0_baseline： ===
+  帧数 3001  速率 50.01 Hz  丢包 0.00%  gap max 40 ms  p99 40 ms
+  故障分布: {'0x00': 2899, '0x20': 102}  健康帧 96.6%  hb_age max 110 ms
+
+=== N1_delay20ms：delay 20ms ===
+  帧数 3000  速率 49.99 Hz  丢包 0.02%  gap max 40 ms  p99 36 ms
+  故障分布: {'0x00': 2898, '0x20': 102}  健康帧 96.6%  hb_age max 110 ms
+  -> N1 期望：速率仍≈50 Hz、无 LINK_LOST
+
+=== N2_delay20ms_loss2：delay 20ms loss 2% ===
+  帧数 3001  速率 50.01 Hz  丢包 0.00%  gap max 40 ms  p99 40 ms
+  故障分布: {'0x00': 2898, '0x20': 103}  健康帧 96.6%  hb_age max 230 ms
+  -> N2 期望：少量丢帧可接受（<3%）
+
+=== N3_delay300ms：delay 300ms ===
+  帧数 3001  速率 50.01 Hz  丢包 0.00%  gap max 40 ms  p99 40 ms
+  故障分布: {'0x00': 2884, '0x20': 117}  健康帧 96.1%  hb_age max 130 ms
+  -> N3 期望：出现 LINK_LOST（安全设计），观测比例 0.0%
+  !! N3 未出现 LINK_LOST（延迟 300 ms 应触发心跳超时）
+
+NETEM TEST PASS

@@ -154,6 +154,7 @@ def main() -> int:
     cpus: list[float] = []
     seq = 0
     next_cmd = t0 + 0.2
+    auto_clear_next = t0 + 5.0
     errors = 0
     try:
         while time.time() - t0 < args.duration:

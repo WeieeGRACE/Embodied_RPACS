@@ -201,3 +201,13 @@ Logic **12036/23040（53%）**、Register 5138（22%）、CLS **7525/11520（66%
 - 验证报告：`records/2026-10-29_uart_bridge_validation.md`
 - 上游计划：`tests/orangepi_depth_perception/PLAN.md` §9
 - 主工程：`src/robot_system_top.v`、`src/uart/`
+
+---
+
+## 以太网（v2）版本
+
+本目录是 **UART 传输** 的链路实现（协议层与传输层解耦）。若要用千兆以太网传输，
+见 `tests/eth_link_protocol/`：同一套帧格式/命令/安全/遥测，只是把 `(byte, valid)`
+换成 UDP payload，并在板上验证过（20 分钟长稳 0 丢包、安全语义 16/16）。
+
+移植到主工程的步骤与资源预算见 `tests/eth_link_protocol/docs/ETH_INTEGRATION_GUIDE.md`。

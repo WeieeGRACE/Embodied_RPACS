@@ -36,7 +36,7 @@ RGMII PHY ── rgmii_to_gmii ──> eth_udp_rx_gmii ── payload 流 ──
 
 | 项 | 值 |
 | --- | --- |
-| 位流 | `impl/pnr/eth_link_top.fs`，SHA256 `AAA9CEC21470946A1956554C1BE8DD7A6E69AF0259D53B2A3DEB064D30C5C2B5` |
+| 位流 | `impl/pnr/eth_link_top.fs`，SHA256 `8B9124197B95CB446C1BD41DDFC1035335708303C037AC9E6155A29CCB08A2B8` |
 | 资源 | Logic 1511/23040（7%）、Register 982、CLS 1142/11520（10%）、IOLOGIC 11（RGMII DDR） |
 | FPGA 网络 | MAC `00:0a:35:01:fe:c0`、IP `192.168.0.2`、UDP **5000** |
 | 回包目的 | IP `192.168.0.1`、UDP **5001**、MAC **广播 FF:FF:FF:FF:FF:FF** |
