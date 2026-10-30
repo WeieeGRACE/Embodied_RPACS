@@ -112,7 +112,7 @@
       "board_enabled": false
     }
   },
-  "elapsed_s": 2.52,
+  "elapsed_s": 4.1,
   "limitations": [
     "100 mm XY / 45 degree lattice with forward/reverse straight motion and stationary turns; any no-path result is planner-resolution/model specific, not physical impossibility",
     "Convex rotation hull is a conservative swept enclosure with a chord error bound. A failed enclosure means safety unproven, not necessarily actual contact",

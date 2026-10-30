@@ -9,6 +9,7 @@ add_file src/nav_event_segment_controller.v
 add_file src/nav_map_wall_association.v
 add_file src/nav_pose_range_guard.v
 add_file src/nav_segment_table.v
+add_file src/nav_speed_limit.v
 add_file src/nav_segment_uart_logger.v
 add_file src/nav_tof_wall_event.v
 add_file src/obstacle_key.v

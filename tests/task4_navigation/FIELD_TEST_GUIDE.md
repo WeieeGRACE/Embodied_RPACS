@@ -1,6 +1,15 @@
 # 任务四单段探针上板验证步骤
 
-本说明针对 `impl/pnr/task4_navigation_board.fs`。它仅开放 **A→OPEN_WAYPOINT_1** 单段探针，速度上限 `50 mm/s`；不含 A→B/C/D/E 和巡检的运行许可。烧录由操作者使用 Gowin Programmer 完成；本次没有自动写入 FPGA。
+本说明针对单段探针位流（两个等价变体，只差调试串口引脚）：
+
+| 变体 | 文件 | SHA-256 | 调试串口 |
+| --- | --- | --- | --- |
+| USB 串口 | `impl/pnr/task4_navigation_single_leg_probe.fs` | `F09B6BCC4A571A60A18120976AF072ED4AE71E96B491B7BB686CE0699D49CFF4` | V8（板载 CH9102） |
+| 无线串口 | `impl/pnr/task4_navigation_single_leg_probe_wireless.fs` | `270D817DAAAD801B9F7D13466D79E44ED32E10DB15503BAC309A6D4A75222CC7` | L12（P6-21，WCH-Link） |
+
+两个位流都带**硬限速**：顶层 `nav_speed_limit` 把左右轮目标速度钳在 **60 mm/s**（段表 50 mm/s + 航向修正最多约 17 mm/s，再大也超不过 60）。这是 RTL 里的最后一道闸门，改段表/调参都无法越过。
+
+它仅开放 **A→OPEN_WAYPOINT_1** 单段探针，速度上限 `50 mm/s`；不含 A→B/C/D/E 和巡检的运行许可。烧录由操作者使用 Gowin Programmer 完成；本次没有自动写入 FPGA。
 
 该单段从 A 沿 `+Y` 朝地图墙段 MID_H 行进，目标参考点约 `(2700, 750) mm`。段确认里程为 `400–430 mm`，未确认墙事件时硬停止里程为 `520 mm`，前向停车阈值为 `120 mm`。这些是本次测试基线，不要在 FPGA 上通过改小安全阈值来绕过故障。
 
@@ -21,7 +30,7 @@ OLED 显示状态、故障码、三路距离和有效性标记。`20 mm` 不作�
 
 ## 上电与测试顺序
 
-1. 核对位流 SHA-256 为 `9F0CFC40F0E4214D8B37DE36AE9CA504577C1553F50412E4738BCDDB63491F2D`。连接逻辑电源、IMU、编码器、三路 ToF、OLED 和 UART；首次上电先断开电机电源。复位后不按启动键，确认 `STBY/PWMA/PWMB` 均为低。
+1. 核对位流 SHA-256 为 `F09B6BCC4A571A60A18120976AF072ED4AE71E96B491B7BB686CE0699D49CFF4`。连接逻辑电源、IMU、编码器、三路 ToF、OLED 和 UART；首次上电先断开电机电源。复位后不按启动键，确认 `STBY/PWMA/PWMB` 均为低。
 2. 等待 `led_ready`。检查三路 ToF 连续刷新、数据年龄正常，IMU 完成静止初始化，UART/OLED 状态合理。没有就绪前不要按启动键；缺失传感器会进入故障并禁止驱动。
 3. 在电机电源仍断开的状态下，检查急停输入低有效、松开不会自动恢复。接上电机电源后先架空车体，确认轮子方向、编码器方向、PWM 响应和急停切断。急停后须释放急停并复位，确认不自动续行。
 4. 架空检查通过后，将车放在已给定的 A 起点，车头朝 `+Y`，沿 A→OPEN_WAYPOINT_1 单段方向清空周边。低速首次地面运行时操作者应在急停旁；确认 MID_H 是预期墙段且位于 ToF 有效范围内，再按一次启动键。

@@ -7,6 +7,8 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'RTL compilation failed; see records/rtl_compile.log' }
   & $Vsim -c -l records/rtl_unit.log -do sim/run_pose.do
   if ($LASTEXITCODE -ne 0) { throw 'Pose RTL simulation failed' }
+  & $Vsim -c -l records/rtl_speed_limit.log -do sim/run_speed_limit.do
+  if ($LASTEXITCODE -ne 0) { throw 'Speed limit RTL simulation failed' }
   & $Vsim -c -l records/rtl_guard.log -do sim/run_supervisor.do
   if ($LASTEXITCODE -ne 0) { throw 'Supervisor RTL simulation failed' }
   & $Vsim -c -l records/rtl_event_segment.log -do sim/run_event_segment.do
@@ -20,6 +22,7 @@ try {
   & $Vsim -c -l records/board_safe_default.log -do sim/run_board_safe.do
   if ($LASTEXITCODE -ne 0) { throw 'Board safe-default simulation failed' }
   if (-not (Select-String -Path records/rtl_unit.log -Pattern 'PASS: range 20 discard' -Quiet)) { throw 'Pose RTL PASS marker missing' }
+  if (-not (Select-String -Path records/rtl_speed_limit.log -Pattern 'PASS tb_nav_speed_limit' -Quiet)) { throw 'Speed limit PASS marker missing' }
   if (-not (Select-String -Path records/rtl_guard.log -Pattern 'PASS: geometry gate' -Quiet)) { throw 'Supervisor RTL PASS marker missing' }
   if (-not (Select-String -Path records/rtl_event_segment.log -Pattern 'PASS: map-linked sample debounce' -Quiet)) { throw 'Event segment RTL PASS marker missing' }
   if (-not (Select-String -Path records/rtl_map_association.log -Pattern 'PASS: expected-wall range association' -Quiet)) { throw 'Map wall association PASS marker missing' }

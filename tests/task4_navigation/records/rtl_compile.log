@@ -1,6 +1,6 @@
 # do sim/run_nav.do
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 16:26:57 on Oct 27,2026
+# Start time: 11:26:03 on Oct 30,2026
 # vlog -sv src/nav_pose_range_guard.v src/nav_route_supervisor.v src/nav_segment_table.v src/nav_tof_wall_event.v src/nav_map_wall_association.v src/nav_event_segment_controller.v src/task4_navigation_top.v src/task4_event_navigation_top.v sim/tb_nav_pose_range_guard.v sim/tb_nav_route_supervisor.v sim/tb_nav_event_segment.v sim/tb_nav_map_wall_association.v sim/tb_nav_closed_loop.v 
 # -- Compiling module nav_pose_range_guard
 # -- Compiling module nav_route_supervisor
@@ -23,5 +23,5 @@
 # 	tb_nav_event_segment
 # 	tb_nav_map_wall_association
 # 	tb_nav_closed_loop
-# End time: 16:26:57 on Oct 27,2026, Elapsed time: 0:00:00
+# End time: 11:26:04 on Oct 30,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

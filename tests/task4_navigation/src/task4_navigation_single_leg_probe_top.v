@@ -4,7 +4,8 @@
 // the integrated sensor/calibration gate and physical start key must pass.
 module task4_navigation_single_leg_probe_top #(
     parameter integer CLK_HZ=50000000,
-    parameter integer KEY_CYCLES=CLK_HZ/50
+    parameter integer KEY_CYCLES=CLK_HZ/50,
+    parameter integer MAX_WHEEL_SPEED_MM_S=60
 ) (
     input wire clk_50m,reset_n,key_enable_n,key_estop_n,
     inout wire tof_front_scl,tof_front_sda,tof_front_xshut_n,
@@ -18,7 +19,8 @@ module task4_navigation_single_leg_probe_top #(
     output wire led_ready,led_run,led_fault,led_heartbeat
 );
     task4_navigation_board_top #(.CLK_HZ(CLK_HZ),.KEY_CYCLES(KEY_CYCLES),
-                                  .ENABLE_SINGLE_LEG(1)) probe (
+                                  .ENABLE_SINGLE_LEG(1),
+                                  .MAX_WHEEL_SPEED_MM_S(MAX_WHEEL_SPEED_MM_S)) probe (
         .clk_50m(clk_50m),.reset_n(reset_n),
         .key_enable_n(key_enable_n),.key_estop_n(key_estop_n),
         .tof_front_scl(tof_front_scl),.tof_front_sda(tof_front_sda),

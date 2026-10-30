@@ -14,6 +14,7 @@ module task4_navigation_board_top #(
     parameter integer IMU_SAMPLE=CLK_HZ/200,IMU_SPI_HALF=25,
     parameter integer CALIBRATION_SAMPLES=200,
     parameter integer ENABLE_SINGLE_LEG=0,
+    parameter integer MAX_WHEEL_SPEED_MM_S=60,
     parameter integer DIAGNOSTIC_ONLY=0,
     parameter [31:0] BUILD_ID=32'h26102702,
     parameter CONFIG_HEX_FILE="src/imu660ra_config.hex",
@@ -237,8 +238,15 @@ module task4_navigation_board_top #(
             convert_mm_s=scaled_value[15:0];
         end
     endfunction
-    wire signed [15:0] target_l=convert_mm_s(nav_velocity_l_mm_s);
-    wire signed [15:0] target_r=convert_mm_s(nav_velocity_r_mm_s);
+    // 硬限速：无论段表/航向修正算出多少，轮速目标都不超过 MAX_WHEEL_SPEED_MM_S
+    wire signed [31:0] nav_velocity_limited_l,nav_velocity_limited_r;
+    wire speed_clamped_l,speed_clamped_r;
+    nav_speed_limit #(.LIMIT_MM_S(MAX_WHEEL_SPEED_MM_S)) speed_limit(
+      .velocity_l_mm_s(nav_velocity_l_mm_s),.velocity_r_mm_s(nav_velocity_r_mm_s),
+      .limited_l_mm_s(nav_velocity_limited_l),.limited_r_mm_s(nav_velocity_limited_r),
+      .clamped_l(speed_clamped_l),.clamped_r(speed_clamped_r));
+    wire signed [15:0] target_l=convert_mm_s(nav_velocity_limited_l);
+    wire signed [15:0] target_r=convert_mm_s(nav_velocity_limited_r);
     wire control_enable=nav_drive_enable && !physical_fault && ENABLE_SINGLE_LEG!=0 && DIAGNOSTIC_ONLY==0;
     wire signed [15:0] control_l,control_r,ramp_l,ramp_r;
     localparam [15:0] PWM_LIMIT=CLK_HZ/PWM_HZ/4;

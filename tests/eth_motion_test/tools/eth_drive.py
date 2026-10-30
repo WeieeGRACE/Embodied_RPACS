@@ -56,7 +56,8 @@ from uart_link import Link    # noqa: E402
 
 CMD_HZ = 20.0
 HB_HZ = 20.0
-LIMIT_MM_S = 300
+LIMIT_MM_S = 300          # RTL 硬限幅（eth_motion_top 的 MAX_V_MM_S）
+DEFAULT_MAX_SPEED = 150   # 驾驶工具的默认上限（落地测试建议 <=100）
 
 
 class SafetyStop(RuntimeError):
@@ -81,6 +82,8 @@ def main() -> int:
     ap.add_argument("--right", type=int, default=0, help="右轮 mm/s")
     ap.add_argument("--seconds", type=float, default=3.0)
     ap.add_argument("--ramp-ms", type=int, default=500, help="0->目标 的斜坡时间")
+    ap.add_argument("--max-speed", type=int, default=DEFAULT_MAX_SPEED,
+                    help="本工具允许的最大轮速 mm/s（默认 150；落地建议 <=100）")
     ap.add_argument("--stop", action="store_true", help="只发 STOP")
     ap.add_argument("--clear", action="store_true", help="只发 CLEAR_FAULT")
     ap.add_argument("--no-verify", action="store_true", help="不检查 ACK/fault（仅测链路）")
@@ -88,7 +91,10 @@ def main() -> int:
 
     for name, v in (("left", args.left), ("right", args.right)):
         if abs(v) > LIMIT_MM_S:
-            ap.error("%s=%d 超过限速 %d mm/s" % (name, v, LIMIT_MM_S))
+            ap.error("%s=%d 超过 RTL 硬限幅 %d mm/s" % (name, v, LIMIT_MM_S))
+        if abs(v) > args.max_speed:
+            ap.error("%s=%d 超过本工具上限 %d mm/s（落地测试请放慢；确需更高用 --max-speed）"
+                     % (name, v, args.max_speed))
 
     tp = T.UdpTransport(remote=(args.host, args.port),
                         local=("0.0.0.0", args.local_port))

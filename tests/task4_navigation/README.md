@@ -15,7 +15,16 @@
 & 'D:\Gowin\Gowin_V1.9.12_x64\IDE\bin\gw_sh.exe' verify_board_saved_project.tcl
 ```
 
-最新板级输出是 `impl/pnr/task4_navigation_board.fs`，Fmax 57.707 MHz，最差 setup slack 2.671 ns，50 MHz setup/hold 违例为 0。它是 A→OPEN_WAYPOINT_1 的 50 mm/s 单段探针，不会自动烧录。上板步骤见 [FIELD_TEST_GUIDE.md](FIELD_TEST_GUIDE.md)，仿真、碰撞预测及完整限制见 [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md)。
+最新板级输出是探针位流（含硬限速 60 mm/s）：USB 串口版 `impl/pnr/task4_navigation_single_leg_probe.fs`、无线串口版 `impl/pnr/task4_navigation_single_leg_probe_wireless.fs`。Fmax 57.707 MHz，最差 setup slack 2.671 ns，50 MHz setup/hold 违例为 0。它是 A→OPEN_WAYPOINT_1 的 50 mm/s 单段探针，不会自动烧录。上板步骤见 [FIELD_TEST_GUIDE.md](FIELD_TEST_GUIDE.md)，仿真、碰撞预测及完整限制见 [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md)。
 
 完整 A→B、A→C、A→D、A→E 和巡检路线仍未通过 ±50 mm 墙端保守包络审计，禁止使用单段探针位流执行这些路线。
 
+
+## 落地测试（上板）
+
+- **操作手册**：[FLOOR_TEST_RUNBOOK.md](FLOOR_TEST_RUNBOOK.md)（烧位流 → 上电检查 → 一条命令采集判读 → 失败速查）
+- **硬限速**：顶层 `nav_speed_limit` 把左右轮目标速度钳在 **60 mm/s**（段表 50 mm/s + 航向修正也超不过）
+- **探针位流**（含限速）：
+  - USB 串口版 `impl/pnr/task4_navigation_single_leg_probe.fs`（V8，SHA `F09B6BCC…49CFF4`）
+  - 无线串口版 `impl/pnr/task4_navigation_single_leg_probe_wireless.fs`（L12/P6-21，SHA `270D817D…222CC7`）
+- **判读工具**：`tools/t4_floor.py`（采集+判读+报告）、`tools/t4_capture.py`、`tools/t4_validate.py`、`tools/t4_selftest.py`

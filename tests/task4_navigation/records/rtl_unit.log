@@ -1,6 +1,6 @@
 # do sim/run_pose.do
 # vsim -c work.tb_nav_pose_range_guard 
-# Start time: 16:26:58 on Oct 27,2026
+# Start time: 11:26:05 on Oct 30,2026
 # ** Note: (vsim-3812) Design is being optimized...
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
@@ -20,5 +20,5 @@
 # PASS: range 20 discard, freshness aging, signed straight odometry, yaw fusion, fault latch
 # ** Note: $finish    : sim/tb_nav_pose_range_guard.v(33)
 #    Time: 100 ns  Iteration: 1  Instance: /tb_nav_pose_range_guard
-# End time: 16:26:59 on Oct 27,2026, Elapsed time: 0:00:01
+# End time: 11:26:06 on Oct 30,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

@@ -1,0 +1,63 @@
+{
+  "verdict": "PASS",
+  "accepted": true,
+  "checks": [
+    {
+      "name": "record_present",
+      "ok": true,
+      "detail": "1 条记录"
+    },
+    {
+      "name": "single_record",
+      "ok": true,
+      "detail": "记录数=1"
+    },
+    {
+      "name": "seg0_segment_id",
+      "ok": true,
+      "detail": "SEG=0 期望=0"
+    },
+    {
+      "name": "seg0_fault",
+      "ok": true,
+      "detail": "FAULT=NONE"
+    },
+    {
+      "name": "seg0_wall",
+      "ok": true,
+      "detail": "WALL=MID_H 期望 MID_H"
+    },
+    {
+      "name": "seg0_distance_confirmed",
+      "ok": true,
+      "detail": "DIST=417mm 期望 [400, 430]"
+    },
+    {
+      "name": "seg0_yaw",
+      "ok": true,
+      "detail": "YAW=0.690° 容差 ±5.0°"
+    }
+  ],
+  "records": [
+    {
+      "segment": 0,
+      "distance_mm": 417,
+      "yaw_mdeg": 690,
+      "yaw_deg": 0.69,
+      "wall": 10,
+      "wall_name": "MID_H",
+      "fault": 0,
+      "fault_name": "NONE",
+      "ts": null
+    }
+  ],
+  "log": "records\\_selftest_replay.log",
+  "parse": {
+    "records": 1,
+    "bytes_in": 74,
+    "garbage_bytes": 15,
+    "partial_bytes": 5,
+    "resyncs": 0
+  },
+  "spec": "route6_probe"
+}
