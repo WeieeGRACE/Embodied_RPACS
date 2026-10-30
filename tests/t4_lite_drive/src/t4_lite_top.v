@@ -142,7 +142,9 @@ module t4_lite_top #(
         // speed_l_mm_s/speed_r_mm_s <- 100 ms 窗口实测轮速，主机用它判断是否被切断
         .enc_l(wheel_mm_l), .enc_r(wheel_mm_r),
         .speed_l_mm_s(speed_l_mm_s), .speed_r_mm_s(speed_r_mm_s),
-        .target_v_left(target_v_l), .target_v_right(target_v_r)
+        .target_v_left(target_v_l), .target_v_right(target_v_r),
+        .dbg_a(16'd0),
+        .dbg_b(16'd0)
     );
 
     // ------------------------------------------------------------ 发送
@@ -298,10 +300,24 @@ module t4_lite_top #(
     tof_calibrate #(.OFFSET_MM(TOF_OFFSET_MM)) u_tof_cal (
         .din(tof_raw_mm), .dout(tof_cal_mm));
 
-    // 停车边界：任意一次有效采样 <=120 mm 即锁存（复位才解除）
+    // 停车边界：连续 3 次有效采样（排除 0/20 哨兵，25..2500 量程内）<=120 mm 才锁存。
+    // 单次 VL53L0X 跳变/噪声不能直接切断电机。
+    reg [2:0] tof_close_cnt;
+    wire tof_sample_good = tof_sample_valid && tof_raw_mm >= 16'd25 && tof_raw_mm <= 16'd2500;
     always @(posedge clk125m or negedge reset_n) begin
-        if (!reset_n)          tof_stop <= 1'b0;
-        else if (tof_sample_valid && (tof_cal_mm <= TOF_STOP_MM)) tof_stop <= 1'b1;
+        if (!reset_n) begin
+            tof_stop      <= 1'b0;
+            tof_close_cnt <= 3'd0;
+        end else if (!tof_stop) begin
+            if (!tof_sample_good) begin
+                tof_close_cnt <= 3'd0;
+            end else if (tof_cal_mm <= TOF_STOP_MM) begin
+                if (tof_close_cnt >= 2'd4) tof_stop <= 1'b1;
+                else                       tof_close_cnt <= tof_close_cnt + 3'd1;
+            end else begin
+                tof_close_cnt <= 3'd0;
+            end
+        end
     end
 
     // ------------------------------------------------- 速度 -> PWM -> H 桥
@@ -310,7 +326,8 @@ module t4_lite_top #(
     wire motors_enabled;
 
     // KEY0 / KEY2 / ToF 停车硬门控（链路安全之外的第二层）
-    wire motor_allow = key_estop_n && key_enable_n && !tof_stop;
+    // KEY1 不再参与门控（本工程由主机显式发运动命令）；保留 KEY2 急停 + ToF 兜底停。
+    wire motor_allow = key_estop_n && !tof_stop;
 
     eth_motion_bridge #(
         .MAX_V_MM_S(MAX_V_MM_S),
@@ -337,7 +354,7 @@ module t4_lite_top #(
     ) u_driver (
         .clk(clk125m), .rst_n(reset_n),
         .enable(motors_enable_gated),
-        .emergency_stop(!key_estop_n || !key_enable_n || tof_stop),
+        .emergency_stop(!key_estop_n || tof_stop),
         .fault(fault_bits != 8'h00),
         .watchdog_timeout(!link_ok),
         .pwm_signed_l(pwm_l), .pwm_signed_r(pwm_r),
@@ -414,4 +431,5 @@ module t4_div1000 (
             endcase
         end
     end
+
 endmodule

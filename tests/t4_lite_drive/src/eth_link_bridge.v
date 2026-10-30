@@ -43,6 +43,9 @@ module eth_link_bridge #(
     input  wire signed [31:0] enc_l,
     input  wire signed [31:0] enc_r,
     input  wire signed [15:0] speed_l_mm_s,
+    // 调试：借用遥测的 pitch/roll 字段（本测试工程未用）
+    input  wire        [15:0] dbg_a,
+    input  wire        [15:0] dbg_b,
     input  wire signed [15:0] speed_r_mm_s,
     // SET_VEL 解出的目标轮速（mm/s，已按 SET_LIMIT 限幅）——给电机控制用
     output wire signed [15:0] target_v_left,
@@ -135,7 +138,7 @@ module eth_link_bridge #(
         .tx_byte(tx_byte), .tx_valid(tx_valid), .tx_ready(tx_ready),
         .enc_l(enc_l), .enc_r(enc_r),
         .speed_l_mm_s(speed_l_mm_s), .speed_r_mm_s(speed_r_mm_s),
-        .yaw_cdeg(16'sd0), .pitch_cdeg(16'sd0), .roll_cdeg(16'sd0),
+        .yaw_cdeg(16'sd0), .pitch_cdeg(dbg_a), .roll_cdeg(dbg_b),
         .ext_fault(8'h00),
         .target_v_left(tgt_l), .target_v_right(tgt_r),
         .setvel_strobe_out(setvel_strobe),

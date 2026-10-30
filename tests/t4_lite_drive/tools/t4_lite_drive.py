@@ -61,12 +61,12 @@ def build_frame(ftype: int, payload: bytes = b"") -> bytes:
 
 
 class Telemetry:
-    __slots__ = ("enc_l", "enc_r", "yaw_cdeg", "speed_l", "speed_r", "fault",
-                 "link_seq", "cmd_seq", "hb_age_ms", "t")
+    __slots__ = ("enc_l", "enc_r", "yaw_cdeg", "dbg_a", "dbg_b", "speed_l", "speed_r",
+                 "fault", "link_seq", "cmd_seq", "hb_age_ms", "t")
 
     def __init__(self, payload: bytes, t: float):
         (self.enc_l, self.enc_r, self.yaw_cdeg,
-         _pitch, _roll, self.speed_l, self.speed_r,
+         self.dbg_a, self.dbg_b, self.speed_l, self.speed_r,
          self.fault, self.link_seq, self.cmd_seq, self.hb_age_ms) = struct.unpack(
              "<iihhhhhBBBH", payload[:23])
         self.t = t
@@ -157,6 +157,7 @@ class Link:
         self.sock.bind(("0.0.0.0", local_port))
         self.sock.settimeout(0.001)
         self.seq = 0
+        self.hb_seq = 0
         self.last_telem = None
         self.telem_time = 0.0
         self.acks = []
@@ -180,7 +181,10 @@ class Link:
         self.send(T_SET_LIMIT, struct.pack("<h", mm_s))
 
     def heartbeat(self) -> None:
-        self.send(T_HEARTBEAT)
+        # 心跳负载固定 1 字节序号（协议 v1.1；0 字节会被 FPGA 判为非法帧）
+        seq = self.hb_seq & 0xFF
+        self.hb_seq = (self.hb_seq + 1) & 0xFF
+        self.send(T_HEARTBEAT, bytes([seq]))
 
     def poll(self, timeout_s: float = 0.0) -> list:
         out = []
@@ -222,11 +226,23 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
     print("[drive] 目标 %.0f mm（起点里程 %.1f）" % (target_mm, base))
 
     link.set_limit(abs(speed_mm_s))
-    link.clear_fault()
+    # 先让 link_ok 恢复，再清锁存故障（CLEAR_FAULT 在 link_ok=0 时会被拒绝）
+    for _ in range(40):
+        link.heartbeat()
+        link.poll(0.02)
+    for _ in range(40):
+        link.heartbeat()
+        link.clear_fault()
+        got = link.poll(0.03)
+        if got and (got[-1].fault & ~0x20) == 0:
+            break
     start = time.time()
     last_hb = 0.0
     last_cmd = 0.0
     stuck_since = None
+    last_dist = base
+    last_progress = time.time()
+    last_report = time.time()
     final = t0
     try:
         while True:
@@ -241,10 +257,11 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
             if now - last_cmd >= 0.05:
                 link.set_vel(v, v)
                 last_cmd = now
-            for t in link.poll(0.01):
-                final = t
-            if final is not None and final.t > 0:
-                if final.fault:
+            fresh = link.poll(0.01)
+            if fresh:
+                final = fresh[-1]
+            if fresh and final is not None:
+                if final.fault and (final.fault & ~0x20):
                     print("[drive] FPGA 报告故障 fault=0x%02X，停车" % final.fault)
                     link.stop()
                     return 3
@@ -253,15 +270,18 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
                     link.stop()
                     return 4
                 dist = final.distance_mm - base
-                if abs(final.speed_l) < 5 and elapsed > 0.5:
-                    if stuck_since is None:
-                        stuck_since = now
-                    elif now - stuck_since > 0.3:
-                        print("[drive] 速度被切断（fv=0，ToF 兜底或安全门控），里程 %.1f mm" % dist)
-                        link.stop()
-                        return 5
-                else:
-                    stuck_since = None
+                # 里程无进展（>0.8 s 且 <2 mm）→ 被安全门控/ToF 切断或堵转
+                if now - last_progress > 0.8 and abs(dist - last_dist) < 2.0 and elapsed > 1.0:
+                    print("[drive] 里程无进展（%.1f mm，0.8 s 未前进），可能被 ToF 兜底停车切断" % dist)
+                    link.stop()
+                    return 5
+                if abs(dist - last_dist) >= 2.0:
+                    last_dist = dist
+                    last_progress = now
+                if now - last_report >= 0.5:
+                    last_report = now
+                    print("[drive] %.2f s  里程 %.1f / %.0f mm  v=(%d,%d) fault=0x%02X"
+                          % (elapsed, dist, target_mm, final.speed_l, final.speed_r, final.fault))
                 if dist >= target_mm:
                     print("[drive] 到达目标：里程 %.1f mm >= %.0f mm，发 STOP" % (dist, target_mm))
                     link.stop()
@@ -313,6 +333,9 @@ def main() -> int:
         print("[link] TELEM OK: enc_l=%d enc_r=%d fault=%s v=(%d,%d) hb_age=%d ms"
               % (t.enc_l, t.enc_r, FAULT_NAMES.get(t.fault, hex(t.fault)),
                  t.speed_l, t.speed_r, t.hb_age_ms))
+        print("[link] dbg_a(tof_cal_mm)=%d dbg_b(flags)=0x%04X  [tof_stop=%d valid=%d err=%d key_en=%d key_estop=%d allow=%d link_ok=%d]"
+              % (t.dbg_a, t.dbg_b, t.dbg_b & 1, (t.dbg_b >> 1) & 1, (t.dbg_b >> 2) & 1,
+                 (t.dbg_b >> 3) & 1, (t.dbg_b >> 4) & 1, (t.dbg_b >> 5) & 1, (t.dbg_b >> 6) & 1))
         return 0
 
     wall = None
