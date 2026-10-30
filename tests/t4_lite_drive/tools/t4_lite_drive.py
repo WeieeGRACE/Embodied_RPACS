@@ -105,7 +105,12 @@ def parse_telemetry(raw: bytes, now: float):
 
 # ------------------------------------------------------------------ 深度相机
 def measure_wall_distance(frames: int = 20, roi_frac: float = 0.25):
-    """返回 (中心 ROI 中值 mm, 最小有效 mm, 统计字典)。"""
+    """返回 (墙面中值 mm, 最小有效 mm, 统计字典)。
+
+    相机固定俯角 23°、墙板 30 cm：墙面出现在图像上方，地面在下方。所以取图像
+    上方墙带（顶部 12% 行）的中值作为墙面距离；该距离是“相机->墙”，需要再减去
+    相机到车头的固定偏移（--cam-offset）。
+    """
     import numpy as np
     from pyorbbecsdk import Pipeline, Config, OBSensorType
 
@@ -132,8 +137,14 @@ def measure_wall_distance(frames: int = 20, roi_frac: float = 0.25):
             cy, cx = h // 2, w // 2
             rh = max(8, int(h * roi_frac / 2))
             rw = max(8, int(w * roi_frac / 2))
-            roi = data[cy - rh:cy + rh, cx - rw:cx + rw]
-            valid = roi[roi > 0]
+            # 墙带：图像上方 12% 行（俯角固定，墙在上方）
+            top_rows = max(6, int(h * 0.12))
+            band = data[0:top_rows, :]
+            valid = band[band > 0]
+            if valid.size < 200:
+                # 兜底：若上方无有效深度，用中心 ROI
+                roi = data[cy - rh:cy + rh, cx - rw:cx + rw]
+                valid = roi[roi > 0]
             if valid.size == 0:
                 continue
             stats["valid_frames"] += 1
@@ -260,7 +271,7 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
                 last_hb = now
             # 斜坡：前 ramp_s 秒线性加到目标速度
             ratio = min(1.0, elapsed / ramp_s) if ramp_s > 0 else 1.0
-            v = max(20, int(abs(speed_mm_s) * ratio))
+            v = max(25, int(abs(speed_mm_s) * ratio))
             # 陀螺仪航向保持：航向偏差 -> 左右轮差速（正=向右修正）
             yaw_err = yaw_ref - final_yaw
             # 实测：cmd(vl>vr) 使 yaw 增大（左转）。yaw 超参考值(err<0) 时要右转 -> vl<vr -> corr<0
@@ -287,7 +298,7 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
                     return 4
                 dist = final.distance_mm - base
                 # 里程无进展（>0.8 s 且 <2 mm）→ 被安全门控/ToF 切断或堵转
-                if now - last_progress > 0.8 and abs(dist - last_dist) < 2.0 and elapsed > 1.0:
+                if now - last_progress > 1.6 and abs(dist - last_dist) < 2.0 and elapsed > 2.0:
                     print("[drive] 里程无进展（%.1f mm，0.8 s 未前进），可能被 ToF 兜底停车切断" % dist)
                     link.stop()
                     return 5
@@ -331,6 +342,8 @@ def main() -> int:
     ap.add_argument("--link-check", action="store_true", help="只检查链路/遥测，不发运动命令")
     ap.add_argument("--no-camera", action="store_true", help="跳过相机，用 --target")
     ap.add_argument("--margin", type=float, default=120.0, help="安全余量 mm（默认 120）")
+    ap.add_argument("--cam-offset", type=float, default=244.0,
+                    help="相机到车头保险杠的固定偏移 mm（实测 244，卷尺标定）")
     ap.add_argument("--target", type=float, default=None, help="直接给目标行程 mm（跳过相机计算）")
     ap.add_argument("--speed", type=int, default=100, help="轮速 mm/s（默认 100）")
     ap.add_argument("--max-time", type=float, default=60.0, help="最大行驶时间 s")
@@ -374,8 +387,11 @@ def main() -> int:
         if wall is None:
             print("[drive] 没有相机距离，也没有 --target")
             return 2
-        target = wall - args.margin
-        print("[drive] 目标行程 = %.0f - %.0f = %.0f mm" % (wall, args.margin, target))
+        bumper = wall - args.cam_offset
+        target = bumper - args.margin
+        print("[drive] 墙面(相机)=%.0f - 偏移 %.0f = 车头距墙 %.0f mm" %
+              (wall, args.cam_offset, bumper))
+        print("[drive] 目标行程 = %.0f - %.0f = %.0f mm" % (bumper, args.margin, target))
     if target <= 100:
         print("[drive] 目标行程 %.0f mm 太小，拒绝执行" % target)
         return 2
