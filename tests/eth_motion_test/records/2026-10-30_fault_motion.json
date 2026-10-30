@@ -1,0 +1,89 @@
+{
+  "host": "192.168.0.2",
+  "port": 5000,
+  "checks": [
+    {
+      "name": "F0_baseline_healthy",
+      "ok": true,
+      "detail": "fault=0x00"
+    },
+    {
+      "name": "F1_heartbeat_stop_latches_link_lost",
+      "ok": true,
+      "detail": "fault=0x22"
+    },
+    {
+      "name": "F1b_setvel_rejected_when_link_lost",
+      "ok": true,
+      "detail": "REJECT_LINK_LOST"
+    },
+    {
+      "name": "F2_clear_after_link_recovery",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "F2b_link_lost_cleared",
+      "ok": true,
+      "detail": "fault=0x20"
+    },
+    {
+      "name": "F3_command_timeout_bit",
+      "ok": true,
+      "detail": "fault=0x20"
+    },
+    {
+      "name": "F4_stop_ack",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "F4b_stop_latched_bit",
+      "ok": true,
+      "detail": "fault=0x21"
+    },
+    {
+      "name": "F4c_setvel_rejected_when_stopped",
+      "ok": true,
+      "detail": "REJECT_STOP_LATCHED"
+    },
+    {
+      "name": "F4d_clear_unlatches_stop",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "F5_set_limit_ack",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "F5b_setvel_over_limit_handled",
+      "ok": true,
+      "detail": "REJECT_OVER_LIMIT"
+    },
+    {
+      "name": "F6_corrupt_frame_ignored",
+      "ok": true,
+      "detail": "telemetry alive"
+    },
+    {
+      "name": "F7_unknown_type_ignored",
+      "ok": true,
+      "detail": "telemetry alive"
+    },
+    {
+      "name": "F8_telemetry_rate_stable",
+      "ok": true,
+      "detail": "50.01 Hz"
+    },
+    {
+      "name": "F9_final_clean",
+      "ok": true,
+      "detail": "fault=0x20"
+    }
+  ],
+  "passed": 16,
+  "total": 16,
+  "ok": true
+}

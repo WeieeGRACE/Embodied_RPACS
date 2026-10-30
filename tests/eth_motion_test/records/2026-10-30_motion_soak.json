@@ -1,0 +1,25 @@
+{
+  "duration_s": 131.7,
+  "cycles": 4,
+  "acks": {
+    "OK": 2626
+  },
+  "n_acks": 2626,
+  "ack_ok_ratio": 1.0,
+  "telemetry": {
+    "frames": 6636,
+    "rate_hz": 50.4,
+    "gap_max_ms": 40.1,
+    "fault_hist": {
+      "0x22": 51,
+      "0x20": 1,
+      "0x00": 6576,
+      "0x01": 8
+    }
+  },
+  "cpu_percent": {
+    "mean": 0.8,
+    "max": 1.0
+  },
+  "ok": true
+}

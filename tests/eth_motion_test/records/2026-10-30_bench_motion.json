@@ -1,0 +1,250 @@
+{
+  "started": "2026-10-30T10:45:48",
+  "duration_s": 61.2,
+  "steps": [
+    {
+      "name": "forward_50",
+      "left": 50,
+      "right": 50,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x20": 1,
+        "0x00": 119
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "forward_100",
+      "left": 100,
+      "right": 100,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 120
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "forward_150",
+      "left": 150,
+      "right": 150,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 121
+      },
+      "telem": 121,
+      "ok": true
+    },
+    {
+      "name": "forward_200",
+      "left": 200,
+      "right": 200,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 120
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "forward_250",
+      "left": 250,
+      "right": 250,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 120
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "forward_300",
+      "left": 300,
+      "right": 300,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 121
+      },
+      "telem": 121,
+      "ok": true
+    },
+    {
+      "name": "backward_50",
+      "left": -50,
+      "right": -50,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 120
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "backward_150",
+      "left": -150,
+      "right": -150,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 120
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "rotate_left",
+      "left": -120,
+      "right": 120,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 120
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "rotate_right",
+      "left": 120,
+      "right": -120,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 120
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "differential",
+      "left": -100,
+      "right": 200,
+      "seconds": 2.0,
+      "acks": {
+        "OK": 50
+      },
+      "n_acks": 50,
+      "fault_hist": {
+        "0x00": 120
+      },
+      "telem": 120,
+      "ok": true
+    },
+    {
+      "name": "quick_reversals",
+      "acks": {
+        "OK": 97
+      },
+      "fault_hist": {
+        "0x00": 241
+      },
+      "ok": true
+    },
+    {
+      "name": "stop_mid_drive",
+      "detail": {
+        "stop": "OK",
+        "setvel_after_stop": "REJECT_STOP_LATCHED"
+      },
+      "ok": true
+    },
+    {
+      "name": "resume_after_stop",
+      "left": 100,
+      "right": 100,
+      "seconds": 1.5,
+      "acks": {
+        "OK": 40
+      },
+      "n_acks": 40,
+      "fault_hist": {
+        "0x00": 95
+      },
+      "telem": 95,
+      "ok": true
+    },
+    {
+      "name": "heartbeat_loss_while_driving",
+      "detail": {
+        "setvel": "REJECT_LINK_LOST",
+        "link_lost_seen": true
+      },
+      "fault_hist": {
+        "0x00": 64,
+        "0x02": 10,
+        "0x22": 18
+      },
+      "ok": true
+    },
+    {
+      "name": "sustained_200",
+      "left": 200,
+      "right": 200,
+      "seconds": 20.0,
+      "acks": {
+        "OK": 414
+      },
+      "n_acks": 414,
+      "fault_hist": {
+        "0x20": 1,
+        "0x00": 1031
+      },
+      "telem": 1032,
+      "ok": true
+    }
+  ],
+  "steps_passed": 16,
+  "steps_total": 16,
+  "telemetry": {
+    "frames": 3111,
+    "rate_hz": 50.82,
+    "gap_max_ms": 40.1,
+    "gap_p99_ms": 39.5,
+    "fault_hist": {
+      "0x22": 84,
+      "0x20": 17,
+      "0x00": 2912,
+      "0x01": 88,
+      "0x02": 10
+    }
+  },
+  "ok": true
+}
