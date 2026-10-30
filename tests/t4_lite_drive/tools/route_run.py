@@ -15,6 +15,13 @@ import time
 sys.path.insert(0, "/home/HwHiAiUser/t4_tools")
 import t4_lite_drive as T
 
+def measure_wall():
+    """返回 (相机墙距, 车头墙距)。"""
+    import t4_lite_drive as TD
+    med, _mn, _st = TD.measure_wall_distance(frames=10)
+    return med, med - TD.CAM_OFFSET_MM
+
+
 WRAP = 18000  # cdeg
 
 
@@ -185,6 +192,16 @@ def main():
             ok = drive(ctl, float(leg["mm"]), leg.get("speed"))
         elif leg["type"] == "turn":
             ok = turn(ctl, float(leg["deg"]))
+        elif leg["type"] == "to_wall":
+            margin = float(leg.get("margin", 120))
+            cam, bumper = measure_wall()
+            travel = bumper - margin
+            print("  相机墙距 %.0f -> 车头距墙 %.0f -> 目标行程 %.0f" % (cam, bumper, travel))
+            if travel < 80:
+                print("  距离太小，跳过")
+                ok = False
+            else:
+                ok = drive(ctl, travel, leg.get("speed"))
         else:
             print("  unknown leg type")
             ok = False

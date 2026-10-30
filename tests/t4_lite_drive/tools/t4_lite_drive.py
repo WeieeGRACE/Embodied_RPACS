@@ -44,6 +44,7 @@ FAULT_NAMES = {
     32: "CMD_TIMEOUT",
 }
 TELEM_LEN = 23
+CAM_OFFSET_MM = 244.0   # 相机->车头保险杠固定偏移（卷尺 800/1046 标定）
 
 
 def crc16_ccitt(data: bytes) -> int:
