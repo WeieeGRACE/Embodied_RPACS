@@ -69,6 +69,18 @@ for label, needle in [
 tr = read(os.path.join(ROOT, "impl/pnr/Embodied_RPACS_tr_content.html"))
 check("main report Fmax 55.050", "55.050(MHz)" in tr)
 
+ARCHIVE = os.path.join(ROOT, "tests/p6_uart_debug/archive")
+archive_uart = os.path.join(ARCHIVE, "Embodied_RPACS_p6uart.fs")
+archive_dist = os.path.join(ARCHIVE, "Embodied_RPACS_p6dist.fs")
+check("archive p6uart bitstream exists", os.path.isfile(archive_uart))
+if os.path.isfile(archive_uart):
+    check("archive p6uart sha256", sha256(archive_uart) == P6_SHA, sha256(archive_uart))
+check("archive p6dist bitstream exists", os.path.isfile(archive_dist))
+if os.path.isfile(archive_dist):
+    check("archive p6dist sha256",
+          sha256(archive_dist) == "EE00D3753180FB199EEA2CF433128374E4F77F1E450DF80FB5BEB1CA19C4EC10",
+          sha256(archive_dist))
+
 p6rpt_path = os.path.join(ROOT, "tests/p6_uart_debug/impl/pnr/Embodied_RPACS_p6uart.rpt.txt")
 if os.path.isfile(p6rpt_path):
     p6rpt = read(p6rpt_path)

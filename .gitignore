@@ -359,3 +359,13 @@
 !/tests/eth_motion_test/tools/
 /tests/eth_motion_test/tools/*
 !/tests/eth_motion_test/tools/*.py
+
+# P6-21 diagnostic projects are archived: keep the frozen pre-cleanup sources and
+# the two delivered diagnostic bitstreams so they stay reproducible/verifiable.
+!/tests/p6_uart_debug/frozen_src/
+/tests/p6_uart_debug/frozen_src/*
+!/tests/p6_uart_debug/frozen_src/*.v
+!/tests/p6_uart_debug/archive/
+/tests/p6_uart_debug/archive/*
+!/tests/p6_uart_debug/archive/*.fs
+!/tests/p6_uart_debug/archive/*.txt

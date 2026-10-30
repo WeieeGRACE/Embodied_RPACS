@@ -438,7 +438,8 @@ IMU 姿态页（roll/pitch 数学、姿态格式化器）与 SPIN 360/菜单项�
 
 > **2026-10-30 起交付主位流已无 USB 调试串口**（事件日志与 UART 按用户确认删除，V8/U8 已释放）。
 > 现场诊断请看 OLED 避障面板的 `F/S/M/I` 码；本节下面涉及串口/WCH-Link 的步骤仅适用于已归档的
-> 历史 P6-21 诊断位流，交付固件无需也不支持串口采集。
+> 历史 P6-21 诊断位流，交付固件无需也不支持串口采集。诊断工程已归档（`tests/p6_uart_debug/ARCHIVE.md`，
+> 测试报告 `records/robustness_20261029/P6_DIAGNOSTIC_ARCHIVE.md`）。
 
 1. 确认 Gowin USB Cable 与板子连接，并先给板上电（电池/开关）；本工程只烧 SRAM，断电后
    位流丢失、每次上电都需重新烧写。板子没电时 `programmer_cli --scan` 会报

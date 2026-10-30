@@ -53,7 +53,9 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
     并同步更新 `PROJECT_PLAN.md` 第 16.4 节、`PIN_ASSIGNMENT.md` 与
     `records/resource_20261029/MINIMAL_PLAN.md`。
   - 历史 P6-21 诊断工程与距离日志变体（`tests/p6_uart_debug/`）：主固件已无调试串口，
-    这些变体不再随主工程维护，仅作历史诊断存档（是否从仓库删除待用户确认）。
+    这些变体不再随主工程维护。按用户 2026-10-30 指示**保留为仓库历史存档**并补齐归档测试报告：
+    `tests/p6_uart_debug/ARCHIVE.md`、`records/robustness_20261029/P6_DIAGNOSTIC_ARCHIVE.md`；
+    两个归档位流与 `archive/SHA256SUMS.txt` 已入仓库，可用 `build_frozen_*.tcl` 独立重建。
   - 故障面板 `F:xx S:xx M:xx I:xx`/PAUSED `R/S/V/U` 诊断字段：少量 LUT，验收后保留——
     它是交付固件最直接的现场诊断手段。
 - 结论：无其它未使用的用户功能可删；主工程已无 DISPLAY/MOTOR TEST 等历史诊断入口。
@@ -104,11 +106,14 @@ Gowin 下载器（FT2CH）已识别，P6-21 诊断位流已成功 SRAM 烧写，
 
 ## 9. 一键验收审计
 
-`python tools/audit_final.py` 从仓库根目录交叉核对全部交付物（当前 **96 项检查 0 失败**，
+`python tools/audit_final.py` 从仓库根目录交叉核对全部交付物（当前 **100 项检查 0 失败**，
 日志 `records/robustness_20261029/final_audit_final.log`）：
 
 - 主位流 `impl/pnr/Embodied_RPACS.fs` 存在、大小 6,228,180、SHA256 `901D7394146E472AF386E5BAB4092C5FD94B62245CF8666C471EDA38F7EAB14B`；
   P6-21 诊断位流 SHA256 `08DFDED3A43359D8E1237C03751E5D1978A97AFA958ED7C8276291FE706F399E`；
+  归档目录 `tests/p6_uart_debug/archive/`：普通日志版 `08DFDED3…`、距离日志版 `EE00D375…`，
+  两个 `.fs` 与 `SHA256SUMS.txt` 一致；冻结源码可由 `frozen_src/` + `build_frozen_*.tcl` 重建
+  （重建 Logic 15910/15919、CLS 9612/9665，与归档一致）；
 - post-PnR 报告 Logic 15445/23040、CLS 9407/11520、Register 6553、BSRAM 5/56、DSP 8.5/28、
   Fmax 55.050 MHz；P6 变体（历史存档）Logic 15910、CLS 9612、`uart_tx` 在 L12；
 - 13 个故障注入日志均为 `fault_seen=0/fault_latched=0/paused=0/blocked_seen=0`，
