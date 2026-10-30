@@ -74,3 +74,24 @@ python3 ~/t4_tools/route_run.py route_field.json --speed 40
 2. `route_wall_approach`：面向墙 → 停 120 mm（验证相机测距在场地是否仍准；先 `--measure-only` 对比卷尺）。
 3. 各转向路线：先只跑 `turn` 段（把 JSON 里 drive 去掉或用小里程）验证转向角，再跑整条。
 4. 速度建议 30–40；有人全程手握 KEY2；每段之间车会重新使能。
+---
+
+## 7. 两个位流版本（现场按需选）
+
+| 版本 | 文件 | SHA-256 | 特点 |
+| --- | --- | --- | --- |
+| **开环（已验证）** | 仓库历史 214beb5 的 `impl/pnr/t4_lite_top.fs`（本地备份 `work/t4_lite_openloop_A55B.fs`） | `A55B465C…D2F0` | 转向 ±1°、直行 1%；命令 50 实际 ~110 mm/s |
+| **轮速闭环（新，待上板验证）** | 当前 `impl/pnr/t4_lite_top.fs` | `57BE714A…65B7` | `SET_VEL(50,50)` 仿真实测 49.91 mm/s；转向更线性 |
+
+两者安全门控完全一致（STOP 锁存 / KEY2 / ToF 旁路 / 心跳超时 / 50% duty 上限）。
+
+### 现场烧写注意
+
+1. SRAM 位流**掉电丢失**：场地必须用笔记本 + Gowin 下载线重新烧。
+2. 若 `programmer_cli` 报 `No Gowin devices found` 或 `Cost 0.0 second(s)`（反复楔死）：
+   **拔插下载线 USB** 或 **FPGA 板断电重上电**，再扫描。
+3. 烧写命令：
+   ```
+   programmer_cli --device GW5A-25A --run 2 --fsFile <abs>\t4_lite_top.fs --cable "Gowin USB Cable(FT2CH)"
+   ```
+4. 烧完先 `--link-check`，确认 `fault=0x20`（仅 CMD_TIMEOUT）、`enc` 静止不漂，再动车。
