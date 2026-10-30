@@ -35,13 +35,42 @@ Pi ──UDP(SET_VEL/STOP/…)──> FPGA 链路核 ──target_v_left/right(m
 | 急停键 KEY2（C15，低有效）按下 | `emergency_stop` → **STBY=0** |
 | 复位未释放 | inhibit → **STBY=0** |
 
-## 2. 今晚已完成的验证（无硬件动作）
+## 2. 仿真测试矩阵（三个 testbench，全部 PASS，不需要板子）
+
+| 套件 | 覆盖 | 检查数 | 日志 |
+| --- | --- | --- | --- |
+| `sim/tb_eth_motion_bridge.sv` | 基础通路：空载/前进/后退/限幅/四条安全路径 | 15 | `records/tb_bridge.log` |
+| `sim/tb_motion_unit2.sv` | **单元级**：占空比-速度全程扫描（-300..+300）、PWM 周期、方向位、换向死区无直通、零速、超速限幅、差速、`motors_enabled` 16 组合真值表、安全恢复 | **24** | `records/tb_unit.log` |
+| `sim/tb_motion_system.sv` | **端到端**：协议帧（心跳/CLEAR/SET_VEL/STOP）→ 链路桥 → 速度映射 → TB6612 → PWMA/AIN1/AIN2/STBY；覆盖建链、前进/后退/原地转、STOP 拒绝、掉链、急停、恢复 | **27** | `records/tb_system.log` |
+
+一键运行：
+
+```powershell
+cd tests\eth_motion_test
+.\run_motion_sim.ps1
+```
+
+**仿真结论（与明天上板一一对应）**：
+
+| 上板要看的 | 仿真已证明 |
+| --- | --- |
+| STBY 在无命令/未建链时为 0，心跳+清故障后为 1 | U8 真值表 16 组合、S1/S2 |
+| 前进时 AIN1=1/AIN2=0，后退相反 | U3、S3/S4 |
+| 占空比 = 速度×20（300 mm/s→6000/6250≈96%） | U1 全程扫描 ±2 拍 |
+| 换向不会直通（in1/in2 永不同时为 1，PWM 死区屏蔽） | U3 全程监视 + U5 |
+| 左右轮独立（差速/原地转） | U7、S5 |
+| 超速命令被限幅 | U6 |
+| 掉心跳 → 300 ms 内 STBY=0、命令被拒 | U9、S9 |
+| STOP → 立即停 + 锁存，SET_VEL 返回 REJECT_STOP | S6/S7 |
+| 急停键 → 立即停 | U9、S10 |
+| 清故障后可重新驱动 | U9、S8/S11 |
+
 
 | 项 | 结果 |
 | --- | --- |
-| 仿真 `sim/tb_eth_motion_bridge.sv` | **15/15 PASS**：空载占空比 0、150 mm/s≈48% 占空比、方向正确、后退反向、超速限幅、链路丢失/故障/STOP/急停四路都能拉低 STBY、恢复后能重新使能 |
-| 综合 | 通过（见上） |
-| 烧写 | **未烧写**（保持板上是无电机的 `eth_link_top`） |
+| 三个仿真套件 | **15 + 24 + 27 = 66 项全部 PASS**（详见 §2） |
+| 综合 | 通过：Logic 1928/23040（8%）、CLS 1401/11520（12%） |
+| 烧写 | **未烧写**——等你上板实测时再烧 |
 
 仿真命令：
 
@@ -104,11 +133,16 @@ python3 ~/eth_fault_test.py          # 链路安全语义先过一遍（无电�
 ```text
 tests/eth_motion_test/
 ├── README.md（本文件）
+├── TEST_PLAN_明日动车.md           上板测试清单（A~F）
 ├── build.tcl                       综合脚本
-├── src/eth_motion_bridge.v         速度→占空比 + 使能门控（新增）
+├── run_motion_sim.ps1              一键跑三个仿真套件
+├── src/eth_motion_bridge.v         速度→占空比 + 使能门控
 ├── src/eth_motion_top.v            顶层（链路桥接 + 电机驱动）
 ├── src/eth_motion_top.cst          RGMII + 电机 + 急停/复位/LED 引脚
-├── sim/tb_eth_motion_bridge.sv     15 项自检
-├── sim/run_motion.do
-└── impl/pnr/eth_motion_top.fs      待烧位流
+├── sim/tb_eth_motion_bridge.sv     基础 15 项
+├── sim/tb_motion_unit2.sv          单元级 24 项
+├── sim/tb_motion_system.sv         端到端 27 项
+├── sim/run_motion*.do              ModelSim 脚本
+├── tools/eth_drive.py              Pi 侧安全驾驶助手
+└── impl/pnr/eth_motion_top.fs      待烧位流（SHA256 AAC99B3B…CCBE3）
 ```

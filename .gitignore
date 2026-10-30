@@ -369,3 +369,7 @@
 /tests/p6_uart_debug/archive/*
 !/tests/p6_uart_debug/archive/*.fs
 !/tests/p6_uart_debug/archive/*.txt
+
+/tests/eth_motion_test/sim/work_unit/
+/tests/eth_motion_test/sim/work_sys/
+/tests/eth_motion_test/sim/work_probe/
