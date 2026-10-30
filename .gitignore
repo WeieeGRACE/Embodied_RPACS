@@ -398,7 +398,9 @@
 !/tests/t4_lite_drive/records/*.log
 !/tests/t4_lite_drive/records/*.md
 !/tests/t4_lite_drive/records/*.json
+!/tests/t4_lite_drive/impl/
 /tests/t4_lite_drive/impl/gwsynthesis/
+!/tests/t4_lite_drive/impl/pnr/
 /tests/t4_lite_drive/impl/pnr/*
 !/tests/t4_lite_drive/impl/pnr/t4_lite_top.fs
 !/tests/t4_lite_drive/impl/pnr/t4_lite_top.rpt.txt
