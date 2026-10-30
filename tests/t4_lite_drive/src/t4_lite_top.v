@@ -32,12 +32,18 @@ module t4_lite_top #(
     parameter integer ENC_FILTER_CYCLES = 125,   // 1 us 去抖 @125 MHz
     parameter integer TOF_I2C_HZ    = 100_000,
     parameter integer TOF_OFFSET_MM = 60,        // 前向实测偏置（读数=真实+60）
+    parameter integer TOF_STOP_EN   = 0,        // 1=ToF 兜底停车启用
     parameter integer TOF_STOP_MM   = 120        // 停车边界
 )(
     input  wire        clk_50m,
     input  wire        reset_n,
     input  wire        key_enable_n,     // KEY0，低有效
     input  wire        key_estop_n,      // KEY2，低有效
+    // IMU660RA SPI（陀螺仪航向修正用）
+    input  wire        imu_spi_miso,
+    output wire        imu_spi_sck,
+    output wire        imu_spi_mosi,
+    output wire        imu_cs_n,
     input  wire        encoder_a_l,
     input  wire        encoder_b_l,
     input  wire        encoder_a_r,
@@ -71,6 +77,9 @@ module t4_lite_top #(
     output wire        led_ready
 );
     wire reset_p = ~reset_n;
+    // 调试遥测（在 bridge 例化之前声明，避免隐式网）
+    wire [15:0] dbg_a;
+    wire [15:0] dbg_b;
 
     // ---------------------------------------------------------------- PHY
     assign eth_rst_n = 1'b1;
@@ -123,6 +132,9 @@ module t4_lite_top #(
     wire signed [15:0] target_v_l, target_v_r;
     wire signed [31:0] wheel_mm_l, wheel_mm_r;   // 左右轮里程（mm），遥测用
     reg  signed [15:0] speed_l_mm_s, speed_r_mm_s;   // 100 ms 窗口实测轮速（mm/s）
+    // 遥测航向（厘度，int16）。IMU 链在 50 MHz 域解算，经 toggle 握手 CDC 后
+    // 在本域寄存器里更新，供 eth_link_bridge 每 20 ms 遥测快照取用。
+    reg  signed [15:0] yaw_cdeg;
 
     eth_link_bridge #(
         .CLK_HZ(125_000_000),
@@ -143,8 +155,9 @@ module t4_lite_top #(
         .enc_l(wheel_mm_l), .enc_r(wheel_mm_r),
         .speed_l_mm_s(speed_l_mm_s), .speed_r_mm_s(speed_r_mm_s),
         .target_v_left(target_v_l), .target_v_right(target_v_r),
-        .dbg_a(16'd0),
-        .dbg_b(16'd0)
+        .dbg_a(dbg_a),
+        .dbg_b(dbg_b),
+        .yaw_cdeg_in(yaw_cdeg)
     );
 
     // ------------------------------------------------------------ 发送
@@ -215,9 +228,18 @@ module t4_lite_top #(
     // ------------------------------------------- 实测轮速（100 ms 窗口，mm/s）
     // 遥测 speed_l_mm_s/speed_r_mm_s：每 100 ms 用「Δmm × 10」得到 mm/s
     // （10 mm/s 量化，只用于主机判断电机是否被安全门切断，不参与控制）。
+    // 时序：原实现把「快照 -> 差值 -> ×10 -> 饱和」压在同一个 125 MHz 周期内，
+    // 起点是 t4_div1000 的输出寄存器 wheel_mm_l/r，PnR SETUP slack 约 -0.32 ns。
+    // 这里改成每 100 ms 只走一次的 3 拍小 FSM，把该组合链拆成 3 段；数值结果与
+    // 原来逐位完全相同，仅在本窗口边界后 3 个时钟（24 ns）才更新遥测量。
     localparam integer SPEED_WINDOW_CYCLES = 125_000_000 / 10;   // 100 ms
     reg [23:0] speed_div;                                        // 12_500_000 < 2^24
-    reg signed [31:0] last_mm_l, last_mm_r;
+    reg signed [31:0] last_mm_l, last_mm_r;                      // 上窗口快照
+    reg signed [31:0] sample_mm_l, sample_mm_r;                  // 本窗口快照
+    reg signed [31:0] delta_mm_l, delta_mm_r;
+    reg signed [31:0] prod_mm_l, prod_mm_r;
+    reg [1:0]  speed_state;
+    localparam [1:0] SP_WAIT = 2'd0, SP_DIFF = 2'd1, SP_MUL = 2'd2, SP_SAT = 2'd3;
 
     function signed [15:0] sat16_speed(input signed [31:0] v);
         begin
@@ -232,17 +254,171 @@ module t4_lite_top #(
             speed_div     <= 24'd0;
             last_mm_l     <= 32'sd0;
             last_mm_r     <= 32'sd0;
+            sample_mm_l   <= 32'sd0;
+            sample_mm_r   <= 32'sd0;
+            delta_mm_l    <= 32'sd0;
+            delta_mm_r    <= 32'sd0;
+            prod_mm_l     <= 32'sd0;
+            prod_mm_r     <= 32'sd0;
+            speed_state   <= SP_WAIT;
             speed_l_mm_s  <= 16'sd0;
             speed_r_mm_s  <= 16'sd0;
-        end else if (speed_div >= SPEED_WINDOW_CYCLES - 1) begin
-            speed_div    <= 24'd0;
-            last_mm_l    <= wheel_mm_l;
-            last_mm_r    <= wheel_mm_r;
-            speed_l_mm_s <= sat16_speed((wheel_mm_l - last_mm_l) * 32'sd10);
-            speed_r_mm_s <= sat16_speed((wheel_mm_r - last_mm_r) * 32'sd10);
+        end else case (speed_state)
+            SP_WAIT: begin
+                if (speed_div >= SPEED_WINDOW_CYCLES - 1) begin
+                    speed_div   <= 24'd0;
+                    sample_mm_l <= wheel_mm_l;
+                    sample_mm_r <= wheel_mm_r;
+                    speed_state <= SP_DIFF;
+                end else begin
+                    speed_div <= speed_div + 24'd1;
+                end
+            end
+            SP_DIFF: begin
+                delta_mm_l  <= sample_mm_l - last_mm_l;
+                delta_mm_r  <= sample_mm_r - last_mm_r;
+                last_mm_l   <= sample_mm_l;
+                last_mm_r   <= sample_mm_r;
+                speed_state <= SP_MUL;
+            end
+            SP_MUL: begin
+                prod_mm_l   <= delta_mm_l * 32'sd10;
+                prod_mm_r   <= delta_mm_r * 32'sd10;
+                speed_state <= SP_SAT;
+            end
+            SP_SAT: begin
+                speed_l_mm_s <= sat16_speed(prod_mm_l);
+                speed_r_mm_s <= sat16_speed(prod_mm_r);
+                speed_state  <= SP_WAIT;
+            end
+            default: speed_state <= SP_WAIT;
+        endcase
+    end
+
+    // ------------------------------- IMU660RA 陀螺仪航向（50 MHz 独立时钟域）
+    //
+    // 时序问题定位（impl/pnr/t4_lite_top.timing_paths）：原设计把 IMU 驱动和
+    // 姿态解算都放在 125 MHz 域，最差路径为
+    //   u_attitude/yaw_mdeg_1_s0 -> (组合 /10 饱和网络 n1570..n1585) -> yaw_cdeg_*
+    // SETUP slack -10.705 ns（到达 21.098 ns，要求 10.394 ns）；姿态解算内部的
+    // 32 位加/除/乘链在 125 MHz 下同样无法收敛。
+    //
+    // 板上 T9 是独立 50 MHz 晶振（与主工程 src/robot_system_top.cst 的 clk_50m
+    // 同一引脚，主工程的 IMU 链就运行在 50 MHz、20 ns 约束下且 SETUP 收敛）。
+    // 因此把 imu660ra_driver + imu_attitude_fixed 整体搬到 clk_50m 域：
+    //   50 MHz 域：200 Hz 姿态更新 -> 32 拍迭代 /10 + int16 饱和 -> yaw_cdeg_50
+    //              寄存器保持，并翻转 yaw_cdeg_50_toggle（数据保持 + toggle 握手）；
+    //   125 MHz 域：toggle 经 3 级 FF 同步 + 边沿检测，边沿处一次性锁存 16 位数据，
+    //              得到与原来语义相同的 yaw_cdeg（毫度/10，int16 饱和，±180° 回绕）。
+    // 两次更新间隔 5 ms，远大于同步器与数据连线延迟，逐位同步该数据总线是安全的。
+    // 解卷绕仍由主机侧完成（RTL 不做 asr_yaw_unwrap）。
+    localparam integer CLK50_HZ = 50_000_000;
+    localparam integer IMU_POWERUP_CYCLES50 = CLK50_HZ / 50;     // 20 ms
+    localparam integer IMU_WAIT_CYCLES50    = CLK50_HZ / 50;     // 20 ms
+    localparam integer IMU_RETRY_CYCLES50   = CLK50_HZ;          // 1 s
+    localparam integer IMU_SAMPLE_CYCLES50  = CLK50_HZ / 200;    // 200 Hz
+    localparam integer IMU_SPI_HALF50       = 25;                // ~1 MHz SPI
+
+    // reset_n 在 50 MHz 域内"异步置位、同步释放"，避免复位释放沿相对
+    // clk_50m 的亚稳态（125 MHz 域沿用原有 reset_n 用法，不改变既有行为）。
+    reg [1:0] rst50_sync;
+    always @(posedge clk_50m or negedge reset_n) begin
+        if (!reset_n) rst50_sync <= 2'b00;
+        else          rst50_sync <= {rst50_sync[0], 1'b1};
+    end
+    wire rst50_n = rst50_sync[1];
+
+    wire               imu_ready, imu_sample_valid, imu_sensor_error;
+    wire signed [15:0] imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz;
+    wire [7:0]         imu_error_code;
+
+    imu660ra_driver #(
+        .CLK_HZ(CLK50_HZ), .SPI_HALF_PERIOD(IMU_SPI_HALF50),
+        .POWERUP_CYCLES(IMU_POWERUP_CYCLES50), .CONFIG_WAIT_CYCLES(IMU_WAIT_CYCLES50),
+        .RETRY_CYCLES(IMU_RETRY_CYCLES50), .ID_RETRY_CYCLES(CLK50_HZ / 1000),
+        .SAMPLE_CYCLES(IMU_SAMPLE_CYCLES50), .HEALTH_CHECK_CYCLES(CLK50_HZ),
+        .CONFIG_HEX_FILE("src/imu660ra_config.hex")
+    ) u_imu (
+        .clk(clk_50m), .rst_n(rst50_n),
+        .spi_miso(imu_spi_miso), .imu_int1(1'b0), .imu_int2(1'b0),
+        .spi_sclk(imu_spi_sck), .spi_mosi(imu_spi_mosi), .spi_cs_n(imu_cs_n),
+        .accel_x(imu_ax), .accel_y(imu_ay), .accel_z(imu_az),
+        .gyro_x(imu_gx), .gyro_y(imu_gy), .gyro_z(imu_gz),
+        .sample_valid(imu_sample_valid), .sample_sequence(), .chip_id(), .init_status(),
+        .power_conf_readback(), .init_ctrl_readback(), .sensor_error(imu_sensor_error),
+        .ready(imu_ready), .error_code(imu_error_code), .int1_sync(), .int2_sync()
+    );
+
+    wire               imu_attitude_valid, imu_attitude_update;
+    wire signed [31:0] imu_yaw_wrapped;
+
+    imu_attitude_fixed #(.CALIBRATION_SAMPLES(200)) u_attitude (
+        .clk(clk_50m), .rst_n(rst50_n), .ready_in(imu_ready), .sample_valid(imu_sample_valid),
+        .accel_x(imu_ax), .accel_y(imu_ay), .accel_z(imu_az),
+        .gyro_x(imu_gx), .gyro_y(imu_gy), .gyro_z(imu_gz),
+        .calibrating(), .attitude_valid(imu_attitude_valid), .update_valid(imu_attitude_update),
+        .roll_mdeg(), .pitch_mdeg(), .yaw_mdeg(imu_yaw_wrapped),
+        .gyro_bias_x(), .gyro_bias_y(), .gyro_bias_z()
+    );
+
+    // update_valid 与 yaw_mdeg 同拍更新；延迟一拍再启动 /10，除数取的才是新航向。
+    reg imu_update_d50;
+    always @(posedge clk_50m or negedge rst50_n) begin
+        if (!rst50_n) imu_update_d50 <= 1'b0;
+        else          imu_update_d50 <= imu_attitude_update;
+    end
+
+    // 毫度 -> 厘度（32 拍逐位 /10，向 0 截断；单拍只有 5 位比较/减法）。
+    // 原组合 /10 + 饱和在 125 MHz 域是 21 ns 的关键路径，这里改成迭代计算，
+    // 数值语义保持不变（yaw_mdeg/10 后 int16 饱和）。
+    wire               cdeg_div_busy, cdeg_div_done;
+    wire signed [15:0] cdeg_div_value;
+    reg  signed [31:0] cdeg_div_din;
+    reg                cdeg_div_start;
+
+    t4_div10_sat u_yaw_div (
+        .clk(clk_50m), .rst_n(rst50_n),
+        .start(cdeg_div_start), .din(cdeg_div_din),
+        .busy(cdeg_div_busy), .done(cdeg_div_done), .cdeg(cdeg_div_value)
+    );
+
+    always @(posedge clk_50m or negedge rst50_n) begin
+        if (!rst50_n) begin
+            cdeg_div_start <= 1'b0;
+            cdeg_div_din   <= 32'sd0;
         end else begin
-            speed_div <= speed_div + 24'd1;
+            cdeg_div_start <= 1'b0;
+            if (imu_update_d50 && !cdeg_div_busy) begin
+                cdeg_div_start <= 1'b1;
+                cdeg_div_din   <= imu_yaw_wrapped;
+            end
         end
+    end
+
+    // 数据保持 + toggle：结果每 5 ms 才变一次，握手期间保持稳定。
+    reg signed [15:0] yaw_cdeg50;
+    reg               yaw_cdeg50_toggle;
+    always @(posedge clk_50m or negedge rst50_n) begin
+        if (!rst50_n) begin
+            yaw_cdeg50        <= 16'sd0;
+            yaw_cdeg50_toggle <= 1'b0;
+        end else if (cdeg_div_done) begin
+            yaw_cdeg50        <= cdeg_div_value;
+            yaw_cdeg50_toggle <= ~yaw_cdeg50_toggle;
+        end
+    end
+
+    // 125 MHz 遥测域：toggle 多 FF 同步 + 上升/下降沿检测，边沿处锁存数据总线。
+    reg [2:0] yaw_toggle_sync;
+    always @(posedge clk125m or negedge reset_n) begin
+        if (!reset_n) yaw_toggle_sync <= 3'b000;
+        else          yaw_toggle_sync <= {yaw_toggle_sync[1:0], yaw_cdeg50_toggle};
+    end
+    wire yaw_cdeg_update = yaw_toggle_sync[2] ^ yaw_toggle_sync[1];
+
+    always @(posedge clk125m or negedge reset_n) begin
+        if (!reset_n)          yaw_cdeg <= 16'sd0;
+        else if (yaw_cdeg_update) yaw_cdeg <= yaw_cdeg50;
     end
 
     // ------------------------------------- 前向 VL53L0X（只做停车边界）
@@ -308,7 +484,7 @@ module t4_lite_top #(
         if (!reset_n) begin
             tof_stop      <= 1'b0;
             tof_close_cnt <= 3'd0;
-        end else if (!tof_stop) begin
+        end else if (!tof_stop && TOF_STOP_EN != 0) begin
             if (!tof_sample_good) begin
                 tof_close_cnt <= 3'd0;
             end else if (tof_cal_mm <= TOF_STOP_MM) begin
@@ -369,6 +545,15 @@ module t4_lite_top #(
     assign led_run   = motors_enable_gated;                           // 电机已使能
     assign led_ready = link_ok && (fault_bits == 8'h00) &&
                        key_enable_n && key_estop_n && !tof_stop;      // 可以接收运动命令
+    // ---- 调试遥测赋值（模块末尾，所有信号都已声明）----
+    //   dbg_a = ToF 标定距离(mm)
+    //   dbg_b[0]=tof_stop [1]=tof_sample_valid [2]=tof_error!=0 [3]=key_enable_n
+    //         [4]=key_estop_n [5]=motor_allow [6]=link_ok [7]=motors_enabled
+    assign dbg_a = tof_cal_mm;
+    assign dbg_b = {8'd0, motors_enabled, link_ok, motor_allow,
+                    key_estop_n, key_enable_n, (tof_error != 8'd0),
+                    tof_sample_valid, tof_stop};
+
 endmodule
 
 // ---------------------------------------------------------------------------
@@ -425,6 +610,92 @@ module t4_div1000 (
                 end
                 FIN: begin
                     dout    <= sign_r ? (32'd0 - quot_r) : quot_r;
+                    state_r <= IDLE;
+                end
+                default: state_r <= IDLE;
+            endcase
+        end
+    end
+
+endmodule
+
+// ---------------------------------------------------------------------------
+// 32 位有符号 /10（向 0 截断）+ int16 饱和，逐位恢复除法（MSB 先处理）：
+// 约 34 拍出一次结果，start/done 握手，非连续自由运行。
+// 数值语义 = 原顶层组合表达式 sat16(yaw_mdeg / 10)：
+//   - 商向 0 截断（与 Verilog 有符号 "/" 一致）；
+//   - 结果饱和到 int16（+32767 / -32768）。
+// 用途：把 IMU 姿态航向从「毫度」换成遥测「厘度」，同时避免 125 MHz 域里
+//      那条约 21 ns 的组合除法关键路径（现在整个 IMU 链在 50 MHz 域，且单拍
+//      只有 5 位比较/减法）。
+// ---------------------------------------------------------------------------
+module t4_div10_sat (
+    input  wire               clk,
+    input  wire               rst_n,
+    input  wire               start,
+    input  wire signed [31:0] din,
+    output reg                busy,
+    output reg                done,
+    output reg  signed [15:0] cdeg
+);
+    localparam [1:0] IDLE = 2'd0, DIV = 2'd1, SAT = 2'd2;
+
+    reg        sign_r;
+    reg [31:0] mag_r;
+    reg [4:0]  rem_r;      // 余数 < 10（rem_r[3:0]）；trial = {rem_r[3:0], bit} < 20
+    reg [31:0] quot_r;
+    reg [5:0]  bit_r;
+    reg [1:0]  state_r;
+
+    wire [4:0] trial = {rem_r[3:0], mag_r[bit_r]};
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            sign_r  <= 1'b0;
+            mag_r   <= 32'd0;
+            rem_r   <= 5'd0;
+            quot_r  <= 32'd0;
+            bit_r   <= 6'd0;
+            state_r <= IDLE;
+            busy    <= 1'b0;
+            done    <= 1'b0;
+            cdeg    <= 16'sd0;
+        end else begin
+            done <= 1'b0;
+            case (state_r)
+                IDLE: begin
+                    busy <= 1'b0;
+                    if (start) begin
+                        busy    <= 1'b1;
+                        sign_r  <= din[31];
+                        mag_r   <= din[31] ? (32'd0 - din) : din;
+                        rem_r   <= 5'd0;
+                        quot_r  <= 32'd0;
+                        bit_r   <= 6'd31;
+                        state_r <= DIV;
+                    end
+                end
+                DIV: begin
+                    if (trial >= 5'd10) begin
+                        rem_r  <= trial - 5'd10;   // trial <= 19 -> 差 <= 9
+                        quot_r <= {quot_r[30:0], 1'b1};
+                    end else begin
+                        rem_r  <= trial;
+                        quot_r <= {quot_r[30:0], 1'b0};
+                    end
+                    if (bit_r == 6'd0) state_r <= SAT;
+                    else               bit_r   <= bit_r - 6'd1;
+                end
+                SAT: begin
+                    if (!sign_r) begin
+                        cdeg <= (quot_r > 32'd32767) ? 16'sd32767 : quot_r[15:0];
+                    end else if (quot_r > 32'd32768) begin
+                        cdeg <= -16'sd32768;
+                    end else begin
+                        cdeg <= 16'sd0 - quot_r[15:0];
+                    end
+                    busy    <= 1'b0;
+                    done    <= 1'b1;
                     state_r <= IDLE;
                 end
                 default: state_r <= IDLE;

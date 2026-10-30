@@ -52,13 +52,29 @@ module eth_motion_bridge #(
         end
     endfunction
 
+    // 一级流水寄存器：把「限幅」和「×SCALE_NUM + 饱和」拆成两个 125 MHz 周期
+    // 内的短路径。原实现是一条 "target_v -> clamp -> *SCALE_NUM -> 饱和 -> pwm"
+    // 的 ~11 ns 组合链（PnR SETUP slack -0.8 ns），在 125 MHz(8 ns) 域下无法收敛。
+    // 这里只增加 1 个时钟周期（8 ns）的目标更新延迟，占空比映射关系与使能门控
+    // 完全不变（安全逻辑未改动）。
+    reg signed [15:0] vl_q, vr_q;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            vl_q <= 16'sd0;
+            vr_q <= 16'sd0;
+        end else begin
+            vl_q <= vl;
+            vr_q <= vr;
+        end
+    end
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             pwm_l <= 16'sd0;
             pwm_r <= 16'sd0;
         end else begin
-            pwm_l <= to_duty(vl);
-            pwm_r <= to_duty(vr);
+            pwm_l <= to_duty(vl_q);
+            pwm_r <= to_duty(vr_q);
         end
     end
 

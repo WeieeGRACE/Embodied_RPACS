@@ -33,6 +33,10 @@ add_file src/eth_motion_bridge.v
 # ---- 编码器里程 + 前向 VL53L0X（从 tests/task4_navigation/src 复制）----
 add_file src/dual_ab_quadrature_encoder.v
 add_file src/asr_feedback.v
+add_file src/imu660ra_spi_master.v
+add_file src/imu660ra_config_rom.v
+add_file src/imu660ra_driver.v
+add_file src/imu_attitude_fixed.v
 add_file src/task4_tof_driver.v
 add_file src/tof_i2c.v
 add_file src/tof_calibrate.v
@@ -40,6 +44,9 @@ add_file src/tof_calibrate.v
 # ---- 顶层 ----
 add_file src/t4_lite_top.v
 add_file src/t4_lite_top.cst
+# IMU 链在板上独立 50 MHz 晶振（T9）域内运行，需要 20 ns 的时钟约束；
+# 125 MHz 遥测/电机域仍按 PnR 默认全局频率（100 MHz）分析，与改动前一致。
+add_file src/t4_lite_top.sdc
 
 set_option -top_module t4_lite_top
 set_option -output_base_name t4_lite_top

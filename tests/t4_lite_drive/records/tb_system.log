@@ -7,7 +7,7 @@
 # vmap sys_lib sim/work_sys 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 20:18:09 on Oct 30,2026
+# Start time: 21:36:39 on Oct 30,2026
 # vlog -sv -work sys_lib ../eth_link_protocol/src/eth_link_bridge.v ../uart_bridge/src/crc16_ccitt.v ../uart_bridge/src/host_frame_rx.v ../uart_bridge/src/host_cmd_decode.v ../uart_bridge/src/host_link_watchdog.v ../uart_bridge/src/telem_builder.v ../uart_bridge/src/frame_tx_engine.v ../uart_bridge/src/uart_bridge_core.v src/eth_motion_bridge.v ../../src/motor/tb6612_driver_interface.v sim/tb_motion_system.sv 
 # -- Compiling module eth_link_bridge
 # -- Compiling module crc16_ccitt
@@ -24,11 +24,11 @@
 # 
 # Top level modules:
 # 	tb_motion_system
-# End time: 20:18:09 on Oct 30,2026, Elapsed time: 0:00:00
+# End time: 21:36:40 on Oct 30,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
 # vsim -onfinish stop -voptargs="+acc" sys_lib.tb_motion_system 
-# Start time: 20:18:09 on Oct 30,2026
-# ** Note: (vsim-8009) Loading existing optimized design _opt
+# Start time: 21:36:40 on Oct 30,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
 # //  Copyright 1991-2017 Mentor Graphics Corporation
@@ -89,5 +89,5 @@
 #    Time: 4966376 ns  Iteration: 1  Instance: /tb_motion_system
 # Break in Module tb_motion_system at sim/tb_motion_system.sv line 357
 # Stopped at sim/tb_motion_system.sv line 357
-# End time: 20:18:10 on Oct 30,2026, Elapsed time: 0:00:01
+# End time: 21:36:41 on Oct 30,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

@@ -7,7 +7,7 @@
 # vmap unit_lib sim/work_unit 
 # Modifying modelsim.ini
 # Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
-# Start time: 20:18:07 on Oct 30,2026
+# Start time: 21:36:37 on Oct 30,2026
 # vlog -sv -work unit_lib src/eth_motion_bridge.v ../../src/motor/tb6612_driver_interface.v sim/tb_motion_unit2.sv 
 # -- Compiling module eth_motion_bridge
 # -- Compiling module tb6612_driver_interface
@@ -24,11 +24,11 @@
 # 
 # Top level modules:
 # 	tb_eth_motion_unit
-# End time: 20:18:07 on Oct 30,2026, Elapsed time: 0:00:00
+# End time: 21:36:37 on Oct 30,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 4
 # vsim -onfinish stop -voptargs="+acc" unit_lib.tb_eth_motion_unit 
-# Start time: 20:18:07 on Oct 30,2026
-# ** Note: (vsim-8009) Loading existing optimized design _opt
+# Start time: 21:36:37 on Oct 30,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
 # //  ModelSim SE-64 10.7 Dec  7 2017
 # //
 # //  Copyright 1991-2017 Mentor Graphics Corporation
@@ -77,5 +77,5 @@
 #    Time: 4601512 ns  Iteration: 1  Instance: /tb_eth_motion_unit
 # Break in Module tb_eth_motion_unit at sim/tb_motion_unit2.sv line 287
 # Stopped at sim/tb_motion_unit2.sv line 287
-# End time: 20:18:08 on Oct 30,2026, Elapsed time: 0:00:01
+# End time: 21:36:38 on Oct 30,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0

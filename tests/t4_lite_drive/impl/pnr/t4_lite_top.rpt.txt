@@ -7,32 +7,32 @@
   <Report Title>: PnR Report
   <Design File>: D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\gwsynthesis\t4_lite_top.vg
   <Physical Constraints File>: D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.cst
-  <Timing Constraints File>: ---
+  <Timing Constraints File>: D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.sdc
   <Tool Version>: V1.9.12 (64-bit)
   <Part Number>: GW5A-LV25UG324C2/I1
   <Device>: GW5A-25
   <Device Version>: A
-  <Created Time>:Fri Oct 30 20:40:30 2026
+  <Created Time>:Fri Oct 30 21:35:53 2026
 
 
 2. PnR Details
 
   Running placement:
-    Placement Phase 0: CPU time = 0h 0m 0.353s, Elapsed time = 0h 0m 0.353s
-    Placement Phase 1: CPU time = 0h 0m 0.21s, Elapsed time = 0h 0m 0.21s
-    Placement Phase 2: CPU time = 0h 0m 0.886s, Elapsed time = 0h 0m 0.886s
-    Placement Phase 3: CPU time = 0h 0m 1s, Elapsed time = 0h 0m 1s
-    Total Placement: CPU time = 0h 0m 3s, Elapsed time = 0h 0m 3s
+    Placement Phase 0: CPU time = 0h 0m 0.69s, Elapsed time = 0h 0m 0.69s
+    Placement Phase 1: CPU time = 0h 0m 0.261s, Elapsed time = 0h 0m 0.261s
+    Placement Phase 2: CPU time = 0h 0m 2s, Elapsed time = 0h 0m 2s
+    Placement Phase 3: CPU time = 0h 0m 2s, Elapsed time = 0h 0m 2s
+    Total Placement: CPU time = 0h 0m 5s, Elapsed time = 0h 0m 5s
  Running routing:
-    Routing Phase 0: CPU time = 0h 0m 0.002s, Elapsed time = 0h 0m 0.002s
-    Routing Phase 1: CPU time = 0h 0m 9s, Elapsed time = 0h 0m 9s
-    Routing Phase 2: CPU time = 0h 0m 0.073s, Elapsed time = 0h 0m 0.072s
+    Routing Phase 0: CPU time = 0h 0m 0.003s, Elapsed time = 0h 0m 0.003s
+    Routing Phase 1: CPU time = 0h 0m 3s, Elapsed time = 0h 0m 3s
+    Routing Phase 2: CPU time = 0h 0m 0.081s, Elapsed time = 0h 0m 0.081s
     Routing Phase 3: CPU time = 0h 0m 0s, Elapsed time = 0h 0m 0s
-    Total Routing: CPU time = 0h 0m 9s, Elapsed time = 0h 0m 9s
+    Total Routing: CPU time = 0h 0m 3s, Elapsed time = 0h 0m 3s
  Generate output files:
     CPU time = 0h 0m 2s, Elapsed time = 0h 0m 2s
 
- Total Time and Memory Usage: CPU time = 0h 0m 13s, Elapsed time = 0h 0m 13s, Peak memory usage = 612MB
+ Total Time and Memory Usage: CPU time = 0h 0m 10s, Elapsed time = 0h 0m 10s, Peak memory usage = 639MB
 
 
 3. Resource Usage Summary
@@ -40,28 +40,29 @@
   --------------------------------------------------------------------------------
   Resources                   | Usage                               | Utilization
   --------------------------------------------------------------------------------
-  Logic                       | 3448/23040                          |  15%
-    --LUT,ALU,ROM16           | 3448(2846 LUT, 602 ALU, 0 ROM16)    | -
+  Logic                       | 5544/23040                          |  25%
+    --LUT,ALU,ROM16           | 5544(4748 LUT, 796 ALU, 0 ROM16)    | -
     --SSRAM(RAM16)            | 0                                   | -
-  Register                    | 2058/23685                          |  9%
+  Register                    | 3244/23685                          |  14%
     --Logic Register as Latch | 0/23040                             |  0%
-    --Logic Register as FF    | 2052/23040                          |  9%
+    --Logic Register as FF    | 3235/23040                          |  15%
     --I/O Register as Latch   | 0/645                               |  0%
-    --I/O Register as FF      | 6/645                               |  <1%
-  CLS                         | 2357/11520                          |  21%
-  I/O Port                    | 37/222                              |  17%
-  I/O Buf                     | 36                                  | -
-    --Input Buf               | 13                                  | -
-    --Output Buf              | 21                                  | -
+    --I/O Register as FF      | 9/645                               |  2%
+  CLS                         | 3847/11520                          |  34%
+  I/O Port                    | 41/222                              |  19%
+  I/O Buf                     | 41                                  | -
+    --Input Buf               | 15                                  | -
+    --Output Buf              | 24                                  | -
     --Inout Buf               | 2                                   | -
   IOLOGIC                     | 11/215                              | 6%
     --IDDR                    | 5
     --ODDR                    | 6
-  BSRAM                       | 2/56                                | 4%
+  BSRAM                       | 6/56                                | 11%
     --SDPB                    | 2
-  DSP                         | 6/28                                | 22%
+    --pROM                    | 4
+  DSP                         | 8/28                                | 29%
     --MULT27X36               | 2
-    --MULTALU27X18            | 2
+    --MULTALU27X18            | 4
   ================================================================================
 
 
@@ -74,8 +75,8 @@
   bank 0   | 2/30        | 7%          
   bank 1   | 5/29        | 18%         
   bank 2   | 9/27        | 34%         
-  bank 3   | 5/27        | 19%         
-  bank 4   | 1/35        | 3%          
+  bank 3   | 7/27        | 26%         
+  bank 4   | 3/35        | 9%          
   bank 5   | 0/25        | 0%          
   bank 6   | 0/17        | 0%          
   bank 7   | 15/27       | 56%         
@@ -89,7 +90,7 @@
   ------------------------------------------
   Clock Resource| Usage         | Utilization 
   ------------------------------------------
-  PRIMARY       | 1/8           | 13%
+  PRIMARY       | 2/8           | 25%
   LW            | 4/8           | 50%
   GCLK_PIN      | 5/40          | 13%
   PLLA          | 1/6           | 17%
@@ -101,11 +102,12 @@
   -------------------------------------------
   Signal         | Global Clock   | Location
   -------------------------------------------
+  clk_50m_d      | PRIMARY        |  TL BR BL
   gmii_tx_clk    | PRIMARY        |  TR TL BR BL
   reset_n_d      | LW             |  -
-  n615_107       | LW             |  -
+  rst50_sync[1]  | LW             |  -
   u_bridge/u_core/telem_snapshot| LW             |  -
-  u_driver/n14_7 | LW             |  -
+  u_imu/n2122_12 | LW             |  -
   rgmii_rx_clk_i_d| HCLK           | 
   ===========================================
 
@@ -119,6 +121,7 @@ clk_50m            | -         | T9/4          | Y          | in    | IOB29[A] |
 reset_n            | -         | B16/1         | Y          | in    | IOT91[A] | RPLL0_T_IN1     | LVCMOS33   | OFF   | NONE      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 key_enable_n       | -         | A15/1         | Y          | in    | IOT87[B] | -               | LVCMOS33   | OFF   | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 key_estop_n        | -         | C15/1         | Y          | in    | IOT87[A] | -               | LVCMOS33   | OFF   | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
+imu_spi_miso       | -         | U18/3         | Y          | in    | IOB71[B] | -               | LVCMOS33   | OFF   | NONE      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 encoder_a_l        | -         | C17/2         | Y          | in    | IOR9[A]  | -               | LVCMOS33   | OFF   | DOWN      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 encoder_b_l        | -         | C18/2         | Y          | in    | IOR9[B]  | MCKTEST         | LVCMOS33   | OFF   | DOWN      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 encoder_a_r        | -         | F14/2         | Y          | in    | IOR7[A]  | -               | LVCMOS33   | OFF   | DOWN      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
@@ -129,6 +132,9 @@ rgmii_rxd[1]       | -         | G1/7          | Y          | in    | IOT7[B]  |
 rgmii_rxd[2]       | -         | F6/7          | Y          | in    | IOT25[A] | -               | LVCMOS33   | OFF   | NONE      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 rgmii_rxd[3]       | -         | F5/7          | Y          | in    | IOT25[B] | -               | LVCMOS33   | OFF   | NONE      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 rgmii_rxdv         | -         | E1/7          | Y          | in    | IOT15[B] | -               | LVCMOS33   | OFF   | NONE      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
+imu_spi_sck        | -         | V15/4         | Y          | out   | IOB56[B] | -               | LVCMOS33   | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
+imu_spi_mosi       | -         | V16/4         | Y          | out   | IOB60[B] | -               | LVCMOS33   | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
+imu_cs_n           | -         | T18/3         | Y          | out   | IOB73[B] | -               | LVCMOS33   | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 eth_rst_n          | -         | G6/7          | Y          | out   | IOT9[B]  | -               | LVCMOS33   | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 eth_mdc            | -         | D3/7          | Y          | out   | IOT23[B] | -               | LVCMOS33   | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
 eth_mdio           | -         | E4/7          | Y          | out   | IOT23[A] | -               | LVCMOS33   | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3        | MEDIUM        | NONE         
@@ -301,11 +307,11 @@ P12/4    | -                  | in    | IOB52[B] | D10             | LVCMOS33 | 
 T14/4    | -                  | in    | IOB54[A] | GCLKT_11B/D01/MI2 | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 V14/4    | -                  | in    | IOB54[B] | GCLKC_11B/D02/MI3/BPLL_C_FB1 | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 U15/4    | -                  | in    | IOB56[A] | -               | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
-V15/4    | -                  | in    | IOB56[B] | -               | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
+V15/4    | imu_spi_sck        | out   | IOB56[B] | -               | LVCMOS33 | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 R13/4    | -                  | in    | IOB58[A] | D00/DIN/MISO/MI1 | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 T13/4    | -                  | in    | IOB58[B] | MOSI/MI0/CSI_B  | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 U16/4    | -                  | in    | IOB60[A] | -               | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
-V16/4    | -                  | in    | IOB60[B] | -               | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
+V16/4    | imu_spi_mosi       | out   | IOB60[B] | -               | LVCMOS33 | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 R15/4    | -                  | in    | IOB62[A] | CCLK            | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 T15/4    | -                  | in    | IOB62[B] | MODE0           | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 V17/4    | -                  | in    | IOB64[A] | DONE            | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
@@ -316,9 +322,9 @@ M13/3    | -                  | in    | IOB67[B] | -               | LVCMOS33 | 
 M14/3    | AIN2               | out   | IOB69[A] | -               | LVCMOS33 | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 N14/3    | -                  | in    | IOB69[B] | -               | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 U17/3    | PWMA               | out   | IOB71[A] | -               | LVCMOS33 | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
-U18/3    | -                  | in    | IOB71[B] | -               | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
+U18/3    | imu_spi_miso       | in    | IOB71[B] | -               | LVCMOS33 | OFF   | NONE      | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 T17/3    | PWMB               | out   | IOB73[A] | -               | LVCMOS33 | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
-T18/3    | -                  | in    | IOB73[B] | -               | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
+T18/3    | imu_cs_n           | out   | IOB73[B] | -               | LVCMOS33 | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 N15/3    | BIN1               | out   | IOB75[A] | GCLKT_6B        | LVCMOS33 | 8     | NONE      | OFF       | OFF        | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 N16/3    | -                  | in    | IOB75[B] | GCLKC_6B        | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         
 P17/3    | -                  | in    | IOB77[A] | -               | LVCMOS33 | 8     | UP        | OFF       | ON         | OFF        | OFF        | OFF             | OFF           | 3.3   | MEDIUM        | NONE         

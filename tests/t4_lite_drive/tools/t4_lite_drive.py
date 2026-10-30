@@ -64,6 +64,10 @@ class Telemetry:
     __slots__ = ("enc_l", "enc_r", "yaw_cdeg", "dbg_a", "dbg_b", "speed_l", "speed_r",
                  "fault", "link_seq", "cmd_seq", "hb_age_ms", "t")
 
+    @property
+    def yaw_deg(self) -> float:
+        return self.yaw_cdeg / 100.0
+
     def __init__(self, payload: bytes, t: float):
         (self.enc_l, self.enc_r, self.yaw_cdeg,
          self.dbg_a, self.dbg_b, self.speed_l, self.speed_r,
@@ -225,7 +229,7 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
     base = t0.distance_mm
     print("[drive] 目标 %.0f mm（起点里程 %.1f）" % (target_mm, base))
 
-    link.set_limit(abs(speed_mm_s))
+    link.set_limit(abs(speed_mm_s) + 30)
     # 先让 link_ok 恢复，再清锁存故障（CLEAR_FAULT 在 link_ok=0 时会被拒绝）
     for _ in range(40):
         link.heartbeat()
@@ -244,6 +248,9 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
     last_progress = time.time()
     last_report = time.time()
     final = t0
+    final_yaw = 0.0
+    yaw_ref = 0.0
+    yaw_ref_set = False
     try:
         while True:
             now = time.time()
@@ -254,12 +261,21 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
             # 斜坡：前 ramp_s 秒线性加到目标速度
             ratio = min(1.0, elapsed / ramp_s) if ramp_s > 0 else 1.0
             v = max(20, int(abs(speed_mm_s) * ratio))
+            # 陀螺仪航向保持：航向偏差 -> 左右轮差速（正=向右修正）
+            yaw_err = yaw_ref - final_yaw
+            # 实测：cmd(vl>vr) 使 yaw 增大（左转）。yaw 超参考值(err<0) 时要右转 -> vl<vr -> corr<0
+            # 增益 1.5 mm/s per degree（err 单位=度）
+            corr = max(-20.0, min(20.0, 1.5 * yaw_err))
             if now - last_cmd >= 0.05:
-                link.set_vel(v, v)
+                link.set_vel(int(v + corr), int(v - corr))
                 last_cmd = now
             fresh = link.poll(0.01)
             if fresh:
                 final = fresh[-1]
+                final_yaw = final.yaw_deg
+                if not yaw_ref_set:
+                    yaw_ref = final_yaw
+                    yaw_ref_set = True
             if fresh and final is not None:
                 if final.fault and (final.fault & ~0x20):
                     print("[drive] FPGA 报告故障 fault=0x%02X，停车" % final.fault)
@@ -280,8 +296,8 @@ def run_drive(link: Link, target_mm: float, speed_mm_s: int,
                     last_progress = now
                 if now - last_report >= 0.5:
                     last_report = now
-                    print("[drive] %.2f s  里程 %.1f / %.0f mm  v=(%d,%d) fault=0x%02X"
-                          % (elapsed, dist, target_mm, final.speed_l, final.speed_r, final.fault))
+                    print("[drive] %.2f s  里程 %.1f / %.0f mm  yaw=%.2f° (err=%.2f°)  v=(%d,%d) fault=0x%02X"
+                          % (elapsed, dist, target_mm, final_yaw, yaw_err, final.speed_l, final.speed_r, final.fault))
                 if dist >= target_mm:
                     print("[drive] 到达目标：里程 %.1f mm >= %.0f mm，发 STOP" % (dist, target_mm))
                     link.stop()
