@@ -62,12 +62,12 @@ python tools\t4_floor.py --bitstream impl\pnr\task4_navigation_single_leg_probe_
 # USB 版：板载 CH9102 也是 /dev/ttyACM0 或 /dev/ttyUSB0
 cd ~/rpacs_phase0 2>/dev/null || true
 
+# 工具已部署到 Pi：~/t4_tools（含 t4_log/capture/validate/floor/selftest + Runbook）
 # 一条命令：采集 60 s + 自动判读 + 生成报告
-~/rpacs_phase0/pyorbbecsdk-main/.venv/bin/python <repo>/tests/task4_navigation/tools/t4_floor.py \
-    --seconds 60
+~/rpacs_phase0/pyorbbecsdk-main/.venv/bin/python ~/t4_tools/t4_floor.py --seconds 60
 
 # 不知道端口时它自动探测；也可显式指定：
-... t4_floor.py --seconds 60 --port /dev/ttyACM0
+... ~/t4_tools/t4_floor.py --seconds 60 --port /dev/ttyACM0
 ```
 
 > PC 上同理：`python tools\t4_floor.py --seconds 60 --port COM24`（WCH-Link）。
