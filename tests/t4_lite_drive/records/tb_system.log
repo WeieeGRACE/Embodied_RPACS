@@ -1,0 +1,93 @@
+﻿Reading D:/app/modesilm/tcl/vsim/pref.tcl
+
+# 10.7
+
+# do sim/run_motion_system.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap sys_lib sim/work_sys 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 20:18:09 on Oct 30,2026
+# vlog -sv -work sys_lib ../eth_link_protocol/src/eth_link_bridge.v ../uart_bridge/src/crc16_ccitt.v ../uart_bridge/src/host_frame_rx.v ../uart_bridge/src/host_cmd_decode.v ../uart_bridge/src/host_link_watchdog.v ../uart_bridge/src/telem_builder.v ../uart_bridge/src/frame_tx_engine.v ../uart_bridge/src/uart_bridge_core.v src/eth_motion_bridge.v ../../src/motor/tb6612_driver_interface.v sim/tb_motion_system.sv 
+# -- Compiling module eth_link_bridge
+# -- Compiling module crc16_ccitt
+# -- Compiling module host_frame_rx
+# -- Compiling module host_cmd_decode
+# -- Compiling module host_link_watchdog
+# -- Compiling module telem_builder
+# -- Compiling module frame_tx_engine
+# -- Compiling module uart_bridge_core
+# -- Compiling module eth_motion_bridge
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module tb_motion_system
+# 
+# Top level modules:
+# 	tb_motion_system
+# End time: 20:18:09 on Oct 30,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" sys_lib.tb_motion_system 
+# Start time: 20:18:09 on Oct 30,2026
+# ** Note: (vsim-8009) Loading existing optimized design _opt
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_motion_system(fast)
+# Loading work.eth_link_bridge(fast)
+# Loading work.uart_bridge_core(fast)
+# Loading work.host_frame_rx(fast)
+# Loading work.crc16_ccitt(fast)
+# Loading work.host_cmd_decode(fast)
+# Loading work.host_link_watchdog(fast)
+# Loading work.telem_builder(fast)
+# Loading work.frame_tx_engine(fast)
+# Loading work.eth_motion_bridge(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# PASS S1_powerup_no_link
+# PASS S1_powerup_stby_off
+# PASS S2_link_ok_after_heartbeat
+# PASS S2_fault_clear (0x20)
+# PASS S2_motors_ready_or_cmd_timeout
+# PASS S3_forward_motors_enabled
+# PASS S3_forward_direction
+# PASS S3_forward_duty_l (4950 vs 4950)
+# PASS S3_setvel_ack_ok
+# PASS S4_reverse_direction
+# PASS S4_reverse_duty_l (3300 vs 3300)
+# PASS S5_rotate_left_reverse
+# PASS S5_rotate_right_forward
+# PASS S6_stop_ack_ok
+# PASS S6_stop_stby_off
+# PASS S6_stop_duty_zero
+# PASS S7_setvel_rejected_when_stopped (status=0x02)
+# PASS S7_still_stopped
+# PASS S8_resume_after_clear
+# PASS S8_pwm_present_after_resume
+# PASS S9_link_lost_after_no_heartbeat
+# PASS S9_stby_off_on_link_lost
+# PASS S9_setvel_rejected_link_lost (status=0x01)
+# PASS S10_estop_key_stops
+# PASS S11_recovered_after_estop_release
+# PASS T1_output_frames_well_formed
+# PASS T2_telemetry_seen
+# 
+# telem=124 ack=26 bad_frames=0
+# PASS tb_eth_motion_system (27 checks)
+# ** Note: $finish    : sim/tb_motion_system.sv(357)
+#    Time: 4966376 ns  Iteration: 1  Instance: /tb_motion_system
+# Break in Module tb_motion_system at sim/tb_motion_system.sv line 357
+# Stopped at sim/tb_motion_system.sv line 357
+# End time: 20:18:10 on Oct 30,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0

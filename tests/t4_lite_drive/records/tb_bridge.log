@@ -1,0 +1,64 @@
+﻿Reading D:/app/modesilm/tcl/vsim/pref.tcl
+
+# 10.7
+
+# do sim/run_motion.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap motion_lib sim/work 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 20:18:05 on Oct 30,2026
+# vlog -sv -work motion_lib src/eth_motion_bridge.v ../../src/motor/tb6612_driver_interface.v sim/tb_eth_motion_bridge.sv 
+# -- Compiling module eth_motion_bridge
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module tb_eth_motion_bridge
+# 
+# Top level modules:
+# 	tb_eth_motion_bridge
+# End time: 20:18:05 on Oct 30,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -onfinish stop -voptargs="+acc" motion_lib.tb_eth_motion_bridge 
+# Start time: 20:18:05 on Oct 30,2026
+# ** Note: (vsim-8009) Loading existing optimized design _opt
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_eth_motion_bridge(fast)
+# Loading work.eth_motion_bridge(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# PASS idle_duty_zero
+# PASS idle_motors_enabled
+# PASS forward_duty_150mmps_left
+# PASS forward_duty_150mmps_right
+# PASS forward_direction_left
+# PASS forward_direction_right
+# PASS reverse_direction_left
+# PASS reverse_duty_left
+# PASS clamp_at_full_scale
+# PASS link_lost_disables_stby
+# PASS link_lost_clears_enable
+# PASS fault_disables_stby
+# PASS stop_latched_disables_stby
+# PASS estop_key_disables_stby
+# PASS recover_reenables_stby
+# 
+# PASS tb_eth_motion_bridge (15 checks)
+# ** Note: $finish    : sim/tb_eth_motion_bridge.sv(143)
+#    Time: 700720 ns  Iteration: 1  Instance: /tb_eth_motion_bridge
+# Break in Module tb_eth_motion_bridge at sim/tb_eth_motion_bridge.sv line 143
+# Stopped at sim/tb_eth_motion_bridge.sv line 143
+# End time: 20:18:06 on Oct 30,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0

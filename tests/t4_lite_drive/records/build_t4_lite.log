@@ -1,0 +1,146 @@
+﻿*** GOWIN Tcl Command Line Console  *** 
+current device: GW5A-25A  GW5A-LV25UG324C2/I1
+add new file: "../eth_link_protocol/src/eth_udp_gmii/crc32_d8.v"
+add new file: "../eth_link_protocol/src/eth_udp_gmii/eth_udp_rx_gmii.v"
+add new file: "../eth_link_protocol/src/eth_udp_gmii/eth_udp_tx_gmii.v"
+add new file: "../eth_link_protocol/src/eth_udp_gmii/ip_checksum.v"
+add new file: "../eth_link_protocol/src/gmii_rgmii_gmii/gmii_to_rgmii.v"
+add new file: "../eth_link_protocol/src/gmii_rgmii_gmii/rgmii_to_gmii.v"
+add new file: "../eth_link_protocol/src/gowin_pll/gowin_pll.v"
+add new file: "src/eth_link_bridge.v"
+add new file: "../uart_bridge/src/crc16_ccitt.v"
+add new file: "../uart_bridge/src/host_frame_rx.v"
+add new file: "../uart_bridge/src/host_cmd_decode.v"
+add new file: "../uart_bridge/src/host_link_watchdog.v"
+add new file: "../uart_bridge/src/telem_builder.v"
+add new file: "../uart_bridge/src/frame_tx_engine.v"
+add new file: "../uart_bridge/src/uart_bridge_core.v"
+add new file: "../../src/motor/tb6612_driver_interface.v"
+add new file: "src/eth_motion_bridge.v"
+add new file: "src/dual_ab_quadrature_encoder.v"
+add new file: "src/asr_feedback.v"
+add new file: "src/task4_tof_driver.v"
+add new file: "src/tof_i2c.v"
+add new file: "src/tof_calibrate.v"
+add new file: "src/t4_lite_top.v"
+add new file: "src/t4_lite_top.cst"
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\crc32_d8.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\eth_udp_rx_gmii.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\eth_udp_tx_gmii.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\ip_checksum.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v'
+WARN  (EX3788) : Block identifier is required on this block("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":58)
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\rgmii_to_gmii.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gowin_pll\gowin_pll.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\eth_link_bridge.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\crc16_ccitt.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_frame_rx.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_cmd_decode.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_link_watchdog.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\telem_builder.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\frame_tx_engine.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\tb6612_driver_interface.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\eth_motion_bridge.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\dual_ab_quadrature_encoder.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\asr_feedback.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\task4_tof_driver.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\tof_i2c.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\tof_calibrate.v'
+Analyzing Verilog file 'D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.v'
+WARN  (EX3073) : Port 'hb_age_ms_out' remains unconnected for this instance("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.v":146)
+Compiling module 't4_lite_top'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.v":19)
+Compiling module 'rgmii_to_gmii'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\rgmii_to_gmii.v":17)
+Compiling module 'eth_udp_rx_gmii'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\eth_udp_rx_gmii.v":18)
+Compiling module 'ip_checksum'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\ip_checksum.v":18)
+Compiling module 'crc32_d8'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\crc32_d8.v":20)
+Compiling module 'Gowin_PLL'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gowin_pll\gowin_pll.v":9)
+WARN  (EX3073) : Port 'estop_latched_out' remains unconnected for this instance("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\eth_link_bridge.v":151)
+Compiling module 'eth_link_bridge'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\eth_link_bridge.v":10)
+Extracting RAM for identifier 'rf_mem'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\eth_link_bridge.v":58)
+Extracting RAM for identifier 'tb_mem'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\eth_link_bridge.v":154)
+Compiling module 'uart_bridge_core(CLK_HZ=125000000,BYTE_TIMEOUT_CYCLES=625000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\uart_bridge_core.v":11)
+Compiling module 'host_frame_rx(TIMEOUT_CYCLES=625000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_frame_rx.v":10)
+Compiling module 'crc16_ccitt'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\crc16_ccitt.v":5)
+Compiling module 'host_cmd_decode'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_cmd_decode.v":13)
+Compiling module 'host_link_watchdog(TIMEOUT_MS=300)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\host_link_watchdog.v":7)
+Compiling module 'telem_builder'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\telem_builder.v":6)
+Compiling module 'frame_tx_engine'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\uart_bridge\src\frame_tx_engine.v":7)
+Compiling module 'eth_udp_tx_gmii'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\eth_udp_tx_gmii.v":21)
+Compiling module 'gmii_to_rgmii'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":20)
+WARN  (EX3670) : Actual bit length 32 differs from formal bit length 1 for port 'TX'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":55)
+WARN  (EX3670) : Actual bit length 32 differs from formal bit length 1 for port 'TX'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":55)
+WARN  (EX3670) : Actual bit length 32 differs from formal bit length 1 for port 'TX'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":55)
+WARN  (EX3670) : Actual bit length 32 differs from formal bit length 1 for port 'TX'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":55)
+WARN  (EX3670) : Actual bit length 32 differs from formal bit length 1 for port 'TX'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":67)
+WARN  (EX3670) : Actual bit length 32 differs from formal bit length 1 for port 'D0'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":76)
+WARN  (EX3670) : Actual bit length 32 differs from formal bit length 1 for port 'D1'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":77)
+WARN  (EX3670) : Actual bit length 32 differs from formal bit length 1 for port 'TX'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\gmii_rgmii_gmii\gmii_to_rgmii.v":78)
+Compiling module 'dual_ab_quadrature_encoder(FILTER_CYCLES=125,INVERT_L=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\dual_ab_quadrature_encoder.v":3)
+Compiling module 'dual_ab_encoder_channel(FILTER_CYCLES=125,INVERT=1)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\dual_ab_quadrature_encoder.v":27)
+Compiling module 'dual_ab_encoder_channel(FILTER_CYCLES=125)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\dual_ab_quadrature_encoder.v":27)
+Compiling module 'asr_distance(UM_PER_REV=204203)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\asr_feedback.v":3)
+Compiling module 't4_div1000'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.v":362)
+Compiling module 'tof_driver(CLK_HZ=125000000,RESET_CYCLES=125000,BOOT_CYCLES=2500000,POLL_CYCLES=1250000,TIMEOUT_CYCLES=1250000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\task4_tof_driver.v":4)
+Compiling module 'tof_i2c_reg(CLK_HZ=125000000,TIMEOUT_CYCLES=1250000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\tof_i2c.v":99)
+Compiling module 'tof_i2c_bits(CLK_HZ=125000000,TIMEOUT_CYCLES=1250000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\tof_i2c.v":4)
+Compiling module 'tof_calibrate(OFFSET_MM=60)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\tof_calibrate.v":4)
+WARN  (EX3791) : Expression size 32 truncated to fit in target size 17("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\tof_calibrate.v":11)
+Compiling module 'eth_motion_bridge'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\eth_motion_bridge.v":7)
+Compiling module 'tb6612_driver_interface(CLK_HZ=125000000)'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\tb6612_driver_interface.v":4)
+Compiling module 'tb6612_driver_channel'("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\src\motor\tb6612_driver_interface.v":58)
+WARN  (EX1998) : Net 'data_overflow' does not have a driver("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.v":85)
+NOTE  (EX0101) : Current top module is "t4_lite_top"
+[5%] Running netlist conversion ...
+WARN  (CV0016) : Input clk_50m is unused("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.v":37)
+Running device independent optimization ...
+[10%] Optimizing Phase 0 completed
+[15%] Optimizing Phase 1 completed
+[25%] Optimizing Phase 2 completed
+Running inference ...
+[30%] Inferring Phase 0 completed
+[40%] Inferring Phase 1 completed
+[50%] Inferring Phase 2 completed
+[55%] Inferring Phase 3 completed
+Running technical mapping ...
+[60%] Tech-Mapping Phase 0 completed
+[65%] Tech-Mapping Phase 1 completed
+[75%] Tech-Mapping Phase 2 completed
+[80%] Tech-Mapping Phase 3 completed
+[90%] Tech-Mapping Phase 4 completed
+WARN  (NL0002) : The module "tof_calibrate" instantiated to "u_tof_cal" is swept in optimizing("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.v":299)
+WARN  (NL0002) : The module "crc32_d8" instantiated to "crc32_d8" is swept in optimizing("D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\eth_link_protocol\src\eth_udp_gmii\eth_udp_rx_gmii.v":515)
+[95%] Generate netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\gwsynthesis\t4_lite_top.vg" completed
+[100%] Generate report file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\gwsynthesis\t4_lite_top_syn.rpt.html" completed
+GowinSynthesis finish
+Reading netlist file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\gwsynthesis\t4_lite_top.vg"
+Parsing netlist file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\gwsynthesis\t4_lite_top.vg" completed
+Processing netlist completed
+Reading constraint file: "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\src\t4_lite_top.cst"
+Physical Constraint parsed completed
+Running placement......
+[10%] Placement Phase 0 completed
+[20%] Placement Phase 1 completed
+[30%] Placement Phase 2 completed
+[50%] Placement Phase 3 completed
+Running routing......
+[60%] Routing Phase 0 completed
+[70%] Routing Phase 1 completed
+[80%] Routing Phase 2 completed
+[90%] Routing Phase 3 completed
+Running timing analysis......
+[95%] Timing analysis completed
+Placement and routing completed
+Bitstream generation in progress......
+Bitstream generation completed
+Running power analysis......
+[100%] Power analysis completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\pnr\t4_lite_top.power.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\pnr\t4_lite_top.pin.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\pnr\t4_lite_top.rpt.html" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\pnr\t4_lite_top.rpt.txt" completed
+Generate file "D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\t4_lite_drive\impl\pnr\t4_lite_top.tr.html" completed
+Fri Oct 30 20:17:14 2026
+

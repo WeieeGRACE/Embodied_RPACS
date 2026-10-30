@@ -1,0 +1,81 @@
+﻿Reading D:/app/modesilm/tcl/vsim/pref.tcl
+
+# 10.7
+
+# do sim/run_motion_unit.do
+# Model Technology ModelSim SE-64 vmap 10.7 Lib Mapping Utility 2017.12 Dec  7 2017
+# vmap unit_lib sim/work_unit 
+# Modifying modelsim.ini
+# Model Technology ModelSim SE-64 vlog 10.7 Compiler 2017.12 Dec  7 2017
+# Start time: 20:18:07 on Oct 30,2026
+# vlog -sv -work unit_lib src/eth_motion_bridge.v ../../src/motor/tb6612_driver_interface.v sim/tb_motion_unit2.sv 
+# -- Compiling module eth_motion_bridge
+# -- Compiling module tb6612_driver_interface
+# -- Compiling module tb6612_driver_channel
+# -- Compiling module tb_eth_motion_unit
+# ** Warning: sim/tb_motion_unit2.sv(201): (vlog-2244) Variable 'pwm_ok' is implicitly static. You must either explicitly declare it as static or automatic
+# or remove the initialization in the declaration of variable.
+# ** Warning: sim/tb_motion_unit2.sv(201): (vlog-2244) Variable 'dead_ok' is implicitly static. You must either explicitly declare it as static or automatic
+# or remove the initialization in the declaration of variable.
+# ** Warning: sim/tb_motion_unit2.sv(201): (vlog-2244) Variable 'low_run' is implicitly static. You must either explicitly declare it as static or automatic
+# or remove the initialization in the declaration of variable.
+# ** Warning: sim/tb_motion_unit2.sv(201): (vlog-2244) Variable 'max_low_run' is implicitly static. You must either explicitly declare it as static or automatic
+# or remove the initialization in the declaration of variable.
+# 
+# Top level modules:
+# 	tb_eth_motion_unit
+# End time: 20:18:07 on Oct 30,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 4
+# vsim -onfinish stop -voptargs="+acc" unit_lib.tb_eth_motion_unit 
+# Start time: 20:18:07 on Oct 30,2026
+# ** Note: (vsim-8009) Loading existing optimized design _opt
+# //  ModelSim SE-64 10.7 Dec  7 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  ModelSim SE-64 and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.tb_eth_motion_unit(fast)
+# Loading work.eth_motion_bridge(fast)
+# Loading work.tb6612_driver_interface(fast)
+# Loading work.tb6612_driver_channel(fast)
+# PASS U1/U3 duty sweep + direction (-300..300 step 50, tol +-2)
+# PASS U2 pwm_period measured=6250 expect=6250
+# PASS U4 zero_duty
+# PASS U4 zero_command_direction_pins_low
+# PASS U4 zero_command_stby_still_on
+# PASS U5 deadtime_pwm_masked_no_shoot_through
+# PASS U5 direction_after_deadtime
+# PASS U5 duty_after_reverse
+# PASS U6 clamp_positive
+# PASS U6 clamp_negative
+# PASS U6 velocity_clamped
+# PASS U7 differential_left_reverse
+# PASS U7 differential_right_forward
+# PASS U7 differential_left_duty
+# PASS U7 differential_right_duty
+# PASS U8 motors_enabled_truth_table (0 mismatches)
+# PASS U9 baseline_stby_on
+# PASS U9 link_lost_stops
+# PASS U9 link_ok_recovers
+# PASS U9 fault_stops
+# PASS U9 stop_latched_stops
+# PASS U9 estop_key_stops
+# PASS U9 reenable_after_all_clear
+# PASS U3 no_shoot_through_ever
+# 
+# PASS tb_eth_motion_unit (24 checks)
+# ** Note: $finish    : sim/tb_motion_unit2.sv(287)
+#    Time: 4601512 ns  Iteration: 1  Instance: /tb_eth_motion_unit
+# Break in Module tb_eth_motion_unit at sim/tb_motion_unit2.sv line 287
+# Stopped at sim/tb_motion_unit2.sv line 287
+# End time: 20:18:08 on Oct 30,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
