@@ -9,6 +9,10 @@
 //   * 前向 VL53L0X（软 I2C，约 60 ms 一次）：读数减 60 mm 实测偏置后 <=120 mm
 //     即锁存 tof_stop，切断电机（只做停车边界，不参与任何导航/避障）；
 //   * TB6612 电机输出（复用主工程 tb6612_driver_interface，含方向死区）。
+//   * 速度闭环（t4_wheel_speed_loop）：SET_VEL 的 mm/s 目标经主工程
+//     speed_measurement_and_velocity_filter -> dual_speed_pi_pid_controller ->
+//     pwm_and_startup_ramp 得到 duty，取代原来 eth_motion_bridge 的开环映射
+//     （duty = v*20）。安全门控/motors_enabled/STOP/KEY2/ToF 均原样保留。
 //
 // 安全（全部硬连线，不依赖上位机）：
 //   * 心跳 300 ms 超时 / 任一链路故障位 / STOP 锁存 / CMD 500 ms 超时
@@ -26,6 +30,15 @@ module t4_lite_top #(
     parameter integer TELEM_PERIOD_MS = 20,
     parameter integer MAX_V_MM_S = 300,
     parameter integer PWM_HZ     = 20000,
+    // ---- 速度闭环参数（详见 src/t4_wheel_speed_loop.v 文件头注释）----
+    // 窗口 20 ms：50 mm/s -> 7 counts/窗口 = 49.1 mm/s（10 ms 窗口会变成 4 counts=56.1）。
+    parameter integer SPEED_WINDOW_MS   = 20,
+    parameter signed [15:0] SPEED_KP    = 16,     // 与主工程等效的连续域 Kp（=32@10ms 折算）
+    parameter signed [15:0] SPEED_KI    = 4,
+    parameter signed [15:0] SPEED_KD    = 0,
+    parameter integer SPEED_GAIN_SHIFT  = 0,
+    parameter integer SPEED_DUTY_DIV    = 2,      // PI/ramp duty 上限 = PWM_TICKS/2
+    parameter integer SPEED_RAMP_STEP   = 1,      // 每 PWM 周期最多变 1 tick
     // 65 mm 轮径标定（与 tests/task4_navigation 一致）
     parameter integer UM_PER_REV     = 204203,
     parameter integer COUNTS_PER_REV = 1456,
@@ -496,31 +509,61 @@ module t4_lite_top #(
         end
     end
 
-    // ------------------------------------------------- 速度 -> PWM -> H 桥
+    // ------------------------------------- SET_VEL 限幅 + 安全门 + 双轮速度闭环
     localparam integer PWM_TICKS = 125_000_000 / PWM_HZ;   // 20 kHz -> 6250
-    wire signed [15:0] pwm_l, pwm_r;
+    wire signed [15:0] pwm_l, pwm_r;      // 速度环输出：有符号 duty（单位 = clk tick）
     wire motors_enabled;
 
     // KEY0 / KEY2 / ToF 停车硬门控（链路安全之外的第二层）
     // KEY1 不再参与门控（本工程由主机显式发运动命令）；保留 KEY2 急停 + ToF 兜底停。
     wire motor_allow = key_estop_n && !tof_stop;
 
+    // 旧开环映射（duty = v*20）仍保留在 eth_motion_bridge 内，但顶层不再使用其
+    // pwm_l/pwm_r；这里只取它限幅到 +/-MAX_V_MM_S 后的目标速度（SET_VEL 语义不变），
+    // 连同它的 motors_enabled 安全门一起原样复用。
+    wire signed [15:0] target_limited_l, target_limited_r;
+
     eth_motion_bridge #(
         .MAX_V_MM_S(MAX_V_MM_S),
         .PWM_TICKS(PWM_TICKS),
-        .SCALE_NUM(PWM_TICKS / MAX_V_MM_S)     // 6250/300=20
+        .SCALE_NUM(PWM_TICKS / MAX_V_MM_S)     // 6250/300=20（旧开环映射，本工程不用）
     ) u_motion (
         .clk(clk125m), .rst_n(reset_n),
         .target_l(target_v_l), .target_r(target_v_r),
         // tof_stop / key 未使能时也清掉 motors_enabled（与 tb6612 enable 双重门控）
         .fault_bits(fault_bits), .link_ok(link_ok), .stop_latched(stop_latched),
         .key_estop_n(motor_allow),
-        .pwm_l(pwm_l), .pwm_r(pwm_r),
+        .pwm_l(), .pwm_r(),
         .motors_enabled(motors_enabled),
-        .v_limited_l(), .v_limited_r()
+        .v_limited_l(target_limited_l), .v_limited_r(target_limited_r)
     );
 
     wire motors_enable_gated = motors_enabled && motor_allow;
+
+    // 主工程速度闭环链：编码器增量 -> 窗口测速 -> PI -> duty 斜坡。
+    // 1 ms = 125_000 clk @125 MHz；窗口长度由顶层参数 SPEED_WINDOW_MS 给出。
+    t4_wheel_speed_loop #(
+        .CLK_HZ(125_000_000),
+        .PWM_HZ(PWM_HZ),
+        .WINDOW_CYCLES(125_000 * SPEED_WINDOW_MS),
+        .FILTER_LENGTH(4),
+        .COUNTS_PER_REV(COUNTS_PER_REV),
+        .UM_PER_REV(UM_PER_REV),
+        .KP(SPEED_KP), .KI(SPEED_KI), .KD(SPEED_KD),
+        .GAIN_SHIFT(SPEED_GAIN_SHIFT),
+        .DUTY_DIV(SPEED_DUTY_DIV),
+        .RAMP_STEP(SPEED_RAMP_STEP)
+    ) u_speed_loop (
+        .clk(clk125m), .rst_n(reset_n),
+        .enable(motors_enable_gated),
+        .target_l_mm_s(target_limited_l), .target_r_mm_s(target_limited_r),
+        .delta_count_l(wheel_delta_l), .delta_count_r(wheel_delta_r),
+        .pwm_l(pwm_l), .pwm_r(pwm_r),
+        // 调试观测口（本工程遥测字段不变，不占用 dbg_a/dbg_b）
+        .control_l(), .control_r(),
+        .speed_count_l(), .speed_count_r(),
+        .speed_valid()
+    );
 
     // 主工程现成的 TB6612 驱动（含方向死区 + 安全 inhibit），直接复用不改动
     tb6612_driver_interface #(

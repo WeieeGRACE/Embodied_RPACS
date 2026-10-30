@@ -28,6 +28,12 @@ add_file ../uart_bridge/src/uart_bridge_core.v
 
 # ---- 电机：主工程现成模块（只读引用，不改动）+ 本测试的速度映射 ----
 add_file ../../src/motor/tb6612_driver_interface.v
+# 速度闭环：主工程三个电机控制模块原样复制到本工程 src/（文件名/模块名/参数名不变），
+# 由 src/t4_wheel_speed_loop.v 负责 mm/s 目标换算与互联（取代开环 to_duty 映射）。
+add_file src/speed_measurement_and_velocity_filter.v
+add_file src/dual_speed_pi_pid_controller.v
+add_file src/pwm_and_startup_ramp.v
+add_file src/t4_wheel_speed_loop.v
 add_file src/eth_motion_bridge.v
 
 # ---- 编码器里程 + 前向 VL53L0X（从 tests/task4_navigation/src 复制）----
