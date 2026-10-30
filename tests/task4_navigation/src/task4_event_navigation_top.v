@@ -2,7 +2,9 @@
 // Normalized simulation shell. Wall IDs come only from the fixed route/map
 // association; the shell exposes sensor values but no caller-supplied wall ID.
 module task4_event_navigation_top #(
-    parameter integer CLK_HZ=50000000
+    parameter integer CLK_HZ=50000000,
+    parameter integer MAP_RANGE_TOLERANCE_MM=50,
+    parameter integer REQUIRE_WALL_EVENT=1
 ) (
     input wire clk_50m, input wire reset_n,
     input wire key_start_n, input wire key_stop_n, input wire key_estop_n,
@@ -114,7 +116,7 @@ module task4_event_navigation_top #(
     wire [7:0] ray_wall_id;
     wire [15:0] predicted_wall_range;
     wire map_match;
-    nav_map_wall_association #(.RANGE_TOLERANCE_MM(50)) map_assoc(
+    nav_map_wall_association #(.RANGE_TOLERANCE_MM(MAP_RANGE_TOLERANCE_MM)) map_assoc(
       .pose_x_mm(x_um_i/1000),.pose_y_mm(y_um_i/1000),.yaw_mdeg(yaw_i),.tof_dir(expected_dir),
       .expected_wall_id(expected_wall),.range_valid(selected_valid),.measured_range_mm(selected_mm),
       .ray_wall_id(ray_wall_id),.predicted_range_mm(predicted_wall_range),.associated(map_match));
@@ -132,7 +134,7 @@ module task4_event_navigation_top #(
       .wall_event_id(wall_event_id),.event_pulse(wall_event_pulse),.event_latched(wall_event_latched),
       .stale_fault(wall_stale),.sample_discarded_20(wall_discard20));
 
-    nav_event_segment_controller controller(
+    nav_event_segment_controller #(.REQUIRE_WALL_EVENT(REQUIRE_WALL_EVENT)) controller(
       .clk(clk_50m),.rst_n(reset_n),.control_tick(tick_100hz),
       .start(!key_start_n),.stop(!key_stop_n),.estop(!key_estop_n),
       .route_id(route_id),.calibration_done(calibration_done),.geometry_ok(geometry_ok),

@@ -24,6 +24,7 @@ add_file src/task4_navigation_single_leg_probe_top.v
 add_file src/tb6612_driver_interface.v
 add_file src/task4_tof_driver.v
 add_file src/tof_i2c.v
+add_file src/tof_calibrate.v
 add_file src/tof_oled_text.v
 add_file src/uart_tx.v
 add_file src/imu660ra_config.hex

@@ -37,6 +37,9 @@ import t4_validate as V      # noqa: E402
 EXPECTED_PROBE_SHAS = {
     "F938C41792B9DA32382BA7C9FE321B8BE08DFA45636F1B6E6AC2B1DE70AFC392": "probe-usb(V8)",
     "C2FA191BB19F224EAAE0A525A3FD092CA304BA3E753DC5553D00A0F83DE6D44F": "probe-wireless(L12)",
+    "0F1A6B0A1A15AC36A1B0B00B1214337B3476A5CC40D814728D616B1A495BC20C": "probe-wireless-calibrated",
+    "CA199023BBEFF841EDF8B19175F7E42F18E289BFB69FAD546BE702267ED01222": "probe-usb-calibrated",
+    "BC995764B4C5C72052FF9F0884340612AFBADBF6298FB26F1A0296CAC64A46E3": "distance-mode-wireless",
 }
 
 
@@ -96,6 +99,8 @@ def main() -> int:
     ap.add_argument("--check-only", action="store_true", help="只查位流，不采集")
     ap.add_argument("--expect-safe-stop", action="store_true", help="安全停车也算通过")
     ap.add_argument("--last-only", action="store_true", help="只判读最后一条记录")
+    ap.add_argument("--profile", choices=["wall", "distance"], default="wall",
+                    help="wall=要求 ToF 墙事件；distance=里程到达即成功")
     ap.add_argument("--spec", default=None, help="期望段序列 JSON（默认 route6 单段探针）")
     ap.add_argument("--out-dir", default=str(ROOT / "records"))
     args = ap.parse_args()
@@ -147,7 +152,7 @@ def main() -> int:
 
     # ---------------- 判读 + 报告
     recs, stats = L.records_from_file(str(log_path))
-    spec = V.load_spec(args.spec)
+    spec = V.load_spec(args.spec, args.profile)
     res = V.validate(recs, spec, args.expect_safe_stop, args.last_only)
     res["log"] = str(log_path)
     res["parse"] = stats.as_dict()

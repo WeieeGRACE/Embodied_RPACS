@@ -6,7 +6,7 @@ module task4_navigation_board_top #(
     parameter integer CLK_HZ=50000000,BAUD=115200,WINDOW_CYCLES=CLK_HZ/100,
     parameter integer PWM_HZ=20000,ENC_FILTER=50,DIR_DEADTIME=2500,
     parameter integer COUNTS_L=1456,COUNTS_R=1456,
-    parameter integer UM_PER_REV_L=207345,UM_PER_REV_R=207345,
+    parameter integer UM_PER_REV_L=204203,UM_PER_REV_R=204203,
     parameter integer YAW_SIGN=-1,KEY_CYCLES=CLK_HZ/50,
     parameter integer TOF_RESET=CLK_HZ/1000,TOF_BOOT=CLK_HZ/50,
     parameter integer TOF_POLL=CLK_HZ/100,TOF_MAX_POLLS=100,TOF_TIMEOUT=CLK_HZ/100,
@@ -15,6 +15,12 @@ module task4_navigation_board_top #(
     parameter integer CALIBRATION_SAMPLES=200,
     parameter integer ENABLE_SINGLE_LEG=0,
     parameter integer MAX_WHEEL_SPEED_MM_S=60,
+    // 三路 ToF 固定偏置实测值（2026-10-30，读数=真实距离+偏置）
+    parameter integer MAP_RANGE_TOLERANCE_MM=50,
+    parameter integer REQUIRE_WALL_EVENT=1,
+    parameter integer TOF_FRONT_CAL_MM=60,
+    parameter integer TOF_LEFT_CAL_MM=15,
+    parameter integer TOF_RIGHT_CAL_MM=70,
     parameter integer DIAGNOSTIC_ONLY=0,
     parameter [31:0] BUILD_ID=32'h26102702,
     parameter CONFIG_HEX_FILE="src/imu660ra_config.hex",
@@ -139,6 +145,12 @@ module task4_navigation_board_top #(
       .reused(reused_distance),.errors(tof_errors),.statuses(tof_status),.event_mask(sample_mask),
       .raw_event_mask(raw_events),.fault_bits(sensor_causes),.fault(sensor_fault));
 
+    // 每路固定偏置标定：nav/OLED/诊断都用标定后的距离
+    wire [15:0] dist_front_cal,dist_left_cal,dist_right_cal;
+    tof_calibrate #(.OFFSET_MM(TOF_FRONT_CAL_MM)) cal_front(.din(distances[15:0]),.dout(dist_front_cal));
+    tof_calibrate #(.OFFSET_MM(TOF_LEFT_CAL_MM))  cal_left (.din(distances[31:16]),.dout(dist_left_cal));
+    tof_calibrate #(.OFFSET_MM(TOF_RIGHT_CAL_MM)) cal_right(.din(distances[47:32]),.dout(dist_right_cal));
+    wire [47:0] distances_cal={dist_right_cal,dist_left_cal,dist_front_cal};
     wire [2:0] tof_nav_valid=tof_valid & ~reused_distance &
       { (ages[47:32]<16'd250 && comm_ages[47:32]<16'd250),
         (ages[31:16]<16'd250 && comm_ages[31:16]<16'd250),
@@ -194,7 +206,8 @@ module task4_navigation_board_top #(
     wire nav_stop=press && (nav_state==1 || nav_state==2 || nav_state==3 || nav_state==4);
     wire calibration_done=imu_ready && imu_signal_valid && speed_seen &&
                           (&tof_seen) && (&tof_nav_valid) && !calibrating && !physical_fault;
-    task4_event_navigation_top #(.CLK_HZ(CLK_HZ)) nav(
+    task4_event_navigation_top #(.CLK_HZ(CLK_HZ),.MAP_RANGE_TOLERANCE_MM(MAP_RANGE_TOLERANCE_MM),
+                                    .REQUIRE_WALL_EVENT(REQUIRE_WALL_EVENT)) nav(
       .clk_50m(clk_50m),.reset_n(rst_n),.key_start_n(!nav_start),.key_stop_n(!nav_stop),
       .key_estop_n(nav_estop_n),.calibration_done(calibration_done),
       .geometry_ok(ENABLE_SINGLE_LEG!=0),
@@ -204,7 +217,7 @@ module task4_navigation_board_top #(
       .encoder_left_um(encoder_left_um),.encoder_right_um(encoder_right_um),
       .imu_yaw_delta_mdeg(imu_yaw_delta),.wheels_stationary(wheels_stationary),
       .tof_valid(tof_nav_valid),.tof_update(sample_mask),
-      .tof_front_mm(distances[15:0]),.tof_left_mm(distances[31:16]),.tof_right_mm(distances[47:32]),
+      .tof_front_mm(dist_front_cal),.tof_left_mm(dist_left_cal),.tof_right_mm(dist_right_cal),
       .route_id(3'd6),.pose_x_um(),.pose_y_um(),.pose_yaw_mdeg(),
       .velocity_l_mm_s(nav_velocity_l_mm_s),.velocity_r_mm_s(nav_velocity_r_mm_s),
       .pose_fault_out(nav_pose_fault),.odometry_fault_out(nav_odometry_fault),.nav_state(nav_state),.segment_id(segment_id),.fault_code(nav_fault_code),
@@ -227,12 +240,14 @@ module task4_navigation_board_top #(
         reg signed [35:0] scaled_value;
         begin
             extended_value={{4{value[31]}},value};
-            scaled_numerator=(extended_value <<< 3)+extended_value;
+            // 65 mm wheel: counts/mm = 1456/(pi*65) = 7.1305; per 10 ms window the
+            // mm/s target maps to v*0.071305 counts. 73/1024 = 0.071289 (0.02% low).
+            scaled_numerator=(extended_value <<< 6)+(extended_value <<< 3)+extended_value;
             // Truncate toward zero so integer encoder-count quantization can
             // never raise the requested speed above its configured ceiling.
             if(scaled_numerator<0)
-                scaled_value=(scaled_numerator+36'sd127)>>>7;
-            else scaled_value=scaled_numerator>>>7;
+                scaled_value=(scaled_numerator+36'sd1023)>>>10;
+            else scaled_value=scaled_numerator>>>10;
             if(scaled_value>36'sd32767) scaled_value=36'sd32767;
             else if(scaled_value< -36'sd32768) scaled_value=-36'sd32768;
             convert_mm_s=scaled_value[15:0];
@@ -281,7 +296,7 @@ module task4_navigation_board_top #(
         nav_board_diagnostics #(.CLK_HZ(CLK_HZ),.BAUD(BAUD),.BUILD_ID(BUILD_ID)) diag(
           .clk(clk_50m),.rst_n(rst_n),.key_enable_n(key_enable_n),.key_estop_n(key_estop_n),
           .estop_latched(estop_latched),.frame_count(frame_count),.raw_mm(tof_raw),
-          .accepted_mm(distances),.ages(ages),.errors(tof_errors),.statuses(tof_status),
+          .accepted_mm(distances_cal),.ages(ages),.errors(tof_errors),.statuses(tof_status),
           .valid(tof_nav_valid),.seen(tof_seen),.nav_fault(nav_fault_code),
           .pose_fault(nav_pose_fault),.odometry_fault(nav_odometry_fault),
           .imu_valid(imu_signal_valid),.encoder_valid(speed_seen),

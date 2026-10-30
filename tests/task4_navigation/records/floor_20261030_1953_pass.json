@@ -1,0 +1,58 @@
+{
+  "verdict": "PASS",
+  "accepted": true,
+  "checks": [
+    {
+      "name": "record_present",
+      "ok": true,
+      "detail": "1 条记录"
+    },
+    {
+      "name": "single_record",
+      "ok": true,
+      "detail": "记录数=1"
+    },
+    {
+      "name": "seg0_segment_id",
+      "ok": true,
+      "detail": "SEG=0 期望=0"
+    },
+    {
+      "name": "seg0_fault",
+      "ok": true,
+      "detail": "FAULT=NONE"
+    },
+    {
+      "name": "seg0_distance_confirmed",
+      "ok": true,
+      "detail": "DIST=432mm 期望 [400, 440]"
+    },
+    {
+      "name": "seg0_yaw",
+      "ok": true,
+      "detail": "YAW=-1.200° 容差 ±5.0°"
+    }
+  ],
+  "records": [
+    {
+      "segment": 0,
+      "distance_mm": 432,
+      "yaw_mdeg": -1200,
+      "yaw_deg": -1.2,
+      "wall": 0,
+      "wall_name": "NONE",
+      "fault": 0,
+      "fault_name": "NONE",
+      "ts": null
+    }
+  ],
+  "log": "records\\floor_20261030_1953_pass.log",
+  "parse": {
+    "records": 2,
+    "bytes_in": 108,
+    "garbage_bytes": 0,
+    "partial_bytes": 0,
+    "resyncs": 0
+  },
+  "spec": "route6_distance"
+}

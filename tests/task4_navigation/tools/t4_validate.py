@@ -27,11 +27,13 @@ sys.path.insert(0, str(HERE.parent))
 import t4_log as L  # noqa: E402
 
 
-def load_spec(path: str | None) -> dict:
+def load_spec(path: str | None, profile: str = "wall") -> dict:
     if path:
         with open(path, "r", encoding="utf-8") as f:
             spec = json.load(f)
         return spec
+    if profile == "distance":
+        return L.PROBE_DISTANCE
     # 默认：route6/seg0 单段探针（与 FIELD_TEST_GUIDE.md 一致）
     return {
         "name": "route6_probe",
@@ -78,8 +80,9 @@ def validate(records: list, spec: dict, expect_safe_stop: bool = False,
             "SEG=%d 期望=%d" % (rec.segment, want["segment"]))
         if rec.fault == L.F_NONE:
             add(prefix + "_fault", True, "FAULT=NONE")
-            add(prefix + "_wall", rec.wall == want["wall"],
-                "WALL=%s 期望 %s" % (rec.wall_name, L.WALL_NAMES.get(want["wall"], want["wall"])))
+            if want.get("require_wall", True):
+                add(prefix + "_wall", rec.wall == want["wall"],
+                    "WALL=%s 期望 %s" % (rec.wall_name, L.WALL_NAMES.get(want["wall"], want["wall"])))
             in_range = want["dist_min"] <= rec.distance_mm <= want["dist_max"]
             add(prefix + "_distance_confirmed", in_range,
                 "DIST=%dmm 期望 [%d, %d]" % (rec.distance_mm, want["dist_min"], want["dist_max"]))

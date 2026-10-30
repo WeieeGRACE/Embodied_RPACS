@@ -129,6 +129,8 @@ module tb_nav_closed_loop;
                 rng_l=raycast(true_x,true_y,true_yaw,1);
                 rng_r=raycast(true_x,true_y,true_yaw,2);
                 noise_state=(noise_state*1103515245+12345)&32'h7fffffff;
+                // This TB drives the event top directly, i.e. after the board-level
+                // ToF calibration, so it must feed already-calibrated distances.
                 sample_front=rounded(rng_f+((noise_state%5)-2));
                 noise_state=(noise_state*1103515245+12345)&32'h7fffffff;
                 sample_left=rounded(rng_l+((noise_state%5)-2));

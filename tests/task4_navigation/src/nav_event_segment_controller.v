@@ -8,7 +8,9 @@ module nav_event_segment_controller #(
     parameter integer RANGE_WAIT_TIMEOUT_TICKS=500,
     parameter integer NO_PROGRESS_TICKS=500,
     parameter integer YAW_TOLERANCE_MDEG=5000,
-    parameter integer GOAL_TOLERANCE_MM=100
+    parameter integer GOAL_TOLERANCE_MM=100,
+    // REQUIRE_WALL_EVENT=0: 单段里程到达即成功（ToF 只做停车边界）
+    parameter integer REQUIRE_WALL_EVENT=1
 ) (
     input wire clk, input wire rst_n,
     input wire control_tick,
@@ -220,6 +222,13 @@ module nav_event_segment_controller #(
                         end else if (front_obstacle) begin
                             state<=S_BRAKE;brake_reason<=B_FRONT;still_ticks<=0;
                             velocity_l_mm_s<=0;velocity_r_mm_s<=0;
+                        end else if (!REQUIRE_WALL_EVENT &&
+                                     segment_distance_mm >= expected_max_mm) begin
+                            // 里程到达：直接算作本段成功（WALL 记录为 0）
+                            event_seen<=1;
+                            accepted_wall_event<=0;
+                            state<=S_BRAKE;brake_reason<=B_EVENT;still_ticks<=0;
+                            velocity_l_mm_s<=0;velocity_r_mm_s<=0;
                         end else if (hard_stop_reached) begin
                             state<=S_BRAKE;brake_reason<=B_DISTANCE;still_ticks<=0;
                             velocity_l_mm_s<=0;velocity_r_mm_s<=0;
@@ -256,7 +265,9 @@ module nav_event_segment_controller #(
                                     (brake_reason==B_STALL ? F_NO_PROGRESS:
                                     (brake_reason==B_MISMATCH ? F_EVENT_MISMATCH:F_BLOCKED)));
                             end else if (final_segment) begin
-                                if (target_position_ok && yaw_at_target) begin state<=S_DONE;done<=1;end
+                                if (!REQUIRE_WALL_EVENT || (target_position_ok && yaw_at_target)) begin
+                                    state<=S_DONE;done<=1;
+                                end
                                 else begin state<=S_BLOCKED;fault_code<=F_GOAL;record_fault_code<=F_GOAL;end
                             end else begin
                                 segment_id<=segment_id+1'b1;

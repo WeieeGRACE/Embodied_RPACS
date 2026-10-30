@@ -41,6 +41,16 @@ WALL_NAMES = {
 }
 
 #: 单段探针基线（FIELD_TEST_GUIDE.md）
+
+PROBE_DISTANCE = {
+    "name": "route6_distance",
+    "segments": [
+        {"segment": 0, "wall": None, "require_wall": False,
+         "dist_min": 400, "dist_max": 440,
+         "dist_hard_stop_max": 520, "yaw_tol_mdeg": 5000, "final": True},
+    ],
+}
+
 PROBE = {
     "segment": 0,
     "wall": 10,               # MID_H
