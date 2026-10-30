@@ -1,7 +1,7 @@
--d D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\gwsynthesis\task4_navigation_diagnostic.vg
+-d D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\gwsynthesis\task4_navigation_diagnostic_wireless.vg
 -p GW5A-25A-UBGA324-2
 -pn GW5A-LV25UG324C2/I1
--cst D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_board_top.cst
+-cst D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_diagnostic_wireless.cst
 -cfg D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\impl\pnr\device.cfg
 -sdc D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_board_top.sdc
 -bit

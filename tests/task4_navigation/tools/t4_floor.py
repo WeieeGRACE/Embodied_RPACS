@@ -35,8 +35,8 @@ import t4_validate as V      # noqa: E402
 
 #: 已验收的探针位流（USB 串口版 / 无线串口版），两个都可接受
 EXPECTED_PROBE_SHAS = {
-    "F09B6BCC4A571A60A18120976AF072ED4AE71E96B491B7BB686CE0699D49CFF4": "probe-usb(V8)",
-    "270D817DAAAD801B9F7D13466D79E44ED32E10DB15503BAC309A6D4A75222CC7": "probe-wireless(L12)",
+    "F938C41792B9DA32382BA7C9FE321B8BE08DFA45636F1B6E6AC2B1DE70AFC392": "probe-usb(V8)",
+    "C2FA191BB19F224EAAE0A525A3FD092CA304BA3E753DC5553D00A0F83DE6D44F": "probe-wireless(L12)",
 }
 
 
@@ -95,6 +95,7 @@ def main() -> int:
     ap.add_argument("--bitstream", default=None, help="可选：检查要烧的位流 SHA256")
     ap.add_argument("--check-only", action="store_true", help="只查位流，不采集")
     ap.add_argument("--expect-safe-stop", action="store_true", help="安全停车也算通过")
+    ap.add_argument("--last-only", action="store_true", help="只判读最后一条记录")
     ap.add_argument("--spec", default=None, help="期望段序列 JSON（默认 route6 单段探针）")
     ap.add_argument("--out-dir", default=str(ROOT / "records"))
     args = ap.parse_args()
@@ -147,7 +148,7 @@ def main() -> int:
     # ---------------- 判读 + 报告
     recs, stats = L.records_from_file(str(log_path))
     spec = V.load_spec(args.spec)
-    res = V.validate(recs, spec, args.expect_safe_stop)
+    res = V.validate(recs, spec, args.expect_safe_stop, args.last_only)
     res["log"] = str(log_path)
     res["parse"] = stats.as_dict()
     res["spec"] = spec.get("name", "custom")

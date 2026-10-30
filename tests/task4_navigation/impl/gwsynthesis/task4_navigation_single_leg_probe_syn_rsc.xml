@@ -1,66 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Module name="task4_navigation_single_leg_probe_top" T_Register="3990(0)" T_Alu="1661(0)" T_Lut="8009(0)" T_MULTALU27X18="3(0)" T_MULT27X36="2(0)" T_Bsram="4(0)">
- <SubModule name="probe" Register="283" Alu="161" Lut="483" T_Register="3990(283)" T_Alu="1661(161)" T_Lut="8009(483)" T_MULTALU27X18="3(0)" T_MULT27X36="2(0)" T_Bsram="4(0)">
-  <SubModule name="imu" Register="366" Lut="782" T_Register="429(366)" T_Lut="876(782)" T_Bsram="4(0)">
-   <SubModule name="spi_master" Register="63" Lut="94" T_Register="63(63)" T_Lut="94(94)"/>
+<Module name="task4_navigation_single_leg_probe_top" T_Register="3994(0)" T_Alu="1664(0)" T_Lut="8023(0)" T_MULTALU27X18="3(0)" T_MULT27X36="2(0)" T_Bsram="4(0)">
+ <SubModule name="probe" Register="283" Alu="161" Lut="470" T_Register="3994(283)" T_Alu="1664(161)" T_Lut="8023(470)" T_MULTALU27X18="3(0)" T_MULT27X36="2(0)" T_Bsram="4(0)">
+  <SubModule name="imu" Register="366" Lut="771" T_Register="429(366)" T_Lut="863(771)" T_Bsram="4(0)">
+   <SubModule name="spi_master" Register="63" Lut="92" T_Register="63(63)" T_Lut="92(92)"/>
    <SubModule name="config_rom" Bsram="4" T_Bsram="4(4)"/>
   </SubModule>
-  <SubModule name="attitude" Register="407" Alu="183" Lut="567" MULTALU27X18="2" T_Register="499(407)" T_Alu="183(183)" T_Lut="753(567)" T_MULTALU27X18="2(2)">
-   <SubModule name="bias_divider" Register="71" Lut="151" T_Register="71(71)" T_Lut="151(151)"/>
-   <SubModule name="atan_unit" Register="6" Lut="10" T_Register="6(6)" T_Lut="10(10)"/>
+  <SubModule name="attitude" Register="407" Alu="186" Lut="577" MULTALU27X18="2" T_Register="499(407)" T_Alu="186(186)" T_Lut="745(577)" T_MULTALU27X18="2(2)">
+   <SubModule name="bias_divider" Register="71" Lut="134" T_Register="71(71)" T_Lut="134(134)"/>
+   <SubModule name="atan_unit" Register="6" Lut="9" T_Register="6(6)" T_Lut="9(9)"/>
    <SubModule name="sqrt_unit" Register="7" Lut="12" T_Register="7(7)" T_Lut="12(12)"/>
    <SubModule name="divider_unit" Register="8" Lut="13" T_Register="8(8)" T_Lut="13(13)"/>
   </SubModule>
-  <SubModule name="yaw_unwrap" Register="66" Alu="64" Lut="80" T_Register="66(66)" T_Alu="64(64)" T_Lut="80(80)"/>
-  <SubModule name="enc" T_Register="166(0)" T_Alu="126(0)" T_Lut="64(0)">
-   <SubModule name="left_channel" Register="84" Alu="63" Lut="32" T_Register="84(84)" T_Alu="63(63)" T_Lut="32(32)"/>
-   <SubModule name="right_channel" Register="82" Alu="63" Lut="32" T_Register="82(82)" T_Alu="63(63)" T_Lut="32(32)"/>
+  <SubModule name="yaw_unwrap" Register="66" Alu="64" Lut="77" T_Register="66(66)" T_Alu="64(64)" T_Lut="77(77)"/>
+  <SubModule name="enc" T_Register="166(0)" T_Alu="126(0)" T_Lut="68(0)">
+   <SubModule name="left_channel" Register="84" Alu="63" Lut="34" T_Register="84(84)" T_Alu="63(63)" T_Lut="34(34)"/>
+   <SubModule name="right_channel" Register="82" Alu="63" Lut="34" T_Register="82(82)" T_Alu="63(63)" T_Lut="34(34)"/>
   </SubModule>
   <SubModule name="distance_l" Register="46" Alu="46" Lut="2" T_Register="46(46)" T_Alu="46(46)" T_Lut="2(2)"/>
   <SubModule name="distance_r" Register="46" Alu="46" Lut="2" T_Register="46(46)" T_Alu="46(46)" T_Lut="2(2)"/>
-  <SubModule name="speed_measure_l" Register="285" Alu="207" Lut="237" T_Register="285(285)" T_Alu="207(207)" T_Lut="237(237)"/>
-  <SubModule name="speed_measure_r" Register="280" Alu="207" Lut="239" T_Register="280(280)" T_Alu="207(207)" T_Lut="239(239)"/>
-  <SubModule name="key_filter" Register="24" Lut="39" T_Register="24(24)" T_Lut="39(39)"/>
-  <SubModule name="sensors" Register="262" Lut="418" T_Register="946(262)" T_Lut="1812(418)">
-   <SubModule name="channels[0].driver" Register="81" Lut="193" T_Register="228(81)" T_Lut="465(193)">
-    <SubModule name="bus" Register="48" Lut="63" T_Register="147(48)" T_Lut="272(63)">
-     <SubModule name="bits" Register="99" Lut="209" T_Register="99(99)" T_Lut="209(209)"/>
+  <SubModule name="speed_measure_l" Register="285" Alu="207" Lut="239" T_Register="285(285)" T_Alu="207(207)" T_Lut="239(239)"/>
+  <SubModule name="speed_measure_r" Register="280" Alu="207" Lut="244" T_Register="280(280)" T_Alu="207(207)" T_Lut="244(244)"/>
+  <SubModule name="key_filter" Register="24" Lut="40" T_Register="24(24)" T_Lut="40(40)"/>
+  <SubModule name="sensors" Register="262" Lut="430" T_Register="946(262)" T_Lut="1791(430)">
+   <SubModule name="channels[0].driver" Register="81" Lut="194" T_Register="228(81)" T_Lut="450(194)">
+    <SubModule name="bus" Register="48" Lut="63" T_Register="147(48)" T_Lut="256(63)">
+     <SubModule name="bits" Register="99" Lut="193" T_Register="99(99)" T_Lut="193(193)"/>
     </SubModule>
    </SubModule>
-   <SubModule name="channels[1].driver" Register="81" Lut="198" T_Register="228(81)" T_Lut="473(198)">
-    <SubModule name="bus" Register="48" Lut="63" T_Register="147(48)" T_Lut="275(63)">
-     <SubModule name="bits" Register="99" Lut="212" T_Register="99(99)" T_Lut="212(212)"/>
+   <SubModule name="channels[1].driver" Register="81" Lut="199" T_Register="228(81)" T_Lut="457(199)">
+    <SubModule name="bus" Register="48" Lut="64" T_Register="147(48)" T_Lut="258(64)">
+     <SubModule name="bits" Register="99" Lut="194" T_Register="99(99)" T_Lut="194(194)"/>
     </SubModule>
    </SubModule>
-   <SubModule name="channels[2].driver" Register="81" Lut="197" T_Register="228(81)" T_Lut="456(197)">
-    <SubModule name="bus" Register="48" Lut="64" T_Register="147(48)" T_Lut="259(64)">
-     <SubModule name="bits" Register="99" Lut="195" T_Register="99(99)" T_Lut="195(195)"/>
+   <SubModule name="channels[2].driver" Register="81" Lut="195" T_Register="228(81)" T_Lut="454(195)">
+    <SubModule name="bus" Register="48" Lut="66" T_Register="147(48)" T_Lut="259(66)">
+     <SubModule name="bits" Register="99" Lut="193" T_Register="99(99)" T_Lut="193(193)"/>
     </SubModule>
    </SubModule>
   </SubModule>
-  <SubModule name="nav" Register="63" Alu="26" Lut="170" MULT27X36="1" T_Register="437(63)" T_Alu="232(26)" T_Lut="1281(170)" T_MULTALU27X18="1(0)" T_MULT27X36="2(1)">
-   <SubModule name="pose" Register="33" Alu="32" Lut="137" MULTALU27X18="1" T_Register="33(33)" T_Alu="32(32)" T_Lut="137(137)" T_MULTALU27X18="1(1)"/>
-   <SubModule name="wall_event" Register="19" Lut="40" T_Register="19(19)" T_Lut="40(40)"/>
-   <SubModule name="controller" Register="322" Alu="174" Lut="934" MULT27X36="1" T_Register="322(322)" T_Alu="174(174)" T_Lut="934(934)" T_MULT27X36="1(1)"/>
+  <SubModule name="nav" Register="64" Alu="26" Lut="174" MULT27X36="1" T_Register="441(64)" T_Alu="232(26)" T_Lut="1426(174)" T_MULTALU27X18="1(0)" T_MULT27X36="2(1)">
+   <SubModule name="pose" Register="33" Alu="32" Lut="135" MULTALU27X18="1" T_Register="33(33)" T_Alu="32(32)" T_Lut="135(135)" T_MULTALU27X18="1(1)"/>
+   <SubModule name="wall_event" Register="19" Lut="48" T_Register="19(19)" T_Lut="48(48)"/>
+   <SubModule name="controller" Register="325" Alu="174" Lut="1069" MULT27X36="1" T_Register="325(325)" T_Alu="174(174)" T_Lut="1069(1069)" T_MULT27X36="1(1)"/>
   </SubModule>
-  <SubModule name="pi" T_Register="56(0)" T_Alu="318(0)" T_Lut="187(0)">
-   <SubModule name="left_channel" Register="28" Alu="159" Lut="94" T_Register="28(28)" T_Alu="159(159)" T_Lut="94(94)"/>
-   <SubModule name="right_channel" Register="28" Alu="159" Lut="93" T_Register="28(28)" T_Alu="159(159)" T_Lut="93(93)"/>
+  <SubModule name="speed_limit" Lut="44" T_Lut="44(44)"/>
+  <SubModule name="pi" T_Register="56(0)" T_Alu="318(0)" T_Lut="203(0)">
+   <SubModule name="left_channel" Register="28" Alu="159" Lut="103" T_Register="28(28)" T_Alu="159(159)" T_Lut="103(103)"/>
+   <SubModule name="right_channel" Register="28" Alu="159" Lut="100" T_Register="28(28)" T_Alu="159(159)" T_Lut="100(100)"/>
   </SubModule>
-  <SubModule name="ramp" Register="16" Lut="26" T_Register="39(16)" T_Alu="64(0)" T_Lut="381(26)">
-   <SubModule name="left_channel" Register="12" Alu="32" Lut="169" T_Register="12(12)" T_Alu="32(32)" T_Lut="169(169)"/>
-   <SubModule name="right_channel" Register="11" Alu="32" Lut="186" T_Register="11(11)" T_Alu="32(32)" T_Lut="186(186)"/>
+  <SubModule name="ramp" Register="16" Lut="24" T_Register="39(16)" T_Alu="64(0)" T_Lut="367(24)">
+   <SubModule name="left_channel" Register="12" Alu="32" Lut="166" T_Register="12(12)" T_Alu="32(32)" T_Lut="166(166)"/>
+   <SubModule name="right_channel" Register="11" Alu="32" Lut="177" T_Register="11(11)" T_Alu="32(32)" T_Lut="177(177)"/>
   </SubModule>
-  <SubModule name="driver" Register="50" Lut="30" T_Register="80(50)" T_Lut="182(30)">
-   <SubModule name="left_channel" Register="15" Lut="75" T_Register="15(15)" T_Lut="75(75)"/>
-   <SubModule name="right_channel" Register="15" Lut="77" T_Register="15(15)" T_Lut="77(77)"/>
+  <SubModule name="driver" Register="50" Lut="30" T_Register="80(50)" T_Lut="192(30)">
+   <SubModule name="left_channel" Register="15" Lut="78" T_Register="15(15)" T_Lut="78(78)"/>
+   <SubModule name="right_channel" Register="15" Lut="84" T_Register="15(15)" T_Lut="84(84)"/>
   </SubModule>
-  <SubModule name="oled_page" Lut="590" T_Lut="590(590)"/>
-  <SubModule name="oled" Register="152" Alu="7" Lut="527" T_Register="188(152)" T_Alu="7(7)" T_Lut="581(527)">
+  <SubModule name="oled_page" Lut="487" T_Lut="487(487)"/>
+  <SubModule name="oled" Register="152" Alu="7" Lut="491" T_Register="188(152)" T_Alu="7(7)" T_Lut="545(491)">
    <SubModule name="i2c_writer" Register="36" Lut="54" T_Register="36(36)" T_Lut="54(54)"/>
   </SubModule>
-  <SubModule name="log_segments" Register="75" Lut="140" T_Register="120(75)" T_Lut="220(140)">
-   <SubModule name="tx_i" Register="45" Lut="80" T_Register="45(45)" T_Lut="80(80)"/>
+  <SubModule name="normal_logging.log_segments" Register="75" Lut="141" T_Register="120(75)" T_Lut="218(141)">
+   <SubModule name="tx_i" Register="45" Lut="77" T_Register="45(45)" T_Lut="77(77)"/>
   </SubModule>
  </SubModule>
 </Module>

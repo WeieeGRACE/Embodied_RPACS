@@ -19,7 +19,8 @@ from dataclasses import dataclass, field
 from typing import Iterable, List
 
 # ------------------------------------------------------------------ 常量表
-F_NONE, F_STOP, F_ESTOP, F_RANGE, F_INPUT, F_GEOMETRY, F_DONE = 0, 1, 2, 3, 4, 5, 6
+F_NONE, F_STOP, F_ESTOP, F_RANGE, F_INPUT, F_GEOMETRY = 0, 1, 2, 3, 4, 5
+F_TIMEOUT, F_EVENT_MISMATCH, F_NO_PROGRESS, F_BLOCKED, F_GOAL = 6, 7, 8, 9, 10
 FAULT_NAMES = {
     F_NONE: "NONE",
     F_STOP: "STOP",
@@ -27,7 +28,11 @@ FAULT_NAMES = {
     F_RANGE: "RANGE",
     F_INPUT: "INPUT",
     F_GEOMETRY: "GEOMETRY",
-    F_DONE: "DONE",
+    F_TIMEOUT: "TIMEOUT",
+    F_EVENT_MISMATCH: "EVENT_MISMATCH",
+    F_NO_PROGRESS: "NO_PROGRESS",
+    F_BLOCKED: "BLOCKED",          # 硬停里程到达但墙事件未确认
+    F_GOAL: "GOAL",
 }
 
 WALL_NAMES = {

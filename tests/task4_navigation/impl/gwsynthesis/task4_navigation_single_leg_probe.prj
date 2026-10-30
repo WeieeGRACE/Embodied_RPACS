@@ -15,6 +15,7 @@
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_map_wall_association.v" type="verilog"/>
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_pose_range_guard.v" type="verilog"/>
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_segment_table.v" type="verilog"/>
+        <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_speed_limit.v" type="verilog"/>
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_segment_uart_logger.v" type="verilog"/>
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_tof_wall_event.v" type="verilog"/>
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\obstacle_key.v" type="verilog"/>
@@ -31,6 +32,8 @@
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tof_i2c.v" type="verilog"/>
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\tof_oled_text.v" type="verilog"/>
         <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\uart_tx.v" type="verilog"/>
+        <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\nav_board_diagnostics.v" type="verilog"/>
+        <File path="D:\Gowin\Project\Contest\Embodied_RPACS\Embodied_RPACS\Embodied_RPACS\tests\task4_navigation\src\task4_navigation_diagnostic_top.v" type="verilog"/>
     </FileList>
     <OptionList>
         <Option type="disable_insert_pad" value="0"/>

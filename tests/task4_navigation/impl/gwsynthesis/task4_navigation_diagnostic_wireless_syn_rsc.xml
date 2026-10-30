@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module name="task4_navigation_diagnostic_top" T_Register="4149(0)" T_Alu="1201(0)" T_Lut="7114(0)" T_MULTALU27X18="3(0)" T_MULT27X36="1(0)" T_Bsram="4(0)">
+ <SubModule name="probe" Register="315" Alu="130" Lut="415" T_Register="4149(315)" T_Alu="1201(130)" T_Lut="7114(415)" T_MULTALU27X18="3(0)" T_MULT27X36="1(0)" T_Bsram="4(0)">
+  <SubModule name="imu" Register="366" Lut="796" T_Register="429(366)" T_Lut="894(796)" T_Bsram="4(0)">
+   <SubModule name="spi_master" Register="63" Lut="98" T_Register="63(63)" T_Lut="98(98)"/>
+   <SubModule name="config_rom" Bsram="4" T_Bsram="4(4)"/>
+  </SubModule>
+  <SubModule name="attitude" Register="407" Alu="183" Lut="581" MULTALU27X18="2" T_Register="499(407)" T_Alu="183(183)" T_Lut="766(581)" T_MULTALU27X18="2(2)">
+   <SubModule name="bias_divider" Register="71" Lut="152" T_Register="71(71)" T_Lut="152(152)"/>
+   <SubModule name="atan_unit" Register="6" Lut="10" T_Register="6(6)" T_Lut="10(10)"/>
+   <SubModule name="sqrt_unit" Register="7" Lut="11" T_Register="7(7)" T_Lut="11(11)"/>
+   <SubModule name="divider_unit" Register="8" Lut="12" T_Register="8(8)" T_Lut="12(12)"/>
+  </SubModule>
+  <SubModule name="yaw_unwrap" Register="66" Alu="64" Lut="75" T_Register="66(66)" T_Alu="64(64)" T_Lut="75(75)"/>
+  <SubModule name="enc" T_Register="166(0)" T_Alu="126(0)" T_Lut="66(0)">
+   <SubModule name="left_channel" Register="84" Alu="63" Lut="33" T_Register="84(84)" T_Alu="63(63)" T_Lut="33(33)"/>
+   <SubModule name="right_channel" Register="82" Alu="63" Lut="33" T_Register="82(82)" T_Alu="63(63)" T_Lut="33(33)"/>
+  </SubModule>
+  <SubModule name="distance_l" Register="46" Alu="46" Lut="2" T_Register="46(46)" T_Alu="46(46)" T_Lut="2(2)"/>
+  <SubModule name="distance_r" Register="46" Alu="46" Lut="2" T_Register="46(46)" T_Alu="46(46)" T_Lut="2(2)"/>
+  <SubModule name="speed_measure_l" Register="285" Alu="207" Lut="248" T_Register="285(285)" T_Alu="207(207)" T_Lut="248(248)"/>
+  <SubModule name="speed_measure_r" Register="280" Alu="207" Lut="248" T_Register="280(280)" T_Alu="207(207)" T_Lut="248(248)"/>
+  <SubModule name="key_filter" Register="24" Lut="39" T_Register="24(24)" T_Lut="39(39)"/>
+  <SubModule name="sensors" Register="322" Lut="421" T_Register="1018(322)" T_Lut="1831(421)">
+   <SubModule name="channels[0].driver" Register="85" Lut="197" T_Register="232(85)" T_Lut="477(197)">
+    <SubModule name="bus" Register="48" Lut="63" T_Register="147(48)" T_Lut="280(63)">
+     <SubModule name="bits" Register="99" Lut="217" T_Register="99(99)" T_Lut="217(217)"/>
+    </SubModule>
+   </SubModule>
+   <SubModule name="channels[1].driver" Register="85" Lut="188" T_Register="232(85)" T_Lut="469(188)">
+    <SubModule name="bus" Register="48" Lut="63" T_Register="147(48)" T_Lut="281(63)">
+     <SubModule name="bits" Register="99" Lut="218" T_Register="99(99)" T_Lut="218(218)"/>
+    </SubModule>
+   </SubModule>
+   <SubModule name="channels[2].driver" Register="85" Lut="180" T_Register="232(85)" T_Lut="464(180)">
+    <SubModule name="bus" Register="48" Lut="64" T_Register="147(48)" T_Lut="284(64)">
+     <SubModule name="bits" Register="99" Lut="220" T_Register="99(99)" T_Lut="220(220)"/>
+    </SubModule>
+   </SubModule>
+  </SubModule>
+  <SubModule name="nav" Register="64" Alu="26" Lut="180" MULT27X36="1" T_Register="295(64)" T_Alu="185(26)" T_Lut="916(180)" T_MULTALU27X18="1(0)" T_MULT27X36="1(1)">
+   <SubModule name="pose" Register="33" Alu="32" Lut="140" MULTALU27X18="1" T_Register="33(33)" T_Alu="32(32)" T_Lut="140(140)" T_MULTALU27X18="1(1)"/>
+   <SubModule name="wall_event" Register="18" Lut="40" T_Register="18(18)" T_Lut="40(40)"/>
+   <SubModule name="controller" Register="180" Alu="127" Lut="556" T_Register="180(180)" T_Alu="127(127)" T_Lut="556(556)"/>
+  </SubModule>
+  <SubModule name="oled" Register="253" Alu="7" Lut="616" T_Register="289(253)" T_Alu="7(7)" T_Lut="670(616)">
+   <SubModule name="i2c_writer" Register="36" Lut="54" T_Register="36(36)" T_Lut="54(54)"/>
+  </SubModule>
+  <SubModule name="diagnostics.diag" Register="346" Lut="861" T_Register="391(346)" T_Lut="942(861)">
+   <SubModule name="uart" Register="45" Lut="81" T_Register="45(45)" T_Lut="81(81)"/>
+  </SubModule>
+ </SubModule>
+</Module>

@@ -97,6 +97,7 @@ def main() -> int:
         ("S7_overrun_600_stop", [rec(0, 600, 0, 10, L.F_STOP)], "FAIL", False),
         ("S8_unknown_fault", [rec(0, 400, 0, 10, 0x77)], "FAIL", False),
         ("S9_no_record", [b"hello world\r\n"], "FAIL", False),
+        ("S8b_blocked_hard_stop", [rec(0, 520, 0, 0, L.F_BLOCKED)], "SAFE_STOP", False),
         ("S10_split_with_garbage",
          [b"\x00\xff junk " + good[:20], good[20:41], good[41:] + b"\r\n\x11"], "PASS", False),
         ("S11_two_records", [good + good], "FAIL", False),
@@ -122,7 +123,7 @@ def main() -> int:
 
     print("")
     if fails == 0:
-        print("PASS t4_selftest (13 scenarios)")
+        print("PASS t4_selftest (14 scenarios)")
         return 0
     print("FAIL t4_selftest (%d scenarios failed)" % fails)
     return 1

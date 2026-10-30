@@ -1,0 +1,53 @@
+{
+  "verdict": "SAFE_STOP",
+  "accepted": true,
+  "checks": [
+    {
+      "name": "record_present",
+      "ok": true,
+      "detail": "1 条记录"
+    },
+    {
+      "name": "single_record",
+      "ok": true,
+      "detail": "记录数=1"
+    },
+    {
+      "name": "seg0_segment_id",
+      "ok": true,
+      "detail": "SEG=0 期望=0"
+    },
+    {
+      "name": "seg0_fault_known",
+      "ok": true,
+      "detail": "FAULT=BLOCKED"
+    },
+    {
+      "name": "seg0_stopped_within_hard_stop",
+      "ok": true,
+      "detail": "DIST=507mm ≤ 硬停 520mm"
+    }
+  ],
+  "records": [
+    {
+      "segment": 0,
+      "distance_mm": 507,
+      "yaw_mdeg": 2525,
+      "yaw_deg": 2.525,
+      "wall": 0,
+      "wall_name": "NONE",
+      "fault": 9,
+      "fault_name": "BLOCKED",
+      "ts": null
+    }
+  ],
+  "log": "records\\floor_20261030_1629.log",
+  "parse": {
+    "records": 8,
+    "bytes_in": 432,
+    "garbage_bytes": 0,
+    "partial_bytes": 0,
+    "resyncs": 0
+  },
+  "spec": "route6_probe"
+}

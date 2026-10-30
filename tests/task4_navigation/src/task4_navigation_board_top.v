@@ -9,7 +9,7 @@ module task4_navigation_board_top #(
     parameter integer UM_PER_REV_L=207345,UM_PER_REV_R=207345,
     parameter integer YAW_SIGN=-1,KEY_CYCLES=CLK_HZ/50,
     parameter integer TOF_RESET=CLK_HZ/1000,TOF_BOOT=CLK_HZ/50,
-    parameter integer TOF_POLL=CLK_HZ/100,TOF_MAX_POLLS=10,TOF_TIMEOUT=CLK_HZ/100,
+    parameter integer TOF_POLL=CLK_HZ/100,TOF_MAX_POLLS=100,TOF_TIMEOUT=CLK_HZ/100,
     parameter integer IMU_POWERUP=CLK_HZ/50,IMU_WAIT=CLK_HZ/50,IMU_RETRY=CLK_HZ,
     parameter integer IMU_SAMPLE=CLK_HZ/200,IMU_SPI_HALF=25,
     parameter integer CALIBRATION_SAMPLES=200,

@@ -42,8 +42,11 @@ def load_spec(path: str | None) -> dict:
     }
 
 
-def validate(records: list, spec: dict, expect_safe_stop: bool = False) -> dict:
+def validate(records: list, spec: dict, expect_safe_stop: bool = False,
+             last_only: bool = False) -> dict:
     segs = spec["segments"]
+    if last_only and records:
+        records = records[-1:]
     checks: list[dict] = []
 
     def add(name: str, ok: bool, detail: str = "") -> None:
@@ -109,6 +112,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="validate task4 segment log")
     ap.add_argument("--log", required=True, help="原始串口抓包（二进制/文本均可）")
     ap.add_argument("--spec", default=None, help="期望的段序列 JSON（默认 route6 单段探针）")
+    ap.add_argument("--last-only", action="store_true",
+                    help="只判读最后一条记录（多次按启动时很有用）")
     ap.add_argument("--expect-safe-stop", action="store_true",
                     help="允许安全停车（SAFE_STOP）算通过")
     ap.add_argument("--json", default=None)
@@ -116,7 +121,7 @@ def main() -> int:
 
     recs, stats = L.records_from_file(args.log)
     spec = load_spec(args.spec)
-    res = validate(recs, spec, args.expect_safe_stop)
+    res = validate(recs, spec, args.expect_safe_stop, args.last_only)
     res["spec"] = spec.get("name", "custom")
     res["parse"] = stats.as_dict()
     res["log"] = args.log
