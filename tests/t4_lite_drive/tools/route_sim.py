@@ -28,9 +28,8 @@ GOALS = {k: tuple(v) for k, v in
          json.load(io.open(MAP, encoding="utf-8"))["goals_mm"].items()}
 GOALS["OPEN1"] = (2700, 750)
 
-CAR_FRONT = 320.0
-CAR_HALF_W = 120.0
-CENTER_OFF = CAR_FRONT / 2.0        # 车中心相对位姿点的前向偏移
+CAR_HALF_L = 160.0                 # 车轴到前/后保险杠
+CAR_HALF_W = 120.0                 # 车轴到车身两侧
 
 
 def seg_dist(px, py, a, b):
@@ -67,8 +66,8 @@ def seg_seg_dist(p1, p2, q1, q2):
                seg_dist(q1[0], q1[1], p1, p2), seg_dist(q2[0], q2[1], p1, p2))
 
 def car_edges(x, y, hdg):
-    c = [pose_point(x, y, hdg, f, l) for f, l in ((0.0, -CAR_HALF_W), (CAR_FRONT, -CAR_HALF_W),
-                                                  (CAR_FRONT, CAR_HALF_W), (0.0, CAR_HALF_W))]
+    c = [pose_point(x, y, hdg, f, l) for f, l in ((-CAR_HALF_L, -CAR_HALF_W), (CAR_HALF_L, -CAR_HALF_W),
+                                                  (CAR_HALF_L, CAR_HALF_W), (-CAR_HALF_L, CAR_HALF_W))]
     return [(c[0], c[1]), (c[1], c[2]), (c[2], c[3]), (c[3], c[0])]
 
 def min_clearance(x, y, hdg):
@@ -90,7 +89,7 @@ def simulate(legs, start=(2700.0, 300.0), hdg0=0.0, rng=None):
             target = hdg + leg["deg"]
             err = rng.gauss(0.0, 0.8) + rng.uniform(-0.3, 0.3)
             hdg = target + err
-            # 原地转：按 8 个角度采样扫掠车体
+            # 原地转（绕车轴）：按 8 个角度采样扫掠车体
             for k in range(9):
                 h = hdg0 + (hdg - hdg0) * k / 8.0
                 d = min_clearance(x, y, h)
@@ -100,12 +99,14 @@ def simulate(legs, start=(2700.0, 300.0), hdg0=0.0, rng=None):
             dist = float(leg["mm"])
             actual = dist * (1.0 + rng.gauss(0.0, 0.008)) + rng.gauss(0.0, 3.0)
             steps = max(2, int(abs(actual) / 25.0))
+            # 航向保持误差：每段一个固定偏差（σ=0.6°），不做无界随机游走
+            hdg_leg = hdg + rng.gauss(0.0, 0.6)
+            hdg = hdg_leg
             for s in range(steps):
-                fx, fy = math.sin(math.radians(hdg)), math.cos(math.radians(hdg))
+                fx, fy = math.sin(math.radians(hdg_leg)), math.cos(math.radians(hdg_leg))
                 x += actual / steps * fx
                 y += actual / steps * fy
-                hdg += rng.gauss(0.0, 0.6) / steps
-                c = min_clearance(x, y, hdg)
+                c = min_clearance(x, y, hdg_leg)
                 if c < min_clr:
                     min_clr = c
     return x, y, hdg, min_clr

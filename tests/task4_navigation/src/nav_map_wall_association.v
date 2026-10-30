@@ -40,35 +40,35 @@ module nav_map_wall_association #(
         begin cos_q15=sin_q15(angle+90000);end
     endfunction
     function automatic integer wall_ax(input integer id);
-        begin case(id)
-            1:wall_ax=0;2:wall_ax=3000;3:wall_ax=3000;4:wall_ax=0;
-            5:wall_ax=0;6:wall_ax=600;7:wall_ax=446;8:wall_ax=446;
+        begin case(id)            1:wall_ax=0;2:wall_ax=3000;3:wall_ax=3000;4:wall_ax=0;
+            5:wall_ax=0;6:wall_ax=600;7:wall_ax=570;8:wall_ax=870;
             9:wall_ax=1200;10:wall_ax=1200;11:wall_ax=1800;12:wall_ax=2400;
-            13:wall_ax=1800;14:wall_ax=2400;default:wall_ax=0;
+            13:wall_ax=1800;14:wall_ax=2400;
+            default:wall_ax=0;
         endcase end
     endfunction
     function automatic integer wall_ay(input integer id);
-        begin case(id)
-            1:wall_ay=0;2:wall_ay=0;3:wall_ay=3000;4:wall_ay=3000;
-            5:wall_ay=1200;6:wall_ay=600;7:wall_ay=2574;8:wall_ay=1726;
+        begin case(id)            1:wall_ay=0;2:wall_ay=0;3:wall_ay=3000;4:wall_ay=3000;
+            5:wall_ay=1200;6:wall_ay=600;7:wall_ay=2150;8:wall_ay=1850;
             9:wall_ay=0;10:wall_ay=1200;11:wall_ay=600;12:wall_ay=1800;
-            13:wall_ay=1800;14:wall_ay=0;default:wall_ay=0;
+            13:wall_ay=1800;14:wall_ay=0;
+            default:wall_ay=0;
         endcase end
     endfunction
     function automatic integer wall_bx(input integer id);
-        begin case(id)
-            1:wall_bx=3000;2:wall_bx=3000;3:wall_bx=0;4:wall_bx=0;
-            5:wall_bx=600;6:wall_bx=600;7:wall_bx=1294;8:wall_bx=1294;
+        begin case(id)            1:wall_bx=3000;2:wall_bx=3000;3:wall_bx=0;4:wall_bx=0;
+            5:wall_bx=600;6:wall_bx=600;7:wall_bx=1170;8:wall_bx=870;
             9:wall_bx=1200;10:wall_bx=3000;11:wall_bx=1800;12:wall_bx=2400;
-            13:wall_bx=2400;14:wall_bx=2400;default:wall_bx=0;
+            13:wall_bx=2400;14:wall_bx=2400;
+            default:wall_bx=0;
         endcase end
     endfunction
     function automatic integer wall_by(input integer id);
-        begin case(id)
-            1:wall_by=0;2:wall_by=3000;3:wall_by=3000;4:wall_by=0;
-            5:wall_by=1200;6:wall_by=1200;7:wall_by=1726;8:wall_by=2574;
+        begin case(id)            1:wall_by=0;2:wall_by=3000;3:wall_by=3000;4:wall_by=0;
+            5:wall_by=1200;6:wall_by=1200;7:wall_by=2150;8:wall_by=2450;
             9:wall_by=600;10:wall_by=1200;11:wall_by=2400;12:wall_by=2400;
-            13:wall_by=1800;14:wall_by=600;default:wall_by=0;
+            13:wall_by=1800;14:wall_by=600;
+            default:wall_by=0;
         endcase end
     endfunction
 

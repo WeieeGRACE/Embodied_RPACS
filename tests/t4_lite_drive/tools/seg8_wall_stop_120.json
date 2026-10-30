@@ -1,0 +1,8 @@
+{
+  "legs": [
+    {
+      "type": "to_wall",
+      "margin": 120
+    }
+  ]
+}

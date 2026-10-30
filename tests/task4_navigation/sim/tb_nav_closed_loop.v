@@ -67,13 +67,14 @@ module tb_nav_closed_loop;
                     4:begin ax=0;ay=3000;bx=0;by=0;end
                     5:begin ax=0;ay=1200;bx=600;by=1200;end
                     6:begin ax=600;ay=600;bx=600;by=1200;end
-                    7:begin ax=445.736;ay=2574.264;bx=1294.264;by=1725.736;end
-                    8:begin ax=445.736;ay=1725.736;bx=1294.264;by=2574.264;end
+                    7:begin ax=570;ay=2150;bx=1170;by=2150;end
+                    8:begin ax=870;ay=1850;bx=870;by=2450;end
                     9:begin ax=1200;ay=0;bx=1200;by=600;end
                     10:begin ax=1200;ay=1200;bx=3000;by=1200;end
                     11:begin ax=1800;ay=600;bx=1800;by=2400;end
                     12:begin ax=2400;ay=1800;bx=2400;by=2400;end
                     13:begin ax=1800;ay=1800;bx=2400;by=1800;end
+                    14:begin ax=2400;ay=0;bx=2400;by=600;end
                     default:begin ax=2400;ay=0;bx=2400;by=600;end
                 endcase
                 wx=bx-ax;wy=by-ay;den=dx*wy-dy*wx;

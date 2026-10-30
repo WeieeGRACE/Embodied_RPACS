@@ -95,3 +95,16 @@ python3 ~/t4_tools/route_run.py route_field.json --speed 40
    programmer_cli --device GW5A-25A --run 2 --fsFile <abs>\t4_lite_top.fs --cable "Gowin USB Cable(FT2CH)"
    ```
 4. 烧完先 `--link-check`，确认 `fault=0x20`（仅 CMD_TIMEOUT）、`enc` 静止不漂，再动车。
+
+---
+
+## 8. 地图 v2（2026-10-31 更新）
+
+- 中心障碍由“四片拼的 X”改为 **两片拼的十字**：横板 (570,2150)-(1170,2150)、竖板 (870,1850)-(870,2450)，
+  四条臂各 300 mm。
+- **唯一地图源**：	ests/task4_navigation/data/map_v1.json（map_version = task4-map-v2-image-derived）。
+  RTL 墙表 
+av_map_wall_association.v 与闭环 TB 的墙表由 	ools/gen_wall_table.py 从该 JSON 自动生成，
+  可用 python tools/gen_wall_table.py --check 检查是否同步（不同步会退出码 1）。
+- 路书/几何/碰撞报告已按 v2 重跑：	ask4_navigation/records/{routes.json,geometry_report.json,collision_prediction_report.json}。
+- 明天的测试清单见 [TEST_PLAN_2026-10-31.md](TEST_PLAN_2026-10-31.md)。

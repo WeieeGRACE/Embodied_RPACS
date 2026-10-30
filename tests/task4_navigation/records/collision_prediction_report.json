@@ -1,6 +1,6 @@
 {
   "status": "PASS_SINGLE_LEG_GEOMETRY_ONLY",
-  "map_version": "task4-map-v1-image-derived",
+  "map_version": "task4-map-v2-image-derived",
   "leg": {
     "from": "A",
     "to": "OPEN_WAYPOINT_1",
