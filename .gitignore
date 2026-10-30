@@ -393,6 +393,7 @@
 !/tests/t4_lite_drive/tools/
 /tests/t4_lite_drive/tools/*
 !/tests/t4_lite_drive/tools/*.py
+!/tests/t4_lite_drive/tools/*.json
 !/tests/t4_lite_drive/records/
 /tests/t4_lite_drive/records/*
 !/tests/t4_lite_drive/records/*.log

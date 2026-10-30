@@ -1,0 +1,10 @@
+{"legs": [
+  {"type": "turn",  "deg": -73.7},
+  {"type": "drive", "mm": 2500},
+  {"type": "turn",  "deg": 73.7},
+  {"type": "drive", "mm": 1400},
+  {"type": "turn",  "deg": 90.0},
+  {"type": "drive", "mm": 1800},
+  {"type": "turn",  "deg": 90.0},
+  {"type": "drive", "mm": 750}
+]}
