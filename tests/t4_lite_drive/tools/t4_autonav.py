@@ -108,10 +108,16 @@ class Nav:
         t0 = time.time()
         tof = self.tof()
         # ToF 无效时也要缓慢前进，等它读到有效值再按两段速控制
+        recent = []
         while time.time() - t0 < 120:
             gap = (tof - TOF_OFF) if tof is not None else None
-            if gap is not None and gap <= target_gap:
-                break
+            # 稳定触发：连续 8 帧读数都在目标 ±15 mm 内才停（防瞬时反射/斜墙误触发）
+            if gap is not None:
+                recent.append(gap)
+                if len(recent) > 8:
+                    recent.pop(0)
+                if len(recent) >= 8 and all(abs(g - target_gap) <= 15.0 for g in recent):
+                    break
             if gap is not None and gap < 70:
                 self.stop()
                 self.log({"ev": "ABORT_CLOSE", "tof": tof})
