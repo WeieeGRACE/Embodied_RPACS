@@ -1,0 +1,19 @@
+{
+  "calib_time": "2026-10-31 13:16:26",
+  "cmd_scale": 0.9129,
+  "turn_mag": 50,
+  "turn_rate_deg_s": 24.83,
+  "turn_coast_deg": 2.01,
+  "turn_lead": 4.47,
+  "ok_speed_50": true,
+  "ok_speed_100": true,
+  "ok_turn": true,
+  "tp_v": 60.0,
+  "tp_diff": 30.0,
+  "tp_fracs": [
+    0.45,
+    0.35,
+    0.2
+  ],
+  "arc_v": 40.0
+}
