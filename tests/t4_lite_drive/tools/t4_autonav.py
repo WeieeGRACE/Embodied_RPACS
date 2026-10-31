@@ -107,16 +107,20 @@ class Nav:
         ok = self.rearm()
         t0 = time.time()
         tof = self.tof()
-        while tof is not None and tof - TOF_OFF > target_gap and time.time() - t0 < 120:
-            v = self.fast if tof - TOF_OFF > self.slow_gap else self.slow
+        # ToF 无效时也要缓慢前进，等它读到有效值再按两段速控制
+        while time.time() - t0 < 120:
+            gap = (tof - TOF_OFF) if tof is not None else None
+            if gap is not None and gap <= target_gap:
+                break
+            if gap is not None and gap < 70:
+                self.stop()
+                self.log({"ev": "ABORT_CLOSE", "tof": tof})
+                return False, gap
+            v = self.slow if gap is None else (self.fast if gap > self.slow_gap else self.slow)
             self.link.set_vel(v, v)
             self.pump(0.02)
             self.link.heartbeat()
             tof = self.tof()
-            if tof is not None and tof - TOF_OFF < 70:
-                self.stop()
-                self.log({"ev": "ABORT_CLOSE", "tof": tof})
-                return False, tof - TOF_OFF
         self.stop()
         gap = (tof - TOF_OFF) if tof else None
         self.log({"ev": "wall_stop", "gap": None if gap is None else round(gap, 1), "ok": ok})
