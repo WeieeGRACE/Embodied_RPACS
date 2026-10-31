@@ -181,6 +181,48 @@ def reverse(ctl, mm, speed=None, tol=10.0, timeout=25.0):
             return False
 
 
+def arc_turn(ctl, deg, radius=None, v=None, tol=4.0, timeout=25.0):
+    """边走边转 90 度：绕半径 R 的圆弧，用左右轮差速实现（600 mm 走廊可过，余量约 65 mm）。
+
+    v_l = v*(1 - track/(2R)), v_r = v*(1 + track/(2R))；yaw 速率 = v/R。
+    参数可在 calib.json 调：arc_radius（默认 200）、arc_v（默认 60）、wheel_track 默认 240。
+    """
+    if radius is None:
+        radius = float(CAL.get("arc_radius", 200.0))
+    if v is None:
+        v = float(CAL.get("arc_v", 60.0))
+    track = float(CAL.get("wheel_track", 240.0))
+    sign = 1.0 if deg >= 0 else -1.0
+    ratio = track / (2.0 * radius)
+    vl = v * (1.0 - ratio) * sign if False else v * (1.0 - ratio)
+    vr = v * (1.0 + ratio)
+    if sign > 0:          # 左转（yaw+）：右轮快、左轮慢
+        cmd_l, cmd_r = vl, vr
+    else:                 # 右转：左轮快、右轮慢
+        cmd_l, cmd_r = vr, vl
+    target = ctl.yaw_deg + deg
+    t0 = time.time()
+    while True:
+        ctl.link.heartbeat()
+        rem = target - ctl.yaw_deg
+        if rem * sign <= 1.0:
+            break
+        ctl.link.set_vel(int(cmd_l), int(cmd_r))
+        ctl.pump(0.025)
+        if time.time() - t0 > timeout:
+            ctl.link.stop()
+            print("  arc TIMEOUT err=%.1f" % rem)
+            return False
+    ctl.link.stop()
+    tw = time.time()
+    while time.time() - tw < 0.4:
+        ctl.link.heartbeat()
+        ctl.pump(0.03)
+    err = target - ctl.yaw_deg
+    print("  arc %.0f -> yaw %+.2f (err %.2f, R=%.0f)" % (deg, ctl.yaw_deg, err, radius))
+    return abs(err) <= tol
+
+
 def three_point(ctl, deg, v_arc=None, diff=None, fracs=(0.45, 0.35, 0.20),
                 tol=4.0, timeout=30.0):
     """三点掉头：前进弧 → 倒车弧 → 前进弧，绕轮轴转向（走廊里比原地转省空间）。

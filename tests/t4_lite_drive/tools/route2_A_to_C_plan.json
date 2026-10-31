@@ -1,60 +1,48 @@
 {
   "legs": [
     {
-      "type": "turn",
-      "deg": -8.1
-    },
-    {
       "type": "drive",
-      "mm": 354
+      "mm": 175
     },
     {
-      "type": "turn",
-      "deg": -36.9
-    },
-    {
-      "type": "drive",
-      "mm": 283
-    },
-    {
-      "type": "turn",
+      "type": "arc",
       "deg": -45.0
     },
     {
       "type": "drive",
-      "mm": 100
+      "mm": 177
     },
     {
-      "type": "turn",
+      "type": "arc",
+      "deg": -45.0
+    },
+    {
+      "type": "arc",
       "deg": -45.0
     },
     {
       "type": "drive",
-      "mm": 707
+      "mm": 389
     },
     {
-      "type": "turn",
+      "type": "arc",
+      "deg": 45.0
+    },
+    {
+      "type": "arc",
       "deg": 45.0
     },
     {
       "type": "drive",
-      "mm": 100
+      "mm": 1838
     },
     {
-      "type": "turn",
+      "type": "arc",
       "deg": 45.0
     },
     {
       "type": "drive",
-      "mm": 2051
-    },
-    {
-      "type": "turn",
-      "deg": 45.0
-    },
-    {
-      "type": "drive",
-      "mm": 300
+      "mm": 175
     }
   ]
 }
