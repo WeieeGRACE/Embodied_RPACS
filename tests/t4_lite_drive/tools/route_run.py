@@ -8,12 +8,22 @@ Safety: per-leg progress/timeout aborts, fault abort, final STOP.
 
 Usage: python3 route_run.py route.json [--speed 40]
 """
+import io
 import json
 import sys
 import time
 
 sys.path.insert(0, "/home/HwHiAiUser/t4_tools")
 import t4_lite_drive as T
+
+CAL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "calib.json")
+CAL = {}
+if os.path.exists(CAL_PATH):
+    try:
+        CAL = json.load(io.open(CAL_PATH, encoding="utf-8"))
+    except Exception:
+        CAL = {}
+
 
 def measure_wall():
     """返回 (相机墙距, 车头墙距)。"""
@@ -105,7 +115,8 @@ def drive(ctl, mm, speed=None, tol=8.0, timeout=40.0):
         ctl.link.heartbeat()
         yaw_err = yaw_ref - ctl.yaw_deg
         corr = max(-20.0, min(20.0, 1.5 * yaw_err))
-        v = min(speed, 25 + elapsed * 60)
+        scale = float(CAL.get("cmd_scale", 1.0) or 1.0)
+        v = min(speed, 25 + elapsed * 60) * scale
         ctl.link.set_vel(int(v + corr), int(v - corr))
         if not ctl.pump(0.03):
             if now - t0 > 1.0 and time.time() - getattr(ctl, "t_last_telem", 0) > 0.5:
@@ -133,7 +144,10 @@ def drive(ctl, mm, speed=None, tol=8.0, timeout=40.0):
             return False
 
 
-def turn(ctl, deg, tol=3.5, mag=70, timeout=20.0, latency=0.18):
+def turn(ctl, deg, tol=3.5, mag=None, timeout=20.0, latency=0.18):
+    if mag is None:
+        mag = float(CAL.get("turn_mag", 70))
+    latency = float(CAL.get("turn_latency", latency))
     """转到 target：先等转速稳定（|rate|>40 deg/s），再按 rate*latency 提前停。"""
     target = ctl.yaw_deg + deg
     t0 = time.time()

@@ -7,13 +7,13 @@
 | 路线 | 总里程(mm) | 转向次数 | 终点误差中值(mm) | P95(mm) | 最小墙距(mm) | 判定 |
 | --- | --- | --- | --- | --- | --- | --- |
 | route1_A_to_B.json | 2500 | 1 | 35.9 | 83.6 | 0.0 | **FAIL** |
-| route1_A_to_B_plan.json | 3516 | 9 | 59.9 | 163.4 | 0.0 | **FAIL** |
+| route1_A_to_B_plan.json | 3989 | 6 | 51.5 | 129.1 | 0.0 | **FAIL** |
 | route2_A_to_C.json | 3189 | 1 | 45.2 | 108.2 | 0.0 | **FAIL** |
-| route2_A_to_C_plan.json | 3941 | 6 | 82.6 | 211.4 | 0.0 | **FAIL** |
+| route2_A_to_C_plan.json | 4175 | 4 | 66.7 | 173.1 | 0.0 | **FAIL** |
 | route3_A_to_D.json | 2184 | 1 | 31.3 | 72.7 | 0.0 | **FAIL** |
-| route3_A_to_D_plan.json | 4525 | 9 | 72.1 | 152.8 | 0.0 | **FAIL** |
+| route3_A_to_D_plan.json | 4871 | 5 | 54.7 | 130.9 | 0.0 | **FAIL** |
 | route4_A_to_E.json | 1477 | 1 | 21.1 | 51.3 | 0.0 | **FAIL** |
-| route4_A_to_E_plan.json | 6263 | 10 | 57.5 | 116.9 | 0.0 | **FAIL** |
+| route4_A_to_E_plan.json | 6666 | 9 | 47.3 | 115.1 | 0.0 | **FAIL** |
 | route5_ABCDE_plan.json | 10249 | 21 | 95.1 | 207.4 | 0.0 | **FAIL** |
 | route5_A_B_C_D_E.json | 6450 | 4 | 57.6 | 110.3 | 0.0 | **FAIL** |
 | route6_A_to_OPEN.json | 450 | 0 | 5.3 | 11.8 | 157.5 | **PASS** |
@@ -23,3 +23,26 @@
 - `min_clr` 是仿真轨迹上四角到任意墙段的最小距离；<40 mm 视为碰撞。
 - 直线到点路线（未规划版本）按地图会穿墙，因此判定 FAIL 属于预期。
 - 误差为纯运动学模型，未包含轮子打滑/地面差异；场地实测应在同一量级。
+
+## 确定性最小墙距（无噪声，按车体 320x240 精确计算）
+
+| 路线文件 | 段数 | 最小墙距(mm) | 位置(x,y,hdg) | 所在动作 |
+| --- | --- | --- | --- | --- |
+| route1_A_to_B.json | 2 | 0.0 | (2580, 335, -73.7) | drive 2500.0 |
+| route1_A_to_B_plan.json | 13 | 13.9 | (2480, 738, -26.6) | drive 671.0 |
+| route2_A_to_C.json | 2 | 0.0 | (2587, 399, -48.8) | drive 3189.0 |
+| route2_A_to_C_plan.json | 8 | 11.0 | (1000, 1232, -40.6) | drive 2305.0 |
+| route3_A_to_D.json | 2 | 0.0 | (2494, 1024, -15.9) | drive 2184.0 |
+| route3_A_to_D_plan.json | 11 | 13.4 | (1185, 1006, -38.7) | drive 1281.0 |
+| route4_A_to_E.json | 2 | 0.0 | (2384, 1009, -24.0) | drive 1477.0 |
+| route4_A_to_E_plan.json | 29 | 9.2 | (2581, 2367, 145.0) | drive 610.0 |
+| route5_ABCDE_plan.json | 50 | 0.3 | (301, 1000, 142.2) | turn 180.0 |
+| route5_A_B_C_D_E.json | 8 | 0.0 | (2580, 335, -73.7) | drive 2500.0 |
+| route6_A_to_OPEN.json | 1 | 165.0 | (2700, 325, 0.0) | drive 450.0 |
+| route_A_B_C_D_E.json | 8 | 0.0 | (2580, 335, -73.7) | drive 2500.0 |
+| route_A_to_B.json | 2 | 0.0 | (2580, 335, -73.7) | drive 2500.0 |
+| route_example.json | 3 | 0.0 | (2550, 700, -90.0) | drive 300.0 |
+| route_wall_approach.json | 1 | 1000000000.0 | None | — |
+
+> 注：这是**无噪声**的几何最小距离；考虑航向保持误差(σ0.6°)与里程误差(0.8%)后,
+> 蒙特卡洛中最小墙距会降到 0 附近。因此这些路线属于"贴墙通过"，只能低速+人工盯着跑。
