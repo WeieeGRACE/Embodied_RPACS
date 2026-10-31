@@ -1,80 +1,152 @@
 {
   "legs": [
     {
-      "type": "drive",
-      "mm": 250
-    },
-    {
       "type": "turn",
-      "deg": -53.1
+      "deg": -8.1
     },
     {
       "type": "drive",
-      "mm": 500
+      "mm": 354
     },
     {
       "type": "turn",
-      "deg": -81.9
+      "deg": -36.9
     },
     {
       "type": "drive",
-      "mm": 778
+      "mm": 283
     },
     {
       "type": "turn",
-      "deg": 96.3
+      "deg": -45.0
     },
     {
       "type": "drive",
-      "mm": 1281
+      "mm": 100
     },
     {
       "type": "turn",
-      "deg": 66.3
+      "deg": -45.0
     },
     {
       "type": "drive",
-      "mm": 1185
+      "mm": 707
     },
     {
       "type": "turn",
-      "deg": 27.4
+      "deg": 45.0
     },
     {
       "type": "drive",
-      "mm": 610
+      "mm": 100
     },
     {
       "type": "turn",
-      "deg": 35.0
+      "deg": 45.0
     },
     {
       "type": "drive",
-      "mm": 350
+      "mm": 1131
     },
     {
       "type": "turn",
-      "deg": 55.0
+      "deg": 69.9
     },
     {
       "type": "drive",
-      "mm": 610
+      "mm": 1544
     },
     {
       "type": "turn",
-      "deg": 40.2
-    },
-    {
-      "type": "drive",
-      "mm": 552
-    },
-    {
-      "type": "turn",
-      "deg": 84.8
+      "deg": 65.1
     },
     {
       "type": "drive",
       "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 100
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "turn",
+      "deg": 90.0
+    },
+    {
+      "type": "drive",
+      "mm": 900
+    },
+    {
+      "type": "turn",
+      "deg": 90.0
     },
     {
       "type": "drive",

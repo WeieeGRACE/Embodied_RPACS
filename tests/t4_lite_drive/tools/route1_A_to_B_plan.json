@@ -2,51 +2,91 @@
   "legs": [
     {
       "type": "turn",
-      "deg": -26.6
+      "deg": -8.1
     },
     {
       "type": "drive",
-      "mm": 671
+      "mm": 354
     },
     {
       "type": "turn",
-      "deg": -108.4
+      "deg": -36.9
     },
     {
       "type": "drive",
-      "mm": 849
+      "mm": 283
     },
     {
       "type": "turn",
-      "deg": 90.0
+      "deg": -45.0
     },
     {
       "type": "drive",
-      "mm": 849
+      "mm": 100
     },
     {
       "type": "turn",
-      "deg": -90.0
+      "deg": -45.0
     },
     {
       "type": "drive",
-      "mm": 849
+      "mm": 707
     },
     {
       "type": "turn",
-      "deg": 108.4
+      "deg": 45.0
     },
     {
       "type": "drive",
-      "mm": 671
+      "mm": 100
     },
     {
       "type": "turn",
-      "deg": 26.6
+      "deg": 45.0
     },
     {
       "type": "drive",
-      "mm": 50
+      "mm": 707
+    },
+    {
+      "type": "turn",
+      "deg": -45.0
+    },
+    {
+      "type": "drive",
+      "mm": 100
+    },
+    {
+      "type": "turn",
+      "deg": -45.0
+    },
+    {
+      "type": "drive",
+      "mm": 707
+    },
+    {
+      "type": "turn",
+      "deg": 45.0
+    },
+    {
+      "type": "drive",
+      "mm": 100
+    },
+    {
+      "type": "turn",
+      "deg": 45.0
+    },
+    {
+      "type": "drive",
+      "mm": 354
+    },
+    {
+      "type": "turn",
+      "deg": 45.0
+    },
+    {
+      "type": "drive",
+      "mm": 350
     },
     {
       "type": "drive",
