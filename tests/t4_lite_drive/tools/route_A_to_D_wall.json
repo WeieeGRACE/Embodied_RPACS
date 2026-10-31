@@ -1,0 +1,100 @@
+{
+  "note": "A -> D 按墙触发（D 区中心 2100,2100；图纸验算通过）",
+  "stages": [
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 555,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "wall",
+      "gap": 205,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 805,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 300,
+      "speed": 20
+    }
+  ]
+}
