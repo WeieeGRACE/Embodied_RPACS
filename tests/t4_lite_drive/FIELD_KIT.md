@@ -108,3 +108,9 @@ av_map_wall_association.v 与闭环 TB 的墙表由 	ools/gen_wall_table.py 从�
   可用 python tools/gen_wall_table.py --check 检查是否同步（不同步会退出码 1）。
 - 路书/几何/碰撞报告已按 v2 重跑：	ask4_navigation/records/{routes.json,geometry_report.json,collision_prediction_report.json}。
 - 明天的测试清单见 [TEST_PLAN_2026-10-31.md](TEST_PLAN_2026-10-31.md)。
+
+## 9. 转向限制（实测）
+
+- 驱动轮中心离车尾约 25 mm → 原地转向扫掠半径 ≈ 319 mm；
+- 600 mm 走廊（中心离墙 300）**转不开**，转向须在净空 ≥0.8 m 处；
+- 路线测试用 `run_segments.py --manual-turn`，转向由人按提示完成。

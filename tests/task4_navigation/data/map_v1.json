@@ -11,8 +11,8 @@
     "wall_thickness_mm": 3,
     "wall_endpoint_xy_uncertainty_mm": 50,
     "connected_vertices_share_perturbation": true,
-    "body_front_mm": 320,
-    "body_rear_mm": 0,
+    "body_front_mm": 295,
+    "body_rear_mm": 25,
     "body_half_width_mm": 120,
     "wheel_track_mm": 240,
     "start_xy_mm": [
@@ -39,7 +39,10 @@
       ],
       "note": "four arms x 300 mm, two 3 mm boards crossing at right angles (aligned with the arena axes)"
     },
-    "goal_region_note": "all waypoints are 600x600 mm regions; a leg is complete when the car FRONT bumper stops inside the central 300x300 mm box (i.e. front at the region centre +/-150 mm)"
+    "goal_region_note": "all waypoints are 600x600 mm regions; a leg is complete when the car FRONT bumper stops inside the central 300x300 mm box (i.e. front at the region centre +/-150 mm)",
+    "axle_from_rear_mm": 25,
+    "turn_sweep_radius_mm": 318.5,
+    "turn_note": "rotation centre is the drive-wheel axle, 25 mm from the rear; the front corner sweeps 319 mm, so the car cannot rotate in place inside a 600 mm corridor (300 mm to each wall) and must reverse to a junction/wide area before turning"
   },
   "goals_mm": {
     "A": [

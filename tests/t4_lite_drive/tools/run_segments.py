@@ -32,6 +32,9 @@ ROUTES = ["route1_A_to_B_plan", "route2_A_to_C_plan",
           "route3_A_to_D_plan", "route4_A_to_E_plan"]
 
 
+MANUAL_TURN = False
+
+
 def run_segment(ctl, name, speed):
     path = os.path.join(TOOLS, name + ".json")
     legs = json.load(io.open(path, encoding="utf-8"))["legs"]
@@ -46,7 +49,15 @@ def run_segment(ctl, name, speed):
         elif leg["type"] == "reverse":
             ok = R.reverse(ctl, float(leg["mm"]), leg.get("speed", speed)) and ok
         elif leg["type"] == "turn":
-            ok = R.turn(ctl, float(leg["deg"])) and ok
+            if MANUAL_TURN:
+                print("  [人工转向] 请把车原地转到 %+.1f°（相对当前车头），摆好后回车…" % leg["deg"])
+                try:
+                    input()
+                except EOFError:
+                    pass
+                ctl.rearm()
+            else:
+                ok = R.turn(ctl, float(leg["deg"])) and ok
         elif leg["type"] == "to_wall":
             margin = float(leg.get("margin", 120))
             med, _mn, _st = T.measure_wall_distance(frames=10)
@@ -73,9 +84,13 @@ def main():
     ap.add_argument("--only", default=None)
     ap.add_argument("--suite", choices=["segs", "routes"], default="segs")
     ap.add_argument("--speed", type=int, default=30)
+    ap.add_argument("--manual-turn", action="store_true",
+                    help="遇到转向段时提示人工把车转到目标角度，不自动原地转（走廊放不下）")
     args = ap.parse_args()
 
     base = ROUTES if args.suite == "routes" else ORDER
+    global MANUAL_TURN
+    MANUAL_TURN = args.manual_turn
     names = [args.only] if args.only else base[max(0, args.start - 1):]
     ctl = R.Ctl(args.speed)
     if not ctl.bring_up():

@@ -28,8 +28,9 @@ GOALS = {k: tuple(v) for k, v in
          json.load(io.open(MAP, encoding="utf-8"))["goals_mm"].items()}
 GOALS["OPEN1"] = (2700, 750)
 
-CAR_HALF_L = 160.0                 # 车轴到前/后保险杠
-CAR_HALF_W = 120.0                 # 车轴到车身两侧
+CAR_REAR = 25.0                    # 轮轴到车尾（实测 25 mm）
+CAR_FRONT = 295.0                  # 轮轴到车头 = 320-25
+CAR_HALF_W = 120.0                 # 轮轴到车身两侧
 
 
 def seg_dist(px, py, a, b):
@@ -66,8 +67,8 @@ def seg_seg_dist(p1, p2, q1, q2):
                seg_dist(q1[0], q1[1], p1, p2), seg_dist(q2[0], q2[1], p1, p2))
 
 def car_edges(x, y, hdg):
-    c = [pose_point(x, y, hdg, f, l) for f, l in ((-CAR_HALF_L, -CAR_HALF_W), (CAR_HALF_L, -CAR_HALF_W),
-                                                  (CAR_HALF_L, CAR_HALF_W), (-CAR_HALF_L, CAR_HALF_W))]
+    c = [pose_point(x, y, hdg, f, l) for f, l in ((-CAR_REAR, -CAR_HALF_W), (CAR_FRONT, -CAR_HALF_W),
+                                                  (CAR_FRONT, CAR_HALF_W), (-CAR_REAR, CAR_HALF_W))]
     return [(c[0], c[1]), (c[1], c[2]), (c[2], c[3]), (c[3], c[0])]
 
 def min_clearance(x, y, hdg):
