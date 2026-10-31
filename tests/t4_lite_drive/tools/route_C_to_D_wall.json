@@ -1,0 +1,27 @@
+{
+  "note": "C -> D：北上395 → 右转东（十字上方）→ 东行到x1900 → 右转南 → 停到D中心",
+  "stages": [
+    {
+      "type": "drive",
+      "mm": 395
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 805,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 300,
+      "speed": 20
+    }
+  ]
+}

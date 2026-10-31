@@ -1,0 +1,44 @@
+{
+  "note": "B 出口 + B->C v2：开口段改用编码器 drive 700（不依赖 ToF），避免 C_PLUS_V 误触发",
+  "stages": [
+    {
+      "type": "reverse",
+      "mm": 500
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "drive",
+      "mm": 700
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 600,
+      "speed": 20
+    }
+  ]
+}

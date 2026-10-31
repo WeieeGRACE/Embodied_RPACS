@@ -1,0 +1,31 @@
+{
+  "note": "D -> E：倒车505 → 左转东 → 东行 → 右转南 → 右转西进入E",
+  "stages": [
+    {
+      "type": "reverse",
+      "mm": 505
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "wall",
+      "gap": 305,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 255,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    }
+  ]
+}
