@@ -181,6 +181,52 @@ def reverse(ctl, mm, speed=None, tol=10.0, timeout=25.0):
             return False
 
 
+def three_point(ctl, deg, v_arc=None, diff=None, fracs=(0.45, 0.35, 0.20),
+                tol=4.0, timeout=30.0):
+    """三点掉头：前进弧 → 倒车弧 → 前进弧，绕轮轴转向（走廊里比原地转省空间）。
+
+    三段旋转方向相同（左转 yaw+ 时：前进时 vl>vr；倒车时 vl=(-v+diff), vr=(-v-diff)）。
+    每段按"目标航向增量"闭环停止，参数可在 calib.json 里调：
+      tp_v（弧线基础速度）、tp_diff（左右轮差速）、tp_fracs（三段分配比例）。
+    """
+    if v_arc is None:
+        v_arc = float(CAL.get("tp_v", 40))
+    if diff is None:
+        diff = float(CAL.get("tp_diff", 40))
+    if CAL.get("tp_fracs"):
+        fracs = tuple(CAL["tp_fracs"])
+    target = ctl.yaw_deg + deg
+    sign = 1.0 if deg >= 0 else -1.0
+    t0 = time.time()
+    for phase, frac in enumerate(fracs):
+        seg_goal = ctl.yaw_deg + sign * abs(deg) * frac
+        while True:
+            ctl.link.heartbeat()
+            rem = seg_goal - ctl.yaw_deg
+            if rem * sign <= 1.0:
+                break
+            if phase == 1:   # 倒车弧
+                vl = -v_arc + sign * diff
+                vr = -v_arc - sign * diff
+            else:            # 前进弧
+                vl = v_arc + sign * diff
+                vr = v_arc - sign * diff
+            ctl.link.set_vel(int(vl), int(vr))
+            ctl.pump(0.025)
+            if time.time() - t0 > timeout:
+                ctl.link.stop()
+                print("  threepoint TIMEOUT err=%.1f" % (target - ctl.yaw_deg))
+                return False
+        ctl.link.stop()
+        tw = time.time()
+        while time.time() - tw < 0.35:
+            ctl.link.heartbeat()
+            ctl.pump(0.03)
+    err = target - ctl.yaw_deg
+    print("  threepoint %.0f -> yaw %+.2f (err %.2f)" % (deg, ctl.yaw_deg, err))
+    return abs(err) <= tol
+
+
 def turn(ctl, deg, tol=3.5, mag=None, timeout=20.0, latency=0.18):
     if mag is None:
         mag = float(CAL.get("turn_mag", 70))

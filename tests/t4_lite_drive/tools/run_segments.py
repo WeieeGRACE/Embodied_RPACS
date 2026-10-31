@@ -33,6 +33,7 @@ ROUTES = ["route1_A_to_B_plan", "route2_A_to_C_plan",
 
 
 MANUAL_TURN = False
+THREE_POINT = False
 
 
 def run_segment(ctl, name, speed):
@@ -48,7 +49,12 @@ def run_segment(ctl, name, speed):
             ok = R.drive(ctl, float(leg["mm"]), leg.get("speed", speed)) and ok
         elif leg["type"] == "reverse":
             ok = R.reverse(ctl, float(leg["mm"]), leg.get("speed", speed)) and ok
+        elif leg["type"] == "threepoint":
+            ok = R.three_point(ctl, float(leg["deg"])) and ok
         elif leg["type"] == "turn":
+            if THREE_POINT:
+                ok = R.three_point(ctl, float(leg["deg"])) and ok
+                continue
             if MANUAL_TURN:
                 print("  [人工转向] 请把车原地转到 %+.1f°（相对当前车头），摆好后回车…" % leg["deg"])
                 try:
@@ -84,13 +90,16 @@ def main():
     ap.add_argument("--only", default=None)
     ap.add_argument("--suite", choices=["segs", "routes"], default="segs")
     ap.add_argument("--speed", type=int, default=30)
+    ap.add_argument("--three-point", action="store_true",
+                    help="用三点掉头代替原地转向（推荐；走廊里原地转不开）")
     ap.add_argument("--manual-turn", action="store_true",
                     help="遇到转向段时提示人工把车转到目标角度，不自动原地转（走廊放不下）")
     args = ap.parse_args()
 
     base = ROUTES if args.suite == "routes" else ORDER
-    global MANUAL_TURN
+    global MANUAL_TURN, THREE_POINT
     MANUAL_TURN = args.manual_turn
+    THREE_POINT = args.three_point
     names = [args.only] if args.only else base[max(0, args.start - 1):]
     ctl = R.Ctl(args.speed)
     if not ctl.bring_up():
