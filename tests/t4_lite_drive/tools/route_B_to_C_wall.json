@@ -1,0 +1,37 @@
+{
+  "note": "B 出口后 -> C（倒车右转朝东后继续）",
+  "stages": [
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "wall",
+      "gap": 555,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": -90
+    },
+    {
+      "type": "wall",
+      "gap": 180,
+      "speed": 20
+    },
+    {
+      "type": "arc",
+      "deg": 90
+    },
+    {
+      "type": "wall",
+      "gap": 600,
+      "speed": 20
+    }
+  ]
+}

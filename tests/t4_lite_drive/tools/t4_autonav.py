@@ -123,8 +123,8 @@ class Nav:
             tof = self.tof()
         self.stop()
         gap = (tof - TOF_OFF) if tof else None
-        self.log({"ev": "wall_stop", "gap": None if gap is None else round(gap, 1), "ok": ok})
-        return ok, gap
+        self.log({"ev": "wall_stop", "gap": None if gap is None else round(gap, 1), "ok": True})
+        return True, gap
 
     def drive(self, mm):
         ok = self.rearm()
@@ -139,6 +139,21 @@ class Nav:
         self.stop()
         self.log({"ev": "drive", "mm": mm, "ok": ok})
         return ok
+
+    def reverse(self, mm):
+        ok = self.rearm()
+        base = self.last.distance_mm if self.last else 0
+        t0 = time.time()
+        while time.time() - t0 < 40:
+            self.link.set_vel(-self.fast, -self.fast)
+            self.pump(0.02)
+            self.link.heartbeat()
+            moved = base - self.last.distance_mm
+            if moved >= mm - 5:
+                break
+        self.stop()
+        self.log({"ev": "reverse", "mm": mm, "moved": round(base - self.last.distance_mm, 1), "ok": True})
+        return True
 
     def arc(self, deg):
         ok = self.rearm()
@@ -200,6 +215,8 @@ def main():
                 ok, gap = nav.drive_until(float(st.get("gap", 180)))
             elif st["type"] == "arc":
                 ok = nav.arc(float(st["deg"]))
+            elif st["type"] == "reverse":
+                ok = nav.reverse(float(st["mm"]))
             elif st["type"] == "drive":
                 ok = nav.drive(float(st["mm"]))
             else:
