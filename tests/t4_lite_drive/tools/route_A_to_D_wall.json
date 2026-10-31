@@ -1,5 +1,5 @@
 {
-  "note": "A -> D 按墙触发（D 区中心 2100,2100；图纸验算通过）",
+  "note": "auto-built with measured arc radius 160 mm; 21 stages",
   "stages": [
     {
       "type": "wall",

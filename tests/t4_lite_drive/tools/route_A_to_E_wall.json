@@ -1,5 +1,5 @@
 {
-  "note": "A -> E 按墙触发 v3：D东墙处转向 y=1750 净空84mm，终点车头(2105,1550)",
+  "note": "auto-built with measured arc radius 160 mm; 22 stages",
   "stages": [
     {
       "type": "wall",
@@ -93,7 +93,7 @@
     },
     {
       "type": "wall",
-      "gap": 255,
+      "gap": 205,
       "speed": 20
     },
     {
