@@ -1,5 +1,5 @@
 {
-  "map_version": "task4-map-v2-image-derived",
+  "map_version": "task4-map-v3-regions",
   "units": "mm",
   "workspace": [
     3000,
@@ -38,7 +38,8 @@
         2150.0
       ],
       "note": "four arms x 300 mm, two 3 mm boards crossing at right angles (aligned with the arena axes)"
-    }
+    },
+    "goal_region_note": "all waypoints are 600x600 mm regions; a leg is complete when the car FRONT bumper stops inside the central 300x300 mm box (i.e. front at the region centre +/-150 mm)"
   },
   "goals_mm": {
     "A": [
@@ -221,5 +222,61 @@
         600
       ]
     }
-  ]
+  ],
+  "goal_regions_mm": {
+    "A": {
+      "centre_mm": [
+        2700,
+        300
+      ],
+      "size_mm": 600,
+      "accept_box_mm": 300,
+      "accept_criterion": "car front bumper inside the central 300x300 box"
+    },
+    "B": {
+      "centre_mm": [
+        300,
+        1000
+      ],
+      "size_mm": 600,
+      "accept_box_mm": 300,
+      "accept_criterion": "car front bumper inside the central 300x300 box"
+    },
+    "C": {
+      "centre_mm": [
+        300,
+        2400
+      ],
+      "size_mm": 600,
+      "accept_box_mm": 300,
+      "accept_criterion": "car front bumper inside the central 300x300 box"
+    },
+    "D": {
+      "centre_mm": [
+        2100,
+        2400
+      ],
+      "size_mm": 600,
+      "accept_box_mm": 300,
+      "accept_criterion": "car front bumper inside the central 300x300 box"
+    },
+    "E": {
+      "centre_mm": [
+        2100,
+        1650
+      ],
+      "size_mm": 600,
+      "accept_box_mm": 300,
+      "accept_criterion": "car front bumper inside the central 300x300 box"
+    },
+    "OPEN1": {
+      "centre_mm": [
+        2700,
+        750
+      ],
+      "size_mm": 600,
+      "accept_box_mm": 300,
+      "accept_criterion": "car front bumper inside the central 300x300 box"
+    }
+  }
 }

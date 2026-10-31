@@ -97,6 +97,8 @@ def simulate(legs, start=(2700.0, 300.0), hdg0=0.0, rng=None):
                     min_clr = d
         else:
             dist = float(leg["mm"])
+            if leg.get("type") == "reverse":
+                dist = -dist
             actual = dist * (1.0 + rng.gauss(0.0, 0.008)) + rng.gauss(0.0, 3.0)
             steps = max(2, int(abs(actual) / 25.0))
             # 航向保持误差：每段一个固定偏差（σ=0.6°），不做无界随机游走

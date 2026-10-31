@@ -144,6 +144,43 @@ def drive(ctl, mm, speed=None, tol=8.0, timeout=40.0):
             return False
 
 
+def reverse(ctl, mm, speed=None, tol=10.0, timeout=25.0):
+    """倒车：与 drive 相反方向，按编码器里程执行。"""
+    speed = speed or ctl.speed
+    mm = abs(float(mm))
+    base = ctl.last.distance_mm
+    t0 = time.time()
+    last_prog = t0
+    last_dist = 0.0
+    while True:
+        now = time.time()
+        elapsed = now - t0
+        ctl.link.heartbeat()
+        scale = float(CAL.get("cmd_scale", 1.0) or 1.0)
+        v = min(speed, 25 + elapsed * 60) * scale
+        ctl.link.set_vel(int(-v), int(-v))
+        ctl.pump(0.03)
+        dist = base - ctl.last.distance_mm          # 倒车时里程减少
+        if abs(dist - last_dist) >= 2.0:
+            last_dist = dist
+            last_prog = now
+        if dist >= mm - tol:
+            ctl.link.stop()
+            for _ in range(15):
+                ctl.link.heartbeat()
+                ctl.pump(0.03)
+            print("  reverse %.0f -> %.1f mm" % (mm, base - ctl.last.distance_mm))
+            return True
+        if now - last_prog > 1.6 and elapsed > 2.0:
+            print("  reverse STALL at %.1f / %.0f" % (dist, mm))
+            ctl.link.stop()
+            return False
+        if elapsed > timeout:
+            ctl.link.stop()
+            print("  reverse TIMEOUT at %.1f / %.0f" % (dist, mm))
+            return False
+
+
 def turn(ctl, deg, tol=3.5, mag=None, timeout=20.0, latency=0.18):
     if mag is None:
         mag = float(CAL.get("turn_mag", 70))

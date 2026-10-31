@@ -43,6 +43,8 @@ def run_segment(ctl, name, speed):
     for leg in legs:
         if leg["type"] == "drive":
             ok = R.drive(ctl, float(leg["mm"]), leg.get("speed", speed)) and ok
+        elif leg["type"] == "reverse":
+            ok = R.reverse(ctl, float(leg["mm"]), leg.get("speed", speed)) and ok
         elif leg["type"] == "turn":
             ok = R.turn(ctl, float(leg["deg"])) and ok
         elif leg["type"] == "to_wall":

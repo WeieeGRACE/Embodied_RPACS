@@ -2,111 +2,23 @@
   "legs": [
     {
       "type": "turn",
-      "deg": -18.4
+      "deg": -8.1
     },
     {
       "type": "drive",
-      "mm": 474
+      "mm": 354
     },
     {
       "type": "turn",
-      "deg": -71.6
+      "deg": -36.9
     },
     {
       "type": "drive",
-      "mm": 300
-    },
-    {
-      "type": "turn",
-      "deg": -45.0
-    },
-    {
-      "type": "drive",
-      "mm": 424
-    },
-    {
-      "type": "turn",
-      "deg": 45.0
-    },
-    {
-      "type": "drive",
-      "mm": 300
-    },
-    {
-      "type": "turn",
-      "deg": 45.0
-    },
-    {
-      "type": "drive",
-      "mm": 424
+      "mm": 283
     },
     {
       "type": "turn",
       "deg": -45.0
-    },
-    {
-      "type": "drive",
-      "mm": 300
-    },
-    {
-      "type": "turn",
-      "deg": -45.0
-    },
-    {
-      "type": "drive",
-      "mm": 424
-    },
-    {
-      "type": "turn",
-      "deg": 45.0
-    },
-    {
-      "type": "drive",
-      "mm": 300
-    },
-    {
-      "type": "turn",
-      "deg": 74.7
-    },
-    {
-      "type": "drive",
-      "mm": 570
-    },
-    {
-      "type": "turn",
-      "deg": 180.0
-    },
-    {
-      "type": "drive",
-      "mm": 570
-    },
-    {
-      "type": "turn",
-      "deg": -74.7
-    },
-    {
-      "type": "drive",
-      "mm": 300
-    },
-    {
-      "type": "turn",
-      "deg": -90.0
-    },
-    {
-      "type": "drive",
-      "mm": 1200
-    },
-    {
-      "type": "turn",
-      "deg": -34.7
-    },
-    {
-      "type": "drive",
-      "mm": 791
-    },
-    {
-      "type": "turn",
-      "deg": 34.7
     },
     {
       "type": "drive",
@@ -114,35 +26,11 @@
     },
     {
       "type": "turn",
-      "deg": 63.4
+      "deg": -45.0
     },
     {
       "type": "drive",
-      "mm": 447
-    },
-    {
-      "type": "turn",
-      "deg": 28.9
-    },
-    {
-      "type": "drive",
-      "mm": 1251
-    },
-    {
-      "type": "turn",
-      "deg": 42.7
-    },
-    {
-      "type": "drive",
-      "mm": 212
-    },
-    {
-      "type": "turn",
-      "deg": -90.0
-    },
-    {
-      "type": "drive",
-      "mm": 212
+      "mm": 707
     },
     {
       "type": "turn",
@@ -150,11 +38,251 @@
     },
     {
       "type": "drive",
-      "mm": 300
+      "mm": 100
     },
     {
       "type": "turn",
-      "deg": 90.0
+      "deg": 45.0
+    },
+    {
+      "type": "drive",
+      "mm": 707
+    },
+    {
+      "type": "turn",
+      "deg": -45.0
+    },
+    {
+      "type": "drive",
+      "mm": 100
+    },
+    {
+      "type": "turn",
+      "deg": -45.0
+    },
+    {
+      "type": "drive",
+      "mm": 707
+    },
+    {
+      "type": "turn",
+      "deg": 45.0
+    },
+    {
+      "type": "drive",
+      "mm": 100
+    },
+    {
+      "type": "turn",
+      "deg": 45.0
+    },
+    {
+      "type": "drive",
+      "mm": 354
+    },
+    {
+      "type": "turn",
+      "deg": 45.0
+    },
+    {
+      "type": "drive",
+      "mm": 100
+    },
+    {
+      "type": "reverse",
+      "mm": 100
+    },
+    {
+      "type": "turn",
+      "deg": 135.0
+    },
+    {
+      "type": "drive",
+      "mm": 354
+    },
+    {
+      "type": "turn",
+      "deg": -59.0
+    },
+    {
+      "type": "drive",
+      "mm": 206
+    },
+    {
+      "type": "turn",
+      "deg": -76.0
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "drive",
+      "mm": 50
+    },
+    {
+      "type": "turn",
+      "deg": -31.0
+    },
+    {
+      "type": "drive",
+      "mm": 875
+    },
+    {
+      "type": "reverse",
+      "mm": 100
+    },
+    {
+      "type": "turn",
+      "deg": 12.5
+    },
+    {
+      "type": "drive",
+      "mm": 158
+    },
+    {
+      "type": "turn",
+      "deg": 63.4
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "turn",
+      "deg": 42.8
+    },
+    {
+      "type": "drive",
+      "mm": 1301
+    },
+    {
+      "type": "reverse",
+      "mm": 100
+    },
+    {
+      "type": "turn",
+      "deg": 12.5
+    },
+    {
+      "type": "drive",
+      "mm": 559
+    },
+    {
+      "type": "turn",
+      "deg": 34.7
+    },
+    {
+      "type": "drive",
+      "mm": 71
+    },
+    {
+      "type": "turn",
+      "deg": 45.0
     },
     {
       "type": "drive",
@@ -163,26 +291,6 @@
     {
       "type": "turn",
       "deg": 90.0
-    },
-    {
-      "type": "drive",
-      "mm": 50
-    },
-    {
-      "type": "drive",
-      "mm": 50
-    },
-    {
-      "type": "drive",
-      "mm": 50
-    },
-    {
-      "type": "drive",
-      "mm": 50
-    },
-    {
-      "type": "drive",
-      "mm": 50
     },
     {
       "type": "drive",
