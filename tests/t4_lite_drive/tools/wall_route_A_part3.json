@@ -1,0 +1,7 @@
+{
+  "stages": [
+    {"type": "wall", "gap": 150, "speed": 20},
+    {"type": "arc", "deg": 90},
+    {"type": "wall", "gap": 185, "speed": 20}
+  ]
+}
