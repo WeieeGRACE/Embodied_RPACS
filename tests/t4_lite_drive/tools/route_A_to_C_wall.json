@@ -1,0 +1,22 @@
+{
+  "note": "A -> C 按墙触发（方块路口法；图纸验算：全部转向净空>=39.8mm，终点车头距C中心25mm）",
+  "stages": [
+    {"type": "wall", "gap": 180, "speed": 20},
+    {"type": "arc", "deg": -90},
+    {"type": "wall", "gap": 180, "speed": 20},
+    {"type": "arc", "deg": -90},
+    {"type": "wall", "gap": 180, "speed": 20},
+    {"type": "arc", "deg": 90},
+    {"type": "wall", "gap": 180, "speed": 20},
+    {"type": "arc", "deg": 90},
+    {"type": "wall", "gap": 180, "speed": 20},
+    {"type": "arc", "deg": -90},
+    {"type": "wall", "gap": 180, "speed": 20},
+    {"type": "arc", "deg": 90},
+    {"type": "wall", "gap": 555, "speed": 20},
+    {"type": "arc", "deg": -90},
+    {"type": "wall", "gap": 180, "speed": 20},
+    {"type": "arc", "deg": 90},
+    {"type": "wall", "gap": 600, "speed": 20}
+  ]
+}
