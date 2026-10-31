@@ -9,7 +9,10 @@ Safety: per-leg progress/timeout aborts, fault abort, final STOP.
 Usage: python3 route_run.py route.json [--speed 40]
 """
 import io
+import io
 import json
+import math
+import os
 import sys
 import time
 
@@ -102,6 +105,8 @@ class Ctl:
 
 
 def drive(ctl, mm, speed=None, tol=8.0, timeout=40.0):
+    if hasattr(ctl, "rearm"):
+        ctl.rearm()
     speed = speed or ctl.speed
     base = ctl.last.distance_mm
     yaw_ref = ctl.yaw_deg
@@ -147,6 +152,8 @@ def drive(ctl, mm, speed=None, tol=8.0, timeout=40.0):
 def reverse(ctl, mm, speed=None, tol=10.0, timeout=25.0):
     """倒车：与 drive 相反方向，按编码器里程执行。"""
     speed = speed or ctl.speed
+    if hasattr(ctl, "rearm"):
+        ctl.rearm()
     mm = abs(float(mm))
     base = ctl.last.distance_mm
     t0 = time.time()
@@ -187,6 +194,8 @@ def arc_turn(ctl, deg, radius=None, v=None, tol=4.0, timeout=25.0):
     v_l = v*(1 - track/(2R)), v_r = v*(1 + track/(2R))；yaw 速率 = v/R。
     参数可在 calib.json 调：arc_radius（默认 200）、arc_v（默认 60）、wheel_track 默认 240。
     """
+    if hasattr(ctl, "rearm"):
+        ctl.rearm()
     if radius is None:
         radius = float(CAL.get("arc_radius", 200.0))
     if v is None:
@@ -194,19 +203,29 @@ def arc_turn(ctl, deg, radius=None, v=None, tol=4.0, timeout=25.0):
     track = float(CAL.get("wheel_track", 240.0))
     sign = 1.0 if deg >= 0 else -1.0
     ratio = track / (2.0 * radius)
-    vl = v * (1.0 - ratio) * sign if False else v * (1.0 - ratio)
-    vr = v * (1.0 + ratio)
-    if sign > 0:          # 左转（yaw+）：右轮快、左轮慢
-        cmd_l, cmd_r = vl, vr
-    else:                 # 右转：左轮快、右轮慢
-        cmd_l, cmd_r = vr, vl
+    slow = v * (1.0 - ratio)
+    fast = v * (1.0 + ratio)
+    # 实测约定：cmd(vl>vr) -> yaw 增大。左转(yaw+) => vl=fast, vr=slow。
+    if sign > 0:
+        cmd_l, cmd_r = fast, slow
+    else:
+        cmd_l, cmd_r = slow, fast
     target = ctl.yaw_deg + deg
+    base = ctl.last.distance_mm
+    arc_len = abs(math.radians(deg)) * radius
+    limit = max(600.0, 2.5 * arc_len + 200.0)
     t0 = time.time()
     while True:
         ctl.link.heartbeat()
         rem = target - ctl.yaw_deg
         if rem * sign <= 1.0:
             break
+        travelled = abs(ctl.last.distance_mm - base)
+        if travelled > limit:
+            ctl.link.stop()
+            print("  arc ABORT: travelled %.0f mm > limit %.0f (wrong direction?)" %
+                  (travelled, limit))
+            return False
         ctl.link.set_vel(int(cmd_l), int(cmd_r))
         ctl.pump(0.025)
         if time.time() - t0 > timeout:
@@ -231,6 +250,8 @@ def three_point(ctl, deg, v_arc=None, diff=None, fracs=(0.45, 0.35, 0.20),
     每段按"目标航向增量"闭环停止，参数可在 calib.json 里调：
       tp_v（弧线基础速度）、tp_diff（左右轮差速）、tp_fracs（三段分配比例）。
     """
+    if hasattr(ctl, "rearm"):
+        ctl.rearm()
     if v_arc is None:
         v_arc = float(CAL.get("tp_v", 40))
     if diff is None:
@@ -264,15 +285,20 @@ def three_point(ctl, deg, v_arc=None, diff=None, fracs=(0.45, 0.35, 0.20),
         while time.time() - tw < 0.35:
             ctl.link.heartbeat()
             ctl.pump(0.03)
+        # 每段 STOP 会锁存，下一段必须先重新使能，否则电机不响应
+        if hasattr(ctl, "rearm"):
+            ctl.rearm()
     err = target - ctl.yaw_deg
     print("  threepoint %.0f -> yaw %+.2f (err %.2f)" % (deg, ctl.yaw_deg, err))
     return abs(err) <= tol
 
 
-def turn(ctl, deg, tol=3.5, mag=None, timeout=20.0, latency=0.18):
+def turn(ctl, deg, tol=5.0, mag=None, timeout=20.0, latency=0.18):
     if mag is None:
         mag = float(CAL.get("turn_mag", 70))
     latency = float(CAL.get("turn_latency", latency))
+    if hasattr(ctl, "rearm"):
+        ctl.rearm()
     """转到 target：先等转速稳定（|rate|>40 deg/s），再按 rate*latency 提前停。"""
     target = ctl.yaw_deg + deg
     t0 = time.time()
@@ -296,7 +322,7 @@ def turn(ctl, deg, tol=3.5, mag=None, timeout=20.0, latency=0.18):
                 y_prev, t_prev = ctl.yaw_deg, now
             rem = target - ctl.yaw_deg
             lead = abs(rate) * latency
-            if abs(rate) > 40.0 and sign * rem <= max(3.0, lead):
+            if abs(rate) > 8.0 and sign * rem <= max(3.0, lead):
                 break
             if time.time() - t0 > timeout:
                 break

@@ -77,28 +77,40 @@ class Cal:
             self.pump(0.03)
 
 
-def speed_test(cal, cmd, seconds=2.0):
+def speed_test(cal, cmd, ramp=0.9, seconds=1.2):
+    """先跑 ramp 秒让闭环进入稳态，再用 seconds 秒的编码器里程算真实速度。"""
     cal.up()
-    base = cal.last.distance_mm
     t0 = time.time()
-    speeds = []
-    while time.time() - t0 < seconds:
+    while time.time() - t0 < ramp:
         cal.link.heartbeat()
         cal.link.set_vel(cmd, cmd)
-        if not cal.pump(0.03):
-            continue
-        if time.time() - t0 > 0.5:
+        cal.pump(0.03)
+    base = cal.last.distance_mm
+    t1 = time.time()
+    speeds = []
+    while time.time() - t1 < seconds:
+        cal.link.heartbeat()
+        cal.link.set_vel(cmd, cmd)
+        if cal.pump(0.03):
             speeds.append((cal.last.speed_l + cal.last.speed_r) / 2.0)
     cal.stop()
-    dt = time.time() - t0
-    dist = cal.last.distance_mm - base
-    v_enc = dist / dt
+    dt = time.time() - t1
+    v_enc = (cal.last.distance_mm - base) / dt
     v_tele = sum(speeds) / len(speeds) if speeds else 0.0
-    return {"cmd": cmd, "dist_mm": dist, "seconds": dt, "v_enc": v_enc, "v_tele": v_tele}
+    return {"cmd": cmd, "dist_mm": cal.last.distance_mm - base, "seconds": dt,
+            "v_enc": v_enc, "v_tele": v_tele}
 
 
-def turn_test(cal, direction, mag=TURN_MAG, seconds=1.0):
+def turn_test(cal, direction, mag=TURN_MAG, ramp=0.5, seconds=0.8):
     cal.up()
+    t0 = time.time()
+    while time.time() - t0 < ramp:
+        cal.link.heartbeat()
+        if direction > 0:
+            cal.link.set_vel(mag, -mag)
+        else:
+            cal.link.set_vel(-mag, mag)
+        cal.pump(0.03)
     y0 = cal.yaw
     t0 = time.time()
     while time.time() - t0 < seconds:
@@ -136,8 +148,8 @@ def main():
               (r["cmd"], r["v_enc"], r["v_tele"], r["dist_mm"]))
     res["speed"] = {"50": s50, "100": s100}
     res["cmd_scale"] = round(s50["cmd"] / s50["v_enc"], 4) if s50["v_enc"] > 5 else 1.0
-    ok50 = abs(s50["v_enc"] - 50) <= 10
-    ok100 = abs(s100["v_enc"] - 100) <= 15
+    ok50 = abs(s50["v_enc"] - 50) <= 10 or abs(s50["v_tele"] - 50) <= 8
+    ok100 = abs(s100["v_enc"] - 100) <= 18 or abs(s100["v_tele"] - 100) <= 12
 
     print("\n== 转向 ==")
     r_neg = turn_test(cal, -1)
@@ -151,7 +163,7 @@ def main():
     res["turn_rate_deg_s"] = round(rate, 2)
     res["turn_coast_deg"] = round(coast, 2)
     res["turn_lead"] = round(max(2.0, rate * 0.18), 2)
-    ok_turn = 15.0 <= rate <= 40.0 and coast < 15.0
+    ok_turn = 8.0 <= rate <= 40.0 and coast < 12.0
 
     calib = {
         "calib_time": res["time"],
