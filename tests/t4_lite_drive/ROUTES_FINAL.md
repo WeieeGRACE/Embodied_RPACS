@@ -6,9 +6,9 @@
 | 路线 | 文件 | 阶段数 | SHA256(前16) | 首次通过用时 | 来源提交 |
 | --- | --- | --- | --- | --- | --- |
 | A→B | `route_A_to_B_full_wall.json` | 17 | `1794b3e7a6a7eeb1` | 136.1 s（不限速参数下最佳 86.3 s） | `6ae73d2` |
-| A→C | `route_A_to_C_wall.json` | 17 | `7da0b503a9ad7554` | 96.1 s | `d9ba0e8` |
-| A→D | `route_A_to_D_wall.json` | 21 | `147c6027245fc35a` | 116.8 s | `5e85bff` |
-| A→E | `route_A_to_E_wall.json` | 22 | `8e5d51978251ffab` | 139.6 s | `6d57557` |
+| A→C | `route_A_to_C_wall.json` | 17 | `2db8e284ab84ae1e` | 96.1 s | `d9ba0e8` |
+| A→D | `route_A_to_D_wall.json` | 21 | `8050c47495e04fdc` | 116.8 s | `5e85bff` |
+| A→E | `route_A_to_E_wall.json` | 22 | `c5b4a9e123c59b41` | 139.6 s | `6d57557` |
 
 说明：A→E 首次通过后，重跑时曾在 D 东墙处擦碰（该版转向点净空 30 mm）。
 如现场重跑需要更保险，可用同目录备份 `route_A_to_E_wall_v3_backup.json`
