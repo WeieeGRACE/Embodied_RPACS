@@ -1,5 +1,5 @@
 {
-  "note": "auto-built with measured arc radius 160 mm; 22 stages",
+  "note": "A -> E 按墙触发（东侧走廊进入；图纸验算通过）",
   "stages": [
     {
       "type": "wall",
@@ -57,7 +57,7 @@
     },
     {
       "type": "wall",
-      "gap": 455,
+      "gap": 555,
       "speed": 20
     },
     {
@@ -93,7 +93,7 @@
     },
     {
       "type": "wall",
-      "gap": 205,
+      "gap": 355,
       "speed": 20
     },
     {
