@@ -47,6 +47,7 @@ class Nav:
         self.arc_r = arc_radius
         self.yaw = 0.0
         self.last_wrap = None
+        self.close_cnt = 0
         self.events = []
         self.logf = None
 
@@ -119,9 +120,14 @@ class Nav:
                 if len(recent) >= 8 and all(abs(g - target_gap) <= 15.0 for g in recent):
                     break
             if gap is not None and gap < 70:
-                self.stop()
-                self.log({"ev": "ABORT_CLOSE", "tof": tof})
-                return False, gap
+                # 连续 3 帧都过近才急停（ToF 单帧跳变不可信）
+                self.close_cnt += 1
+                if self.close_cnt >= 3:
+                    self.stop()
+                    self.log({"ev": "ABORT_CLOSE", "tof": tof})
+                    return False, gap
+            else:
+                self.close_cnt = 0
             v = self.slow if gap is None else (self.fast if gap > self.slow_gap else self.slow)
             self.link.set_vel(v, v)
             self.pump(0.02)
@@ -183,9 +189,28 @@ class Nav:
             self.link.set_vel(int(cmd_l), int(cmd_r))
             self.pump(0.02)
         self.stop()
+        # 等 STOP 后的惯性滑行结束，再做闭环微修正（每次 <=2° 的原地微脉冲，扫掠只有 ~11 mm）
+        for _ in range(3):
+            tw = time.time()
+            while time.time() - tw < 0.35:
+                self.link.heartbeat()
+                self.pump(0.03)
+            err = target - self.yaw
+            if abs(err) <= 1.2:
+                break
+            rate_dps = (self.arc_v / self.arc_r) * 180.0 / 3.1416   # deg/s，弧线角速度
+            dur = min(0.45, abs(err) / max(5.0, rate_dps))
+            m = 30
+            vl, vr = (m, -m) if err > 0 else (-m, m)
+            t1 = time.time()
+            while time.time() - t1 < dur:
+                self.link.heartbeat()
+                self.link.set_vel(vl, vr)
+                self.pump(0.02)
+            self.stop()
         err = target - self.yaw
-        self.log({"ev": "arc", "deg": deg, "err": round(err, 2), "ok": abs(err) <= 5.0})
-        return abs(err) <= 5.0
+        self.log({"ev": "arc", "deg": deg, "err": round(err, 2), "ok": abs(err) <= 2.0})
+        return abs(err) <= 3.0
 
 
 def main():

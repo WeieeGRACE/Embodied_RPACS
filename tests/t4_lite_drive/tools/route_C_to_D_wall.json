@@ -1,5 +1,5 @@
 {
-  "note": "C -> D：北上395 → 右转东（十字上方）→ 东行到x1900 → 右转南 → 停到D中心",
+  "note": "C -> D v2：东行段用编码器 1425mm（不用 ToF）",
   "stages": [
     {
       "type": "drive",
@@ -10,9 +10,8 @@
       "deg": 90
     },
     {
-      "type": "wall",
-      "gap": 805,
-      "speed": 20
+      "type": "drive",
+      "mm": 1425
     },
     {
       "type": "arc",
